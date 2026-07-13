@@ -4,8 +4,14 @@
 
 📲 **Live on the App Store** · Launched June 2026 · ~3 months of solo development
 
-<!-- ![Shap.IO](./images/01-app.jpg) -->
-<!-- App screenshots to be added -->
+<table>
+<tr>
+<td align="center"><img src="./Simulator%20Screenshot%20-%20iPhone%2014%20Plus%20-%202026-06-19%20at%2012.54.55.png" width="230"><br><sub><b>Home</b> — calories & macros ring</sub></td>
+<td align="center"><img src="./Simulator%20Screenshot%20-%20iPhone%2014%20Plus%20-%202026-06-19%20at%2012.55.14.png" width="230"><br><sub><b>Profile</b> — metabolism & 4-language toggle</sub></td>
+<td align="center"><img src="./Simulator%20Screenshot%20-%20iPhone%2014%20Plus%20-%202026-06-19%20at%2012.56.12.png" width="230"><br><sub><b>AI recipe</b> — post-workout, macro-matched</sub></td>
+<td align="center"><img src="./Simulator%20Screenshot%20-%20iPhone%2014%20Plus%20-%202026-06-19%20at%2012.56.40.png" width="230"><br><sub><b>Workout</b> — logged & synced to nutrition</sub></td>
+</tr>
+</table>
 
 ---
 
@@ -44,6 +50,4 @@
 
 ## Media
 
-App screenshots will live in [`images/`](./images).
-
-> **Note:** send me current Shap.IO screenshots (or confirm which screens to feature) and I'll drop them in.
+App screenshots are in this folder (iPhone and iPad).
