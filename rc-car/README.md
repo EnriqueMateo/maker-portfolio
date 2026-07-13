@@ -2,8 +2,8 @@
 
 > After 3D-printing a couple of existing RC car models, I wanted a **bigger project**: to design my own car and really understand vehicle geometry — suspension, drivetrain and a reduction gearbox I designed from scratch.
 
-![RC car chassis](./0B79A5C9-206C-470E-9AFE-362494A6D12F.JPG)
-*The build: a custom 3D-printed chassis carrying a brushless motor, LiPo battery and off-road tires.*
+![Self-designed reduction gearbox in Fusion 360](./IMG_8532.jpg)
+*The heart of the project: a **reduction gearbox I designed from scratch** in Fusion 360 — a pinion driving a large spur gear to gear the motor down to the wheels.*
 
 ---
 
@@ -22,18 +22,40 @@ I had already printed a few RC cars from existing designs. That was fun, but I w
 - **Component integration** — I bought the wheels/tires, servo(s) and motor, and designed the printed structure to hold everything: motor mount, battery tray, steering and suspension.
 - **RC link** — connected to a standard radio-control transmitter/receiver so it drives.
 
+### Designed in Fusion 360
+
+<table>
+<tr>
+<td align="center"><img src="./IMG_8697.jpg" width="380"><br><sub>Full chassis + drivetrain, modelled from scratch</sub></td>
+<td align="center"><img src="./IMG_8698.jpg" width="380"><br><sub>Gearbox, ESC and suspension packaged together</sub></td>
+</tr>
+</table>
+
 ## Hardware
 
 | Subsystem | Detail |
 |---|---|
 | Chassis | Custom-designed, 3D-printed |
 | Drivetrain | **Self-designed reduction gearbox** (printed gears) → wheels |
-| Motor | Brushless RC motor |
-| Battery | LiPo pack (≈5200 mAh) |
+| Motor + ESC | RC motor with dedicated ESC and cooling fan |
+| Battery | GOLDBAT LiPo 2S 7.4 V, 5200 mAh 50C |
 | Steering | Servo-driven |
 | Control | Standard RC transmitter / receiver |
-| Wheels | Off-road RC tires |
+| Wheels | Off-road monster-truck tires |
 | CAD | Fusion 360 |
+
+### The build
+
+<table>
+<tr>
+<td align="center"><img src="./IMG_8716.jpg" width="250"><br><sub>Front stance — printed chassis, monster-truck tires</sub></td>
+<td align="center"><img src="./IMG_8717.jpg" width="250"><br><sub>3/4 view — oil-filled coilover shocks</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="./IMG_8718.jpg" width="250"><br><sub>Top view — LiPo, ESC, receiver and cooling fan</sub></td>
+<td align="center"><img src="./IMG_8719.jpg" width="250"><br><sub>Drivetrain + electronics close-up</sub></td>
+</tr>
+</table>
 
 ## What I learned
 
@@ -43,4 +65,4 @@ I had already printed a few RC cars from existing designs. That was fun, but I w
 
 ## Media
 
-Photos are in this folder at full resolution. More build and driving shots to be added.
+All photos (Fusion 360 CAD + the physical build) are in this folder at full resolution.
