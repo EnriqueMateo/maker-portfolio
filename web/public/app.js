@@ -80,6 +80,11 @@
     const status = form.querySelector('.form-status');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (window.STATIC_PREVIEW) {
+        status.className = 'form-status';
+        status.textContent = 'This is a static preview. The form sends messages once the site is deployed on Railway.';
+        return;
+      }
       const btn = form.querySelector('button[type=submit]');
       btn.disabled = true;
       status.className = 'form-status';

@@ -45,7 +45,7 @@ a { color: inherit; }
 .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
 
 /* Header */
-.site-header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--line); }
+.site-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--line); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; }
 .brand-mark { font-family: var(--mono); font-size: 12px; background: var(--text); color: var(--bg); padding: 4px 6px; border-radius: 6px; }
