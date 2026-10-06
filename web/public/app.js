@@ -1,19 +1,5 @@
-// Theme toggle, photo lightbox and the contact form.
+// Photo lightbox and the contact form.
 (function () {
-  const root = document.documentElement;
-
-  // ---- Theme ----
-  const toggle = document.querySelector('[data-theme-toggle]');
-  if (toggle) {
-    toggle.addEventListener('click', () => {
-      const dark = root.dataset.theme
-        ? root.dataset.theme === 'dark'
-        : matchMedia('(prefers-color-scheme: dark)').matches;
-      root.dataset.theme = dark ? 'light' : 'dark';
-      try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
-    });
-  }
-
   // ---- Lightbox ----
   // Story photos open at full size; [data-lb] links (hero, gallery) open their href.
   const lb = document.querySelector('[data-lightbox]');

@@ -8,12 +8,12 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
-const { mediaName, IMAGE_EXT } = require('./lib/media-names');
+const { mediaName, IMAGE_EXT, ROTATE } = require('./lib/media-names');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'content', 'projects.json');
 // Card/preview image when the first photo in the README isn't the best one.
-const COVER_OVERRIDES = { '3d-printer': 'DSC04210.JPG' };
+const COVER_OVERRIDES = { '3d-printer': 'DSC04210.JPG', 'filament-recycler': '1000003647.JPEG' };
 
 // Facts shown on the project cards and page headers, and how the media is
 // presented: 'photo' (workshop photos) or 'device' (app screenshots in a phone frame).
@@ -58,9 +58,10 @@ const EXTRAS = {
 
 // Pixel size of a source image after EXIF rotation, so the page can lay
 // photos out at their real proportions without cropping.
-async function imageSize(file) {
-  const m = await sharp(file).metadata();
-  return m.orientation >= 5 ? { w: m.height, h: m.width } : { w: m.width, h: m.height };
+async function imageSize(slug, file) {
+  const m = await sharp(path.join(ROOT, slug, file)).metadata();
+  const quarterTurns = (m.orientation >= 5 ? 1 : 0) + (ROTATE[`${slug}/${file}`] || 0) / 90;
+  return quarterTurns % 2 ? { w: m.height, h: m.width } : { w: m.width, h: m.height };
 }
 
 function parseRootTable(md) {
@@ -165,7 +166,7 @@ async function main() {
     const { title, tagline, body } = parseProjectReadme(row.slug, md);
     const { used, extra } = collectMedia(row.slug, body);
     const sizes = {};
-    for (const x of [...used, ...extra]) sizes[x.file] = await imageSize(path.join(ROOT, row.slug, x.file));
+    for (const x of [...used, ...extra]) sizes[x.file] = await imageSize(row.slug, x.file);
     const toMedia = (kind) => (x, i) => ({
       width: sizes[x.file]?.w ?? null,
       height: sizes[x.file]?.h ?? null,

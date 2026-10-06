@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
-const { IMAGE_EXT, mediaName } = require('./lib/media-names');
+const { IMAGE_EXT, ROTATE, mediaName } = require('./lib/media-names');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, '.cache', 'media');
@@ -31,8 +31,10 @@ async function main() {
       for (const s of SIZES) {
         const out = path.join(dst, mediaName(file, s.variant));
         if (fs.existsSync(out)) continue;
-        await sharp(path.join(src, file))
-          .rotate() // honour EXIF orientation from phone photos
+        // Honour EXIF orientation first, then any manual fix for sideways photos.
+        const upright = await sharp(path.join(src, file)).rotate().toBuffer();
+        await sharp(upright)
+          .rotate(ROTATE[`${slug}/${file}`] || 0)
           .resize({ width: s.width, withoutEnlargement: true })
           .webp({ quality: s.quality })
           .toFile(out);

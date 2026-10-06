@@ -1,29 +1,26 @@
 {
   "name": "Enrique Mateo Cobo",
   "role": "Mechatronics Engineering · KIT Karlsruhe",
-  "headline": "From graph paper to machines that move, print and ship.",
-  "intro": "I design and build things end to end: mechanics, electronics, firmware and software. Most of my projects start as a pencil sketch and end as something running on my desk, or live on the App Store.",
+  "headline": "I design and build machines and software end to end.",
+  "intro": "Mechatronics engineering student at KIT. My projects go from a hand sketch and Fusion 360 CAD to working hardware on my desk, and to an iOS app live on the App Store.",
   "location": "Karlsruhe, Germany",
   "github": "https://github.com/EnriqueMateo",
-  "hero": {
-    "sketch": { "src": "/media/3d-printer/1000012100-sm.webp", "full": "/media/3d-printer/1000012100.webp", "alt": "Hand-drawn sketch of the CoreXY printer on graph paper", "label": "Sketch · graph paper" },
-    "built": { "src": "/media/3d-printer/dsc04210.webp", "full": "/media/3d-printer/dsc04210.webp", "alt": "The finished KMI 2.0 CoreXY 3D printer on an aluminium frame", "label": "KMI 2.0 · built and printing" }
-  },
-  "titleBlock": [
-    { "label": "Printer budget", "value": "< €120" },
-    { "label": "Apps shipped", "value": "1 · App Store" },
-    { "label": "Languages", "value": "ES · DE · EN · PT" },
-    { "label": "Based in", "value": "Karlsruhe, DE" }
+  "heroImage": { "src": "/media/3d-printer/dsc04210.webp", "alt": "KMI 2.0, the CoreXY 3D printer I designed and built on an aluminium-extrusion frame" },
+  "heroCaption": "KMI 2.0 · CoreXY 3D printer, designed and built from scratch",
+  "stats": [
+    { "value": "4", "label": "Projects built end to end" },
+    { "value": "< €120", "label": "Budget for a CoreXY printer" },
+    { "value": "1", "label": "iOS app on the App Store" },
+    { "value": "4", "label": "Languages: ES · DE · EN · PT" }
   ],
-  "process": [
-    { "step": "Sketch", "text": "Pencil on graph paper, before any software." },
-    { "step": "CAD", "text": "Every part modelled in Fusion 360 and checked against the real hardware." },
-    { "step": "Make", "text": "Printed, cut, wired. Often on the machine I'm replacing." },
-    { "step": "Test", "text": "Run it until it breaks, then find out why." },
-    { "step": "Iterate", "text": "The printed frame flexed, so v2 moved to aluminium extrusion." }
+  "about": [
+    "I like starting from a blank sheet of graph paper and ending with something that moves, prints, or ships. Most of my builds start as a pencil sketch, move into Fusion 360, and are then printed, wired and tested at my desk.",
+    "I treat constraints as part of the design: the printer had a hard €120 budget, so I recycled the mainboard from my old Creality and only bought what I truly needed. When something fails, I rebuild it better. The first printed frame flexed, so version two moved to aluminium extrusion."
   ],
-  "principles": [
-    { "title": "Constraints as a feature", "text": "The printer had a hard €120 budget. I recycled the mainboard from my old Creality and only bought what I truly needed: rails, belts, extrusions, endstops." },
-    { "title": "Full stack, both worlds", "text": "As comfortable with kinematics, steppers and G-code as with React Native, Node and a production backend with real users." }
-  ]
+  "skills": [
+    { "area": "Mechanical design", "items": ["Fusion 360 CAD", "Gearbox and mechanism design", "FDM 3D printing", "Aluminium-extrusion frames"] },
+    { "area": "Electronics & firmware", "items": ["Stepper motion systems", "CoreXY kinematics", "Printer firmware configuration", "Mains power integration"] },
+    { "area": "Software", "items": ["React Native + Expo", "Node.js / Express", "Supabase / Postgres", "Claude API (vision)"] }
+  ],
+  "languages": "Spanish (native) · German · English · Portuguese"
 }

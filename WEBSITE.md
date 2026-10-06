@@ -64,7 +64,7 @@ Messages are saved to the `contact_messages` table (Supabase → Table Editor). 
 | `web/server.js` | Express app: pages, `/api/projects`, `/api/contact`, `/api/health` |
 | `web/views.js` | HTML templates (server-rendered, with Open Graph tags for link previews) |
 | `web/lib/data.js` | Supabase reads and writes, with a cache and a local fallback |
-| `web/public/` | CSS, the small client script (filters, lightbox, form) and the favicon |
-| `content/` | `projects.json` (generated) and `site.json` (hero, title block, process, principles) |
+| `web/public/` | CSS, the small client script (lightbox, contact form) and the favicon |
+| `content/` | `projects.json` (generated) and `site.json` (hero, stats, about, skills) |
 | `scripts/` | `build-content`, `build-media`, `seed-supabase` |
 | `supabase/migrations/` | Database schema |
