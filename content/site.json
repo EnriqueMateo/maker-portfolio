@@ -1,0 +1,19 @@
+{
+  "name": "Enrique Mateo Cobo",
+  "role": "Mechatronics Engineering @ KIT",
+  "headline": "I design and build things end to end — mechanics, electronics, firmware and software.",
+  "intro": "I like starting from a blank sheet of graph paper and ending with something that moves, prints, or ships to the App Store.",
+  "location": "Karlsruhe, Germany",
+  "github": "https://github.com/EnriqueMateo",
+  "stats": [
+    { "value": "€120", "label": "budget for a CoreXY printer built from scratch" },
+    { "value": "1", "label": "iOS app shipped solo to the App Store" },
+    { "value": "4", "label": "languages: ES · DE · EN · PT" }
+  ],
+  "howIWork": [
+    { "title": "From scratch", "text": "Most projects start as a pencil sketch on graph paper, move into Fusion 360 CAD, and are then printed, wired and tested at my desk." },
+    { "title": "Constraints as a feature", "text": "The printer had a hard €120 budget, so I recycled and reused wherever I could and only bought what I truly needed." },
+    { "title": "Iterate on failure", "text": "The first printer frame was fully 3D-printed and flexed too much. I rebuilt it around aluminium extrusions. Learning by breaking is part of the process." },
+    { "title": "Full stack, both worlds", "text": "As comfortable with kinematics, steppers and G-code as with React Native, Node and a production backend." }
+  ]
+}

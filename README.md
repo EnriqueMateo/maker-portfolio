@@ -33,3 +33,5 @@ This repository collects four projects that show how I work: from hand-drawn con
 - Languages: Spanish (native), German, English, Portuguese.
 
 > Each folder has its own detailed README with the story, the engineering decisions, photos and short clips.
+>
+> 🌐 This repo also powers my portfolio website (Express on Railway + Supabase) — see [WEBSITE.md](./WEBSITE.md).
