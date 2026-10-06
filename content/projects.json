@@ -12,7 +12,26 @@
       "Firmware",
       "Electronics"
     ],
-    "body_md": "![Hand-drawn design](/media/3d-printer/1000012100.webp)\n*The starting point: the whole machine sketched by hand on graph paper — frame, CoreXY gantry, belt path and Z bed.*\n\n---\n\n## The idea\n\nI wanted to build a 3D printer **from scratch** — not assemble a kit — to really understand motion systems, firmware and machine design. The rules I set myself:\n\n- **Hard budget: under €120.** Recycle and reuse as much as possible.\n- **Reuse the electronics** from my old Creality printer (its **Creality 4.2.7 silent mainboard**) instead of buying a new controller.\n- **Different kinematics from what I knew.** My old Creality was a \"bed-slinger\" (the bed moves on Y). I wanted a **CoreXY** system, where the toolhead moves in X and Y via two belts and two fixed motors, and the **heated bed moves up and down on Z**.\n\n## From sketch to CAD\n\nEvery part was modelled in **Fusion 360** before printing. I designed the frame, the CoreXY gantry, the motor mounts and the Z bed carriage from scratch.\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/1000012371.webp\" loading=\"lazy\"><br><sub>NEMA stepper mount — CAD next to the real motor to check the fit</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/1000012381.webp\" loading=\"lazy\"><br><sub>Z bed carriage on twin lead-screws, driven by two steppers — modelled in Fusion 360</sub></td>\n</tr>\n</table>\n\n## The printed chassis (v1 — all plastic)\n\nThe first full chassis was **entirely 3D-printed** in yellow PLA — frame legs, base shell and brackets. It worked, but under load the printed frame flexed more than I wanted.\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/1000012870.webp\" loading=\"lazy\"><br><sub>A printed structural column with its threaded rod</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/1000013172.webp\" loading=\"lazy\"><br><sub>Printed base panels + black reinforcement brackets</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/1000013188.webp\" loading=\"lazy\"><br><sub>Printed base/enclosure shell with vents</sub></td>\n</tr>\n</table>\n\n![Printed chassis v1](/media/3d-printer/1000013997.webp)\n*Version 1 assembled: fully 3D-printed base and uprights, with a NEMA stepper and Z lead-screw fitted.*\n\n### The key iteration\n\nVersion 1 taught me the most important lesson: **a fully printed frame isn't stiff enough.** So I rebuilt the whole machine around a **full aluminium-extrusion frame with 3D-printed reinforcements** — the project I call **KMI 2.0**.\n\n---\n\n## KMI 2.0 — the aluminium reconstruction\n\nThis is the version I'm proudest of. I kept everything that worked from v1 (the CoreXY concept, the recycled electronics, the Z-bed idea) and rebuilt the entire structure in **2020 aluminium extrusion**, using 3D-printed parts only where they add value: corner gussets, motor mounts, the toolhead and belt tensioners. Aluminium carries the loads; plastic does the clever geometry.\n\n### Print the new machine on the old one\n\nBefore swapping anything, I printed all the new structural brackets on my **old Ender-3 Pro** — the same printer whose mainboard would later become the brain of the new one. The donor building its own successor.\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/1000012382.webp\" loading=\"lazy\"><br><sub>The new twin-Z bed carriage, redesigned in Fusion 360</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/1000012964.webp\" loading=\"lazy\"><br><sub>Printing the new structural brackets on my old Ender-3 Pro before the rebuild</sub></td>\n</tr>\n</table>\n\n### The new frame\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/img-9549.webp\" loading=\"lazy\"><br><sub>The v2 frame: 2020 aluminium extrusion with custom 3D-printed corner gussets and twin-Z lead-screws. Rigid where v1 flexed.</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/img-9569.webp\" loading=\"lazy\"><br><sub>Old and new side by side: the donor Ender-3 next to the aluminium machine it's becoming</sub></td>\n</tr>\n</table>\n\n### Assembly\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04213.webp\" loading=\"lazy\"><br><sub>Mid-assembly: MGN linear rails, printed + metal corner brackets, twin lead-screws and the Kingroon bed dropping in</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04245.webp\" loading=\"lazy\"><br><sub>Toolhead, part-cooling fan and bed, coming together on the aluminium frame</sub></td>\n</tr>\n</table>\n\n### Electronics — same brain, new body\n\n- **Controller:** recycled **Creality 4.2.7** board from the Ender-3.\n- **Firmware:** reflashed and reconfigured for **CoreXY kinematics** — new axis directions, steps/mm, endstop positions and a moving-Z heated bed. Nothing like the stock Creality config.\n- **Power:** a dedicated mains PSU feeding the bed and electronics.\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04220.webp\" loading=\"lazy\"><br><sub>Recycled Creality 4.2.7 board, mains PSU and the Ender LCD wired into the new machine</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04240.webp\" loading=\"lazy\"><br><sub>PSU and the two Z steppers driving the bed on twin lead-screws</sub></td>\n</tr>\n</table>\n\n### The finished machine\n\n![KMI 2.0 finished](/media/3d-printer/dsc04210.webp)\n*KMI 2.0 assembled and running: the CoreXY gantry on a rigid aluminium frame, LED-lit, with the recycled electronics underneath.*\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04230.webp\" loading=\"lazy\"><br><sub>Detail: toolhead, Kingroon bed and the twin-Z lead-screws with anti-backlash nuts</sub></td>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04250.webp\" loading=\"lazy\"><br><sub>Mechanical Z endstop and the part-cooling fan up close</sub></td>\n</tr>\n</table>\n\n### Gallery\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04222.webp\" loading=\"lazy\"></td>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04211.webp\" loading=\"lazy\"></td>\n</tr>\n<tr>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04238.webp\" loading=\"lazy\"></td>\n<td align=\"center\"><img src=\"/media/3d-printer/dsc04244.webp\" loading=\"lazy\"></td>\n</tr>\n</table>\n\n![Detail](/media/3d-printer/dsc04248.webp)\n\n---\n\n## Specs at a glance\n\n| Item | Detail |\n|---|---|\n| Motion system | CoreXY (X/Y), heated bed on twin-Z lead-screws |\n| Controller | Creality 4.2.7 (recycled from an Ender-3) + custom firmware config |\n| Frame | v1: fully 3D-printed → **KMI 2.0: 2020 aluminium extrusion + printed reinforcements** |\n| Motion hardware | MGN linear rails, steel rods + bearings, GT2 belts & pulleys |\n| Bed | Kingroon 180 × 180 mm heated bed |\n| Endstops | Mechanical limit switches |\n| Power | Dedicated mains PSU |\n| CAD | Fusion 360 |\n| Budget | **< €120** |\n\n## What I learned\n\n- How **CoreXY kinematics** actually work, and how to configure firmware for a motion system from zero (axis mapping, steps/mm, homing, endstops).\n- **Structural stiffness matters more than part count** — the jump from a printed frame to aluminium was the difference between \"moves\" and \"prints well.\"\n- How to plan a **rebuild without waste**: reuse the electronics, print the new parts on the old machine, and only buy what the budget truly needs.\n- Safe integration of **mains power** into a machine.",
+    "body_md": "![Hand-drawn design](/media/3d-printer/1000012100.webp)\n*The starting point: the whole machine sketched by hand on graph paper — frame, CoreXY gantry, belt path and Z bed.*\n\n---\n\n## The idea\n\nI wanted to build a 3D printer **from scratch** — not assemble a kit — to really understand motion systems, firmware and machine design. The rules I set myself:\n\n- **Hard budget: under €120.** Recycle and reuse as much as possible.\n- **Reuse the electronics** from my old Creality printer (its **Creality 4.2.7 silent mainboard**) instead of buying a new controller.\n- **Different kinematics from what I knew.** My old Creality was a \"bed-slinger\" (the bed moves on Y). I wanted a **CoreXY** system, where the toolhead moves in X and Y via two belts and two fixed motors, and the **heated bed moves up and down on Z**.\n\n## From sketch to CAD\n\nEvery part was modelled in **Fusion 360** before printing. I designed the frame, the CoreXY gantry, the motor mounts and the Z bed carriage from scratch.\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.563\"><img src=\"/media/3d-printer/1000012371.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>NEMA stepper mount — CAD next to the real motor to check the fit</sub></td>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/1000012381.webp\" width=\"4000\" height=\"2250\" loading=\"lazy\"><br><sub>Z bed carriage on twin lead-screws, driven by two steppers — modelled in Fusion 360</sub></td>\n</tr>\n</table>\n\n## The printed chassis (v1 — all plastic)\n\nThe first full chassis was **entirely 3D-printed** in yellow PLA — frame legs, base shell and brackets. It worked, but under load the printed frame flexed more than I wanted.\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.563\"><img src=\"/media/3d-printer/1000012870.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>A printed structural column with its threaded rod</sub></td>\n<td style=\"--ar:0.563\"><img src=\"/media/3d-printer/1000013172.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>Printed base panels + black reinforcement brackets</sub></td>\n<td style=\"--ar:0.563\"><img src=\"/media/3d-printer/1000013188.webp\" width=\"1080\" height=\"1920\" loading=\"lazy\"><br><sub>Printed base/enclosure shell with vents</sub></td>\n</tr>\n</table>\n\n![Printed chassis v1](/media/3d-printer/1000013997.webp)\n*Version 1 assembled: fully 3D-printed base and uprights, with a NEMA stepper and Z lead-screw fitted.*\n\n### The key iteration\n\nVersion 1 taught me the most important lesson: **a fully printed frame isn't stiff enough.** So I rebuilt the whole machine around a **full aluminium-extrusion frame with 3D-printed reinforcements** — the project I call **KMI 2.0**.\n\n---\n\n## KMI 2.0 — the aluminium reconstruction\n\nThis is the version I'm proudest of. I kept everything that worked from v1 (the CoreXY concept, the recycled electronics, the Z-bed idea) and rebuilt the entire structure in **2020 aluminium extrusion**, using 3D-printed parts only where they add value: corner gussets, motor mounts, the toolhead and belt tensioners. Aluminium carries the loads; plastic does the clever geometry.\n\n### Print the new machine on the old one\n\nBefore swapping anything, I printed all the new structural brackets on my **old Ender-3 Pro** — the same printer whose mainboard would later become the brain of the new one. The donor building its own successor.\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.563\"><img src=\"/media/3d-printer/1000012382.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>The new twin-Z bed carriage, redesigned in Fusion 360</sub></td>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/1000012964.webp\" width=\"4000\" height=\"2250\" loading=\"lazy\"><br><sub>Printing the new structural brackets on my old Ender-3 Pro before the rebuild</sub></td>\n</tr>\n</table>\n\n### The new frame\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.750\"><img src=\"/media/3d-printer/img-9549.webp\" width=\"3024\" height=\"4032\" loading=\"lazy\"><br><sub>The v2 frame: 2020 aluminium extrusion with custom 3D-printed corner gussets and twin-Z lead-screws. Rigid where v1 flexed.</sub></td>\n<td style=\"--ar:0.750\"><img src=\"/media/3d-printer/img-9569.webp\" width=\"3024\" height=\"4032\" loading=\"lazy\"><br><sub>Old and new side by side: the donor Ender-3 next to the aluminium machine it's becoming</sub></td>\n</tr>\n</table>\n\n### Assembly\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04213.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"><br><sub>Mid-assembly: MGN linear rails, printed + metal corner brackets, twin lead-screws and the Kingroon bed dropping in</sub></td>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04245.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"><br><sub>Toolhead, part-cooling fan and bed, coming together on the aluminium frame</sub></td>\n</tr>\n</table>\n\n### Electronics — same brain, new body\n\n- **Controller:** recycled **Creality 4.2.7** board from the Ender-3.\n- **Firmware:** reflashed and reconfigured for **CoreXY kinematics** — new axis directions, steps/mm, endstop positions and a moving-Z heated bed. Nothing like the stock Creality config.\n- **Power:** a dedicated mains PSU feeding the bed and electronics.\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04220.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"><br><sub>Recycled Creality 4.2.7 board, mains PSU and the Ender LCD wired into the new machine</sub></td>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04240.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"><br><sub>PSU and the two Z steppers driving the bed on twin lead-screws</sub></td>\n</tr>\n</table>\n\n### The finished machine\n\n![KMI 2.0 finished](/media/3d-printer/dsc04210.webp)\n*KMI 2.0 assembled and running: the CoreXY gantry on a rigid aluminium frame, LED-lit, with the recycled electronics underneath.*\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04230.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"><br><sub>Detail: toolhead, Kingroon bed and the twin-Z lead-screws with anti-backlash nuts</sub></td>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04250.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"><br><sub>Mechanical Z endstop and the part-cooling fan up close</sub></td>\n</tr>\n</table>\n\n### Gallery\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04222.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"></td>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04211.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"></td>\n</tr>\n<tr>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04238.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"></td>\n<td style=\"--ar:1.778\"><img src=\"/media/3d-printer/dsc04244.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"></td>\n</tr>\n</table>\n\n![Detail](/media/3d-printer/dsc04248.webp)\n\n---\n\n## Specs at a glance\n\n| Item | Detail |\n|---|---|\n| Motion system | CoreXY (X/Y), heated bed on twin-Z lead-screws |\n| Controller | Creality 4.2.7 (recycled from an Ender-3) + custom firmware config |\n| Frame | v1: fully 3D-printed → **KMI 2.0: 2020 aluminium extrusion + printed reinforcements** |\n| Motion hardware | MGN linear rails, steel rods + bearings, GT2 belts & pulleys |\n| Bed | Kingroon 180 × 180 mm heated bed |\n| Endstops | Mechanical limit switches |\n| Power | Dedicated mains PSU |\n| CAD | Fusion 360 |\n| Budget | **< €120** |\n\n## What I learned\n\n- How **CoreXY kinematics** actually work, and how to configure firmware for a motion system from zero (axis mapping, steps/mm, homing, endstops).\n- **Structural stiffness matters more than part count** — the jump from a printed frame to aluminium was the difference between \"moves\" and \"prints well.\"\n- How to plan a **rebuild without waste**: reuse the electronics, print the new parts on the old machine, and only buy what the budget truly needs.\n- Safe integration of **mains power** into a machine.",
+    "facts": [
+      {
+        "label": "Budget",
+        "value": "< €120"
+      },
+      {
+        "label": "Kinematics",
+        "value": "CoreXY + twin-Z bed"
+      },
+      {
+        "label": "Frame",
+        "value": "2020 aluminium extrusion"
+      },
+      {
+        "label": "Controller",
+        "value": "Recycled Creality 4.2.7"
+      }
+    ],
+    "media_style": "photo",
     "cover_url": "/media/3d-printer/dsc04210.webp",
     "cover_thumb_url": "/media/3d-printer/dsc04210-sm.webp",
     "links": [
@@ -25,6 +44,8 @@
     "published": true,
     "media": [
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000012100.webp",
         "thumb_url": "/media/3d-printer/1000012100-sm.webp",
         "caption": "The starting point: the whole machine sketched by hand on graph paper — frame, CoreXY gantry, belt path and Z bed.",
@@ -32,6 +53,8 @@
         "sort_order": 0
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000012371.webp",
         "thumb_url": "/media/3d-printer/1000012371-sm.webp",
         "caption": "NEMA stepper mount — CAD next to the real motor to check the fit",
@@ -39,6 +62,8 @@
         "sort_order": 1
       },
       {
+        "width": 4000,
+        "height": 2250,
         "url": "/media/3d-printer/1000012381.webp",
         "thumb_url": "/media/3d-printer/1000012381-sm.webp",
         "caption": "Z bed carriage on twin lead-screws, driven by two steppers — modelled in Fusion 360",
@@ -46,6 +71,8 @@
         "sort_order": 2
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000012870.webp",
         "thumb_url": "/media/3d-printer/1000012870-sm.webp",
         "caption": "A printed structural column with its threaded rod",
@@ -53,6 +80,8 @@
         "sort_order": 3
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000013172.webp",
         "thumb_url": "/media/3d-printer/1000013172-sm.webp",
         "caption": "Printed base panels + black reinforcement brackets",
@@ -60,6 +89,8 @@
         "sort_order": 4
       },
       {
+        "width": 1080,
+        "height": 1920,
         "url": "/media/3d-printer/1000013188.webp",
         "thumb_url": "/media/3d-printer/1000013188-sm.webp",
         "caption": "Printed base/enclosure shell with vents",
@@ -67,6 +98,8 @@
         "sort_order": 5
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000013997.webp",
         "thumb_url": "/media/3d-printer/1000013997-sm.webp",
         "caption": "Version 1 assembled: fully 3D-printed base and uprights, with a NEMA stepper and Z lead-screw fitted.",
@@ -74,6 +107,8 @@
         "sort_order": 6
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000012382.webp",
         "thumb_url": "/media/3d-printer/1000012382-sm.webp",
         "caption": "The new twin-Z bed carriage, redesigned in Fusion 360",
@@ -81,6 +116,8 @@
         "sort_order": 7
       },
       {
+        "width": 4000,
+        "height": 2250,
         "url": "/media/3d-printer/1000012964.webp",
         "thumb_url": "/media/3d-printer/1000012964-sm.webp",
         "caption": "Printing the new structural brackets on my old Ender-3 Pro before the rebuild",
@@ -88,6 +125,8 @@
         "sort_order": 8
       },
       {
+        "width": 3024,
+        "height": 4032,
         "url": "/media/3d-printer/img-9549.webp",
         "thumb_url": "/media/3d-printer/img-9549-sm.webp",
         "caption": "The v2 frame: 2020 aluminium extrusion with custom 3D-printed corner gussets and twin-Z lead-screws. Rigid where v1 flexed.",
@@ -95,6 +134,8 @@
         "sort_order": 9
       },
       {
+        "width": 3024,
+        "height": 4032,
         "url": "/media/3d-printer/img-9569.webp",
         "thumb_url": "/media/3d-printer/img-9569-sm.webp",
         "caption": "Old and new side by side: the donor Ender-3 next to the aluminium machine it's becoming",
@@ -102,6 +143,8 @@
         "sort_order": 10
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04213.webp",
         "thumb_url": "/media/3d-printer/dsc04213-sm.webp",
         "caption": "Mid-assembly: MGN linear rails, printed + metal corner brackets, twin lead-screws and the Kingroon bed dropping in",
@@ -109,6 +152,8 @@
         "sort_order": 11
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04245.webp",
         "thumb_url": "/media/3d-printer/dsc04245-sm.webp",
         "caption": "Toolhead, part-cooling fan and bed, coming together on the aluminium frame",
@@ -116,6 +161,8 @@
         "sort_order": 12
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04220.webp",
         "thumb_url": "/media/3d-printer/dsc04220-sm.webp",
         "caption": "Recycled Creality 4.2.7 board, mains PSU and the Ender LCD wired into the new machine",
@@ -123,6 +170,8 @@
         "sort_order": 13
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04240.webp",
         "thumb_url": "/media/3d-printer/dsc04240-sm.webp",
         "caption": "PSU and the two Z steppers driving the bed on twin lead-screws",
@@ -130,6 +179,8 @@
         "sort_order": 14
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04210.webp",
         "thumb_url": "/media/3d-printer/dsc04210-sm.webp",
         "caption": "KMI 2.0 assembled and running: the CoreXY gantry on a rigid aluminium frame, LED-lit, with the recycled electronics underneath.",
@@ -137,6 +188,8 @@
         "sort_order": 15
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04230.webp",
         "thumb_url": "/media/3d-printer/dsc04230-sm.webp",
         "caption": "Detail: toolhead, Kingroon bed and the twin-Z lead-screws with anti-backlash nuts",
@@ -144,6 +197,8 @@
         "sort_order": 16
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04250.webp",
         "thumb_url": "/media/3d-printer/dsc04250-sm.webp",
         "caption": "Mechanical Z endstop and the part-cooling fan up close",
@@ -151,6 +206,8 @@
         "sort_order": 17
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04222.webp",
         "thumb_url": "/media/3d-printer/dsc04222-sm.webp",
         "caption": null,
@@ -158,6 +215,8 @@
         "sort_order": 18
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04211.webp",
         "thumb_url": "/media/3d-printer/dsc04211-sm.webp",
         "caption": null,
@@ -165,6 +224,8 @@
         "sort_order": 19
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04238.webp",
         "thumb_url": "/media/3d-printer/dsc04238-sm.webp",
         "caption": null,
@@ -172,6 +233,8 @@
         "sort_order": 20
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04244.webp",
         "thumb_url": "/media/3d-printer/dsc04244-sm.webp",
         "caption": null,
@@ -179,6 +242,8 @@
         "sort_order": 21
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/3d-printer/dsc04248.webp",
         "thumb_url": "/media/3d-printer/dsc04248-sm.webp",
         "caption": "Detail",
@@ -186,6 +251,8 @@
         "sort_order": 22
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000013462.webp",
         "thumb_url": "/media/3d-printer/1000013462-sm.webp",
         "caption": null,
@@ -193,6 +260,8 @@
         "sort_order": 23
       },
       {
+        "width": 4000,
+        "height": 2250,
         "url": "/media/3d-printer/1000013465.webp",
         "thumb_url": "/media/3d-printer/1000013465-sm.webp",
         "caption": null,
@@ -200,6 +269,8 @@
         "sort_order": 24
       },
       {
+        "width": 4000,
+        "height": 2250,
         "url": "/media/3d-printer/1000013789.webp",
         "thumb_url": "/media/3d-printer/1000013789-sm.webp",
         "caption": null,
@@ -207,6 +278,8 @@
         "sort_order": 25
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000016071.webp",
         "thumb_url": "/media/3d-printer/1000016071-sm.webp",
         "caption": null,
@@ -214,6 +287,8 @@
         "sort_order": 26
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000017888.webp",
         "thumb_url": "/media/3d-printer/1000017888-sm.webp",
         "caption": null,
@@ -221,6 +296,8 @@
         "sort_order": 27
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/3d-printer/1000018122.webp",
         "thumb_url": "/media/3d-printer/1000018122-sm.webp",
         "caption": null,
@@ -228,6 +305,8 @@
         "sort_order": 28
       },
       {
+        "width": 2160,
+        "height": 3840,
         "url": "/media/3d-printer/8e68f8b2-8346-4547-bdb4-8ee397b15cd8.webp",
         "thumb_url": "/media/3d-printer/8e68f8b2-8346-4547-bdb4-8ee397b15cd8-sm.webp",
         "caption": null,
@@ -249,7 +328,26 @@
       "Drivetrain",
       "Electronics"
     ],
-    "body_md": "![Self-designed reduction gearbox in Fusion 360](/media/rc-car/img-8532.webp)\n*The heart of the project: a **reduction gearbox I designed from scratch** in Fusion 360 — a pinion driving a large spur gear to gear the motor down to the wheels.*\n\n---\n\n## Why I built it\n\nI had already printed a few RC cars from existing designs. That was fun, but I was following someone else's geometry. I wanted to **design one myself** to understand *why* the parts are shaped the way they are:\n\n- How **suspension and chassis geometry** affect handling.\n- How a **drivetrain** actually delivers torque to the wheels.\n- How to design a **reduction gearbox** with the right ratio and get real printed gears to mesh and survive.\n\n## What I designed and built\n\n- **Full CAD in Fusion 360** — chassis, mounts and drivetrain modelled from scratch.\n- **My own reduction gearbox** — designed the gear stages and ratio myself, then printed and assembled them to couple the motor to the wheels.\n- **Component integration** — I bought the wheels/tires, servo(s) and motor, and designed the printed structure to hold everything: motor mount, battery tray, steering and suspension.\n- **RC link** — connected to a standard radio-control transmitter/receiver so it drives.\n\n### Designed in Fusion 360\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/rc-car/img-8697.webp\" loading=\"lazy\"><br><sub>Full chassis + drivetrain, modelled from scratch</sub></td>\n<td align=\"center\"><img src=\"/media/rc-car/img-8698.webp\" loading=\"lazy\"><br><sub>Gearbox, ESC and suspension packaged together</sub></td>\n</tr>\n</table>\n\n## Hardware\n\n| Subsystem | Detail |\n|---|---|\n| Chassis | Custom-designed, 3D-printed |\n| Drivetrain | **Self-designed reduction gearbox** (printed gears) → wheels |\n| Motor + ESC | RC motor with dedicated ESC and cooling fan |\n| Battery | GOLDBAT LiPo 2S 7.4 V, 5200 mAh 50C |\n| Steering | Servo-driven |\n| Control | Standard RC transmitter / receiver |\n| Wheels | Off-road monster-truck tires |\n| CAD | Fusion 360 |\n\n### The build\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/rc-car/img-8716.webp\" loading=\"lazy\"><br><sub>Front stance — printed chassis, monster-truck tires</sub></td>\n<td align=\"center\"><img src=\"/media/rc-car/img-8717.webp\" loading=\"lazy\"><br><sub>3/4 view — oil-filled coilover shocks</sub></td>\n</tr>\n<tr>\n<td align=\"center\"><img src=\"/media/rc-car/img-8718.webp\" loading=\"lazy\"><br><sub>Top view — LiPo, ESC, receiver and cooling fan</sub></td>\n<td align=\"center\"><img src=\"/media/rc-car/img-8719.webp\" loading=\"lazy\"><br><sub>Drivetrain + electronics close-up</sub></td>\n</tr>\n</table>\n\n## What I learned\n\n- **Gearbox design end to end**: choosing a reduction ratio, sizing gears, and dealing with the reality that 3D-printed gears need tolerances, clearances and sometimes a redesign to run smoothly.\n- How **vehicle geometry** (wheelbase, suspension travel, motor placement) drives the whole layout.\n- Packaging real electronics (motor, ESC, battery, servo, receiver) into a printed chassis that stays rigid.",
+    "body_md": "![Self-designed reduction gearbox in Fusion 360](/media/rc-car/img-8532.webp)\n*The heart of the project: a **reduction gearbox I designed from scratch** in Fusion 360 — a pinion driving a large spur gear to gear the motor down to the wheels.*\n\n---\n\n## Why I built it\n\nI had already printed a few RC cars from existing designs. That was fun, but I was following someone else's geometry. I wanted to **design one myself** to understand *why* the parts are shaped the way they are:\n\n- How **suspension and chassis geometry** affect handling.\n- How a **drivetrain** actually delivers torque to the wheels.\n- How to design a **reduction gearbox** with the right ratio and get real printed gears to mesh and survive.\n\n## What I designed and built\n\n- **Full CAD in Fusion 360** — chassis, mounts and drivetrain modelled from scratch.\n- **My own reduction gearbox** — designed the gear stages and ratio myself, then printed and assembled them to couple the motor to the wheels.\n- **Component integration** — I bought the wheels/tires, servo(s) and motor, and designed the printed structure to hold everything: motor mount, battery tray, steering and suspension.\n- **RC link** — connected to a standard radio-control transmitter/receiver so it drives.\n\n### Designed in Fusion 360\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:1.333\"><img src=\"/media/rc-car/img-8697.webp\" width=\"4032\" height=\"3024\" loading=\"lazy\"><br><sub>Full chassis + drivetrain, modelled from scratch</sub></td>\n<td style=\"--ar:1.333\"><img src=\"/media/rc-car/img-8698.webp\" width=\"4032\" height=\"3024\" loading=\"lazy\"><br><sub>Gearbox, ESC and suspension packaged together</sub></td>\n</tr>\n</table>\n\n## Hardware\n\n| Subsystem | Detail |\n|---|---|\n| Chassis | Custom-designed, 3D-printed |\n| Drivetrain | **Self-designed reduction gearbox** (printed gears) → wheels |\n| Motor + ESC | RC motor with dedicated ESC and cooling fan |\n| Battery | GOLDBAT LiPo 2S 7.4 V, 5200 mAh 50C |\n| Steering | Servo-driven |\n| Control | Standard RC transmitter / receiver |\n| Wheels | Off-road monster-truck tires |\n| CAD | Fusion 360 |\n\n### The build\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.750\"><img src=\"/media/rc-car/img-8716.webp\" width=\"3024\" height=\"4032\" loading=\"lazy\"><br><sub>Front stance — printed chassis, monster-truck tires</sub></td>\n<td style=\"--ar:0.750\"><img src=\"/media/rc-car/img-8717.webp\" width=\"3024\" height=\"4032\" loading=\"lazy\"><br><sub>3/4 view — oil-filled coilover shocks</sub></td>\n</tr>\n<tr>\n<td style=\"--ar:0.750\"><img src=\"/media/rc-car/img-8718.webp\" width=\"3024\" height=\"4032\" loading=\"lazy\"><br><sub>Top view — LiPo, ESC, receiver and cooling fan</sub></td>\n<td style=\"--ar:0.750\"><img src=\"/media/rc-car/img-8719.webp\" width=\"3024\" height=\"4032\" loading=\"lazy\"><br><sub>Drivetrain + electronics close-up</sub></td>\n</tr>\n</table>\n\n## What I learned\n\n- **Gearbox design end to end**: choosing a reduction ratio, sizing gears, and dealing with the reality that 3D-printed gears need tolerances, clearances and sometimes a redesign to run smoothly.\n- How **vehicle geometry** (wheelbase, suspension travel, motor placement) drives the whole layout.\n- Packaging real electronics (motor, ESC, battery, servo, receiver) into a printed chassis that stays rigid.",
+    "facts": [
+      {
+        "label": "CAD",
+        "value": "Fusion 360, from scratch"
+      },
+      {
+        "label": "Drivetrain",
+        "value": "Self-designed reduction gearbox"
+      },
+      {
+        "label": "Power",
+        "value": "2S LiPo · 7.4 V · 5200 mAh"
+      },
+      {
+        "label": "Chassis",
+        "value": "3D-printed"
+      }
+    ],
+    "media_style": "photo",
     "cover_url": "/media/rc-car/img-8532.webp",
     "cover_thumb_url": "/media/rc-car/img-8532-sm.webp",
     "links": [
@@ -262,6 +360,8 @@
     "published": true,
     "media": [
       {
+        "width": 3024,
+        "height": 4032,
         "url": "/media/rc-car/img-8532.webp",
         "thumb_url": "/media/rc-car/img-8532-sm.webp",
         "caption": "The heart of the project: a reduction gearbox I designed from scratch in Fusion 360 — a pinion driving a large spur gear to gear the motor down to the wheels.",
@@ -269,6 +369,8 @@
         "sort_order": 0
       },
       {
+        "width": 4032,
+        "height": 3024,
         "url": "/media/rc-car/img-8697.webp",
         "thumb_url": "/media/rc-car/img-8697-sm.webp",
         "caption": "Full chassis + drivetrain, modelled from scratch",
@@ -276,6 +378,8 @@
         "sort_order": 1
       },
       {
+        "width": 4032,
+        "height": 3024,
         "url": "/media/rc-car/img-8698.webp",
         "thumb_url": "/media/rc-car/img-8698-sm.webp",
         "caption": "Gearbox, ESC and suspension packaged together",
@@ -283,6 +387,8 @@
         "sort_order": 2
       },
       {
+        "width": 3024,
+        "height": 4032,
         "url": "/media/rc-car/img-8716.webp",
         "thumb_url": "/media/rc-car/img-8716-sm.webp",
         "caption": "Front stance — printed chassis, monster-truck tires",
@@ -290,6 +396,8 @@
         "sort_order": 3
       },
       {
+        "width": 3024,
+        "height": 4032,
         "url": "/media/rc-car/img-8717.webp",
         "thumb_url": "/media/rc-car/img-8717-sm.webp",
         "caption": "3/4 view — oil-filled coilover shocks",
@@ -297,6 +405,8 @@
         "sort_order": 4
       },
       {
+        "width": 3024,
+        "height": 4032,
         "url": "/media/rc-car/img-8718.webp",
         "thumb_url": "/media/rc-car/img-8718-sm.webp",
         "caption": "Top view — LiPo, ESC, receiver and cooling fan",
@@ -304,6 +414,8 @@
         "sort_order": 5
       },
       {
+        "width": 3024,
+        "height": 4032,
         "url": "/media/rc-car/img-8719.webp",
         "thumb_url": "/media/rc-car/img-8719-sm.webp",
         "caption": "Drivetrain + electronics close-up",
@@ -311,6 +423,8 @@
         "sort_order": 6
       },
       {
+        "width": 2160,
+        "height": 3840,
         "url": "/media/rc-car/0b79a5c9-206c-470e-9afe-362494a6d12f.webp",
         "thumb_url": "/media/rc-car/0b79a5c9-206c-470e-9afe-362494a6d12f-sm.webp",
         "caption": null,
@@ -331,7 +445,26 @@
       "Thermal",
       "Recycling"
     ],
-    "body_md": "![Pulling a PET strip through the modified hotend](/media/filament-recycler/1000003631.webp)\n*The core of the machine: a continuous PET strip (cut from a bottle) is drawn through a **modified 3D-printer hotend** and reshaped by heat into round filament.*\n\n---\n\n## The idea\n\n3D-printing filament is bought new and thrown away as failed prints and supports. **PET bottles** are everywhere and are the same family of plastic used in some filaments. I wanted to build a machine that **recycles PET bottles directly into printable filament** — and then actually print with the result.\n\n## How it works\n\n1. **Cut** — a plastic bottle is sliced into one long, continuous **strip** of even width.\n2. **Heat & reshape** — the strip passes through a **modified 3D-printer hotend**: the heated nozzle sizes the plastic down into a round ~1.75 mm filament as it goes through.\n3. **Pull & wind** — on the other side, a **motor drives a large 3D-printed reduction gear** that turns a drum. The drum pulls the strip through the hot zone at a steady rate and winds the finished filament onto itself.\n4. **Control** — a repurposed **3D-printer control board + LCD** drives the puller motor and the hotend temperature.\n5. **Print** — the recycled filament is then loaded into a normal 3D printer and used to print PET parts.\n\n```\nPET bottle  →  cut into strip  →  [ modified hotend, heated ]  →  motor + geared drum  →  wound filament  →  3D printer\n```\n\n## The machine\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/filament-recycler/1000004612.webp\" loading=\"lazy\"><br><sub>Drum winding recycled PET filament, driven by a printed reduction gear</sub></td>\n<td align=\"center\"><img src=\"/media/filament-recycler/1000003647.webp\" loading=\"lazy\"><br><sub>Printed herringbone reduction gears + the filament drum</sub></td>\n<td align=\"center\"><img src=\"/media/filament-recycler/1000003655.webp\" loading=\"lazy\"><br><sub>Full setup: gears, control board and LCD on the bench</sub></td>\n</tr>\n</table>\n\n## The result — printing with recycled filament\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/filament-recycler/1000004023.webp\" loading=\"lazy\"><br><sub>Printing on the Ender with the recycled PET filament</sub></td>\n<td align=\"center\"><img src=\"/media/filament-recycler/1000003865.webp\" loading=\"lazy\"><br><sub>A test model printed from recycled PET</sub></td>\n<td align=\"center\"><img src=\"/media/filament-recycler/1000004823.webp\" loading=\"lazy\"><br><sub>Finished print — straight from a bottle</sub></td>\n</tr>\n</table>\n\n## What I designed and built\n\n- A **cutting method** to turn a bottle into a uniform continuous strip.\n- A **modified hotend** reworked so a bottle strip (not standard 1.75 mm filament) can pass through and be reshaped by heat.\n- A **motorised, geared puller**: 3D-printed reduction gears turning a drum, so the strip is drawn through the hot zone at a controlled, steady rate.\n- **Electronics**: a repurposed 3D-printer control board and LCD to run the motor and regulate the hotend temperature.\n\n## What I learned\n\n- **Thermal + speed control is the whole game.** Pull too fast and the plastic doesn't reshape; too slow and it degrades. A steady, geared feed rate is what makes it work.\n- **Designing printed gears that survive load** — herringbone reduction gears to get torque to the drum.\n- **Closing the loop**: recycling a waste material back into a useful engineering input, and proving it by printing real parts with the output.",
+    "body_md": "![Pulling a PET strip through the modified hotend](/media/filament-recycler/1000003631.webp)\n*The core of the machine: a continuous PET strip (cut from a bottle) is drawn through a **modified 3D-printer hotend** and reshaped by heat into round filament.*\n\n---\n\n## The idea\n\n3D-printing filament is bought new and thrown away as failed prints and supports. **PET bottles** are everywhere and are the same family of plastic used in some filaments. I wanted to build a machine that **recycles PET bottles directly into printable filament** — and then actually print with the result.\n\n## How it works\n\n1. **Cut** — a plastic bottle is sliced into one long, continuous **strip** of even width.\n2. **Heat & reshape** — the strip passes through a **modified 3D-printer hotend**: the heated nozzle sizes the plastic down into a round ~1.75 mm filament as it goes through.\n3. **Pull & wind** — on the other side, a **motor drives a large 3D-printed reduction gear** that turns a drum. The drum pulls the strip through the hot zone at a steady rate and winds the finished filament onto itself.\n4. **Control** — a repurposed **3D-printer control board + LCD** drives the puller motor and the hotend temperature.\n5. **Print** — the recycled filament is then loaded into a normal 3D printer and used to print PET parts.\n\n```\nPET bottle  →  cut into strip  →  [ modified hotend, heated ]  →  motor + geared drum  →  wound filament  →  3D printer\n```\n\n## The machine\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.563\"><img src=\"/media/filament-recycler/1000004612.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>Drum winding recycled PET filament, driven by a printed reduction gear</sub></td>\n<td style=\"--ar:0.563\"><img src=\"/media/filament-recycler/1000003647.webp\" width=\"1080\" height=\"1920\" loading=\"lazy\"><br><sub>Printed herringbone reduction gears + the filament drum</sub></td>\n<td style=\"--ar:1.778\"><img src=\"/media/filament-recycler/1000003655.webp\" width=\"1920\" height=\"1080\" loading=\"lazy\"><br><sub>Full setup: gears, control board and LCD on the bench</sub></td>\n</tr>\n</table>\n\n## The result — printing with recycled filament\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.563\"><img src=\"/media/filament-recycler/1000004023.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>Printing on the Ender with the recycled PET filament</sub></td>\n<td style=\"--ar:0.563\"><img src=\"/media/filament-recycler/1000003865.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>A test model printed from recycled PET</sub></td>\n<td style=\"--ar:0.563\"><img src=\"/media/filament-recycler/1000004823.webp\" width=\"2250\" height=\"4000\" loading=\"lazy\"><br><sub>Finished print — straight from a bottle</sub></td>\n</tr>\n</table>\n\n## What I designed and built\n\n- A **cutting method** to turn a bottle into a uniform continuous strip.\n- A **modified hotend** reworked so a bottle strip (not standard 1.75 mm filament) can pass through and be reshaped by heat.\n- A **motorised, geared puller**: 3D-printed reduction gears turning a drum, so the strip is drawn through the hot zone at a controlled, steady rate.\n- **Electronics**: a repurposed 3D-printer control board and LCD to run the motor and regulate the hotend temperature.\n\n## What I learned\n\n- **Thermal + speed control is the whole game.** Pull too fast and the plastic doesn't reshape; too slow and it degrades. A steady, geared feed rate is what makes it work.\n- **Designing printed gears that survive load** — herringbone reduction gears to get torque to the drum.\n- **Closing the loop**: recycling a waste material back into a useful engineering input, and proving it by printing real parts with the output.",
+    "facts": [
+      {
+        "label": "Input",
+        "value": "PET bottles"
+      },
+      {
+        "label": "Output",
+        "value": "≈ 1.75 mm filament"
+      },
+      {
+        "label": "Puller",
+        "value": "Printed herringbone gears"
+      },
+      {
+        "label": "Control",
+        "value": "Repurposed printer board"
+      }
+    ],
+    "media_style": "photo",
     "cover_url": "/media/filament-recycler/1000003631.webp",
     "cover_thumb_url": "/media/filament-recycler/1000003631-sm.webp",
     "links": [
@@ -344,6 +477,8 @@
     "published": true,
     "media": [
       {
+        "width": 3264,
+        "height": 1836,
         "url": "/media/filament-recycler/1000003631.webp",
         "thumb_url": "/media/filament-recycler/1000003631-sm.webp",
         "caption": "The core of the machine: a continuous PET strip (cut from a bottle) is drawn through a modified 3D-printer hotend and reshaped by heat into round filament.",
@@ -351,6 +486,8 @@
         "sort_order": 0
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/filament-recycler/1000004612.webp",
         "thumb_url": "/media/filament-recycler/1000004612-sm.webp",
         "caption": "Drum winding recycled PET filament, driven by a printed reduction gear",
@@ -358,6 +495,8 @@
         "sort_order": 1
       },
       {
+        "width": 1080,
+        "height": 1920,
         "url": "/media/filament-recycler/1000003647.webp",
         "thumb_url": "/media/filament-recycler/1000003647-sm.webp",
         "caption": "Printed herringbone reduction gears + the filament drum",
@@ -365,6 +504,8 @@
         "sort_order": 2
       },
       {
+        "width": 1920,
+        "height": 1080,
         "url": "/media/filament-recycler/1000003655.webp",
         "thumb_url": "/media/filament-recycler/1000003655-sm.webp",
         "caption": "Full setup: gears, control board and LCD on the bench",
@@ -372,6 +513,8 @@
         "sort_order": 3
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/filament-recycler/1000004023.webp",
         "thumb_url": "/media/filament-recycler/1000004023-sm.webp",
         "caption": "Printing on the Ender with the recycled PET filament",
@@ -379,6 +522,8 @@
         "sort_order": 4
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/filament-recycler/1000003865.webp",
         "thumb_url": "/media/filament-recycler/1000003865-sm.webp",
         "caption": "A test model printed from recycled PET",
@@ -386,6 +531,8 @@
         "sort_order": 5
       },
       {
+        "width": 2250,
+        "height": 4000,
         "url": "/media/filament-recycler/1000004823.webp",
         "thumb_url": "/media/filament-recycler/1000004823-sm.webp",
         "caption": "Finished print — straight from a bottle",
@@ -407,7 +554,26 @@
       "AI",
       "Product"
     ],
-    "body_md": "📲 **Live on the App Store** · Launched June 2026 · ~3 months of solo development\n\n<table class=\"media-grid\">\n<tr>\n<td align=\"center\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-54-55.webp\" loading=\"lazy\"><br><sub><b>Home</b> — calories & macros ring</sub></td>\n<td align=\"center\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-55-14.webp\" loading=\"lazy\"><br><sub><b>Profile</b> — metabolism & 4-language toggle</sub></td>\n<td align=\"center\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-12.webp\" loading=\"lazy\"><br><sub><b>AI recipe</b> — post-workout, macro-matched</sub></td>\n<td align=\"center\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-40.webp\" loading=\"lazy\"><br><sub><b>Workout</b> — logged & synced to nutrition</sub></td>\n</tr>\n</table>\n\n---\n\n## What it does\n\n- **Photo → nutrition.** Take a photo of a plate and get instant **calories and macros** via AI vision.\n- **Personalized weekly meal plan.** Generated from age, weight, goal, allergies, budget and cooking time.\n- **Weekly training plan** with progressive overload.\n- **Gym session logging** (sets, reps, weight, rest) — and it suggests the next set's weight from your history plus a mood check-in.\n- **Post-workout recipe** wired into the nutrition module.\n- **Automatic shopping list** from the weekly plan.\n- **Localized in 4 languages:** English, Spanish, German, Portuguese.\n\n## Tech stack\n\n| Layer | Technology |\n|---|---|\n| Mobile | React Native + Expo (SDK 52) |\n| Backend | Node.js / Express on Railway |\n| Database / Auth | Supabase |\n| AI | Anthropic Claude (vision + generation) |\n| Monetization | RevenueCat (in-app purchases), AdMob (free tier) |\n| Platform | Native iOS, App Store |\n\n## Why it matters (as an engineering project)\n\n- **Full-stack, solo.** I owned every layer: design, front end, API, database, third-party integrations, infrastructure and the App Store submission/review process.\n- **Real AI integration** in production — image understanding and structured plan generation, with cost per user tracked and controlled.\n- **Real product constraints** — free vs. premium tiers, IAP, ads, localization in four languages, and a sustainable margin after platform and AI costs.\n\n## What I learned\n\n- Shipping a **real product to real users** is a different discipline from building a prototype: reliability, cost control, store review, and localization all matter.\n- Designing an **AI pipeline that stays cheap and fast** at scale.\n- Owning the **entire stack** end to end as a single developer.",
+    "body_md": "📲 **Live on the App Store** · Launched June 2026 · ~3 months of solo development\n\n<table class=\"media-grid\">\n<tr>\n<td style=\"--ar:0.462\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-54-55.webp\" width=\"1284\" height=\"2778\" loading=\"lazy\"><br><sub><b>Home</b> — calories & macros ring</sub></td>\n<td style=\"--ar:0.462\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-55-14.webp\" width=\"1284\" height=\"2778\" loading=\"lazy\"><br><sub><b>Profile</b> — metabolism & 4-language toggle</sub></td>\n<td style=\"--ar:0.462\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-12.webp\" width=\"1284\" height=\"2778\" loading=\"lazy\"><br><sub><b>AI recipe</b> — post-workout, macro-matched</sub></td>\n<td style=\"--ar:0.462\"><img src=\"/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-40.webp\" width=\"1284\" height=\"2778\" loading=\"lazy\"><br><sub><b>Workout</b> — logged & synced to nutrition</sub></td>\n</tr>\n</table>\n\n---\n\n## What it does\n\n- **Photo → nutrition.** Take a photo of a plate and get instant **calories and macros** via AI vision.\n- **Personalized weekly meal plan.** Generated from age, weight, goal, allergies, budget and cooking time.\n- **Weekly training plan** with progressive overload.\n- **Gym session logging** (sets, reps, weight, rest) — and it suggests the next set's weight from your history plus a mood check-in.\n- **Post-workout recipe** wired into the nutrition module.\n- **Automatic shopping list** from the weekly plan.\n- **Localized in 4 languages:** English, Spanish, German, Portuguese.\n\n## Tech stack\n\n| Layer | Technology |\n|---|---|\n| Mobile | React Native + Expo (SDK 52) |\n| Backend | Node.js / Express on Railway |\n| Database / Auth | Supabase |\n| AI | Anthropic Claude (vision + generation) |\n| Monetization | RevenueCat (in-app purchases), AdMob (free tier) |\n| Platform | Native iOS, App Store |\n\n## Why it matters (as an engineering project)\n\n- **Full-stack, solo.** I owned every layer: design, front end, API, database, third-party integrations, infrastructure and the App Store submission/review process.\n- **Real AI integration** in production — image understanding and structured plan generation, with cost per user tracked and controlled.\n- **Real product constraints** — free vs. premium tiers, IAP, ads, localization in four languages, and a sustainable margin after platform and AI costs.\n\n## What I learned\n\n- Shipping a **real product to real users** is a different discipline from building a prototype: reliability, cost control, store review, and localization all matter.\n- Designing an **AI pipeline that stays cheap and fast** at scale.\n- Owning the **entire stack** end to end as a single developer.",
+    "facts": [
+      {
+        "label": "Status",
+        "value": "Live on the App Store"
+      },
+      {
+        "label": "Built",
+        "value": "≈ 3 months, solo"
+      },
+      {
+        "label": "Stack",
+        "value": "React Native · Node · Supabase"
+      },
+      {
+        "label": "AI",
+        "value": "Claude vision + generation"
+      }
+    ],
+    "media_style": "device",
     "cover_url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-54-55.webp",
     "cover_thumb_url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-54-55-sm.webp",
     "links": [
@@ -420,6 +586,8 @@
     "published": true,
     "media": [
       {
+        "width": 1284,
+        "height": 2778,
         "url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-54-55.webp",
         "thumb_url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-54-55-sm.webp",
         "caption": "Home — calories & macros ring",
@@ -427,6 +595,8 @@
         "sort_order": 0
       },
       {
+        "width": 1284,
+        "height": 2778,
         "url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-55-14.webp",
         "thumb_url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-55-14-sm.webp",
         "caption": "Profile — metabolism & 4-language toggle",
@@ -434,6 +604,8 @@
         "sort_order": 1
       },
       {
+        "width": 1284,
+        "height": 2778,
         "url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-12.webp",
         "thumb_url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-12-sm.webp",
         "caption": "AI recipe — post-workout, macro-matched",
@@ -441,6 +613,8 @@
         "sort_order": 2
       },
       {
+        "width": 1284,
+        "height": 2778,
         "url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-40.webp",
         "thumb_url": "/media/shapio/simulator-screenshot-iphone-14-plus-2026-06-19-at-12-56-40-sm.webp",
         "caption": "Workout — logged & synced to nutrition",

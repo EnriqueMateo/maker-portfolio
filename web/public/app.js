@@ -1,4 +1,4 @@
-// Theme toggle, project filters, photo lightbox and the contact form.
+// Theme toggle, photo lightbox and the contact form.
 (function () {
   const root = document.documentElement;
 
@@ -14,50 +14,46 @@
     });
   }
 
-  // ---- Project filters ----
-  const filters = document.querySelectorAll('[data-filter]');
-  filters.forEach((btn) =>
-    btn.addEventListener('click', () => {
-      filters.forEach((b) => b.classList.toggle('active', b === btn));
-      const f = btn.dataset.filter;
-      document.querySelectorAll('.card').forEach((card) => {
-        card.hidden = Boolean(f) && !card.dataset.domains.split('|').includes(f);
-      });
-    })
-  );
-
   // ---- Lightbox ----
+  // Story photos open at full size; [data-lb] links (hero, gallery) open their href.
   const lb = document.querySelector('[data-lightbox]');
-  const imgs = Array.from(document.querySelectorAll('.prose img, .gallery img'));
-  if (lb && imgs.length) {
+  const items = Array.from(document.querySelectorAll('[data-lb], .prose img')).filter(
+    (el) => !(el.tagName === 'IMG' && el.closest('[data-lb]'))
+  );
+  if (lb && items.length) {
     const lbImg = lb.querySelector('img');
     const lbCap = lb.querySelector('figcaption');
     let current = 0;
 
-    const captionFor = (img) => {
-      const td = img.closest('td');
-      const sub = td && td.querySelector('sub');
+    const imgOf = (el) => (el.tagName === 'IMG' ? el : el.querySelector('img'));
+    const captionFor = (el) => {
+      const img = imgOf(el);
+      const sub = el.closest('td') && el.closest('td').querySelector('sub');
       if (sub) return sub.textContent;
-      const em = img.parentElement && img.parentElement.nextElementSibling;
-      if (em && em.tagName === 'P' && em.firstElementChild && em.firstElementChild.tagName === 'EM') return em.textContent;
+      const em = img.parentElement && img.parentElement.querySelector(':scope > em');
+      if (em) return em.textContent;
       return img.alt || '';
     };
     const show = (i) => {
-      current = (i + imgs.length) % imgs.length;
-      const img = imgs[current];
-      lbImg.src = img.dataset.full || img.currentSrc || img.src;
+      current = (i + items.length) % items.length;
+      const el = items[current];
+      const img = imgOf(el);
+      lbImg.src = el.tagName === 'A' ? el.href : img.currentSrc || img.src;
       lbImg.alt = img.alt;
-      lbCap.textContent = captionFor(img);
+      lbCap.textContent = captionFor(el);
       lb.hidden = false;
       document.body.style.overflow = 'hidden';
+      lb.querySelector('.lb-close').focus();
     };
     const close = () => {
       lb.hidden = true;
       document.body.style.overflow = '';
+      const el = items[current];
+      if (el && el.focus) el.focus({ preventScroll: true });
     };
 
-    imgs.forEach((img, i) =>
-      img.addEventListener('click', (e) => {
+    items.forEach((el, i) =>
+      el.addEventListener('click', (e) => {
         e.preventDefault();
         show(i);
       })
@@ -65,7 +61,7 @@
     lb.querySelector('.lb-close').addEventListener('click', close);
     lb.querySelector('.lb-prev').addEventListener('click', () => show(current - 1));
     lb.querySelector('.lb-next').addEventListener('click', () => show(current + 1));
-    lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
+    lb.addEventListener('click', (e) => { if (e.target === lb || e.target.tagName === 'FIGURE') close(); });
     document.addEventListener('keydown', (e) => {
       if (lb.hidden) return;
       if (e.key === 'Escape') close();

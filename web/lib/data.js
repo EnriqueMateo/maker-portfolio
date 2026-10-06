@@ -18,13 +18,13 @@ let cache = { at: 0, projects: null, source: 'local' };
 function normalize(p) {
   const media = [...(p.media || p.project_media || [])].sort((a, b) => a.sort_order - b.sort_order);
   const { project_media, ...rest } = p;
-  return { ...rest, domains: p.domains || [], links: p.links || [], media };
+  return { ...rest, domains: p.domains || [], links: p.links || [], facts: p.facts || [], media_style: p.media_style || 'photo', media };
 }
 
 async function fetchFromSupabase() {
   const { data, error } = await reader
     .from('projects')
-    .select('*, project_media(url, thumb_url, caption, kind, sort_order)')
+    .select('*, project_media(url, thumb_url, caption, kind, sort_order, width, height)')
     .eq('published', true)
     .order('sort_order', { ascending: true });
   if (error) throw error;

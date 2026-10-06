@@ -24,7 +24,7 @@ npm test
 ## 1. Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open the **SQL Editor**, paste [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) and run it. This creates the `projects`, `project_media` and `contact_messages` tables, the RLS policies and the public `portfolio` storage bucket.
+2. Open the **SQL Editor**, run the files in [`supabase/migrations/`](supabase/migrations/) in order (`0001_init.sql`, then `0002_facts_and_media_style.sql`). This creates the `projects`, `project_media` and `contact_messages` tables, the RLS policies and the public `portfolio` storage bucket.
 3. In **Project Settings → API**, copy the project URL, the `anon` key and the `service_role` key.
 4. Import the projects and photos:
    ```bash
@@ -45,7 +45,7 @@ npm test
 
 Once the projects are seeded, Supabase is the source of truth. In the **Table Editor**:
 
-- **`projects`**: one row per project. `body_md` is the story in Markdown (HTML is allowed). `domains` drive the filter chips, `sort_order` sets the order and `published` hides or shows a project.
+- **`projects`**: one row per project. `body_md` is the story in Markdown (HTML is allowed). `facts` is a list of `{label, value}` pairs shown on the card and in the page header, `media_style` is `photo` or `device` (`device` shows screenshots in phone frames, uncropped), `sort_order` sets the order and `published` hides or shows a project.
 - **`project_media`**: photos. Rows with `kind = image` appear in the story; rows with `kind = extra` appear in the "More photos" gallery.
 - Upload new photos to the `portfolio` bucket and paste their public URLs.
 
@@ -65,6 +65,6 @@ Messages are saved to the `contact_messages` table (Supabase → Table Editor). 
 | `web/views.js` | HTML templates (server-rendered, with Open Graph tags for link previews) |
 | `web/lib/data.js` | Supabase reads and writes, with a cache and a local fallback |
 | `web/public/` | CSS, the small client script (filters, lightbox, form) and the favicon |
-| `content/` | `projects.json` (generated) and `site.json` (hero, stats, "How I work") |
+| `content/` | `projects.json` (generated) and `site.json` (hero, title block, process, principles) |
 | `scripts/` | `build-content`, `build-media`, `seed-supabase` |
 | `supabase/migrations/` | Database schema |

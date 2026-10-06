@@ -36,7 +36,8 @@ app.get('/projects/:slug', wrap(async (req, res) => {
   const projects = await data.listProjects();
   const i = projects.findIndex((p) => p.slug === req.params.slug);
   if (i === -1) return res.status(404).send(views.notFound({ site }));
-  res.send(views.project({ site, project: projects[i], prev: projects[i - 1], next: projects[i + 1], baseUrl: BASE_URL }));
+  const next = projects.length > 1 ? projects[(i + 1) % projects.length] : null;
+  res.send(views.project({ site, project: projects[i], index: i, total: projects.length, next, baseUrl: BASE_URL }));
 }));
 
 // ---- API -----------------------------------------------------------------
