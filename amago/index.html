@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-/* Layout: una sola columna tipo móvil; tablero rival arriba, el tuyo abajo, panel de acciones al pie */
+/* Layout: una columna tipo móvil; tablero rival arriba, tu equipo abajo y una tarjeta de órdenes guiada al pie */
 :root{
-  --bg:#0e1322; --surface:#161d33; --cell:#1f2945; --cell-2:#26325a; --line:#33406a;
+  --bg:#0e1322; --surface:#161d33; --cell:#1f2945; --cell-2:#28345e; --line:#33406a;
   --fg:#e9edf9; --muted:#8a94b8;
   --me:#4cc3ff; --foe:#ff5c7a; --warn:#ffb547; --lava:#ff6a2b; --ok:#5be3a0;
   --f-display:"Bungee", "Impact", system-ui, sans-serif;
@@ -25,101 +25,139 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);fon
 button{font:inherit;color:inherit}
 button:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.logo{font-family:var(--f-display);font-size:26px;letter-spacing:.04em;margin:0;line-height:1}
+.logo{font-family:var(--f-display);font-size:24px;letter-spacing:.04em;margin:0;line-height:1}
 .logo b{color:var(--foe);font-weight:400}
-.score{font-family:var(--f-mono);font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:center;font-variant-numeric:tabular-nums}
+.score{font-family:var(--f-mono);font-size:13px;display:flex;gap:8px;align-items:center;font-variant-numeric:tabular-nums}
 .score .me{color:var(--me)} .score .foe{color:var(--foe)}
+.helpbtn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:800}
 .hud{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
 .hud strong{color:var(--fg)}
 .timer{flex:1;height:6px;border-radius:3px;background:var(--cell);overflow:hidden}
-.timer i{display:block;height:100%;background:var(--me);width:100%;transition:width .1s linear}
+.timer i{display:block;height:100%;background:var(--me);width:100%}
 .timer.low i{background:var(--foe)}
 .tsec{font-family:var(--f-mono);min-width:3ch;text-align:right;font-variant-numeric:tabular-nums}
 
 /* tableros */
-.boardwrap{display:flex;flex-direction:column;align-items:center;gap:4px}
-.blabel{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);align-self:stretch;display:flex;justify-content:space-between}
+.boardwrap{display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:14px;padding:6px;transition:box-shadow .2s}
+.boardwrap.focus{box-shadow:0 0 0 2px var(--me)}
+.boardwrap.focus.foe{box-shadow:0 0 0 2px var(--foe)}
+.blabel{font-size:12px;text-transform:uppercase;letter-spacing:.12em;align-self:stretch;display:flex;justify-content:space-between;font-weight:800}
 .blabel.foe span:first-child{color:var(--foe)} .blabel.me span:first-child{color:var(--me)}
+.blabel span+span{color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:none}
 .board{display:grid;grid-template-columns:16px repeat(5,var(--cellsz));grid-template-rows:14px repeat(5,var(--cellsz));gap:4px;align-items:center}
-.board .hdr{font-family:var(--f-mono);font-size:10px;color:var(--muted);text-align:center;height:14px;line-height:14px}
-.cell{position:relative;width:var(--cellsz);height:var(--cellsz);border-radius:9px;border:1px solid var(--line);background:var(--cell);padding:0;display:grid;place-items:center;cursor:pointer;overflow:hidden}
-.cell.rock{background:repeating-linear-gradient(45deg,var(--cell-2) 0 6px,var(--line) 6px 9px);cursor:default}
+.board .hdr{font-family:var(--f-mono);font-size:10px;color:var(--muted);text-align:center;line-height:14px}
+.cell{position:relative;width:var(--cellsz);height:var(--cellsz);border-radius:9px;border:1px solid var(--line);background:var(--cell);padding:0;display:grid;place-items:center;cursor:default;overflow:hidden}
+.cell.rock{background:var(--surface);border-style:dashed}
 .cell.lava{background:radial-gradient(circle at 50% 60%,var(--lava),#7a1d0c);border-color:var(--lava)}
-.cell.lavasoon{box-shadow:inset 0 0 0 2px var(--lava);animation:pulse 1s infinite alternate}
-.cell.hl{background:var(--cell-2);border-color:var(--me)}
-.cell.tgt{border-color:var(--foe);background:color-mix(in srgb,var(--foe) 14%,var(--cell))}
-.cell.area{box-shadow:inset 0 0 0 3px var(--foe)}
-.cell.fbwarn{background:repeating-linear-gradient(-45deg,color-mix(in srgb,var(--warn) 40%,var(--cell)) 0 7px,var(--cell) 7px 14px);border-color:var(--warn)}
-.cell.fbmine{box-shadow:inset 0 0 0 3px var(--warn)}
-.cell.hintcol{background:color-mix(in srgb,var(--warn) 9%,var(--cell))}
-.cell.sel{border-color:var(--me);box-shadow:0 0 0 2px var(--me)}
-.cell.leaving .u{opacity:.4}
+.cell.lavasoon{box-shadow:inset 0 0 0 2px var(--lava)}
+.cell.hl{background:color-mix(in srgb,var(--me) 30%,var(--cell));border:2px solid var(--me);cursor:pointer;animation:glow 1s infinite alternate}
+.cell.tgt{cursor:crosshair;border-color:color-mix(in srgb,var(--foe) 60%,var(--line))}
+.cell.tgt:hover{background:color-mix(in srgb,var(--foe) 25%,var(--cell))}
+.cell.area{background:color-mix(in srgb,var(--foe) 22%,var(--cell));border:2px solid var(--foe)}
+.cell.fbwarn{background:repeating-linear-gradient(-45deg,color-mix(in srgb,var(--warn) 45%,var(--cell)) 0 7px,var(--cell) 7px 14px);border:2px solid var(--warn)}
+.cell.fbmine{border:2px solid var(--warn)}
+.cell.hintcol{background:color-mix(in srgb,var(--warn) 12%,var(--cell))}
+.cell.sel{border:2px solid var(--me);box-shadow:0 0 14px color-mix(in srgb,var(--me) 60%,transparent)}
+.cell.mine{cursor:pointer}
 .cell.dest{border:2px dashed var(--me)}
+.cell.leaving .u{opacity:.35}
 .cell .u{font-size:calc(var(--cellsz)*.5);line-height:1}
-.cell .ghost{font-size:calc(var(--cellsz)*.42);opacity:.55}
+.cell .ghost{font-size:calc(var(--cellsz)*.42);opacity:.6}
+.cell .rk{font-size:calc(var(--cellsz)*.42);opacity:.7}
 .cell .hp{position:absolute;bottom:3px;left:0;right:0;display:flex;gap:2px;justify-content:center}
 .cell .hp i{width:6px;height:6px;border-radius:50%;background:var(--ok)}
 .cell .hp i.off{background:var(--line)}
-.cell .cd{position:absolute;top:2px;right:3px;font-family:var(--f-mono);font-size:10px;color:var(--warn)}
-.cell .act{position:absolute;top:2px;left:3px;font-size:10px}
-.cell .exposed{position:absolute;inset:3px;border:2px dashed var(--foe);border-radius:7px;opacity:.8;pointer-events:none}
-.cell .huella{width:58%;height:58%;border-radius:50%;border:3px solid var(--foe);box-shadow:0 0 12px var(--foe)}
-.cell .huella.old{opacity:.4;box-shadow:none}
-.cell .mk{font-size:calc(var(--cellsz)*.42)}
-.cell .mk.tocado{filter:drop-shadow(0 0 6px var(--foe))}
-.cell .mk.visto{opacity:.75}
+.cell .tl,.cell .tr,.cell .bl{position:absolute;font-size:11px;line-height:1}
+.cell .tl{top:3px;left:3px} .cell .tr{top:3px;right:3px} .cell .bl{bottom:3px;left:3px}
+.cell .cd{font-family:var(--f-mono);color:var(--warn);font-size:10px}
+.cell .mk{font-size:calc(var(--cellsz)*.45);line-height:1}
 .cell .mk.old{opacity:.4}
-.cell .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.6}
-.cell .lbl{position:absolute;bottom:2px;right:3px;font-size:9px;color:var(--warn);font-family:var(--f-mono)}
-.cell.f-atk::after{content:"";position:absolute;inset:0;background:var(--foe);opacity:0;animation:flash .9s ease-out}
-.cell.f-hit::after{content:"";position:absolute;inset:0;background:#fff;opacity:0;animation:flash .9s ease-out 2}
-.cell.f-scan::after{content:"";position:absolute;inset:0;background:var(--me);opacity:0;animation:flash .9s ease-out}
-.cell.r-atk{box-shadow:inset 0 0 0 3px var(--foe)}
+.cell .x{color:var(--muted);font-size:18px;opacity:.7}
+.cell .pop{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--cellsz)*.6);animation:pop 1.6s ease-out forwards;pointer-events:none}
+.cell.f-atk::after,.cell.f-hit::after,.cell.f-scan::after{content:"";position:absolute;inset:0;opacity:0;animation:flash 1s ease-out}
+.cell.f-atk::after{background:var(--foe)} .cell.f-hit::after{background:#fff} .cell.f-scan::after{background:var(--me)}
+.cell.r-atk{border:2px solid var(--foe)}
 .cell.r-hit{background:color-mix(in srgb,var(--foe) 35%,var(--cell))}
 .cell.dead .u{filter:grayscale(1);opacity:.35}
-@keyframes flash{0%{opacity:.75}100%{opacity:0}}
-@keyframes pulse{to{box-shadow:inset 0 0 0 2px transparent}}
+@keyframes flash{0%{opacity:.7}100%{opacity:0}}
+@keyframes pop{0%{transform:scale(.4);opacity:0}20%{transform:scale(1.15);opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes glow{to{background:color-mix(in srgb,var(--me) 14%,var(--cell))}}
 .shake{animation:shake .35s}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 
-/* log y panel */
-.log{background:var(--surface);border-radius:10px;padding:8px 10px;font-size:13px;min-height:38px;display:flex;flex-direction:column;gap:3px}
-.log p{margin:0}
-.log .good{color:var(--ok)} .log .bad{color:var(--foe)} .log .info{color:var(--muted)} .log .warn{color:var(--warn)}
-.panel{background:var(--surface);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.panel h3{margin:0;font-size:15px;display:flex;align-items:center;gap:6px}
-.panel p{margin:0;font-size:13px;color:var(--muted)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--cell);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer}
-.chip.set{border-color:var(--me)}
-.row{display:flex;gap:8px;flex-wrap:wrap}
+/* resumen del turno */
+.strip{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:30px}
+.pill{border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line)}
+.pill.good{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.pill.bad{color:var(--foe);border-color:color-mix(in srgb,var(--foe) 45%,var(--line))}
+.pill.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.pill.info{color:var(--muted)}
+
+/* tarjeta de órdenes */
+.cmd{background:var(--surface);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.dots{display:flex;gap:6px;align-items:center}
+.dots .lbl{font-size:12px;color:var(--muted);margin-right:auto}
+.dotb{border:1px solid var(--line);background:var(--cell);border-radius:10px;padding:4px 8px;cursor:pointer;font-size:16px;display:flex;gap:4px;align-items:center}
+.dotb.cur{border-color:var(--me);box-shadow:0 0 0 1px var(--me)}
+.dotb.done small{color:var(--ok)}
+.dotb small{font-size:11px;color:var(--muted);font-weight:800}
+.who{display:flex;gap:10px;align-items:center}
+.who .big{font-size:36px;line-height:1}
+.who b{font-size:17px;display:block}
+.who small{color:var(--muted);font-size:13px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choice{border:2px solid var(--line);background:var(--cell);border-radius:12px;padding:10px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.choice .ic{font-size:24px}
+.choice b{font-size:15px}
+.choice small{font-size:11px;color:var(--muted);text-align:center}
+.choice.mv{border-color:color-mix(in srgb,var(--me) 60%,var(--line))}
+.choice.at{border-color:color-mix(in srgb,var(--foe) 60%,var(--line))}
+.choice:disabled{opacity:.4;cursor:default}
+.instr{font-size:16px;font-weight:800;text-align:center;padding:8px;border-radius:10px;background:var(--cell)}
+.instr.mv{color:var(--me)} .instr.at{color:var(--foe)}
+.linkbtn{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:13px;align-self:center;padding:4px}
+.orders{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.orders div{display:flex;gap:8px;align-items:center}
 .btn{border:1px solid var(--line);background:var(--cell);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:600}
 .btn:disabled{opacity:.4;cursor:default}
 .btn.primary{background:var(--me);border-color:var(--me);color:#06223a;font-weight:800}
-.btn.danger{border-color:var(--foe);color:var(--foe)}
-.btn.big{width:100%;padding:13px;font-size:16px;font-family:var(--f-display);letter-spacing:.05em;font-weight:400}
+.btn.fight{background:var(--foe);border-color:var(--foe);color:#2a0710}
+.btn.big{width:100%;padding:13px;font-size:17px;font-family:var(--f-display);letter-spacing:.05em;font-weight:400}
 
 /* pantallas */
-.hero{display:flex;flex-direction:column;gap:12px;padding-block:18px 4px}
-.hero h1{font-family:var(--f-display);font-size:clamp(46px,16vw,72px);margin:0;line-height:.9;letter-spacing:.03em;text-wrap:balance}
+.hero{display:flex;flex-direction:column;gap:12px;padding-block:24px 8px}
+.hero h1{font-family:var(--f-display);font-size:clamp(52px,17vw,76px);margin:0;line-height:.9;letter-spacing:.03em}
 .hero h1 b{color:var(--foe);font-weight:400}
-.hero .tag{font-size:17px;margin:0;max-width:34ch}
-.rules{background:var(--surface);border-radius:12px;padding:12px 14px}
-.rules ol{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
-.rules h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0}
-.opts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.hero .tag{font-size:18px;margin:0;max-width:30ch}
+.opts{display:flex;flex-direction:column;gap:8px;background:var(--surface);border-radius:12px;padding:12px}
+.opt{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.opt span{min-width:76px}
+.chip{background:var(--cell);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.chip.set{border-color:var(--me);color:var(--me)}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .card{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px}
 .card.on{border-color:var(--me);background:color-mix(in srgb,var(--me) 10%,var(--surface))}
 .card .ic{font-size:30px}
 .card strong{font-size:15px}
 .card small{color:var(--muted);font-size:12px;line-height:1.35}
-.card .st{font-family:var(--f-mono);font-size:11px;color:var(--warn)}
+.card .st{font-size:11px;color:var(--warn)}
 .result{font-family:var(--f-display);font-size:30px;margin:0;line-height:1.05}
 .result.win{color:var(--ok)} .result.lose{color:var(--foe)}
-.replay{display:flex;flex-direction:column;gap:8px}
 .rnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .rnav span{font-family:var(--f-mono);font-size:13px}
+
+/* ventanas */
+.overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);display:grid;place-items:center;padding:16px;z-index:10}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:400px;width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;max-height:90%;overflow:auto}
+.sheet h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:24px;letter-spacing:.03em}
+.sheet p{margin:0;font-size:16px;line-height:1.45}
+.tutic{font-size:54px;line-height:1}
+.tutdots{display:flex;gap:6px}
+.tutdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.tutdots i.on{background:var(--me)}
+.legend{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.legend li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.legend .sw{width:30px;height:30px;flex:none;border-radius:7px;border:1px solid var(--line);background:var(--cell);display:grid;place-items:center;font-size:16px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -129,15 +167,21 @@ button:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
 "use strict";
 const N=5, COLS="ABCDE", D4=[[1,0],[-1,0],[0,1],[0,-1]];
 const CH={
-  arq:{n:"Arquera",i:"🏹",hp:2,cd:1,t:"enemy",d:"Dispara a una línea de 3 casillas. 1 de daño."},
-  mon:{n:"Monstruo",i:"🐉",hp:3,cd:3,t:"enemy",d:"Bola de fuego 2×2. Cae el turno siguiente y el rival ve el aviso."},
-  ase:{n:"Asesina",i:"🗡️",hp:1,cd:2,t:"enemy",d:"Golpea 1 casilla con 2 de daño. No deja huella."},
-  exp:{n:"Exploradora",i:"🔭",hp:2,cd:1,t:"enemy",d:"Revela una zona 2×2 del tablero rival."},
-  cab:{n:"Caballero",i:"🛡️",hp:3,cd:2,t:"self",d:"Escudo: él y los aliados de al lado no reciben daño este turno. No deja huella."},
-  ilu:{n:"Ilusionista",i:"🎭",hp:2,cd:2,t:"own",d:"Señuelo: una huella falsa en tu tablero y un ataque falso al rival. No deja huella real."},
+  arq:{n:"Arquera",i:"🏹",hp:2,cd:1,t:"enemy",a:"Disparar",s:"Dispara a 3 casillas en fila. 1 de daño."},
+  mon:{n:"Monstruo",i:"🐉",hp:3,cd:3,t:"enemy",a:"Bola de fuego",s:"Fuego en una zona 2×2. Cae el turno siguiente."},
+  ase:{n:"Asesina",i:"🗡️",hp:1,cd:2,t:"enemy",a:"Apuñalar",s:"2 de daño en 1 casilla. No deja huella."},
+  exp:{n:"Exploradora",i:"🔭",hp:2,cd:1,t:"enemy",a:"Explorar",s:"Descubre quién hay en una zona 2×2."},
+  cab:{n:"Caballero",i:"🛡️",hp:3,cd:2,t:"self",a:"Escudo",s:"Protege este turno a él y a los que tiene al lado."},
+  ilu:{n:"Ilusionista",i:"🎭",hp:2,cd:2,t:"own",a:"Señuelo",s:"Pone una huella falsa para engañar al rival."},
 };
 const TYPES=Object.keys(CH);
 const MAX_TURNS=10;
+const TUT=[
+  {i:"🙈",h:"Todo está escondido",p:"Abajo está tu equipo. Arriba, el tablero del rival: sus personajes están ocultos, igual que en Hundir la flota."},
+  {i:"🏃 🎯",h:"Mover o atacar",p:"Cada turno das una orden a cada personaje: moverse una casilla o atacar. Nunca las dos cosas."},
+  {i:"👣",h:"Atacar te delata",p:"Cuando atacas, el rival ve una huella 👣 donde estás. Al turno siguiente, muévete o te cazará."},
+  {i:"⚡",h:"Los dos a la vez",p:"Los dos dais las órdenes a la vez. Primero se mueve todo el mundo y luego caen los ataques: apunta a donde el rival va a estar."},
+];
 
 const rnd=n=>Math.floor(Math.random()*n);
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
@@ -147,9 +191,12 @@ const ring=(x,y)=>Math.min(x,y,N-1-x,N-1-y);
 const cname=(x,y)=>COLS[x]+(y+1);
 const other=s=>s==="p"?"b":"p";
 const clone=o=>JSON.parse(JSON.stringify(o));
+const manh=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+const grid=v=>Array.from({length:N},()=>Array(N).fill(v));
 const good=m=>({c:"good",m}), bad=m=>({c:"bad",m}), info=m=>({c:"info",m}), warn=m=>({c:"warn",m});
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
 
-let G={phase:"menu",timerOpt:15,score:{p:0,b:0},round:0};
+let G={phase:"menu",timerOpt:0,diff:"hard",score:{p:0,b:0},round:0,tut:null,help:false};
 let timerId=null;
 
 /* ---------- reglas ---------- */
@@ -159,17 +206,13 @@ const isRock=(s,x,y)=>G.sides[s].rocks.has(key(x,y));
 const isLava=(x,y)=>ring(x,y)<G.lava;
 const nextLava=()=>G.turn===5?1:G.lava;
 const lavaSoon=(x,y)=>!isLava(x,y)&&ring(x,y)<nextLava();
-const incoming=(s)=>G.fireballs.filter(f=>f.t===s&&f.turn===G.turn);
+const incoming=s=>G.fireballs.filter(f=>f.t===s&&f.turn===G.turn);
 const inArea=(cells,x,y)=>cells.some(([a,b])=>a===x&&b===y);
 
 function areaOf(type,tx,ty){
   if(type==="arq"){const x0=Math.max(0,Math.min(tx-1,N-3));return [[x0,ty],[x0+1,ty],[x0+2,ty]];}
   if(type==="mon"||type==="exp"){const x0=Math.min(tx,N-2),y0=Math.min(ty,N-2);return [[x0,y0],[x0+1,y0],[x0,y0+1],[x0+1,y0+1]];}
   return [[tx,ty]];
-}
-function areaName(cells){
-  if(cells.length===1)return cname(...cells[0]);
-  return cname(...cells[0])+"–"+cname(...cells[cells.length-1]);
 }
 function validMoves(u){
   const s=u.side, range=alive(s).length===1?2:1;
@@ -196,101 +239,104 @@ function placeRandom(s,types){
   G.sides[s].units=types.map((t,i)=>({id:s+i,side:s,type:t,x:pos[i][0],y:pos[i][1],hp:CH[t].hp,max:CH[t].hp,cd:0,alive:true}));
 }
 
-/* ---------- flujo ---------- */
-function newMatch(){G.score={p:0,b:0};G.round=0;startRound();}
-function startRound(){
-  G.round++; G.turn=0; G.lava=0; G.fireballs=[]; G.marks={p:[],b:[]}; G.dmg={p:0,b:0};
-  G.history=[]; G.log=[]; G.fx=null; G.plan={}; G.sel=null; G.mode=null;
+/* ---------- lo que cada bando sabe del otro (para el bot) ---------- */
+function normalize(b,o,total){
+  let sum=0;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){if(isRock(o,x,y))b[y][x]=0;sum+=b[y][x];}
+  if(sum<=1e-6){for(let y=0;y<N;y++)for(let x=0;x<N;x++)b[y][x]=isRock(o,x,y)?0:1;sum=0;for(const r of b)for(const v of r)sum+=v;}
+  const k=total/sum; for(const r of b)for(let x=0;x<N;x++)r[x]*=k;
+  return b;
+}
+function diffuse(b,o){
+  const nb=grid(0);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const w=b[y][x]; if(w<=0)continue;
+    const nbrs=D4.map(([dx,dy])=>[x+dx,y+dy]).filter(([a,c])=>inB(a,c)&&!isRock(o,a,c)&&!isLava(a,c));
+    const stay=isLava(x,y)?0:(nbrs.length?0.4:1);
+    nb[y][x]+=w*stay;
+    for(const [a,c] of nbrs)nb[c][a]+=w*(1-stay)/nbrs.length;
+  }
+  return nb;
+}
+function initBelief(s){
+  const o=other(s), b=grid(1);
+  for(let y=0;y<N;y++)b[y][G.hint[s]]*=3;
+  G.belief[s]=normalize(b,o,alive(o).length);
+}
+function updateBelief(s,shots){
+  const o=other(s), b=G.belief[s];
+  for(const sh of shots){
+    if(sh.v)b[sh.y][sh.x]=unitAt(o,sh.x,sh.y)?Math.max(b[sh.y][sh.x],3):0.02;
+    else b[sh.y][sh.x]*=0.03;
+  }
+  for(const m of G.marks[o])if(m.age===0&&m.t==="huella")b[m.y][m.x]+=2;
+  normalize(b,o,Math.max(1,alive(o).length));
+}
+
+/* ---------- motor de rondas (sin interfaz) ---------- */
+function roundCore(){
+  G.turn=0; G.lava=0; G.fireballs=[]; G.marks={p:[],b:[]}; G.dmg={p:0,b:0};
+  G.history=[]; G.ev=[]; G.fx=null; G.plan={}; G.belief={};
   G.sides={p:{units:[],rocks:makeRocks()},b:{units:[],rocks:makeRocks()}};
-  placeRandom("b",shuffle(shuffle(TYPES).slice(0,4)).slice(0,3));
-  G.offer=shuffle(TYPES).slice(0,4); G.pick=[];
-  G.phase="draft"; render();
 }
-function confirmDraft(){
-  placeRandom("p",G.pick.slice());
-  G.phase="place"; G.sel=null; render();
-}
-function startBattle(){
+function battleCore(){
   const bu=alive("b"), pu=alive("p");
   G.hint={p:bu[rnd(bu.length)].x,b:pu[rnd(pu.length)].x};
-  G.log=[warn("Pista: hay un personaje rival en la columna "+COLS[G.hint.p]+".")];
+  initBelief("p"); initBelief("b");
   G.history.push(snapshot([]));
-  beginTurn();
 }
-function beginTurn(){
+function turnCore(){
   G.turn++;
   if(G.turn===6)G.lava=1;
-  G.plan={}; G.sel=null; G.mode=null; G.fx=null; G.phase="plan";
-  if(G.turn===5)G.log.push(warn("La lava avanza el próximo turno: sal de las casillas que parpadean."));
-  startTimer(); render();
+  for(const s of ["p","b"])G.belief[s]=normalize(diffuse(G.belief[s],other(s)),other(s),Math.max(1,alive(other(s)).length));
 }
-function startTimer(){
-  clearInterval(timerId);
-  if(!G.timerOpt){G.deadline=null;return;}
-  G.deadline=Date.now()+G.timerOpt*1000;
-  timerId=setInterval(()=>{
-    const left=G.deadline-Date.now();
-    const bar=document.querySelector(".timer"), sec=document.querySelector(".tsec");
-    if(bar){bar.querySelector("i").style.width=Math.max(0,left/(G.timerOpt*1000)*100)+"%";bar.classList.toggle("low",left<3000);}
-    if(sec)sec.textContent=Math.max(0,Math.ceil(left/1000))+"s";
-    if(left<=0)submitTurn();
-  },100);
-}
-function submitTurn(){
-  if(G.phase!=="plan")return;
-  clearInterval(timerId);
-  G.phase="resolve";
-  resolveTurn();
-  G.plan={}; G.sel=null; G.mode=null;
-  render();
+function roundResult(){
   const pa=alive("p").length, ba=alive("b").length;
-  setTimeout(()=>{
-    if(pa===0||ba===0||G.turn>=MAX_TURNS)endRound();
-    else beginTurn();
-  },1500);
+  if(pa===0&&ba===0)return {w:null,why:"Caísteis los dos a la vez."};
+  if(ba===0)return {w:"p",why:"Eliminaste a todo el equipo rival."};
+  if(pa===0)return {w:"b",why:"El rival eliminó a todo tu equipo."};
+  if(G.dmg.p!==G.dmg.b)return {w:G.dmg.p>G.dmg.b?"p":"b",why:"Se acabó el tiempo. Daño hecho: tú "+G.dmg.p+", rival "+G.dmg.b+"."};
+  const hp=s=>alive(s).reduce((a,u)=>a+u.hp,0);
+  if(hp("p")!==hp("b"))return {w:hp("p")>hp("b")?"p":"b",why:"Se acabó el tiempo con el mismo daño. Gana quien tiene más vida."};
+  return {w:null,why:"Se acabó el tiempo y estáis empatados."};
 }
-function snapshot(log){
-  return {turn:G.turn,units:{p:clone(G.sides.p.units),b:clone(G.sides.b.units)},fx:G.fx?clone(G.fx):{p:[],b:[]},log:clone(log),lava:G.lava,
-    fire:G.fireballs.map(f=>({...f}))};
+const roundOver=()=>alive("p").length===0||alive("b").length===0||G.turn>=MAX_TURNS;
+
+function snapshot(ev){
+  return {turn:G.turn,units:{p:clone(G.sides.p.units),b:clone(G.sides.b.units)},fx:G.fx?clone(G.fx):{p:[],b:[]},ev:clone(ev),lava:G.lava};
 }
 
-/* ---------- resolución de un turno ---------- */
-function resolveTurn(){
-  const plans={p:G.plan,b:botPlan()};
+function resolveTurn(plans){
   for(const s of ["p","b"])G.marks[s]=G.marks[s].map(m=>({...m,age:m.age+1})).filter(m=>m.age<=1);
-  const fx={p:[],b:[]}, L=[], used=new Set();
+  const fx={p:[],b:[]}, used=new Set(), shots={p:[],b:[]};
+  const ev={hit:[],kill:[],miss:0,blocked:0,seen:null,fireOut:false,decoy:false,shield:false,hurt:[],lost:[],dodged:false,missedMe:0,blockedMe:0,lava:[],fireIn:false};
 
   // 1. movimientos
-  for(const s of ["p","b"]){
-    for(const u of alive(s)){
-      const a=plans[s][u.id];
-      if(a&&a.k==="mv"&&!unitAt(s,a.x,a.y)&&!isRock(s,a.x,a.y)&&!isLava(a.x,a.y)){u.x=a.x;u.y=a.y;}
-    }
+  for(const s of ["p","b"])for(const u of alive(s)){
+    const a=plans[s][u.id];
+    if(a&&a.k==="mv"&&!unitAt(s,a.x,a.y)&&!isRock(s,a.x,a.y)&&!isLava(a.x,a.y)){u.x=a.x;u.y=a.y;}
   }
   // 2. escudos
   const shielded=new Set();
   for(const s of ["p","b"])for(const u of alive(s)){
     if(u.type==="cab"&&plans[s][u.id]&&plans[s][u.id].k==="ab"){
       used.add(u.id); shielded.add(u.id);
-      for(const v of alive(s))if(Math.abs(v.x-u.x)+Math.abs(v.y-u.y)===1)shielded.add(v.id);
-      if(s==="p")L.push(info("Tu Caballero levanta el escudo."));
+      for(const v of alive(s))if(manh(u,v)===1)shielded.add(v.id);
+      if(s==="p")ev.shield=true;
     }
   }
-  const hit=(att,cells,amount,src)=>{
+  const hit=(att,cells,amount)=>{
     const d=other(att); let n=0;
     for(const [x,y] of cells){
       fx[d].push({x,y,c:"atk"});
-      const v=unitAt(d,x,y); if(!v)continue; n++;
-      if(shielded.has(v.id)){
-        G.marks[d].push({t:"bloq",x,y,age:0});
-        L.push(att==="p"?info("Bloqueado en "+cname(x,y)+": tenía escudo."):good("Tu escudo paró un ataque en "+cname(x,y)+"."));
-        continue;
-      }
+      const v=unitAt(d,x,y); shots[att].push({x,y,v:!!v});
+      if(!v){G.marks[d].push({t:"vacio",x,y,age:0});continue;}
+      n++;
+      if(shielded.has(v.id)){G.marks[d].push({t:"bloq",x,y,age:0});att==="p"?ev.blocked++:ev.blockedMe++;continue;}
       v.hp-=amount; G.dmg[att]+=amount;
       G.marks[d].push({t:"tocado",x,y,age:0,i:CH[v.type].i});
       fx[d].push({x,y,c:"hit"});
-      L.push(att==="p"?good("¡Tocado en "+cname(x,y)+"! "+CH[v.type].i+" "+CH[v.type].n+" −"+amount)
-                      :bad(CH[src].n+" rival dio a tu "+CH[v.type].n+" en "+cname(x,y)+" (−"+amount+")."));
+      if(att==="p")ev.hit.push(CH[v.type].i);else ev.hurt.push(CH[v.type].i+" −"+amount);
     }
     return n;
   };
@@ -298,8 +344,8 @@ function resolveTurn(){
   const landing=G.fireballs.filter(f=>f.turn===G.turn);
   G.fireballs=G.fireballs.filter(f=>f.turn!==G.turn);
   for(const f of landing){
-    const n=hit(f.o,areaOf("mon",f.x,f.y),1,"mon");
-    if(!n)L.push(f.o==="p"?info("Tu bola de fuego cayó en "+areaName(areaOf("mon",f.x,f.y))+": agua."):good("Esquivaste la bola de fuego."));
+    const n=hit(f.o,areaOf("mon",f.x,f.y),1);
+    if(!n){if(f.o==="p")ev.miss++;else ev.dodged=true;}
   }
   // 4. habilidades nuevas
   for(const s of ["p","b"]){
@@ -309,152 +355,300 @@ function resolveTurn(){
       used.add(u.id);
       const huella=()=>G.marks[s].push({t:"huella",x:u.x,y:u.y,age:0});
       if(u.type==="arq"){
-        const cells=areaOf("arq",a.x,a.y); const n=hit(s,cells,1,"arq"); huella();
-        if(!n)L.push(s==="p"?info("Flecha a "+areaName(cells)+": agua."):info("Te lanzan una flecha a "+areaName(cells)+": falla."));
+        const n=hit(s,areaOf("arq",a.x,a.y),1); huella();
+        if(!n){s==="p"?ev.miss++:ev.missedMe++;}
       }else if(u.type==="mon"){
         const c=areaOf("mon",a.x,a.y)[0];
         G.fireballs.push({o:s,t:o,x:c[0],y:c[1],turn:G.turn+1}); huella();
-        L.push(s==="p"?info("Bola de fuego en camino a "+areaName(areaOf("mon",c[0],c[1]))+". Cae el próximo turno.")
-                      :warn("¡Aviso! Bola de fuego sobre "+areaName(areaOf("mon",c[0],c[1]))+". Cae el próximo turno."));
+        if(s==="p")ev.fireOut=true;else ev.fireIn=true;
       }else if(u.type==="ase"){
-        const n=hit(s,[[a.x,a.y]],2,"ase");
-        if(!n)L.push(s==="p"?info("Tu Asesina falla en "+cname(a.x,a.y)+"."):info("Algo golpea "+cname(a.x,a.y)+" y falla."));
+        const n=hit(s,[[a.x,a.y]],2);
+        if(!n){s==="p"?ev.miss++:ev.missedMe++;}
       }else if(u.type==="exp"){
-        const cells=areaOf("exp",a.x,a.y); let seen=0;
-        for(const [x,y] of cells){
-          const v=unitAt(o,x,y);
+        const seen=[];
+        for(const [x,y] of areaOf("exp",a.x,a.y)){
+          const v=unitAt(o,x,y); shots[s].push({x,y,v:!!v});
           G.marks[o].push(v?{t:"visto",x,y,age:0,i:CH[v.type].i}:{t:"vacio",x,y,age:0});
-          if(v)seen++; fx[o].push({x,y,c:"scan"});
+          if(v)seen.push(CH[v.type].i); fx[o].push({x,y,c:"scan"});
         }
         huella();
-        L.push(s==="p"?(seen?good("Exploradora: "+seen+" personaje"+(seen>1?"s":"")+" a la vista."):info("Exploradora: zona "+areaName(cells)+" vacía."))
-                      :info("La Exploradora rival ha mirado tu zona "+areaName(cells)+"."));
+        if(s==="p")ev.seen=seen;
       }else if(u.type==="ilu"){
         G.marks[s].push({t:"huella",x:a.x,y:a.y,age:0,fake:true});
-        const fy=rnd(N), f0=rnd(N-2), cells=[[f0,fy],[f0+1,fy],[f0+2,fy]];
-        for(const [x,y] of cells)fx[o].push({x,y,c:"atk"});
-        L.push(s==="p"?info("Señuelo en "+cname(a.x,a.y)+" y flecha falsa enviada."):info("Te lanzan una flecha a "+areaName(cells)+": falla."));
+        const fy=rnd(N), f0=rnd(N-2);
+        for(let k=0;k<3;k++)fx[o].push({x:f0+k,y:fy,c:"atk"});
+        if(s==="p")ev.decoy=true;else ev.missedMe++;
       }
     }
   }
   // 5. lava
   for(const s of ["p","b"])for(const u of alive(s))if(isLava(u.x,u.y)){
     u.hp-=1; fx[s].push({x:u.x,y:u.y,c:"hit"});
-    L.push(s==="p"?bad("Tu "+CH[u.type].n+" se quema en la lava (−1)."):info("Un personaje rival se quema en la lava."));
+    if(s==="p")ev.lava.push(CH[u.type].i);
   }
   // 6. bajas
   for(const s of ["p","b"])for(const u of alive(s))if(u.hp<=0){
     u.alive=false;
-    L.push(s==="p"?bad("Has perdido a tu "+CH[u.type].n+"."):good("¡Eliminaste a "+CH[u.type].n+" rival!"));
+    (s==="p"?ev.lost:ev.kill).push(CH[u.type].i);
   }
-  // 7. recargas
+  // 7. recargas y memoria del bot
   for(const s of ["p","b"])for(const u of G.sides[s].units){if(u.cd>0)u.cd--; if(used.has(u.id))u.cd=CH[u.type].cd;}
+  for(const s of ["p","b"])updateBelief(s,shots[s]);
 
-  if(!L.length)L.push(info("Turno tranquilo. Nadie ha atacado."));
-  G.fx=fx; G.log=L;
-  G.history.push(snapshot(L));
+  G.fx=fx; G.ev=pills(ev);
+  G.history.push(snapshot(G.ev));
 }
 
+function pills(ev){
+  const c=[];
+  ev.kill.forEach(i=>c.push(good("☠️ Eliminaste a "+i)));
+  ev.hit.forEach(i=>c.push(good("💥 ¡Le diste a "+i+"!")));
+  if(ev.blocked)c.push(info("🛡️ Te bloquearon"));
+  if(ev.seen)c.push(ev.seen.length?good("👁 Has visto "+ev.seen.join(" ")):info("👁 Zona vacía"));
+  if(ev.miss)c.push(info("❌ Fallaste"+(ev.miss>1?" ×"+ev.miss:"")));
+  if(ev.fireOut)c.push(info("☄️ Tu fuego cae el próximo turno"));
+  if(ev.decoy)c.push(info("🎭 Señuelo puesto"));
+  if(ev.shield)c.push(info("🛡️ Escudo arriba"));
+  ev.lost.forEach(i=>c.push(bad("☠️ Has perdido a "+i)));
+  ev.hurt.forEach(t=>c.push(bad("💔 Te dieron: "+t)));
+  ev.lava.forEach(i=>c.push(bad("🔥 "+i+" se quema")));
+  if(ev.blockedMe)c.push(good("🛡️ Tu escudo aguantó"));
+  if(ev.dodged)c.push(good("😎 Esquivaste el fuego"));
+  if(ev.missedMe)c.push(info("💨 Te atacaron y fallaron"));
+  if(ev.fireIn)c.push(warn("⚠️ ¡Fuego enemigo! Huye de la zona naranja"));
+  if(!c.length)c.push(info("😶 Turno tranquilo"));
+  return c;
+}
+
+/* ---------- bots ---------- */
+function easyPlan(s){
+  const o=other(s), plan={}, reserved=new Set();
+  for(const u of alive(s)){
+    const moves=validMoves(u).filter(([x,y])=>!reserved.has(key(x,y)));
+    const r=Math.random();
+    if(u.cd===0&&r<0.4){
+      if(CH[u.type].t==="enemy")plan[u.id]={k:"ab",x:rnd(N),y:rnd(N)};
+      else plan[u.id]={k:"ab",x:rnd(N),y:rnd(N)};
+      if(CH[u.type].t==="enemy"&&isRock(o,plan[u.id].x,plan[u.id].y))delete plan[u.id];
+      if(u.type==="ilu"&&isRock(s,plan[u.id]?.x,plan[u.id]?.y))delete plan[u.id];
+    }else if(moves.length&&r<0.8){const [x,y]=moves[rnd(moves.length)];plan[u.id]={k:"mv",x,y};reserved.add(key(x,y));}
+  }
+  return plan;
+}
+function hardPlan(s){
+  const o=other(s), plan={}, reserved=new Set();
+  const B=G.belief[s].map(r=>r.slice());
+  const B2=normalize(diffuse(B,o),o,Math.max(1,alive(o).length));
+  const cap=v=>Math.min(1,v);
+  const best=(type,bel,dmg)=>{
+    let bv=-1,bt=null;
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+      if(isRock(o,x,y))continue;
+      const v=areaOf(type,x,y).reduce((a,[cx,cy])=>a+cap(bel[cy][cx])*dmg,0)+Math.random()*0.05;
+      if(v>bv){bv=v;bt=[x,y];}
+    }
+    return {v:bv,t:bt};
+  };
+  const danger=(x,y)=>isLava(x,y)||lavaSoon(x,y)||incoming(s).some(f=>inArea(areaOf("mon",f.x,f.y),x,y));
+  const exposedAt=(x,y)=>G.marks[s].some(m=>m.age===0&&m.x===x&&m.y===y&&((m.t==="huella"&&!m.fake)||m.t==="tocado"||m.t==="visto"||m.t==="bloq"));
+  const units=alive(s);
+  const score=u=>(danger(u.x,u.y)?2:0)+(exposedAt(u.x,u.y)?1:0);
+  const order=units.slice().sort((a,b)=>score(b)-score(a));
+  for(const u of order){
+    const moves=validMoves(u).filter(([x,y])=>!reserved.has(key(x,y)));
+    const safe=moves.filter(([x,y])=>!danger(x,y));
+    const exp=exposedAt(u.x,u.y);
+    const pickMove=pool=>{
+      let bm=null,bs=-1e9;
+      for(const [x,y] of pool){
+        let sc=Math.random();
+        if(exp&&y!==u.y)sc+=1.5;
+        sc+=Math.abs(x-u.x)+Math.abs(y-u.y);
+        sc-=units.filter(v=>v!==u&&Math.abs(v.x-x)+Math.abs(v.y-y)===1).length*0.4;
+        if(sc>bs){bs=sc;bm=[x,y];}
+      }
+      plan[u.id]={k:"mv",x:bm[0],y:bm[1]}; reserved.add(key(...bm));
+    };
+    if(danger(u.x,u.y)){const pool=safe.length?safe:moves;if(pool.length){pickMove(pool);continue;}}
+    let act=null;
+    if(u.cd===0){
+      if(u.type==="cab"){
+        const adj=units.some(v=>v!==u&&manh(u,v)===1&&exposedAt(v.x,v.y));
+        if((adj||exp)&&Math.random()<0.8)act={k:"ab",x:u.x,y:u.y};
+      }else if(u.type==="ilu"){
+        if((units.some(v=>exposedAt(v.x,v.y))&&Math.random()<0.7)||Math.random()<0.25){
+          let bc=null,bs=-1;
+          for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+            if(isRock(s,x,y))continue;
+            const d=Math.min(...units.map(v=>Math.abs(v.x-x)+Math.abs(v.y-y)))+Math.random();
+            if(d>bs){bs=d;bc=[x,y];}
+          }
+          act={k:"ab",x:bc[0],y:bc[1]};
+        }
+      }else if(u.type==="exp"){
+        const mx=Math.max(...B.flat().map(cap));
+        if(mx<0.55){const r=best("exp",B,1);act={k:"ab",x:r.t[0],y:r.t[1]};}
+      }else{
+        const bel=u.type==="mon"?B2:B, dmg=u.type==="ase"?2:1;
+        const r=best(u.type,bel,dmg);
+        const th={arq:0.45,ase:0.6,mon:0.5}[u.type]*(exp?1.8:1);
+        if(r.v>=th){
+          act={k:"ab",x:r.t[0],y:r.t[1]};
+          for(const [x,y] of areaOf(u.type,...r.t)){B[y][x]*=0.4;B2[y][x]*=0.4;}
+        }
+      }
+    }
+    if(act){plan[u.id]=act;continue;}
+    if(exp&&safe.length){pickMove(safe);continue;}
+    if(safe.length&&Math.random()<0.35)pickMove(safe);
+  }
+  return plan;
+}
+const botPlan=s=>G.diff==="easy"?easyPlan(s):hardPlan(s);
+
+/* simulador para medir la dificultad: window.__amagoSim(200,"hard","easy") */
+window.__amagoSim=function(games,polP,polB){
+  const POL={easy:easyPlan,hard:hardPlan}; const w={p:0,b:0,draw:0}; const saved=G;
+  for(let g=0;g<games;g++){
+    G={phase:"sim"}; roundCore();
+    placeRandom("p",shuffle(TYPES).slice(0,3)); placeRandom("b",shuffle(TYPES).slice(0,3));
+    battleCore();
+    while(true){turnCore();resolveTurn({p:POL[polP]("p"),b:POL[polB]("b")});if(roundOver())break;}
+    const r=roundResult(); w[r.w||"draw"]++;
+  }
+  G=saved; return w;
+};
+
+/* ---------- flujo con interfaz ---------- */
+function newMatch(){
+  G.score={p:0,b:0};G.round=0;
+  if(!store.get("amago-tut")){G.tut=0;}
+  startRound();
+}
+function startRound(){
+  G.round++; roundCore();
+  placeRandom("b",shuffle(TYPES).slice(0,3));
+  G.offer=shuffle(TYPES).slice(0,4); G.pick=[];
+  G.phase="draft"; render();
+}
+function confirmDraft(){placeRandom("p",G.pick.slice());G.phase="place";G.cur=null;render();}
+function startBattle(){
+  battleCore();
+  G.ev=[warn("💡 Pista: hay un rival en la columna "+COLS[G.hint.p])];
+  beginTurn();
+}
+function order(){return alive("p");}
+function beginTurn(){
+  turnCore();
+  G.plan={}; G.cur=0; G.mode=null; G.fx=null; G.phase="plan";
+  if(G.turn===5)G.ev=[...G.ev,warn("⚠️ La lava llega el próximo turno: sal del borde")];
+  if(G.turn===6)G.ev=[...G.ev,warn("🔥 El borde es lava: quema 1 por turno")];
+  startTimer(); render();
+}
+function startTimer(){
+  clearInterval(timerId);
+  if(!G.timerOpt){G.deadline=null;return;}
+  G.deadline=Date.now()+G.timerOpt*1000;
+  timerId=setInterval(()=>{
+    if(G.tut!==null||G.help){G.deadline+=100;return;}
+    const left=G.deadline-Date.now();
+    const bar=document.querySelector(".timer"), sec=document.querySelector(".tsec");
+    if(bar){bar.querySelector("i").style.width=Math.max(0,left/(G.timerOpt*1000)*100)+"%";bar.classList.toggle("low",left<4000);}
+    if(sec)sec.textContent=Math.max(0,Math.ceil(left/1000))+"s";
+    if(left<=0)submitTurn();
+  },100);
+}
+function submitTurn(){
+  if(G.phase!=="plan")return;
+  clearInterval(timerId);
+  G.phase="resolve";
+  resolveTurn({p:G.plan,b:botPlan("b")});
+  G.plan={}; G.cur=null; G.mode=null;
+  render();
+  setTimeout(()=>{if(roundOver())endRound();else beginTurn();},1900);
+}
 function endRound(){
   clearInterval(timerId);
-  const pa=alive("p").length, ba=alive("b").length;
-  let w=null, why="";
-  if(pa===0&&ba===0){why="Caísteis los dos a la vez.";}
-  else if(ba===0){w="p";why="Eliminaste a todo el equipo rival.";}
-  else if(pa===0){w="b";why="El rival eliminó a todo tu equipo.";}
-  else if(G.dmg.p!==G.dmg.b){w=G.dmg.p>G.dmg.b?"p":"b";why="Se acabó el tiempo. Daño hecho: tú "+G.dmg.p+", rival "+G.dmg.b+".";}
-  else{
-    const hp=s=>alive(s).reduce((a,u)=>a+u.hp,0);
-    if(hp("p")!==hp("b")){w=hp("p")>hp("b")?"p":"b";why="Se acabó el tiempo con el mismo daño; gana quien tiene más vida.";}
-    else why="Se acabó el tiempo y estáis empatados.";
-  }
-  if(w)G.score[w]++;
-  G.roundWinner=w; G.roundWhy=why; G.replayIdx=G.history.length-1;
+  const r=roundResult();
+  if(r.w)G.score[r.w]++;
+  G.roundWinner=r.w; G.roundWhy=r.why; G.replayIdx=G.history.length-1;
   G.matchOver=G.score.p>=2||G.score.b>=2||G.round>=5;
   G.phase="roundEnd"; render();
 }
-
-/* ---------- bot ---------- */
-function botPlan(){
-  const plan={}, reserved=new Set();
-  const heat=Array.from({length:N},()=>Array(N).fill(0.15));
-  const add=(x,y,w)=>{if(inB(x,y))heat[y][x]+=w;};
-  for(const m of G.marks.p){
-    const w=m.age===0?3:1.5;
-    if(m.t==="huella"||m.t==="tocado"||m.t==="visto"){add(m.x,m.y,w);for(const [dx,dy] of D4)add(m.x+dx,m.y+dy,w*0.45);}
-    if(m.t==="vacio"&&m.age===0)heat[m.y][m.x]*=0.3;
-  }
-  if(G.hint&&G.turn<=3)for(let y=0;y<N;y++)add(G.hint.b,y,0.8);
-  for(let y=0;y<N;y++)for(let x=0;x<N;x++){if(isRock("p",x,y))heat[y][x]=0;else if(isLava(x,y))heat[y][x]*=0.3;}
-  const maxHeat=Math.max(...heat.flat());
-  const best=type=>{
-    let bs=-1,bt=[0,0];
-    for(let y=0;y<N;y++)for(let x=0;x<N;x++){
-      const sc=areaOf(type,x,y).reduce((a,[cx,cy])=>a+heat[cy][cx],0)+Math.random()*0.4;
-      if(sc>bs){bs=sc;bt=[x,y];}
-    }
-    return {s:bs,t:bt};
-  };
-  const danger=(x,y)=>isLava(x,y)||lavaSoon(x,y)||incoming("b").some(f=>inArea(areaOf("mon",f.x,f.y),x,y));
-  for(const u of shuffle(alive("b"))){
-    const exposed=G.marks.b.some(m=>m.age===0&&m.x===u.x&&m.y===u.y&&((m.t==="huella"&&!m.fake)||m.t==="tocado"||m.t==="visto"));
-    const moves=validMoves(u).filter(([x,y])=>!reserved.has(key(x,y)));
-    const safe=moves.filter(([x,y])=>!danger(x,y));
-    const go=pool=>{const [x,y]=pool[rnd(pool.length)];plan[u.id]={k:"mv",x,y};reserved.add(key(x,y));};
-    if(danger(u.x,u.y)||(exposed&&Math.random()<0.7)){
-      const pool=safe.length?safe:moves;
-      if(pool.length){go(pool);continue;}
-    }
-    if(u.cd===0){
-      let use=false,t=null;
-      if(u.type==="cab")use=alive("b").some(v=>v!==u&&Math.abs(v.x-u.x)+Math.abs(v.y-u.y)===1)&&Math.random()<0.5;
-      else if(u.type==="ilu"){use=Math.random()<0.4;t=[rnd(N),rnd(N)];if(isRock("b",t[0],t[1]))use=false;}
-      else if(u.type==="exp"){use=maxHeat<2||Math.random()<0.3;t=[rnd(N-1),rnd(N-1)];}
-      else{const b=best(u.type);use=b.s>(u.type==="ase"?1.2:0.9)||Math.random()<0.5;t=b.t;}
-      if(use){plan[u.id]={k:"ab",x:t?t[0]:u.x,y:t?t[1]:u.y};continue;}
-    }
-    if(safe.length&&Math.random()<0.45)go(safe);
-  }
-  return plan;
+function advance(){
+  G.mode=null;
+  const list=order();
+  const next=list.findIndex((u,i)=>i>G.cur&&!G.plan[u.id]);
+  G.cur=next>=0?next:(list.findIndex(u=>!G.plan[u.id])>=0?list.findIndex(u=>!G.plan[u.id]):null);
+  render();
+}
+function curUnit(){return G.cur===null||G.cur===undefined?null:order()[G.cur]||null;}
+function moveOptions(u){
+  const taken=new Set(Object.entries(G.plan).filter(([id,a])=>id!==u.id&&a.k==="mv").map(([,a])=>key(a.x,a.y)));
+  return validMoves(u).filter(([x,y])=>!taken.has(key(x,y)));
 }
 
 /* ---------- interfaz ---------- */
 const $app=document.getElementById("app");
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 
-function header(){
-  const sc=G.phase==="menu"?"":`<div class="score"><span class="me">Tú ${G.score.p}</span><span>–</span><span class="foe">${G.score.b} Bot</span></div>`;
-  return `<div class="top"><p class="logo">AMA<b>GO</b></p>${sc}</div>`;
-}
-
 function render(){
-  let h=header();
+  let h=`<div class="top"><p class="logo">AMA<b>GO</b></p>`;
+  if(G.phase!=="menu")h+=`<div class="score"><span class="me">Tú ${G.score.p}</span><span>–</span><span class="foe">${G.score.b} Bot</span><button class="helpbtn" data-act="help" aria-label="Ayuda">?</button></div>`;
+  h+=`</div>`;
   if(G.phase==="menu")h+=menuView();
   else if(G.phase==="draft")h+=draftView();
   else if(G.phase==="roundEnd")h+=roundEndView();
   else h+=gameView();
+  if(G.tut!==null)h+=tutView();
+  else if(G.help)h+=helpView();
   $app.innerHTML=h;
   if(G.phase==="plan"&&G.deadline){
-    const left=G.deadline-Date.now(), bar=document.querySelector(".timer");
-    if(bar)bar.querySelector("i").style.width=Math.max(0,left/(G.timerOpt*1000)*100)+"%";
+    const bar=document.querySelector(".timer");
+    if(bar)bar.querySelector("i").style.width=Math.max(0,(G.deadline-Date.now())/(G.timerOpt*1000)*100)+"%";
   }
 }
 
 function menuView(){
-  const opt=(v,l)=>`<button class="chip ${G.timerOpt===v?"set":""}" data-act="timer" data-v="${v}">${l}</button>`;
-  return `<section class="hero">
-    <h1>AMA<b>GO</b></h1>
-    <p class="tag">Hundir la flota con personajes que se mueven. Los dos jugáis a la vez y cada ataque te delata.</p>
-  </section>
-  <div class="rules"><h2>Cómo se juega</h2><ol>
-    <li>Tienes 3 personajes escondidos en tu tablero de 5×5. El rival no los ve.</li>
-    <li>Cada turno, cada personaje <strong>se mueve</strong> una casilla <strong>o ataca</strong>. Nunca las dos cosas.</li>
-    <li>Primero se mueve todo el mundo y luego caen los ataques: apunta a donde <em>va a estar</em> el rival.</li>
-    <li>Atacar deja una <strong>huella</strong> que el rival ve. Si aciertas, ves <strong>¡Tocado!</strong></li>
-    <li>Desde el turno 6 la lava cierra el tablero. Gana la ronda quien elimine al equipo rival. Al mejor de 3.</li>
-  </ol></div>
-  <div class="opts">Tiempo por turno: ${opt(8,"8 s")} ${opt(15,"15 s")} ${opt(0,"Sin límite")}</div>
-  <button class="btn primary big" data-act="start">Jugar contra el bot</button>`;
+  const opt=(k,v,l)=>`<button class="chip ${G[k]===v?"set":""}" data-act="opt" data-k="${k}" data-v="${v}">${l}</button>`;
+  return `<section class="hero"><h1>AMA<b>GO</b></h1>
+    <p class="tag">Hundir la flota con personajes que se mueven. Cada ataque te delata.</p></section>
+    <button class="btn primary big" data-act="start">Jugar</button>
+    <button class="btn" data-act="tut">Cómo se juega</button>
+    <div class="opts">
+      <div class="opt"><span>Bot</span>${opt("diff","easy","Fácil")}${opt("diff","hard","Difícil")}</div>
+      <div class="opt"><span>Tiempo</span>${opt("timerOpt",0,"Sin límite")}${opt("timerOpt",20,"20 s")}${opt("timerOpt",10,"10 s")}</div>
+    </div>`;
+}
+
+function tutView(){
+  const t=TUT[G.tut], last=G.tut===TUT.length-1;
+  return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
+    <div class="tutdots">${TUT.map((_,i)=>`<i class="${i===G.tut?"on":""}"></i>`).join("")}</div>
+    <div class="tutic">${t.i}</div><h2>${t.h}</h2><p>${t.p}</p>
+    <button class="btn primary big" data-act="tutnext">${last?"¡Entendido!":"Siguiente"}</button>
+    ${last?"":`<button class="linkbtn" data-act="tutskip">Saltar</button>`}
+  </div></div>`;
+}
+
+function helpView(){
+  const li=(sw,txt,cls="")=>`<li><span class="sw ${cls}">${sw}</span><span>${txt}</span></li>`;
+  return `<div class="overlay" data-act="helpclose"><div class="sheet" role="dialog" aria-modal="true">
+    <h2>Qué significa cada cosa</h2>
+    <ul class="legend">
+      ${li("👣","<b>Huella.</b> Un personaje atacó desde aquí. En tu tablero: el rival ve tu huella, ¡muévete!")}
+      ${li("💥","<b>Tocado.</b> Le diste a alguien en esta casilla.")}
+      ${li("👁","<b>Visto.</b> Tu Exploradora vio a alguien aquí.")}
+      ${li("<span class='x'>×</span>","<b>Agua.</b> Atacaste aquí y no había nadie.")}
+      ${li("☄️","<b>Bola de fuego.</b> En tu tablero, zona naranja: cae este turno, ¡huye!")}
+      ${li("🪨","<b>Roca.</b> Nadie puede estar ahí.")}
+      ${li("⚠️","<b>Lava que llega.</b> El turno siguiente esa casilla quema.")}
+      ${li("⏳","<b>Recargando.</b> Ese personaje aún no puede usar su habilidad.")}
+      ${li("🎯","<b>Va a atacar</b> este turno.")}
+    </ul>
+    <button class="btn" data-act="tut">Ver el tutorial otra vez</button>
+    <button class="btn primary" data-act="helpclose">Cerrar</button>
+  </div></div>`;
 }
 
 function draftView(){
@@ -462,15 +656,15 @@ function draftView(){
     const c=CH[t], on=G.pick.includes(t);
     return `<button class="card ${on?"on":""}" data-act="pick" data-t="${t}" aria-pressed="${on}">
       <span class="ic">${c.i}</span><strong>${c.n}</strong>
-      <span class="st">Vida ${c.hp} · Recarga ${c.cd}</span><small>${c.d}</small></button>`;
+      <span class="st">${"❤️".repeat(c.hp)}</span><small>${c.s}</small></button>`;
   }).join("");
-  return `<div class="hud"><strong>Ronda ${G.round}</strong><span>Elige 3 de estos 4 personajes</span></div>
+  return `<div class="hud"><strong>Ronda ${G.round}</strong><span>Elige 3 personajes</span></div>
     <div class="cards">${cards}</div>
-    <button class="btn primary big" data-act="draftok" ${G.pick.length===3?"":"disabled"}>Confirmar equipo (${G.pick.length}/3)</button>`;
+    <button class="btn primary big" data-act="draftok" ${G.pick.length===3?"":"disabled"}>Confirmar (${G.pick.length}/3)</button>`;
 }
 
 function boardHTML(id,cellFn){
-  let h=`<div class="board" id="${id}"><span></span>`;
+  let h=`<div class="board"><span></span>`;
   for(let x=0;x<N;x++)h+=`<span class="hdr">${COLS[x]}</span>`;
   for(let y=0;y<N;y++){
     h+=`<span class="hdr">${y+1}</span>`;
@@ -482,148 +676,140 @@ const hpPips=u=>`<span class="hp">${Array.from({length:u.max},(_,i)=>`<i class="
 
 function plannedAreas(){
   const out=[];
-  for(const u of alive("p")){
-    const a=G.plan[u.id];
-    if(a&&a.k==="ab"&&CH[u.type].t==="enemy")out.push({u,cells:areaOf(u.type,a.x,a.y)});
-  }
+  for(const u of alive("p")){const a=G.plan[u.id];if(a&&a.k==="ab"&&CH[u.type].t==="enemy")out.push({u,cells:areaOf(u.type,a.x,a.y)});}
   return out;
-}
-function selUnit(){return G.sel?G.sides.p.units.find(u=>u.id===G.sel&&u.alive):null;}
-function moveOptions(u){
-  const taken=new Set(Object.entries(G.plan).filter(([id,a])=>id!==u.id&&a.k==="mv").map(([,a])=>key(a.x,a.y)));
-  return validMoves(u).filter(([x,y])=>!taken.has(key(x,y)));
 }
 
 function enemyCell(x,y){
-  const cls=[], parts=[];
-  const fxOn=G.phase==="resolve"&&G.fx;
-  if(isRock("b",x,y))cls.push("rock");
-  if(isLava(x,y))cls.push("lava");else if(lavaSoon(x,y))cls.push("lavasoon");
+  const cls=[], parts=[], cu=curUnit();
+  const res=G.phase==="resolve"&&G.fx;
+  if(isRock("b",x,y)){cls.push("rock");parts.push(`<span class="rk">🪨</span>`);}
+  if(isLava(x,y))cls.push("lava");else if(lavaSoon(x,y)){cls.push("lavasoon");parts.push(`<span class="tr">⚠️</span>`);}
   if(G.hint&&G.turn<=2&&x===G.hint.p)cls.push("hintcol");
-  if(incoming("b").some(f=>f.o==="p"&&inArea(areaOf("mon",f.x,f.y),x,y))){cls.push("fbmine");parts.push(`<span class="lbl">🔥</span>`);}
-  for(const pa of plannedAreas())if(inArea(pa.cells,x,y)){cls.push("area");parts.push(`<span class="lbl">${pa.u.type==="mon"?"🔥":CH[pa.u.type].i}</span>`);}
-  const su=selUnit();
-  if(G.phase==="plan"&&su&&G.mode==="target"&&!isRock("b",x,y))cls.push("tgt");
+  if(incoming("b").some(f=>inArea(areaOf("mon",f.x,f.y),x,y))){cls.push("fbmine");parts.push(`<span class="tr">☄️</span>`);}
+  for(const pa of plannedAreas())if(inArea(pa.cells,x,y)){cls.push("area");parts.push(`<span class="tl">${pa.u.i||CH[pa.u.type].i}</span>`);}
+  if(G.phase==="plan"&&cu&&G.mode==="target"&&!isRock("b",x,y))cls.push("tgt");
   const ms=G.marks.b.filter(m=>m.x===x&&m.y===y);
   const top=ms.find(m=>m.t==="tocado")||ms.find(m=>m.t==="visto")||ms.find(m=>m.t==="bloq")||ms.find(m=>m.t==="huella")||ms.find(m=>m.t==="vacio");
-  if(top){
+  if(top&&!isRock("b",x,y)){
     const old=top.age>0?" old":"";
-    if(top.t==="huella")parts.unshift(`<span class="huella${old}" title="Huella"></span>`);
-    else if(top.t==="tocado")parts.unshift(`<span class="mk tocado${old}">${top.i}</span>`);
-    else if(top.t==="visto")parts.unshift(`<span class="mk visto${old}">${top.i}</span>`);
+    if(top.t==="huella")parts.unshift(`<span class="mk${old}">👣</span>`);
+    else if(top.t==="tocado")parts.unshift(`<span class="mk${old}">${top.i}</span><span class="bl">💥</span>`);
+    else if(top.t==="visto")parts.unshift(`<span class="mk${old}">${top.i}</span><span class="bl">👁</span>`);
     else if(top.t==="bloq")parts.unshift(`<span class="mk${old}">🛡️</span>`);
-    else parts.unshift(`<span class="dot"></span>`);
+    else if(top.age===0)parts.unshift(`<span class="x">×</span>`);
   }
-  if(fxOn)for(const f of G.fx.b)if(f.x===x&&f.y===y)cls.push("f-"+f.c);
+  if(res)for(const f of G.fx.b)if(f.x===x&&f.y===y){cls.push("f-"+f.c);if(f.c==="hit")parts.push(`<span class="pop">💥</span>`);}
   return {cls:cls.join(" "),html:parts.join("")};
 }
 
 function myCell(x,y){
-  const cls=[], parts=[];
-  const fxOn=G.phase==="resolve"&&G.fx;
-  if(isRock("p",x,y))cls.push("rock");
-  if(isLava(x,y))cls.push("lava");else if(lavaSoon(x,y))cls.push("lavasoon");
+  const cls=[], parts=[], cu=curUnit();
+  const res=G.phase==="resolve"&&G.fx;
+  if(isRock("p",x,y)){cls.push("rock");parts.push(`<span class="rk">🪨</span>`);}
+  if(isLava(x,y))cls.push("lava");else if(lavaSoon(x,y)){cls.push("lavasoon");parts.push(`<span class="tr">⚠️</span>`);}
   if(incoming("p").some(f=>inArea(areaOf("mon",f.x,f.y),x,y)))cls.push("fbwarn");
-  const u=unitAt("p",x,y), su=selUnit();
+  const u=unitAt("p",x,y);
   if(u){
+    cls.push("mine");
     const a=G.plan[u.id];
     parts.push(`<span class="u">${CH[u.type].i}</span>`+hpPips(u));
-    if(u.cd>0)parts.push(`<span class="cd">⏳${u.cd}</span>`);
+    if(u.cd>0)parts.push(`<span class="tr cd">⏳${u.cd}</span>`);
+    else if(a&&a.k==="ab")parts.push(`<span class="tr">🎯</span>`);
     if(a&&a.k==="mv")cls.push("leaving");
-    if(a&&a.k==="ab")parts.push(`<span class="act">⚔️</span>`);
-    if(su&&su.id===u.id)cls.push("sel");
+    if((cu&&cu.id===u.id)||(G.phase==="place"&&G.cur===u.id))cls.push("sel");
   }
   for(const [id,a] of Object.entries(G.plan)){
-    if(a.k==="mv"&&a.x===x&&a.y===y){const v=G.sides.p.units.find(w=>w.id===id);cls.push("dest");parts.push(`<span class="ghost">${CH[v.type].i}</span>`);}
-    if(a.k==="ab"&&a.x===x&&a.y===y&&G.sides.p.units.find(w=>w.id===id).type==="ilu")parts.push(`<span class="lbl">🎭</span>`);
+    const v=G.sides.p.units.find(w=>w.id===id);
+    if(a.k==="mv"&&a.x===x&&a.y===y){cls.push("dest");parts.push(`<span class="ghost">${CH[v.type].i}</span>`);}
+    if(a.k==="ab"&&v.type==="ilu"&&a.x===x&&a.y===y)parts.push(`<span class="tl">🎭</span>`);
   }
-  if(G.marks.p.some(m=>m.t==="huella"&&m.x===x&&m.y===y))parts.push(`<span class="exposed" title="El rival ve una huella aquí"></span>`);
-  if(G.phase==="place"&&su&&!u&&!isRock("p",x,y))cls.push("hl");
-  if(G.phase==="plan"&&su&&G.mode==="move"&&moveOptions(su).some(([a,b])=>a===x&&b===y))cls.push("hl");
-  if(G.phase==="plan"&&su&&G.mode==="decoy"&&!isRock("p",x,y))cls.push("tgt");
-  if(fxOn)for(const f of G.fx.p)if(f.x===x&&f.y===y)cls.push("f-"+f.c);
+  if(G.marks.p.some(m=>m.t==="huella"&&m.age===0&&m.x===x&&m.y===y))parts.push(`<span class="bl" title="El rival ve una huella aquí">👣</span>`);
+  if(G.phase==="place"&&G.cur&&!u&&!isRock("p",x,y))cls.push("hl");
+  if(G.phase==="plan"&&cu&&G.mode==="move"&&moveOptions(cu).some(([a,b])=>a===x&&b===y))cls.push("hl");
+  if(G.phase==="plan"&&cu&&G.mode==="decoy"&&!isRock("p",x,y))cls.push("tgt");
+  if(res)for(const f of G.fx.p)if(f.x===x&&f.y===y){cls.push("f-"+f.c);if(f.c==="hit")parts.push(`<span class="pop">💔</span>`);}
   return {cls:cls.join(" "),html:parts.join("")};
 }
 
-function actionText(u){
+function orderText(u){
   const a=G.plan[u.id];
-  if(!a)return "quieto";
-  if(a.k==="mv")return "→ "+cname(a.x,a.y);
-  if(u.type==="cab")return "escudo";
-  if(u.type==="ilu")return "señuelo "+cname(a.x,a.y);
-  if(u.type==="mon")return "fuego "+areaName(areaOf("mon",a.x,a.y));
-  return "ataca "+areaName(areaOf(u.type,a.x,a.y));
+  if(!a)return "Quieto";
+  if(a.k==="mv")return "Se mueve";
+  return CH[u.type].a;
 }
 
-function panelView(){
+function cmdView(){
   if(G.phase==="place"){
-    return `<div class="panel"><h3>Coloca a tu equipo</h3>
-      <p>Toca un personaje y luego una casilla libre para moverlo. El rival no verá dónde los pones.</p>
-      <button class="btn primary big" data-act="battle">¡A jugar!</button></div>`;
+    return `<div class="cmd"><div class="who"><span class="big">🫣</span><div><b>Esconde a tu equipo</b><small>Toca un personaje y luego una casilla para moverlo. O empieza ya.</small></div></div>
+      <button class="btn fight big" data-act="battle">¡Empezar!</button></div>`;
   }
-  if(G.phase==="resolve")return `<div class="panel"><p>Resolviendo el turno…</p></div>`;
-  const su=selUnit();
-  if(su){
-    const c=CH[su.type], ready=su.cd===0;
-    let abBtn="";
-    if(c.t==="self")abBtn=`<button class="btn ${G.plan[su.id]&&G.plan[su.id].k==="ab"?"primary":""}" data-act="shield" ${ready?"":"disabled"}>Escudo</button>`;
-    else if(c.t==="own")abBtn=`<button class="btn ${G.mode==="decoy"?"primary":""}" data-act="decoy" ${ready?"":"disabled"}>Señuelo</button>`;
-    else abBtn=`<button class="btn ${G.mode==="target"?"primary":""}" data-act="target" ${ready?"":"disabled"}>Atacar</button>`;
-    let hint;
-    if(!ready)hint="Recargando: podrá usar su habilidad en "+su.cd+" turno"+(su.cd>1?"s":"")+".";
-    else if(G.mode==="target")hint="Toca una casilla del tablero rival.";
-    else if(G.mode==="decoy")hint="Toca una casilla de tu tablero para poner la huella falsa.";
-    else hint="Toca una casilla azul para moverte, o usa su habilidad.";
-    return `<div class="panel"><h3>${c.i} ${c.n} <span style="font-weight:400;color:var(--muted);font-size:13px">· ${actionText(su)}</span></h3>
-      <p>${c.d}</p><p style="color:var(--fg)">${hint}</p>
-      <div class="row"><button class="btn ${G.mode==="move"?"primary":""}" data-act="move">Mover</button>${abBtn}
-      <button class="btn" data-act="stay">Quieto</button><button class="btn" data-act="desel">Hecho</button></div></div>`;
+  if(G.phase==="resolve")return `<div class="cmd"><div class="instr">⚡ ¡Revelación!</div></div>`;
+  const list=order(), cu=curUnit();
+  const dots=list.map((u,i)=>{
+    const done=!!G.plan[u.id]||(i<G.cur&&false);
+    return `<button class="dotb ${cu&&cu.id===u.id?"cur":""} ${G.plan[u.id]?"done":""}" data-act="cur" data-i="${i}">${CH[u.type].i}<small>${G.plan[u.id]?"✓":""}</small></button>`;
+  }).join("");
+  if(!cu){
+    const rows=list.map(u=>`<div><span>${CH[u.type].i}</span><span>${orderText(u)}</span></div>`).join("");
+    return `<div class="cmd"><div class="dots"><span class="lbl">Órdenes listas</span>${dots}</div>
+      <div class="orders">${rows}</div>
+      <button class="btn fight big" data-act="ready">¡Luchar!</button></div>`;
   }
-  const chips=alive("p").map(u=>`<button class="chip ${G.plan[u.id]?"set":""}" data-act="sel" data-id="${u.id}">${CH[u.type].i} ${actionText(u)}</button>`).join("");
-  return `<div class="panel"><p>Toca uno de tus personajes para darle una orden.</p><div class="chips">${chips}</div>
-    <button class="btn primary big" data-act="ready">Listo</button></div>`;
+  const c=CH[cu.type], ready=cu.cd===0;
+  const head=`<div class="dots"><span class="lbl">Orden ${G.cur+1} de ${list.length}</span>${dots}</div>
+    <div class="who"><span class="big">${c.i}</span><div><b>${c.n}</b><small>${c.s}</small></div></div>`;
+  if(G.mode==="move")return `<div class="cmd">${head}<div class="instr mv">👇 Toca una casilla azul de tu tablero</div><button class="linkbtn" data-act="back">Volver</button></div>`;
+  if(G.mode==="target")return `<div class="cmd">${head}<div class="instr at">👆 Toca dónde atacar en el tablero rival</div><button class="linkbtn" data-act="back">Volver</button></div>`;
+  if(G.mode==="decoy")return `<div class="cmd">${head}<div class="instr">👇 Toca en tu tablero dónde poner la huella falsa</div><button class="linkbtn" data-act="back">Volver</button></div>`;
+  const atkSub=!ready?`⏳ Lista en ${cu.cd} turno${cu.cd>1?"s":""}`:(cu.type==="cab"||cu.type==="ase"||cu.type==="ilu"?"No deja huella":"Se queda quieto y deja 👣");
+  const mvSub=alive("p").length===1?"Hasta 2 casillas":"1 casilla";
+  return `<div class="cmd">${head}
+    <div class="choices">
+      <button class="choice mv" data-act="move"><span class="ic">🏃</span><b>Mover</b><small>${mvSub}</small></button>
+      <button class="choice at" data-act="ability" ${ready?"":"disabled"}><span class="ic">🎯</span><b>${c.a}</b><small>${atkSub}</small></button>
+    </div>
+    <button class="linkbtn" data-act="stay">Quedarse quieto</button></div>`;
 }
 
 function gameView(){
   const timer=G.phase==="plan"&&G.timerOpt?`<div class="timer"><i></i></div><span class="tsec">${G.timerOpt}s</span>`:`<span style="flex:1"></span>`;
-  const turnTxt=G.phase==="place"?"Colocación":"Turno "+G.turn+"/"+MAX_TURNS;
-  const log=G.phase==="place"?`<div class="log"><p class="info">Tu tablero es el de abajo. El de arriba es el del rival, oculto.</p></div>`
-    :`<div class="log">${G.log.map(l=>`<p class="${l.c}">${esc(l.m)}</p>`).join("")}</div>`;
+  const turnTxt=G.phase==="place"?"Preparación":"Turno "+G.turn+" de "+MAX_TURNS;
+  const strip=G.phase==="place"?[info("Abajo, tu equipo. Arriba, el rival escondido.")]:G.ev;
   const shake=G.phase==="resolve"&&G.fx&&G.fx.p.some(f=>f.c==="hit")?"shake":"";
+  const focusFoe=G.phase==="plan"&&G.mode==="target", focusMe=G.phase==="plan"&&(G.mode==="move"||G.mode==="decoy");
   return `<div class="hud"><strong>Ronda ${G.round}</strong><span>${turnTxt}</span>${timer}</div>
-    <div class="boardwrap"><div class="blabel foe"><span>Tablero rival</span><span>${alive("b").length} vivos</span></div>${boardHTML("e",enemyCell)}</div>
-    ${log}
-    <div class="boardwrap ${shake}">${boardHTML("m",myCell)}<div class="blabel me"><span>Tu tablero</span><span>Daño hecho: ${G.dmg.p}</span></div></div>
-    ${panelView()}`;
+    <div class="boardwrap foe ${focusFoe?"focus":""}"><div class="blabel foe"><span>Rival</span><span>escondido · ${alive("b").length} vivos</span></div>${boardHTML("e",enemyCell)}</div>
+    <div class="strip">${strip.map(l=>`<span class="pill ${l.c}">${esc(l.m)}</span>`).join("")}</div>
+    <div class="boardwrap ${shake} ${focusMe?"focus":""}"><div class="blabel me"><span>Tu equipo</span><span>${alive("p").length} vivos</span></div>${boardHTML("m",myCell)}</div>
+    ${cmdView()}`;
 }
 
 function roundEndView(){
-  const snap=G.history[G.replayIdx];
-  const w=G.roundWinner;
+  const snap=G.history[G.replayIdx], w=G.roundWinner;
   const title=w==="p"?"Ronda para ti":w==="b"?"Ronda para el bot":"Ronda empatada";
   const cellFor=s=>(x,y)=>{
     const cls=[],parts=[];
-    if(G.sides[s].rocks.has(key(x,y)))cls.push("rock");
+    if(G.sides[s].rocks.has(key(x,y))){cls.push("rock");parts.push(`<span class="rk">🪨</span>`);}
     if(ring(x,y)<snap.lava)cls.push("lava");
-    const u=snap.units[s].find(v=>v.x===x&&v.y===y&&(v.alive||v.hp<=0));
     const live=snap.units[s].find(v=>v.alive&&v.x===x&&v.y===y);
-    const shown=live||u;
+    const dead=!live&&snap.units[s].find(v=>!v.alive&&v.x===x&&v.y===y);
+    const shown=live||dead;
     if(shown){parts.push(`<span class="u">${CH[shown.type].i}</span>`+hpPips({...shown,hp:Math.max(0,shown.hp)}));if(!live)cls.push("dead");}
     for(const f of snap.fx[s]||[])if(f.x===x&&f.y===y)cls.push(f.c==="hit"?"r-hit":"r-atk");
     return {cls:cls.join(" "),html:parts.join("")};
   };
   const over=G.matchOver;
   const final=over?(G.score.p>G.score.b?"¡Has ganado la partida!":G.score.p<G.score.b?"El bot gana la partida":"Partida empatada"):"";
+  const evs=snap.ev.length?snap.ev:[info("Así empezó la ronda")];
   return `<div><p class="result ${w==="p"?"win":w==="b"?"lose":""}">${title}</p><p style="color:var(--muted);margin:6px 0 0">${esc(G.roundWhy)}</p>
       ${over?`<p class="result" style="font-size:22px;margin-top:10px">${final}</p>`:""}</div>
-    <div class="replay">
-      <div class="rnav"><button class="btn" data-act="rprev" ${G.replayIdx>0?"":"disabled"}>◀</button>
-        <span>Repetición · ${snap.turn===0?"inicio":"turno "+snap.turn}</span>
-        <button class="btn" data-act="rnext" ${G.replayIdx<G.history.length-1?"":"disabled"}>▶</button></div>
-      <div class="boardwrap"><div class="blabel foe"><span>Rival al descubierto</span></div>${boardHTML("rb",cellFor("b"))}</div>
-      <div class="log">${(snap.log.length?snap.log:[info("Posiciones iniciales.")]).map(l=>`<p class="${l.c}">${esc(l.m)}</p>`).join("")}</div>
-      <div class="boardwrap">${boardHTML("rp",cellFor("p"))}<div class="blabel me"><span>Tu equipo</span></div></div>
-    </div>
+    <div class="rnav"><button class="btn" data-act="rprev" ${G.replayIdx>0?"":"disabled"} aria-label="Turno anterior">◀</button>
+      <span>Repetición · ${snap.turn===0?"inicio":"turno "+snap.turn}</span>
+      <button class="btn" data-act="rnext" ${G.replayIdx<G.history.length-1?"":"disabled"} aria-label="Turno siguiente">▶</button></div>
+    <div class="boardwrap"><div class="blabel foe"><span>Rival</span><span>al descubierto</span></div>${boardHTML("rb",cellFor("b"))}</div>
+    <div class="strip">${evs.map(l=>`<span class="pill ${l.c}">${esc(l.m)}</span>`).join("")}</div>
+    <div class="boardwrap"><div class="blabel me"><span>Tu equipo</span></div>${boardHTML("rp",cellFor("p"))}</div>
     <button class="btn primary big" data-act="${over?"again":"next"}">${over?"Nueva partida":"Siguiente ronda"}</button>
     ${over?`<button class="btn" data-act="menu">Volver al inicio</button>`:""}`;
 }
@@ -631,24 +817,31 @@ function roundEndView(){
 /* ---------- eventos ---------- */
 $app.addEventListener("click",e=>{
   const el=e.target.closest("[data-act],[data-b]"); if(!el)return;
-  const act=el.dataset.act;
+  if(el.dataset.act==="helpclose"&&el.classList.contains("overlay")&&e.target!==el)return;
   if(el.dataset.b){onCell(el.dataset.b,+el.dataset.x,+el.dataset.y);return;}
-  const su=selUnit();
-  switch(act){
-    case "timer":G.timerOpt=+el.dataset.v;render();break;
+  const cu=curUnit();
+  switch(el.dataset.act){
+    case "opt":G[el.dataset.k]=el.dataset.k==="timerOpt"?+el.dataset.v:el.dataset.v;render();break;
     case "start":case "again":newMatch();break;
     case "menu":G.phase="menu";render();break;
-    case "pick":{const t=el.dataset.t;const i=G.pick.indexOf(t);if(i>=0)G.pick.splice(i,1);else if(G.pick.length<3)G.pick.push(t);render();break;}
+    case "tut":G.help=false;G.tut=0;render();break;
+    case "tutnext":if(G.tut<TUT.length-1)G.tut++;else{G.tut=null;store.set("amago-tut","1");}render();break;
+    case "tutskip":G.tut=null;store.set("amago-tut","1");render();break;
+    case "help":G.help=true;render();break;
+    case "helpclose":G.help=false;render();break;
+    case "pick":{const t=el.dataset.t,i=G.pick.indexOf(t);if(i>=0)G.pick.splice(i,1);else if(G.pick.length<3)G.pick.push(t);render();break;}
     case "draftok":if(G.pick.length===3)confirmDraft();break;
-    case "battle":G.sel=null;startBattle();break;
+    case "battle":G.cur=null;startBattle();break;
     case "ready":submitTurn();break;
-    case "sel":G.sel=el.dataset.id;G.mode="move";render();break;
-    case "desel":G.sel=null;G.mode=null;render();break;
+    case "cur":G.cur=+el.dataset.i;G.mode=null;render();break;
     case "move":G.mode="move";render();break;
-    case "target":if(su&&su.cd===0){G.mode="target";render();}break;
-    case "decoy":if(su&&su.cd===0){G.mode="decoy";render();}break;
-    case "shield":if(su&&su.cd===0){if(G.plan[su.id]&&G.plan[su.id].k==="ab")delete G.plan[su.id];else G.plan[su.id]={k:"ab",x:su.x,y:su.y};G.sel=null;G.mode=null;render();}break;
-    case "stay":if(su){delete G.plan[su.id];G.sel=null;G.mode=null;render();}break;
+    case "ability":
+      if(!cu||cu.cd>0)break;
+      if(CH[cu.type].t==="self"){G.plan[cu.id]={k:"ab",x:cu.x,y:cu.y};advance();}
+      else{G.mode=CH[cu.type].t==="own"?"decoy":"target";render();}
+      break;
+    case "back":G.mode=null;render();break;
+    case "stay":if(cu){G.plan[cu.id]={k:"stay"};advance();}break;
     case "rprev":G.replayIdx=Math.max(0,G.replayIdx-1);render();break;
     case "rnext":G.replayIdx=Math.min(G.history.length-1,G.replayIdx+1);render();break;
     case "next":startRound();break;
@@ -658,23 +851,21 @@ $app.addEventListener("click",e=>{
 function onCell(b,x,y){
   if(G.phase==="place"&&b==="m"){
     const u=unitAt("p",x,y);
-    if(u){G.sel=u.id;render();return;}
-    const su=selUnit();
-    if(su&&!isRock("p",x,y)){su.x=x;su.y=y;G.sel=null;render();}
+    if(u){G.cur=u.id;render();return;}
+    const su=G.sides.p.units.find(v=>v.id===G.cur);
+    if(su&&!isRock("p",x,y)){su.x=x;su.y=y;G.cur=null;render();}
     return;
   }
   if(G.phase!=="plan")return;
-  const su=selUnit();
+  const cu=curUnit();
   if(b==="m"){
+    if(cu&&G.mode==="decoy"&&!isRock("p",x,y)){G.plan[cu.id]={k:"ab",x,y};advance();return;}
+    if(cu&&G.mode==="move"&&moveOptions(cu).some(([a,c])=>a===x&&c===y)){G.plan[cu.id]={k:"mv",x,y};advance();return;}
     const u=unitAt("p",x,y);
-    if(su&&G.mode==="decoy"&&!isRock("p",x,y)){G.plan[su.id]={k:"ab",x,y};G.sel=null;G.mode=null;render();return;}
-    if(su&&G.mode==="move"&&moveOptions(su).some(([a,c])=>a===x&&c===y)){G.plan[su.id]={k:"mv",x,y};G.sel=null;G.mode=null;render();return;}
-    if(u){G.sel=u.id;G.mode="move";render();return;}
+    if(u){G.cur=order().findIndex(v=>v.id===u.id);G.mode=null;render();}
     return;
   }
-  if(b==="e"&&su&&CH[su.type].t==="enemy"&&su.cd===0&&!isRock("b",x,y)){
-    G.plan[su.id]={k:"ab",x,y};G.sel=null;G.mode=null;render();
-  }
+  if(b==="e"&&cu&&G.mode==="target"&&!isRock("b",x,y)){G.plan[cu.id]={k:"ab",x,y};advance();}
 }
 
 render();

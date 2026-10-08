@@ -2,7 +2,20 @@
 
 Hundir la flota con personajes que se mueven. Los dos jugadores deciden a la vez y cada ataque deja una huella que delata al atacante.
 
-Este es el primer prototipo: tú contra un bot, todo en un solo archivo HTML sin dependencias. Abre `index.html` en el navegador del ordenador o del móvil.
+Prototipo: tú contra un bot, todo en un solo archivo HTML sin dependencias. Abre `index.html` en el navegador del ordenador o del móvil.
+
+## Interfaz
+
+- Tutorial de 4 pantallas la primera vez y botón `?` con la leyenda de símbolos.
+- Órdenes guiadas: el juego te pide la orden de cada personaje uno a uno (Mover o Habilidad) y marca dónde tocar.
+- El resultado de cada turno se muestra en etiquetas cortas (💥 le diste, ❌ fallaste, 💔 te dieron...).
+
+## Bot
+
+- **Difícil:** lleva un mapa de probabilidad de dónde están tus personajes (huellas, aciertos, fallos y movimientos posibles), ataca donde más probable es acertar, huye cuando se ha delatado y esquiva el fuego y la lava. En 400 rondas simuladas gana el 85 % contra el bot fácil.
+- **Fácil:** se mueve y ataca al azar.
+
+Para repetir la simulación, en la consola del navegador: `__amagoSim(400, "hard", "easy")`.
 
 ## Reglas implementadas
 
