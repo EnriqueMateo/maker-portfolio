@@ -1132,7 +1132,7 @@ const BUILD={
   },
 };
 /* ---- modelos esculpidos (GLB) que sustituyen a los procedurales cuando existen ---- */
-const MODEL_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum"],MODELS={},BASE=window.AMAGO_ASSETS||"";
+const MODEL_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum"],MODELS={},BASE=window.AMAGO_ASSETS||"",EXT=window.AMAGO_EXT||".glb";
 function prepModel(scn,id){
   const ref=new T.Box3().setFromObject(BUILD[id](HEROES[id])),h=(ref.max.y-ref.min.y)*1.08;
   scn.updateMatrixWorld(true);const box=new T.Box3();scn.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}});
@@ -1144,13 +1144,13 @@ function prepModel(scn,id){
 function loadModels(){
   if(!T.GLTFLoader)return Promise.resolve();
   const L=new T.GLTFLoader();
-  return Promise.all(MODEL_LIST.map(id=>new Promise(res=>L.load(BASE+"models/"+id+".glb",g=>{try{MODELS[id]=prepModel(g.scene,id);}catch(e){console.warn(e);}res();},undefined,e=>{console.warn("Sin modelo",id,e);res();}))));
+  return Promise.all(MODEL_LIST.map(id=>new Promise(res=>L.load(BASE+"models/"+id+EXT,g=>{try{MODELS[id]=prepModel(g.scene,id);}catch(e){console.warn(e);}res();},undefined,e=>{console.warn("Sin modelo",id,e);res();}))));
 }
 const ARENA={},arenaP={};
 function loadArena(k){
   if(!T.GLTFLoader||!k)return Promise.resolve(null);
   if(arenaP[k])return arenaP[k];
-  return arenaP[k]=new Promise(res=>new T.GLTFLoader().load(BASE+"arenas/"+k+".glb",g=>{
+  return arenaP[k]=new Promise(res=>new T.GLTFLoader().load(BASE+"arenas/"+k+EXT,g=>{
     g.scene.traverse(o=>{if(o.isMesh){o.material=new T.MeshBasicMaterial({vertexColors:true});o.castShadow=o.receiveShadow=false;}});
     ARENA[k]=g.scene;res(g.scene);},undefined,e=>{console.warn("Sin arena",k,e);res(null);}));
 }
