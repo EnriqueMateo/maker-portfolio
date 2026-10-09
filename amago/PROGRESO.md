@@ -28,6 +28,10 @@ Props de Gemini recortados con `cutout_ai.py` en `art/props_src` → `art/props_
 
 Siguiente: arbusto y flores de Gemini para Pradera; luego bosque/volcán/trono/olimpo con sus props (`PSET[k]`).
 
+## Animaciones 2D (esqueleto sobre la ilustración)
+
+`RIG2D` en index.html marca articulaciones por héroe (coordenadas 0..1 de la imagen). `skin2D` crea huesos (raíz, columna, cabeza, brazos, piernas y extras como cola, bufanda, gorro o mecha) y pesa cada vértice de una malla 22×26 por distancia a los huesos; `applySkin` deforma la malla en CPU cada fotograma. `animateSprite` hace reposo (respira), andar (piernas por turnos, brazos, rebote), ataque según estilo (`shoot`/`throw`/`slam`/`breath`, carga corta porque el proyectil sale al instante), golpe (destello, retroceso, temblor), KO (cae girando sobre un pie) y victoria (saltos, vuelta). Regla: no girar brazos más de ~0,8 rad o la ilustración se deforma. Tamaño en arena `HSCALE=1.02`. Polvo al andar (`puff`). Banco de pruebas: `testanim3.js` / `testgif2.js` en el scratchpad.
+
 ## Pendiente después
 
 - Pulir: KO más claro, resumen de ronda, ronda de práctica guiada, pedir nombre tras la primera partida.
