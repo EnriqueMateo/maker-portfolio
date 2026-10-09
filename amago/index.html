@@ -437,6 +437,21 @@ body,body[style]{background:
 .act{font-size:15px!important}
 .coinpill{cursor:default}
 .keysline b{color:var(--gold)}
+.shoph{font-family:var(--f-game);font-weight:400;font-size:20px;margin:10px 0 0}
+.shopgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.shopgrid.one{grid-template-columns:1fr}
+.shopcard{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;border:3px solid var(--ink);border-radius:18px;padding:10px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 5px 0 var(--ink)}
+.shopgrid.one .shopcard{flex-direction:row;justify-content:flex-start;gap:12px;text-align:left}
+.shopgrid.one .shopcard .gbtn{margin-left:auto}
+.shopcard .shm{width:92px;height:92px;display:block}
+.shopcard b{font-family:var(--f-game);font-weight:400;font-size:20px}
+.shopcard small{font-size:12px;opacity:.9}
+.shopcard .gbtn{font-size:17px;padding:8px 14px}
+.shopcard .gbtn s{opacity:.6;font-size:12px}
+.shoptag{position:absolute;top:-10px;left:12px;font-style:normal;background:var(--foe);border:2px solid var(--ink);border-radius:999px;padding:1px 10px;font-size:12px;font-weight:900}
+.chestc{background:linear-gradient(180deg,#a77bff,#6a3fd0)}
+.chestc .shm svg{width:92px;height:80px}
+.bnav button{flex:0 1 96px!important}
 </style>
 </head>
 <body>
@@ -691,7 +706,7 @@ const HOW=[
   {i:"🏆",h:"3 rondas, 3 héroes",p:"Antes de cada ronda eliges héroe. No puedes repetir. Gana quien se lleve 2 rondas."},
 ];
 const ROAD=[{t:15,r:"chest"},{t:40,r:"hero",id:"ojo"},{t:70,r:"chest"},{t:110,r:"hero",id:"truco"},{t:160,r:"chest"},{t:220,r:"hero",id:"rayo"},{t:300,r:"chest"},{t:400,r:"hero",id:"bum"},{t:520,r:"chest"},{t:680,r:"chest"},{t:850,r:"chest"},{t:1000,r:"chest"}];
-const KEYS_PER_CHEST=3;
+const KEYS_PER_CHEST=3,CHEST_MAX=3,PRICE=[100,180,320,550],CHEST_PRICE=60;
 const speedLabel=st=>st<=.22?"Muy rápido":st<=.32?"Rápido":st<=.42?"Normal":"Lento";
 /* servidor online: el mismo origen si el juego lo sirve el servidor, o window.AMAGO_SERVER en la app nativa y de escritorio */
 const SERVER=window.AMAGO_SERVER||"";
@@ -1634,12 +1649,12 @@ const ARENA_BG={pradera:["#2a8cf0","#1450b8"],bosque:["#23a86e","#11613f"],volca
 function setBg(){const {a}=arenaOf(S.tro),c=ARENA_BG[a.k]||ARENA_BG.pradera;const st=document.body.style;st.setProperty("--arena",a.bg);st.setProperty("--arena2",c[0]);st.setProperty("--arena3",c[1]);}
 function nav(active){
   const it=(t,i,l,dot)=>`<button class="${active===t?"on":""}" data-a="tab" data-t="${t}">${dot?'<i class="dot"></i>':""}<span class="ni">${i}</span><span>${l}</span></button>`;
-  return `<nav class="bnav">${it("heroes","🦸","Héroes")}${it("home","🏠","Inicio")}${it("road","🏆","Trofeos",claimable().length>0)}</nav>`;
+  return `<nav class="bnav">${it("shop","🛒","Tienda")}${it("heroes","🦸","Héroes")}${it("home","🏠","Inicio")}${it("road","🏆","Trofeos",claimable().length>0)}</nav>`;
 }
 function topbar(){
   return `<div class="hometop">
     <button class="prof" data-a="name" aria-label="Cambiar nombre"><span class="pav">${heroSVG(S.fav)}</span><span class="pinfo"><b>${esc(S.name)}</b><span class="lvl"><i>${level()}</i><span class="bar"><i style="width:${xpPct()}%"></i></span></span></span></button>
-    <span class="tropill coinpill">🪙 <b class="out">${S.coins||0}</b></span><button class="tropill" data-a="tab" data-t="road">🏆 <b class="out">${S.tro}</b>${claimable().length?'<i class="dot"></i>':""}</button>
+    <button class="tropill coinpill" data-a="tab" data-t="shop">🪙 <b class="out">${S.coins||0}</b></button><button class="tropill" data-a="tab" data-t="road">🏆 <b class="out">${S.tro}</b>${claimable().length?'<i class="dot"></i>':""}</button>
     <button class="iconbtn" data-a="settings" aria-label="Ajustes">⚙️</button></div>`;
 }
 function showHome(){
@@ -1676,6 +1691,33 @@ function showHeroes(){
   ${nav("heroes")}`;
   renderModal();
 }
+/* ---- tienda: héroes por monedas, oferta del día y cofres ---- */
+function dayOffer(){const locked=IDS.filter(id=>!S.unl.includes(id));if(!locked.length)return null;const d=Math.floor(Date.now()/864e5);return locked[d%locked.length];}
+function heroPrice(id){const p=PRICE[HEROES[id].rar];return id===dayOffer()?Math.round(p*.7/10)*10:p;}
+function showShop(){
+  leaveHome();
+  UI.screen="shop";stopLoop();app.className="home";setBg();
+  const off=dayOffer(),locked=IDS.filter(id=>!S.unl.includes(id)&&id!==off),coins=S.coins||0;
+  const card=(id,tag)=>{const H=HEROES[id],RR=RAR[H.rar],pr=heroPrice(id),can=coins>=pr;
+    return `<div class="shopcard" style="background:${RR.bg}">${tag?`<i class="shoptag">${tag}</i>`:""}<span class="shm">${heroSVG(id)}</span><b class="out">${H.n}</b><small>${RR.n} · ${H.r}</small>
+      <button class="gbtn mini ${can?"":"off"}" data-a="buy" data-id="${id}" ${can?"":"disabled"}>🪙 ${pr}${id===off?` <s>${PRICE[H.rar]}</s>`:""}</button></div>`;};
+  const full=S.chests>=CHEST_MAX;
+  app.innerHTML=`${topbar()}<h2 class="sectiont out">Tienda</h2>
+    <p class="slogan">Gana monedas abriendo cofres y en el camino de trofeos.</p>
+    ${off?`<h3 class="shoph out">⭐ Oferta del día · −30 %</h3><div class="shopgrid one">${card(off,"OFERTA")}</div>`:""}
+    <h3 class="shoph out">Héroes</h3>
+    ${locked.length?`<div class="shopgrid">${locked.map(id=>card(id)).join("")}</div>`:`<p class="slogan">${off?"":"¡Ya tienes todos los héroes!"}</p>`}
+    <h3 class="shoph out">Cofres</h3>
+    <div class="shopgrid one"><div class="shopcard chestc"><span class="shm">${chestSVG()}</span><b class="out">Cofre</b><small>${full?`Ya tienes ${CHEST_MAX} sin abrir`:"Monedas y, con suerte, un héroe"}</small>
+      <button class="gbtn mini" data-a="buychest" ${coins>=CHEST_PRICE&&!full?"":"disabled"}>🪙 ${CHEST_PRICE}</button></div></div>
+    ${nav("shop")}`;
+  renderModal();
+}
+function buy(id){
+  if(S.unl.includes(id))return;const pr=heroPrice(id);if((S.coins||0)<pr){toast("coins","🪙 Te faltan monedas. Gana partidas y abre cofres.");return;}
+  S.coins-=pr;S.unl.push(id);save();UI.modal={k:"chest",taps:3,reward:{hero:id}};renderModal();confetti();sfx("win");showShop();
+}
+function buyChest(){if((S.coins||0)<CHEST_PRICE||S.chests>=CHEST_MAX)return;S.coins-=CHEST_PRICE;S.chests++;save();sfx("chest");UI.modal={k:"chest",taps:0};renderModal();}
 function showRoad(){
   leaveHome();
   UI.screen="road";stopLoop();app.className="home";setBg();
@@ -1694,6 +1736,7 @@ function claim(t){
   const m=ROAD.find(r=>r.t===t);if(!m||S.claimed.includes(t)||S.tro<t)return;
   S.claimed.push(t);
   if(m.r==="hero"&&!S.unl.includes(m.id)){S.unl.push(m.id);save();UI.modal={k:"chest",taps:3,reward:{hero:m.id}};renderModal();confetti();sfx("win");}
+  else if(m.r==="hero"||S.chests>=CHEST_MAX){const c=m.r==="hero"?150:60;S.coins=(S.coins||0)+c;save();UI.modal={k:"chest",taps:3,reward:{coins:c}};renderModal();sfx("win");}
   else{S.chests++;save();UI.modal={k:"chest",taps:0};renderModal();}
   showRoad();
 }
@@ -1872,11 +1915,11 @@ async function endMatch(){
   const before=S.tro,lvlBefore=level(),shield=!win&&!draw&&before<30;
   const delta=win?8+rnd(3):draw||shield?0:-Math.min(before,3+rnd(2));
   S.tro+=delta;S.games++;S.xp+=win?40:20;let gotChest=false;
-  if(win){S.wins++;S.keys=(S.keys||0)+1;if(S.keys>=KEYS_PER_CHEST){S.keys=0;S.chests++;gotChest=true;}}
+  if(win){S.wins++;if(S.chests>=CHEST_MAX){S.keys=KEYS_PER_CHEST-1;}else{S.keys=(S.keys||0)+1;if(S.keys>=KEYS_PER_CHEST){S.keys=0;S.chests++;gotChest=true;}}}
   save();
   endScreen(win,draw,`<div class="trobig out">🏆 <span id="tro">${before}</span> <small class="${delta>=0?"up":"dn"}">${delta>=0?"+":""}${delta}</small></div>
     <div class="xpline">⭐ +${win?40:20} XP${level()>lvlBefore?` · <b>¡Nivel ${level()}!</b>`:""}</div>
-    ${win?(gotChest?`<button class="chestbtn" data-a="chest" style="align-self:center">${chestSVG()}<span>¡3 victorias: cofre!<br><b>Toca para abrir</b></span></button>`:`<p class="slogan keysline">🔑 Llaves: <b>${S.keys}/${KEYS_PER_CHEST}</b> · al llegar a ${KEYS_PER_CHEST}, cofre</p>`):`<p class="slogan">${draw?"¡Igualadísimo!":shield?"🛡️ Protección de novato: no pierdes trofeos":"¡Casi! La próxima es tuya."}</p>`}
+    ${win?(gotChest?`<button class="chestbtn" data-a="chest" style="align-self:center">${chestSVG()}<span>¡3 victorias: cofre!<br><b>Toca para abrir</b></span></button>`:(S.chests>=CHEST_MAX?`<p class="slogan keysline">📦 Tienes ${CHEST_MAX} cofres sin abrir. ¡Ábrelos para ganar más!</p>`:`<p class="slogan keysline">🔑 Llaves: <b>${S.keys}/${KEYS_PER_CHEST}</b> · al llegar a ${KEYS_PER_CHEST}, cofre</p>`)):`<p class="slogan">${draw?"¡Igualadísimo!":shield?"🛡️ Protección de novato: no pierdes trofeos":"¡Casi! La próxima es tuya."}</p>`}
     ${claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">🎁 ¡Tienes premios en el camino de trofeos!</button>`:""}
     <button class="gbtn play" data-a="play">JUGAR OTRA</button>
     <button class="pillbtn" data-a="home" style="align-self:center">Volver al inicio</button>`);
@@ -2077,7 +2120,9 @@ document.addEventListener("click",e=>{
   switch(a){
     case "play":sfx("tap");if(S.mode==="friends"){UI.modal={k:"friends",st:"menu"};renderModal();}else startMatch();break;
     case "home":sfx("tap");UI.modal=null;renderModal();if(G&&G.online)netClose();G=null;R=null;showHome();break;
-    case "tab":sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad})[el.dataset.t]();break;
+    case "tab":sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop})[el.dataset.t]();break;
+    case "buy":buy(el.dataset.id);break;
+    case "buychest":buyChest();break;
     case "settings":sfx("tap");UI.modal={k:"settings"};renderModal();break;
     case "tsnd":S.snd=S.snd?0:1;save();sfx("tap");renderModal();break;
     case "reset1":UI.modal.confirm=true;renderModal();break;
@@ -2111,7 +2156,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&UI.modal){if(UI.modal.k==="name")$("[data-a=namesave]")?.click();if(UI.modal.k==="friends"&&$("#codeinp")===document.activeElement)$("[data-a=netjoin]")?.click();}
 });
 function loadSaveFresh(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}return loadSave();}
-function refreshScreen(){({home:showHome,heroes:showHeroes,road:showRoad})[UI.screen]?.();}
+function refreshScreen(){({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop})[UI.screen]?.();}
 function onTile(b,x,y){
   if(!R||R.paused||R.over)return;
   const me=R.heroes.p,H=HEROES[me.type];
