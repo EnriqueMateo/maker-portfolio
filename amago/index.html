@@ -407,6 +407,9 @@ canvas.bigmodel{position:relative;z-index:1;width:min(78vw,330px);height:min(86v
 .gbottom>*{pointer-events:auto}
 #app.game ~ .toast{bottom:calc(132px + env(safe-area-inset-bottom,0px))}
 .g3 .side2 .mini{width:44px;height:44px}
+.loading{margin:auto;display:flex;flex-direction:column;align-items:center;gap:22px;font-size:54px;font-weight:900;color:#fff}
+.loading .spin{width:46px;height:46px;border-radius:50%;border:6px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -1103,7 +1106,28 @@ const BUILD={
     return k.root;
   },
 };
-function makeHero(id){const g=BUILD[id](HEROES[id]);g.userData.id=id;return g;}
+/* ---- modelos esculpidos (GLB) que sustituyen a los procedurales cuando existen ---- */
+const MODEL_LIST=["flecha"],MODELS={},BASE=window.AMAGO_ASSETS||"";
+function prepModel(scn,id){
+  const ref=new T.Box3().setFromObject(BUILD[id](HEROES[id])),h=(ref.max.y-ref.min.y)*1.08;
+  const box=new T.Box3().setFromObject(scn),k=h/(box.max.y-box.min.y),c=box.getCenter(new T.Vector3());
+  scn.scale.setScalar(k);scn.position.set(-c.x*k,-box.min.y*k,-c.z*k);
+  scn.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;const m=o.material;if(m&&m.isMeshStandardMaterial){m.envMapIntensity=.7;m.roughness=Math.min(m.roughness??1,.6);}}});
+  const g=new T.Group();g.add(scn);return g;
+}
+function loadModels(){
+  if(!T.GLTFLoader)return Promise.resolve();
+  const L=new T.GLTFLoader();
+  return Promise.all(MODEL_LIST.map(id=>new Promise(res=>L.load(BASE+"models/"+id+".glb",g=>{try{MODELS[id]=prepModel(g.scene,id);}catch(e){console.warn(e);}res();},undefined,e=>{console.warn("Sin modelo",id,e);res();}))));
+}
+function glbHero(id){
+  const root=new T.Group(),body=new T.Group();body.name="body";body.position.y=.16;root.add(body);
+  const m=MODELS[id].clone(true);m.position.y=-.16;body.add(m);
+  const d=()=>new T.Object3D(),arms=[d(),d()];arms.forEach(a=>a.userData.base=0);
+  root.userData={body,head:d(),arms,legs:[d(),d()],eyes:null,t0:Math.random()*10,glb:true};
+  return root;
+}
+function makeHero(id){const g=MODELS[id]?glbHero(id):BUILD[id](HEROES[id]);g.userData.id=id;return g;}
 
 /* ---- animación procedural ---- */
 function setFlash(g,on){
@@ -1171,12 +1195,13 @@ function bakePortraits(size=320){
   const sc=new T.Scene();lights(sc,false,r);
   const cam=new T.PerspectiveCamera(28,1,.1,20);cam.position.set(0,.8,3.4);cam.lookAt(0,.56,0);
   for(const id of Object.keys(HEROES)){
+    if(MODELS[id]){PORTRAIT[id]=BASE+"portraits/"+id+".webp";continue;}
     const g=makeHero(id);g.rotation.y=-.38;animate(g,1.2,{});if(id==="rayo")g.scale.setScalar(.9);
     sc.add(g);r.render(sc,cam);PORTRAIT[id]=r.domElement.toDataURL("image/png");sc.remove(g);
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,makeHero,animate,setFlash,bakePortraits,PORTRAIT,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -1426,7 +1451,7 @@ return {build,update,dispose,resize,fireFx,impactFx,screenPos,areaScreen,shake,f
 /* ================= escaparate 3D del inicio ================= */
 const SHOW=(function(){
 if(!GFX)return null;
-const T=GFX.T;let r=null,sc,cam,model,id=null,raf=0,rotY=-.3,drag=null,winT=-1;
+const T=GFX.T;let r=null,sc,cam,model,id=null,raf=0,rotY=.32,drag=null,winT=-1;
 function mount(canvas,heroId){
   unmount();
   r=new T.WebGLRenderer({canvas,antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));GFX.setupRenderer(r);r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
@@ -1438,7 +1463,7 @@ function mount(canvas,heroId){
   canvas.onpointerdown=e=>{drag={x:e.clientX,r:rotY};canvas.setPointerCapture(e.pointerId);};
   canvas.onpointermove=e=>{if(drag)rotY=drag.r+(e.clientX-drag.x)*.012;};
   canvas.onpointerup=e=>{if(drag&&Math.abs(e.clientX-drag.x)<6){winT=performance.now()/1000;}drag=null;};
-  const loop=()=>{if(!r)return;resize();const t=performance.now()/1000;if(!drag)rotY+=(-.3-rotY)*.02;model.rotation.y=rotY;
+  const loop=()=>{if(!r)return;resize();const t=performance.now()/1000;if(!drag)rotY+=(.32-rotY)*.02;model.rotation.y=rotY;
     const w=winT>0&&t-winT<1.2;GFX.animate(model,t,{act:w?"win":null,actT:w?t-winT:0});r.render(sc,cam);raf=requestAnimationFrame(loop);};
   loop();
 }
@@ -1954,10 +1979,14 @@ function onTile(b,x,y){
 document.addEventListener("visibilitychange",()=>{lastT=performance.now();});
 
 fxInit();
-if(GFX){try{GFX.bakePortraits();}catch(e){console.warn("Sin retratos 3D",e);}}
-if(!B3){app.innerHTML=`<div class="sheet" style="margin:auto"><h2 class="out">AMAGO</h2><p>Tu navegador no puede mostrar gráficos 3D (WebGL). Prueba con Chrome, Safari o Edge actualizados.</p></div>`;}
-else showHome();
-if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
+function bootGame(){
+  if(GFX){try{GFX.bakePortraits();}catch(e){console.warn("Sin retratos 3D",e);}}
+  if(!B3){app.innerHTML=`<div class="sheet" style="margin:auto"><h2 class="out">AMAGO</h2><p>Tu navegador no puede mostrar gráficos 3D (WebGL). Prueba con Chrome, Safari o Edge actualizados.</p></div>`;}
+  else showHome();
+  if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
+}
+if(GFX){app.innerHTML=`<div class="loading"><div class="out">AMAGO</div><div class="spin"></div></div>`;Promise.race([GFX.loadModels(),new Promise(r=>setTimeout(r,15000))]).then(bootGame);}
+else bootGame();
 
 </script>
 <!--ARTIFACT-END-->

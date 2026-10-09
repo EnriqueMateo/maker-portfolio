@@ -34,6 +34,15 @@ El usuario quiere personajes al nivel de Brawl Stars, Clash, Fall Guys y Mario: 
 3. Exportar cada héroe a GLB (diezmado a unas 15-30 mil caras, nodos con los nombres del rig) para el juego. Hace falta GLTFLoader: empaquetar Three.js y GLTFLoader en un IIFE con esbuild (npm funciona), sustituyendo a `vendor/three.min.js`. Cargar los GLB y mapear los nodos del rig para reutilizar `GFX.animate`.
 4. Después: arenas distintas según los trofeos, ajustes de jugabilidad, y empaquetado para App Store (Capacitor) y escritorio (Electron), con `window.AMAGO_SERVER` para el online.
 
+## Nuevo flujo de personajes (sustituye al modelado a mano)
+
+1. Imagen de concepto con Gemini (prompts en la conversación; estilo común + descripción del héroe) → `art/concepts/<id>.jpg`.
+2. Imagen → modelo 3D con TRELLIS (licencia MIT): web de Hugging Face (1-2 al día) o en lote con el cuaderno de Kaggle `art/kaggle/amago_trellis.ipynb` (GPU T4 gratis; se lanza con `!wget ... && %run`). El cuaderno usa el PyTorch de Kaggle, sustitutos propios de xformers y kaolin (`art/kaggle/shim`), nvdiffrast 0.4 y `CUMM_DISABLE_JIT=1`.
+3. En Blender: `glb_view.py` (normaliza y revisa vistas), `glb_hero.py` (render promocional; con `t` fondo transparente), `portrait_crop.py` (retrato cuadrado webp) y `glb_game.py` (versión ligera de unas 30 mil caras y texturas de 1024).
+4. Juego: copiar a `models/<id>.glb` y `portraits/<id>.webp` y añadir el id a `MODEL_LIST` en `GFX`. Si un héroe no tiene modelo se usa el procedural.
+
+Hecho: Flecha integrado (inicio, selección, arena y retratos). Pendientes de modelo: Brasa, Sombra, Ojo, Truco, Muro, Rayo y Bum (imágenes ya en `art/concepts`).
+
 ## Notas del entorno
 
 - Las CDN (cdnjs, jsdelivr) y blender.org están bloqueadas desde el contenedor; PyPI y npm funcionan.

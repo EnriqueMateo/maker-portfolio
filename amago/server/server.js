@@ -34,6 +34,19 @@ const server = http.createServer((req, res) => {
     res.end(fs.readFileSync(path.join(__dirname, "..", "vendor", "three.min.js")));
     return;
   }
+  const asset = url.match(/^\/(models|portraits)\/([a-z0-9_-]+)\.(glb|webp)$/);
+  if (asset) {
+    const file = path.join(__dirname, "..", asset[1], asset[2] + "." + asset[3]);
+    if (!fs.existsSync(file)) {
+      res.writeHead(404, { "content-type": "text/plain" });
+      res.end("No encontrado");
+      return;
+    }
+    const type = asset[3] === "glb" ? "model/gltf-binary" : "image/webp";
+    res.writeHead(200, { "content-type": type, "cache-control": "public, max-age=86400" });
+    res.end(fs.readFileSync(file));
+    return;
+  }
   if (url === "/" || url === "/index.html") {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" });
     res.end(fs.readFileSync(INDEX));
