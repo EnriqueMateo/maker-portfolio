@@ -132,7 +132,7 @@ bone('hips', (0, 0, hip), (0, 0, hip + .12), 'root')
 bone('spine', (0, 0, hip + .12), (0, 0, chest), 'hips')
 bone('head', (0, 0, neck), (0, 0, top), 'spine')
 for s, side in ((1, 'L'), (-1, 'R')):  # L = +X (izquierda del personaje mirando a -Y)
-    sh, el, ha = J['shoulder'], J['elbow'], J['hand']
+    sh, el, ha = J.get('shoulder_' + side, J['shoulder']), J.get('elbow_' + side, J['elbow']), J.get('hand_' + side, J['hand'])  # brazos asimétricos
     bone(f'arm.{side}', (s * sh[0], 0, sh[1]), (s * el[0], 0, el[1]), 'spine')
     bone(f'fore.{side}', (s * el[0], 0, el[1]), (s * ha[0], 0, ha[1]), f'arm.{side}')
     lx = J['leg_x']
@@ -159,20 +159,31 @@ for i, n in enumerate(names):
     if n.startswith(('thigh', 'shin')):
         s = 1 if n.endswith('L') else -1
         allow[:, i] = (s * x > -.02) & (z < hip + .08) & (np.abs(x) < gate)
-    if n == 'head': allow[:, i] = z > J['head_rigid'] - .08
+    if n == 'head': allow[:, i] = (z > J['head_rigid'] - .08) & (np.abs(x) < J.get('head_w', 9))
     if n in ('spine', 'hips'): allow[:, i] = (np.abs(x) < gate + .06) | (z > J['shoulder'][1])
 # fuera del tronco y por debajo del hombro: siempre brazo
 out = np.abs(x) > gate
 for n in names:
     if not n.startswith(('arm', 'fore')): allow[out & (z < J['shoulder'][1]), idx[n]] = False
 W = np.where(allow, 1.0 / np.maximum(D, .015) ** 4, 0)
-W[z > J['head_rigid'] + .06] = 0; W[z > J['head_rigid'] + .06, idx['head']] = 1  # cabeza rígida
+hm = (z > J['head_rigid'] + .06) & (np.abs(x) < J.get('head_w', 9))
+W[hm] = 0; W[hm, idx['head']] = 1  # cabeza rígida (head_w: solo en el centro, p. ej. si los hombros suben por encima)
 # manos y lo que sujetan (arco, armas): rígidos con el antebrazo de su lado
 # ("prop": lados que llevan un objeto largo, como el arco, que sube por encima del hombro)
 for s_, side in ((1, 'L'), (-1, 'R')):
-    top_ = J['shoulder'][1] + .1
+    top_ = 9 if side in J.get('rigid_all', []) else max(J['shoulder'][1], J.get('hand_' + side, J['hand'])[1] + .2) + .1  # rigid_all: bastones largos
     m_ = (s_ * x > gate) & (z < top_) & (V[:, 1] < .25)
     W[m_] = 0; W[m_, idx[f'fore.{side}']] = 1
+# zonas que van con el tronco aunque estén fuera (bufandas, colas, alas)
+# pies: todo lo que está por debajo de la rodilla va con la espinilla de su lado
+fm = (z < J['knee']) & (np.abs(x) < gate + .1)
+for s_, side in ((1, 'L'), (-1, 'R')):
+    m_ = fm & (s_ * x >= 0)
+    W[m_] = 0; W[m_, idx[f'shin.{side}']] = 1
+for bx in J.get('spine_boxes', []):
+    (x0, x1), (y0, y1), (z0, z1) = bx[:3]; bn = bx[3] if len(bx) > 3 else 'spine'
+    m_ = (x > x0) & (x < x1) & (V[:, 1] > y0) & (V[:, 1] < y1) & (z > z0) & (z < z1)
+    W[m_] = 0; W[m_, idx[bn]] = 1
 W = W / np.maximum(W.sum(1, keepdims=True), 1e-9)
 # quedarse con los 2 huesos más fuertes por vértice
 order = np.argsort(-W, 1)

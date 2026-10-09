@@ -1,0 +1,1 @@
+{"hip": 0.55, "chest": 1.1, "neck": 1.18, "top": 1.95, "leg_x": 0.2, "knee": 0.25, "shoulder": [0.42, 1.05], "elbow": [0.6, 0.8], "hand": [0.7, 0.55], "arm_gate": 0.5, "head_rigid": 1.22, "spine_boxes": [[[-2, 2], [0.15, 3], [0, 0.75], "hips"]]}
