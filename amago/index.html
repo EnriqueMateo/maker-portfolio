@@ -1156,9 +1156,9 @@ function animateRig(rig,tt,st,act,at_){
   const walking=st.walk,w=Math.sin(tt*12),br=Math.sin(tt*2.6);
   let lt=0,rt=0,ls=0,rs=0,la=[br*.04,0,br*.04],ra=[-br*.04,0,-br*.04],lf=0,rf=0,sp=[br*.03,Math.sin(tt*.7)*.05,0],hd=[0,Math.sin(tt*.8)*.12,0];
   if(walking){lt=-w*.45;rt=w*.45;ls=Math.max(0,w)*.5;rs=Math.max(0,-w)*.5;la=[w*.3,0,0];ra=[-w*.3,0,0];sp=[.1,w*.06,0];}
-  if(act==="attack"){const k=Math.min(1,at_/.4),e=k<.25?k/.25:1-(k-.25)/.75;la=[-.55*e,0,.1*e];ra=[-.45*e,0,-.15*e];sp=[-.12*e,.3*e,0];hd=[0,.15*e,0];}
+  if(act==="attack"){const k=Math.min(1,at_/.45),e=k<.3?k/.3:1-(k-.3)/.7;la=[-1.35*e,0,.15*e];ra=[-.75*e,0,-.2*e];rf=-.4*e;sp=[-.1*e,.35*e,0];hd=[0,.2*e,0];}
   if(act==="hit"){const k=Math.min(1,at_/.4),e=Math.sin(k*Math.PI);sp=[-.3*e,0,0];hd=[-.25*e,0,0];la=[0,0,.4*e];ra=[0,0,-.4*e];}
-  if(act==="win"){const b=Math.sin(tt*10);la=[0,0,.55+b*.15];ra=[0,0,-.55+b*.15];hd=[-.15,Math.sin(tt*5)*.2,0];}
+  if(act==="win"){const b=Math.sin(tt*10);la=[0,0,1.1+b*.25];ra=[0,0,-.55+b*.15];hd=[-.15,Math.sin(tt*5)*.2,0];}
   if(act==="ko"){la=[0,0,.5];ra=[0,0,-.5];hd=[.35,0,0];sp=[.2,0,0];}
   pose(rig,"thighl",lt);pose(rig,"thighr",rt);pose(rig,"shinl",ls);pose(rig,"shinr",rs);
   pose(rig,"arml",...la);pose(rig,"armr",...ra);pose(rig,"forel",lf);pose(rig,"forer",rf);
