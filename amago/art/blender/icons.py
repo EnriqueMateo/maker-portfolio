@@ -119,6 +119,90 @@ elif ITEM == 'mission':
     md = t.modifiers.new('bv', 'BEVEL'); md.width = .03; md.segments = 4; md.limit_method = 'NONE'; apply_mods(t); assign(t, mat('wh', hexc('#ffffff'), rough=.3, coat=.5))
     shot('mission', 256, orbit(-18, 6, .9), (0, 0, 0), 50)
 
+elif ITEM == 'gem':
+    # gema (moneda premium): talla brillante verde
+    G = mat('gem', hexc('#2ee87a'), rough=.08, coat=1, sss=.15, emit=.25, emit_c=hexc('#14c45a'))
+    bm = bmesh.new(); n = 8
+    top = [bm.verts.new((math.cos(i * 2 * math.pi / n) * .55, math.sin(i * 2 * math.pi / n) * .55, .45)) for i in range(n)]
+    mid = [bm.verts.new((math.cos((i + .5) * 2 * math.pi / n) * 1.0, math.sin((i + .5) * 2 * math.pi / n) * 1.0, .1)) for i in range(n)]
+    tip = bm.verts.new((0, 0, -1.0)); c = bm.verts.new((0, 0, .45))
+    for i in range(n):
+        j = (i + 1) % n
+        bm.faces.new((c, top[i], top[j])); bm.faces.new((top[i], mid[i], top[j])); bm.faces.new((top[j], mid[i], mid[j])); bm.faces.new((mid[i], tip, mid[j]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new('gem'); bm.to_mesh(me); g = link(bpy.data.objects.new('gem', me))
+    for o2 in bpy.context.selected_objects: o2.select_set(False)
+    g.select_set(True); bpy.context.view_layer.objects.active = g
+    md = g.modifiers.new('bv', 'BEVEL'); md.width = .03; md.segments = 2; md.limit_method = 'NONE'; apply_mods(g); assign(g, G)
+    g.rotation_euler = (math.radians(12), 0, math.radians(10))
+    shot('gem', 256, orbit(-10, 6, 1.6), (0, 0, -.1), 44)
+
+elif ITEM == 'crown':
+    # corona del pase premium
+    lathe('band', [(0, -.45), (.78, -.45), (.82, -.3), (.82, .05), (.76, .12), (0, .12)], GOLD)
+    for i in range(5):
+        a = i * 2 * math.pi / 5 + math.pi / 2
+        x, y = math.cos(a) * .72, math.sin(a) * .72
+        bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=.26, radius2=.02, depth=.75, location=(x, y, .45)); cn = bpy.context.object; bpy.ops.object.shade_smooth(); assign(cn, GOLD)
+        sphere('b%d' % i, (x * 1.0, y * 1.0, .85), .1, m=GOLD2, seg=24)
+    for i, col in enumerate(['#ff3a5a', '#2fb8ff', '#3cff9a']):
+        a = math.pi / 2 + (i - 1) * .55
+        sphere('j%d' % i, (math.cos(a) * .82, math.sin(a) * -.82, -.15), .12, scale=(1, .55, 1), m=mat('j%d' % i, hexc(col), rough=.08, coat=1), seg=32)
+    shot('crown', 256, orbit(-10, 6, 1.9), (0, 0, .15), 40)
+
+elif ITEM == 'house':
+    W = mat('wall', hexc('#fff1d6'), rough=.5, coat=.3); RF = mat('roof', hexc('#ff4a3a'), rough=.35, coat=.6)
+    rbox('body', (0, 0, -.25), (1.3, 1.0, 1.0), bevel=.08, m=W)
+    bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=1.12, radius2=0, depth=.85, location=(0, 0, .65), rotation=(0, 0, math.radians(45))); r = bpy.context.object
+    r.scale = (1.1, .85, 1); md = r.modifiers.new('bv', 'BEVEL'); md.width = .06; md.segments = 4; md.limit_method = 'NONE'; apply_mods(r); assign(r, RF)
+    rbox('door', (0, -.51, -.42), (.36, .06, .62), bevel=.05, m=mat('door', hexc('#9a5a2a'), rough=.5))
+    rbox('win', (.4, -.51, -.1), (.26, .05, .26), bevel=.04, m=mat('win', hexc('#7fd8ff'), rough=.1, coat=1))
+    rbox('chim', (.38, .1, .85), (.2, .2, .45), bevel=.04, m=RF)
+    shot('house', 256, orbit(-24, 6, 1.4), (0, 0, .05), 46)
+
+elif ITEM == 'swords':
+    STEEL = mat('steel', hexc('#e8eef8'), rough=.2, metal=.6, coat=.6)
+    for sx in (-1, 1):
+        root = empty('sw%d' % sx, (0, 0, 0))
+        rbox('blade', (0, 0, .35), (.18, .06, 1.25), bevel=.05, m=STEEL, parent=root)
+        bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=.13, radius2=0, depth=.25, location=(0, 0, 1.08), rotation=(0, 0, math.radians(45))); t = bpy.context.object; t.scale = (1, .35, 1); assign(t, STEEL); reparent(t, root)
+        rbox('guard', (0, 0, -.32), (.62, .14, .12), bevel=.05, m=GOLD, parent=root)
+        tube('grip', [(0, 0, -.38), (0, 0, -.72)], .07, m=mat('grip', hexc('#7a3b1b'), rough=.5), parent=root)
+        sphere('pom', (0, 0, -.78), .1, m=GOLD, seg=24, parent=root)
+        root.rotation_euler = (0, math.radians(38 * sx), 0)
+    shot('swords', 256, orbit(-6, 6, .4), (0, 0, .15), 44)
+
+elif ITEM == 'heart':
+    R_ = mat('red', hexc('#ff2f4a'), rough=.18, coat=1)
+    b = Blob('heart'); b.ball((-.42, 0, .3), .55); b.ball((.42, 0, .3), .55)
+    b.cap((-.55, 0, .1), (0, 0, -.85), .32); b.cap((.55, 0, .1), (0, 0, -.85), .32); b.cap((0, 0, .2), (0, 0, -.6), .45)
+    o = b.mesh('heart', voxel=.03, smooth=3, fillet=3, m=R_); o.scale = (1, .55, 1)
+    sphere('hl', (-.45, -.32, .5), .13, scale=(1, .4, .7), m=mat('hl', hexc('#ffffff'), rough=.2, emit=.5), seg=24)
+    shot('heart', 256, orbit(-8, 6, .6), (0, 0, -.05), 44)
+
+elif ITEM == 'drop':
+    D_ = mat('elx', hexc('#3aa8ff'), rough=.08, coat=1, sss=.2, emit=.2, emit_c=hexc('#1f7ae0'))
+    b = Blob('drop'); b.ball((0, 0, -.25), .62); b.cap((0, 0, -.25), (0, 0, .85), .55, r2=.03)
+    o = b.mesh('drop', voxel=.025, smooth=3, fillet=2, m=D_)
+    sphere('hl', (-.22, -.5, -.05), .12, scale=(1, .4, 1.6), m=mat('hl', hexc('#ffffff'), rough=.2, emit=.6), seg=24)
+    shot('drop', 256, orbit(-8, 6, .5), (0, 0, .1), 44)
+
+elif ITEM == 'gear':
+    M_ = mat('gr', hexc('#c8d2e8'), rough=.3, metal=.5, coat=.5)
+    cyl('g', (0, 0, 0), .78, .3, M_, rot=(math.radians(90), 0, 0), bevel=.05)
+    for i in range(8):
+        a = i * math.pi / 4
+        rbox('t%d' % i, (math.cos(a) * .86, 0, math.sin(a) * .86), (.3, .3, .3), bevel=.06, rot=(0, -a, 0), m=M_)
+    cyl('hole', (0, -.16, 0), .3, .05, mat('dk', hexc('#3a4366'), rough=.6), rot=(math.radians(90), 0, 0), bevel=.02)
+    shot('gear', 256, orbit(-12, 6, .9), (0, 0, 0), 46)
+
+elif ITEM == 'lock':
+    L_ = mat('lk', hexc('#c8d2e8'), rough=.25, metal=.5, coat=.6)
+    rbox('body', (0, 0, -.3), (1.1, .5, .9), bevel=.12, m=GOLD)
+    bpy.ops.mesh.primitive_torus_add(major_radius=.36, minor_radius=.1, location=(0, 0, .2), rotation=(math.radians(90), 0, 0)); sh = bpy.context.object; bpy.ops.object.shade_smooth(); assign(sh, L_)
+    sphere('kh', (0, -.26, -.25), .1, scale=(1, .4, 1), m=DARK, seg=24)
+    shot('lock', 256, orbit(-14, 6, .9), (0, 0, -.05), 46)
+
 elif ITEM.startswith('chest'):
     tier = int(ITEM[-1])
     body_c, band_m, sz = {1: ('#c46a2b', GOLD, 1.0), 2: ('#2f7cff', GOLD, 1.0), 3: ('#8a3cff', GOLD, 1.0)}[tier]

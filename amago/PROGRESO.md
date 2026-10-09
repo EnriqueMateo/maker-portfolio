@@ -40,6 +40,17 @@ Siguiente: arbusto y flores de Gemini para Pradera; luego bosque/volcán/trono/o
 - Iconos y cofres renderizados en 3D: `art/blender/icons.py` (pieza por pieza) → `art/blender/ui_icons.py` (recorte + contorno) → `ui/*.webp`. Al publicar el artifact, añadir `ui/*.webp` a `files`.
 - CSS de menús al final del `<style>` (bloque "menús (estilo Supercell)"); `.mbg` es el fondo a rayas, `.tabs` la barra de pestañas.
 
+## Retención y monetización (análisis con 4 agentes: retención, monetización, dirección de arte, "juice")
+
+Informes completos en `docs/` (retencion.md, monetizacion.md, direccion_arte_ui.md, recompensas_juice.md). Implementado:
+- **Economía:** `UPG` nuevo (héroe 1→9: 6.000 monedas y 3.600 ⚡), `CHESTS` (solo se ganan jugando, con garantía `PITY_MAX`), monedas por victoria según dificultad (tope 100/día), primera victoria del día (llave doble +30 monedas +20 ⚡), trofeos según dificultad (Fácil deja de dar trofeos en 300), rachas, escudo tras 2 derrotas, bot según trofeos (máx. 1 nivel por encima) y **tope de nivel por arena** `LV_CAP` (pagar no compra victorias).
+- **Retención:** calendario de 7 días sin castigo (`CAL1`/`CAL2`), misiones diarias (con 1 cambio gratis) y semanales, maestría por héroe (`MASTERY`, usa `S.hw`), premios de regreso (3/10/30 días), regalo de bienvenida, camino de trofeos infinito, amistosos que cuentan para misiones y pase.
+- **Pase:** temporadas de 28 días, 40 escalones de 200 fichas, pista gratis `PASS_F` y Premium `PASS_P` (solo contenido fijo), bóveda tras el 40, recuperación ×2 si vas con retraso, cobro automático al cambiar de temporada (`seasonRollover`).
+- **Monetización:** gemas (gratis y de pago separadas), Pase Premium 4,99 € o 450 gemas (retroactivo), Plus 9,99 €, saltos de escalón (solo Premium), pack de inicio 1,99 €, lote semanal, aceleradores con gemas con límite diario, cofres de la tienda "a la vista" (contenido fijo), aspectos (filtro de color, también en partida), pregunta de edad y tope de 30 €/mes para 13-17 (menores de 13 sin compras), máximo 1 oferta emergente al día y nunca tras perder, "Información de compras y probabilidades", "Restaurar compras".
+- **Pagos:** adaptador `PAY` (`PAY_TEST` simula sin cobrar con `?paytest=1` o `window.AMAGO_PAY_TEST`; `PAY_NONE` oculta lo de pago; la app nativa debe poner `window.AMAGO_PAY` con RevenueCat o cordova-plugin-purchase). Entrega idempotente (`grantSku`). **Antes de cobrar de verdad: guardado en la nube y validación de recibos en el servidor.**
+- **UI:** sistema de diseño nuevo (bloque CSS "menús (estilo Supercell): sistema de diseño"), ficha de héroe a pantalla completa, pase de dos pistas, tienda con destacado, camino con raíl, apertura de cofre con luz de rareza honesta, subida de nivel con comparación, resultados en secuencia, recursos que vuelan a la barra (`flyRes`), bus de audio con compresor y sonidos nuevos.
+- Iconos 3D provisionales (Blender) en `ui/`: el usuario los sustituirá por arte de Gemini con los mismos nombres. Al publicar el artifact, poner `window.AMAGO_PAY_TEST=true` para probar compras sin cobro.
+
 ## Pendiente después
 
 - Pulir: KO más claro, resumen de ronda, ronda de práctica guiada, pedir nombre tras la primera partida.
