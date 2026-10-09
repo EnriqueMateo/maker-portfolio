@@ -1141,18 +1141,28 @@ function prepModel(scn,id){
   scn.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;const m=o.material;if(m&&m.isMeshStandardMaterial){m.envMapIntensity=.7;m.roughness=Math.min(m.roughness??1,.6);}}});
   const g=new T.Group();g.add(scn);return g;
 }
+/* carga un GLB; en hosts que solo sirven JSON llega como {"glb":"base64"} y se decodifica aquí (sin fetch de data:/blob:) */
+function loadGLB(url,ok,bad){
+  const L=new T.GLTFLoader();
+  if(EXT===".glb")return L.load(url,ok,undefined,bad);
+  fetch(url).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(j=>{
+    const bin=atob(j.glb),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
+    const cib=window.createImageBitmap;try{window.createImageBitmap=undefined;}catch(e){}
+    L.parse(buf.buffer,"",g=>{try{window.createImageBitmap=cib;}catch(e){}ok(g);},e=>{try{window.createImageBitmap=cib;}catch(e2){}bad(e);});
+  }).catch(bad);
+}
 function loadModels(){
   if(!T.GLTFLoader)return Promise.resolve();
   const L=new T.GLTFLoader();
-  return Promise.all(MODEL_LIST.map(id=>new Promise(res=>L.load(BASE+"models/"+id+EXT,g=>{try{MODELS[id]=prepModel(g.scene,id);}catch(e){console.warn(e);}res();},undefined,e=>{console.warn("Sin modelo",id,e);res();}))));
+  return Promise.all(MODEL_LIST.map(id=>new Promise(res=>loadGLB(BASE+"models/"+id+EXT,g=>{try{MODELS[id]=prepModel(g.scene,id);}catch(e){console.warn(e);}res();},e=>{console.warn("Sin modelo",id,e);res();}))));
 }
 const ARENA={},arenaP={};
 function loadArena(k){
   if(!T.GLTFLoader||!k)return Promise.resolve(null);
   if(arenaP[k])return arenaP[k];
-  return arenaP[k]=new Promise(res=>new T.GLTFLoader().load(BASE+"arenas/"+k+EXT,g=>{
+  return arenaP[k]=new Promise(res=>loadGLB(BASE+"arenas/"+k+EXT,g=>{
     g.scene.traverse(o=>{if(o.isMesh){o.material=new T.MeshBasicMaterial({vertexColors:true});o.castShadow=o.receiveShadow=false;}});
-    ARENA[k]=g.scene;res(g.scene);},undefined,e=>{console.warn("Sin arena",k,e);res(null);}));
+    ARENA[k]=g.scene;res(g.scene);},e=>{console.warn("Sin arena",k,e);res(null);}));
 }
 function glbHero(id){
   const root=new T.Group(),body=new T.Group();body.name="body";body.position.y=.16;root.add(body);
@@ -2120,7 +2130,10 @@ function bootGame(){
   else showHome();
   if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
 }
-if(GFX){app.innerHTML=`<div class="loading"><div class="out">AMAGO</div><div class="spin"></div></div>`;Promise.race([Promise.all([GFX.loadModels(),GFX.loadArena(arenaOf(S.tro).a.k)]),new Promise(r=>setTimeout(r,20000))]).then(bootGame);}
+if(GFX){app.innerHTML=`<div class="loading"><div class="out">AMAGO</div><div class="spin"></div></div>`;{const all=Promise.all([GFX.loadModels(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
+  Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
+  /* si la conexión es lenta y los modelos llegan después, se cambian al momento */
+  all.then(()=>{if(late&&booted){try{GFX.bakePortraits();}catch(e){}if(UI.screen!=="game"&&UI.screen!=="pick")refreshScreen();}});}}
 else bootGame();
 
 </script>
