@@ -396,7 +396,7 @@ img.h3{width:100%;height:100%;object-fit:contain;display:block;pointer-events:no
 .hcard2.lock .hm img,.hchip.lock img,.pt.lock img,.rrow:not(.reach) .rwh img{filter:brightness(0) opacity(.5)}
 .mk.dead img{filter:grayscale(1) brightness(.6)}
 .hcard2 .hm img{filter:drop-shadow(0 6px 4px rgba(0,0,0,.35))}
-canvas.bigmodel{position:relative;z-index:1;width:min(78vw,330px);height:min(86vw,360px);touch-action:none;cursor:grab}
+canvas.bigmodel{position:relative;z-index:1;width:min(96vw,440px);height:min(118vw,520px);max-height:56svh;touch-action:none;cursor:grab}
 .showcase .nameplate{cursor:pointer;margin-top:-26px}
 #app.game{max-width:none;padding:0}
 .g3{position:fixed;inset:0;overflow:hidden;background:#5fb8ff}
@@ -1584,7 +1584,7 @@ function mount(canvas,heroId){
   r=new T.WebGLRenderer({canvas,antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));GFX.setupRenderer(r);r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
   sc=new T.Scene();GFX.lights(sc,true,r);
   const plat=GFX.part(new T.CylinderGeometry(.62,.7,.18,64),GFX.mat(0x3a48e0,{r:.2,cc:1}));plat.position.y=-.11;plat.traverse(o=>{if(o.isMesh)o.receiveShadow=true;});sc.add(plat);
-  cam=new T.PerspectiveCamera(28,1,.1,30);cam.position.set(0,1.3,4.1);cam.lookAt(0,.55,0);
+  cam=new T.PerspectiveCamera(28,1,.1,30);cam.position.set(0,1.05,3.25);cam.lookAt(0,.62,0);
   set(heroId);
   const resize=()=>{const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();};resize();
   canvas.onpointerdown=e=>{drag={x:e.clientX,r:rotY};canvas.setPointerCapture(e.pointerId);};
