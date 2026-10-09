@@ -34,7 +34,7 @@ const server = http.createServer((req, res) => {
     res.end(fs.readFileSync(path.join(__dirname, "..", "vendor", "three.min.js")));
     return;
   }
-  const asset = url.match(/^\/(models|portraits)\/([a-z0-9_-]+)\.(glb|webp)$/);
+  const asset = url.match(/^\/(models|portraits|arenas)\/([a-z0-9_-]+)\.(glb|webp)$/);
   if (asset) {
     const file = path.join(__dirname, "..", asset[1], asset[2] + "." + asset[3]);
     if (!fs.existsSync(file)) {
