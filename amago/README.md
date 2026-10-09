@@ -2,7 +2,41 @@
 
 Hundir la flota con héroes que se mueven. Encuéntralos antes de que te encuentren.
 
-Todo el juego está en un solo archivo HTML sin dependencias (solo carga dos fuentes de Google Fonts). Abre `index.html` en el navegador del móvil o del ordenador.
+Todo el juego está en un solo archivo HTML sin dependencias (solo carga dos fuentes de Google Fonts). Abre `index.html` en el navegador del móvil o del ordenador para jugar contra el bot.
+
+## Modo online con amigos
+
+El modo online necesita el servidor de `server/`. El servidor sirve el propio juego y gestiona las salas con WebSocket. Es autoritativo: simula la partida y a cada jugador solo le envía lo que puede ver, así que nadie puede saber dónde está el rival mirando el código.
+
+El motor de reglas vive una sola vez, dentro de `index.html`, entre los comentarios `ENGINE-START` y `ENGINE-END`. El servidor lo lee de ahí al arrancar, así que el juego contra el bot y el online siempre usan las mismas reglas.
+
+### Probarlo en tu ordenador
+
+```bash
+cd amago/server
+npm install
+npm start
+```
+
+Abre `http://localhost:8080` en dos pestañas (o en el móvil, con la IP de tu ordenador en la misma wifi). En una pestaña: modo **Con amigos** → **Crear sala**. En la otra: escribe el código de 4 letras → **Unirse**.
+
+### Publicarlo para jugar desde cualquier móvil (Render, plan gratuito)
+
+1. Crea una cuenta en [render.com](https://render.com) y conecta tu GitHub.
+2. **New → Web Service** y elige este repositorio.
+3. Configura:
+   - **Root Directory:** `amago/server`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+   - **Health Check Path:** `/health`
+4. Crea el servicio. Render te dará una dirección tipo `https://amago-xxxx.onrender.com`: ábrela en el móvil y comparte el código de sala con tus amigos.
+
+En el plan gratuito el servidor se duerme tras un rato sin uso y tarda unos segundos en despertar con la primera visita.
+
+### Mensajes del protocolo
+
+Cliente → servidor: `hello`, `create`, `join {code}`, `pick {hero}`, `move {x,y}`, `fire {x,y}`, `rematch`, `leave`.
+Servidor → cliente: `room {code}`, `matched {opp}`, `pickPhase`, `oppPicked`, `roundStart {you, opp, view}`, `go`, `view {v}` (10 veces por segundo), `ev` (disparos, impactos, objetos), `roundEnd`, `matchEnd`, `rematchAsk`, `oppLeft`, `error`.
 
 ## Reglas (versión 4: tiempo real con elixir)
 
@@ -29,6 +63,13 @@ Todo el juego está en un solo archivo HTML sin dependencias (solo carga dos fue
 | Truco (Zorro) | Raro | 3 | Rápida | Línea de 3; huella falsa | 3 | 1 | Sí |
 | Rayo (Mago) | Épico | 3 | Normal | Diagonal de 3 | 4 | 2 | No |
 | Bum (Bomba) | Legendario | 3 | Normal | Cruz de 5 | 6 | 2 | Sí |
+
+## Menús
+
+- **Inicio** al estilo de los juegos de héroes para móvil: perfil con nivel, trofeos, héroe de portada en un pedestal, selector de modo (contra bot o con amigos) y botón JUGAR.
+- **Héroes:** colección con tarjetas por rareza (común, raro, épico, legendario), victorias por héroe y ficha con sus estadísticas. Puedes elegir el héroe de portada.
+- **Camino de trofeos:** premios cada pocos trofeos (cofres y héroes garantizados) que se reclaman con un botón.
+- Los héroes tienen arte nuevo: manos, pies, sombreado y parpadeo.
 
 ## Lo que lo hace adictivo
 
