@@ -410,6 +410,31 @@ canvas.bigmodel{position:relative;z-index:1;width:min(78vw,330px);height:min(86v
 .loading{margin:auto;display:flex;flex-direction:column;align-items:center;gap:22px;font-size:54px;font-weight:900;color:#fff}
 .loading .spin{width:46px;height:46px;border-radius:50%;border:6px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.diffrow{display:flex;gap:8px;margin:-2px 0 6px}
+.diffchip{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:16px;border:3px solid transparent;background:rgba(255,255,255,.1);color:#fff;font:inherit}
+.diffchip span{font-size:24px}.diffchip b{font-size:15px}.diffchip small{font-size:11px;opacity:.8;text-align:center;line-height:1.2}
+.diffchip.on{border-color:#ffd23a;background:rgba(255,210,58,.18)}
+
+/* ===== estilo v8: brillante y con relieve, a juego con los personajes 3D ===== */
+:root{--bg:#1d7fe0;--bg2:#0f4fb3;--panel:#2b6fe0;--panel2:#4a8cff;--muted:#d6e6ff;color-scheme:light dark}
+body,body[style]{background:
+  repeating-linear-gradient(135deg,rgba(255,255,255,.055) 0 22px,transparent 22px 44px) fixed,
+  radial-gradient(130% 80% at 50% 0%,#6cc8ff 0%,var(--arena2,#2a8cf0) 42%,var(--arena3,#1450b8) 100%) fixed,#1450b8}
+.tro,.pillbtn,.iconbtn,.bnav button:not(.on),.prof,.modebtn,.sheet,.hcard2,.statbox,.pickcard,.ebar,.act,.side2{background:linear-gradient(180deg,#5ba2ff 0%,#2f6fe0 55%,#2459c7 100%)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 4px 0 var(--ink)!important}
+.sheet{border-radius:22px!important}
+.bnav{background:linear-gradient(transparent,rgba(10,40,120,.75) 35%)!important}
+.bnav button{font-size:14px!important;padding:7px 0!important}
+.bnav .ni{font-size:26px!important}
+.toast{font-size:17px!important;padding:12px 14px!important}
+.diffchip{background:linear-gradient(180deg,#5ba2ff,#2f6fe0);border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 4px 0 var(--ink)}
+.diffchip.on{background:linear-gradient(180deg,#ffe56b,#ffc21a);color:var(--ink);border-color:var(--ink)}
+.diffchip.on small{opacity:1}
+.stage::after{background:radial-gradient(closest-side,rgba(255,255,255,.55),transparent)!important}
+.gbtn{border-radius:18px;box-shadow:inset 0 3px 0 rgba(255,255,255,.6),0 6px 0 var(--gold-d),0 6px 0 3px var(--ink)}
+.gbtn.red{box-shadow:inset 0 3px 0 rgba(255,255,255,.5),0 6px 0 var(--foe-d),0 6px 0 3px var(--ink)}
+/* textos de ayuda grandes y claros en partida */
+.status,.tipbox,.hint{font-size:17px!important;line-height:1.3!important}
+.act{font-size:15px!important}
 </style>
 </head>
 <body>
@@ -480,7 +505,7 @@ function newRound(tp,tb,opts){
   opts=opts||{};
   const R={now:0,heroes:{p:newHero(tp,rnd(N),rnd(N)),b:newHero(tb,rnd(N),rnd(N))},elx:{p:ELX_START,b:ELX_START},
     boosts:[],projs:[],marks:{p:[],b:[]},nextBoost:3,sudden:false,nextPing:SUDDEN_T,over:false,dmg:{p:0,b:0},paused:true};
-  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,eps:opts.bot.eps,passiveUntil:opts.bot.passive};
+  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1};
   return R;
 }
 function moveTo(R,s,x,y){
@@ -591,30 +616,30 @@ function botUpdate(R,dt,hk){
     else if(m.t==="cerca"){B.belief[m.y][m.x]*=.05;for(const [dx,dy] of D4){const nx=m.x+dx,ny=m.y+dy;if(inB(nx,ny))B.belief[ny][nx]*=1.6;}B.belief=normalize(B.belief);}
   }
   if(me.visionUntil>R.now)setExact(foe.x,foe.y,.95);
-  if(R.now<B.next)return;B.next=R.now+.2;
+  if(R.now<B.next)return;B.next=R.now+B.think*(.75+Math.random()*.5);
   const hpLead=me.hp/me.max-foe.hp/foe.max,eps=B.eps+(hpLead>.34?.15:0);
   const danger=R.projs.filter(p=>p.d==="b"&&p.warn&&R.now-p.launched>=B.react);
   const unsafe=(x,y)=>danger.some(p=>inArea(p.cells,x,y));
   const adj=()=>D4.map(([dx,dy])=>[me.x+dx,me.y+dy]).filter(([x,y])=>inB(x,y)&&!unsafe(x,y));
-  if(unsafe(me.x,me.y)){const o=adj();if(o.length&&R.elx.b>=H.mc){me.path=[pick(o)];return;}}
+  if(unsafe(me.x,me.y)&&Math.random()<B.dodge){const o=adj();if(o.length&&R.elx.b>=H.mc){me.path=[pick(o)];return;}}
   if(B.relocateAt&&R.now>=B.relocateAt&&!me.path.length){
     B.relocateAt=0;
     const o=allCells().filter(([x,y])=>{const d=Math.abs(x-me.x)+Math.abs(y-me.y);return d>=1&&d<=2&&!unsafe(x,y);});
     if(o.length&&R.elx.b>=H.mc*2){const c=pick(o);me.path=pathTo(me,c[0],c[1]);return;}
   }
   if(R.now<B.passiveUntil)return;
-  if(R.now>=me.cdUntil&&R.elx.b>=H.cost&&!me.path.length){
+  if(R.now>=me.cdUntil&&R.now-B.lastShot>=B.gap&&R.elx.b>=H.cost&&!me.path.length){
     let bel=B.belief.map(r=>r.slice());
     for(const bo of R.boosts)bel[bo.y][bo.x]+=.06;
     if(H.travel>.6)bel=diffuseB(bel,Math.min(.9,H.travel/HF.step*.35));
     const best=bestArea(H.pat,bel);
-    let thr=H.pat==="one"?.42:.38;if(R.elx.b>=9)thr*=.55;
+    let thr=(H.pat==="one"?.42:.38)*B.thr;if(R.elx.b>=9)thr*=.55;
     if(best.v>=thr){
       let t=best.t;
       if(Math.random()<eps)t=[clampN(t[0]+rnd(3)-1),clampN(t[1]+rnd(3)-1)];
       if(Math.random()<eps*.5)t=[rnd(N),rnd(N)];
-      fire(R,"b",t[0],t[1],hk);
-      if(!H.stealth)B.relocateAt=R.now+.25+Math.random()*.6;
+      fire(R,"b",t[0],t[1],hk);B.lastShot=R.now;
+      if(!H.stealth&&Math.random()<B.moveP)B.relocateAt=R.now+.25+Math.random()*.6;
       return;
     }
   }
@@ -676,7 +701,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* ================= guardado ================= */
 const SAVE_KEY="amago-v3";
-const DEF={tro:0,unl:STARTERS.slice(),chests:0,tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",claimed:[],xp:0,hw:{}};
+const DEF={tro:0,unl:STARTERS.slice(),chests:0,tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",claimed:[],xp:0,hw:{}};
 function loadSave(){
   let s;try{s=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");}catch(e){s=null;}
   s=Object.assign(clone(DEF),s||{});
@@ -1361,7 +1386,7 @@ function build(canvasEl,R,k){
     tiles[b]=[];
     for(let y=0;y<5;y++)for(let x=0;x<5;x++){
       const w=tileWorld(b,x,y),odd=(x+y)%2;
-      const col=theme.tile[odd];
+      const col=b==="b"?[0xff8c8c,0xf26d7d][odd]:theme.tile[odd];
       const m=new T.Mesh(TILE_GEO,new T.MeshBasicMaterial({map:tileTex(col,(x*7+y*13+(b==="p"?0:5))%6+1,theme.stone)}));m.castShadow=false;m.position.set(w.x,-.15,w.z);m.receiveShadow=true;m.userData={b,x,y,base:-.15};root.add(m);
       const dec=new T.Mesh(new T.PlaneGeometry(.9,.9),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false}));dec.rotation.x=-Math.PI/2;dec.position.set(w.x,.012,w.z);root.add(dec);
       const icon=new T.Sprite(new T.SpriteMaterial({map:iconTex("💧"),transparent:true,depthTest:false}));icon.position.set(w.x,.55,w.z);icon.scale.setScalar(.6);icon.visible=false;icon.renderOrder=5;root.add(icon);
@@ -1589,7 +1614,8 @@ function statsHTML(id){
     <div><span>${H.warn?"🔔":"⚡"} Aviso</span><b>${H.warn?"El rival lo ve venir":"Sin aviso: casi imposible de esquivar"}</b></div>
   </div><p class="special">${H.d}</p>`;
 }
-function setBg(){const {a}=arenaOf(S.tro);document.body.style.setProperty("--arena",a.bg);}
+const ARENA_BG={pradera:["#2a8cf0","#1450b8"],bosque:["#23a86e","#11613f"],volcan:["#e0562a","#7a1f2a"],trono:["#7a52f0","#3a1f9a"],olimpo:["#f0b02a","#b0681a"]};
+function setBg(){const {a}=arenaOf(S.tro),c=ARENA_BG[a.k]||ARENA_BG.pradera;const st=document.body.style;st.setProperty("--arena",a.bg);st.setProperty("--arena2",c[0]);st.setProperty("--arena3",c[1]);}
 function nav(active){
   const it=(t,i,l,dot)=>`<button class="${active===t?"on":""}" data-a="tab" data-t="${t}">${dot?'<i class="dot"></i>':""}<span class="ni">${i}</span><span>${l}</span></button>`;
   return `<nav class="bnav">${it("heroes","🦸","Héroes")}${it("home","🏠","Inicio")}${it("road","🏆","Trofeos",claimable().length>0)}</nav>`;
@@ -1614,7 +1640,7 @@ function showHome(){
     ${claimable().length?`<button class="sidebtn" data-a="tab" data-t="road">🎁<span>¡Premio!</span></button>`:""}
   </div>
   <div class="playrow">
-    <button class="modebtn" data-a="mode"><small>MODO</small><b>${S.mode==="bot"?"⚔️ Contra bot":"👥 Con amigos"}</b><em>Cambiar</em></button>
+    <button class="modebtn" data-a="mode"><small>MODO</small><b>${S.mode==="bot"?"⚔️ Bot "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase():"👥 Con amigos"}</b><em>Cambiar</em></button>
     <button class="gbtn play pulse" data-a="play">JUGAR</button>
   </div>
   ${nav("home")}`;
@@ -1682,6 +1708,7 @@ function renderModal(){
   }else if(M.k==="mode"){
     m.innerHTML=`<div class="sheet"><h2 class="out">Elige modo</h2>
       <button class="modecard ${S.mode==="bot"?"on":""}" data-a="setmode" data-m="bot"><span class="mi">⚔️</span><span><b>Contra bot</b><small>Gana trofeos y cofres</small></span></button>
+      <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${(S.diff||"facil")===k?"on":""}" data-a="setdiff" data-d="${k}"><span>${d.i}</span><b>${d.n}</b><small>${d.d}</small></button>`).join("")}</div>
       <button class="modecard ${S.mode==="friends"?"on":""}" data-a="setmode" data-m="friends"><span class="mi">👥</span><span><b>Con amigos</b><small>Sala privada con código · amistoso</small></span></button></div>`;
   }else if(M.k==="friends"){
     if(!ONLINE_OK){
@@ -1736,12 +1763,17 @@ async function openChestTap(){
 }
 
 /* ================= partida contra el bot ================= */
+/* dificultad del bot: Fácil está pensada para quien juega por primera vez */
+const DIFFS={
+  facil:{n:"Fácil",i:"🙂",d:"Tranquilo, falla bastante",think:1.15,react:1.1,dodge:.3,eps:.5,passive:6,gap:4,thr:1.35,moveP:.35},
+  normal:{n:"Normal",i:"😎",d:"Para quien ya sabe jugar",think:.55,react:.6,dodge:.7,eps:.22,passive:3,gap:1.8,thr:1.1,moveP:.75},
+  dificil:{n:"Difícil",i:"😈",d:"Rápido y certero",think:.2,react:.35,dodge:1,eps:.08,passive:1.5,gap:0,thr:1,moveP:1},
+};
 function botParams(){
-  let react=.35,eps=.08,passive=1.5;
-  if(G.tutorial){react=.9;eps=.45;passive=7;}
-  if(G.score.b>G.score.p){react+=.2;eps+=.15;}
-  if(S.tro<60){eps+=.07;react+=.1;}
-  return {react,eps,passive};
+  const P=Object.assign({},DIFFS[S.diff]||DIFFS.facil);
+  if(G.tutorial){P.react=Math.max(P.react,.9);P.eps=Math.max(P.eps,.45);P.passive=Math.max(P.passive,7);}
+  if(G.score.b>G.score.p){P.react+=.2;P.eps+=.15;}
+  return P;
 }
 function startMatch(){
   sfx("go");actx();
@@ -2037,6 +2069,7 @@ document.addEventListener("click",e=>{
     case "name":sfx("tap");UI.modal={k:"name"};renderModal();break;
     case "namesave":{const v=($("#nameinp").value||"").replace(/[<>&"]/g,"").trim().slice(0,14);if(v){S.name=v;save();}UI.modal=null;renderModal();refreshScreen();break;}
     case "mode":sfx("tap");UI.modal={k:"mode"};renderModal();break;
+    case "setdiff":S.diff=el.dataset.d;S.mode="bot";save();sfx("sel");renderModal();showHome();break;
     case "setmode":S.mode=el.dataset.m;save();sfx("sel");UI.modal=null;renderModal();showHome();break;
     case "hero":sfx("tap");UI.modal={k:"hero",id:el.dataset.id};renderModal();break;
     case "fav":S.fav=el.dataset.id;save();sfx("sel");UI.modal=null;renderModal();refreshScreen();break;
