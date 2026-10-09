@@ -4,28 +4,31 @@ Hundir la flota con héroes que se mueven. Encuéntralos antes de que te encuent
 
 Todo el juego está en un solo archivo HTML sin dependencias (solo carga dos fuentes de Google Fonts). Abre `index.html` en el navegador del móvil o del ordenador.
 
-## Reglas (versión 3, simplificada)
+## Reglas (versión 4: tiempo real con elixir)
 
-- Cada jugador tiene 3 héroes escondidos en un tablero de 5×5.
-- **Una jugada por turno:** eliges un héroe y atacas en el tablero rival o lo mueves una casilla. Los dos jugáis a la vez.
-- Primero se resuelven los movimientos y después los ataques.
-- **Atacar te delata:** el rival ve una huella 👣 donde estás (salvo los héroes sigilosos).
-- Si fallas pero había un rival al lado, sale **¡CERCA! 🔥**.
-- **Radar 📡:** se carga solo (y más rápido si pierdes un héroe). Revela a un rival.
-- La mayoría de héroes cae de un golpe. Ronda de 12 turnos como máximo; en los 3 últimos el radar se carga para los dos. Partida al mejor de 3.
+- **1 contra 1, sin turnos.** Cada jugador tiene un solo héroe escondido en su tablero de 5×5.
+- **3 rondas, 3 héroes:** antes de cada ronda eliges héroe y no puedes repetirlo. Gana quien se lleve 2 rondas.
+- **Todo cuesta elixir** (máximo 10, se recarga 1 por segundo): moverse cuesta según el héroe y disparar según su ataque.
+- Toca tu tablero para moverte (el héroe camina casilla a casilla) y el tablero rojo para disparar.
+- **Disparar te delata:** el rival ve una huella 👣 durante 2 s (Sombra no deja huella; la de Truco sale en una casilla falsa).
+- **Aviso o sin aviso:** los ataques con aviso marcan la zona en rojo en el tablero del rival y se pueden esquivar; Sombra y Rayo pegan casi al instante.
+- **Objetos cebo:** salen en la misma casilla en los dos tableros, con su tiempo de vida visible. Si el rival lo coge, desaparece y sabes dónde está.
+  - 💧 +4 elixir · ⚡ elixir al doble 6 s · 👁 ves al rival 2,5 s · 🛡️ para el próximo golpe
+- **¡CERCA! 🔥** si fallas por una casilla.
+- Ronda de 90 s. Desde el segundo 60, muerte súbita: os veis cada 5 s y el elixir va más rápido. Si se acaba el tiempo, gana quien tenga más vida.
 
 ## Héroes
 
-| Héroe | Rareza | Ataque |
-|---|---|---|
-| Flecha (Arquera) | Común | Línea de 3 en fila |
-| Brasa (Dragón) | Común | Fuego 2×2 que cae al turno siguiente (recarga 1) |
-| Sombra (Ninja) | Común | 1 casilla, sin huella |
-| Muro (Gólem) | Común | Columna de 3. Aguanta 2 golpes |
-| Ojo (Búho) | Raro | Revela una zona 2×2, sin huella |
-| Truco (Zorro) | Raro | Ataque falso y huella falsa |
-| Rayo (Mago) | Épico | Diagonal de 3 |
-| Bum (Bomba) | Legendario | Cruz de 5 (recarga 1) |
+| Héroe | Rareza | Vida | Velocidad | Ataque | Coste | Daño | Aviso |
+|---|---|---|---|---|---|---|---|
+| Flecha (Arquera) | Común | 3 | Rápida | Línea de 3 | 3 | 1 | Sí |
+| Brasa (Dragón) | Común | 4 | Lenta | 2×2 | 5 | 2 | Sí |
+| Sombra (Ninja) | Común | 2 | Muy rápida | 1 casilla, sin huella | 3 | 1 | No |
+| Muro (Gólem) | Común | 6 | Lenta | Columna de 3 | 4 | 1 | Sí |
+| Ojo (Búho) | Raro | 2 | Rápida | 1 casilla; oye los pasos del rival | 2 | 1 | Sí |
+| Truco (Zorro) | Raro | 3 | Rápida | Línea de 3; huella falsa | 3 | 1 | Sí |
+| Rayo (Mago) | Épico | 3 | Normal | Diagonal de 3 | 4 | 2 | No |
+| Bum (Bomba) | Legendario | 3 | Normal | Cruz de 5 | 6 | 2 | Sí |
 
 ## Lo que lo hace adictivo
 
@@ -38,6 +41,6 @@ Todo el juego está en un solo archivo HTML sin dependencias (solo carga dos fue
 
 ## Bot
 
-Lleva un mapa de probabilidad de dónde están tus héroes (huellas, aciertos, fallos, avisos de cerca y movimientos posibles), ataca donde más probable es acertar y huye cuando se delata. En 400 rondas simuladas gana el 94 % contra un bot aleatorio. Para repetirlo, en la consola: `__amagoSim(400, "hard", "easy")`.
+Lleva en tiempo real un mapa de probabilidad de dónde está tu héroe (huellas, objetos que coges, aciertos, fallos, avisos de cerca y lo rápido que te mueves), dispara cuando cree que va a acertar, tiende emboscadas en los objetos, esquiva los ataques con aviso tras un tiempo de reacción y se aparta después de disparar. Cuando va ganando reacciona más lento y apunta peor.
 
 El progreso (trofeos, cofres, héroes) se guarda en el navegador con `localStorage`.
