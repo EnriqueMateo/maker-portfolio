@@ -1239,12 +1239,17 @@ function iconTex(k){
 const TILE_GEO=GFX.rbox(.96,.3,.96,.07,5);
 function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
 /* hierba pintada para una casilla: bisel claro arriba, sombra abajo y briznas */
-function tileTex(hex,seed){
-  const k="tile"+hex+"_"+seed;if(texCache[k])return texCache[k];
+function tileTex(hex,seed,stone){
+  const k="tile"+hex+"_"+seed+(stone?"s":"");if(texCache[k])return texCache[k];
   const N=256,c=document.createElement("canvas");c.width=c.height=N;const g=c.getContext("2d"),r=rng(seed);
   const base=hex,css=(h,l)=>{let r=(h>>16&255)/255,g2=(h>>8&255)/255,b=(h&255)/255;const mx=Math.max(r,g2,b),mn=Math.min(r,g2,b);let H=0,S=0,L=(mx+mn)/2;if(mx!==mn){const d=mx-mn;S=L>.5?d/(2-mx-mn):d/(mx+mn);H=mx===r?(g2-b)/d+(g2<b?6:0):mx===g2?(b-r)/d+2:(r-g2)/d+4;H*=60;}return `hsl(${H.toFixed(0)},${Math.min(100,S*100+6).toFixed(0)}%,${Math.max(0,Math.min(100,(L+l)*100)).toFixed(0)}%)`;};
   g.fillStyle=css(base,0);g.fillRect(0,0,N,N);
   const gr=g.createRadialGradient(N*.45,N*.4,N*.1,N*.5,N*.5,N*.75);gr.addColorStop(0,"rgba(255,255,160,.12)");gr.addColorStop(1,"rgba(0,40,0,.12)");g.fillStyle=gr;g.fillRect(0,0,N,N);
+  if(stone){
+    for(let i=0;i<180;i++){g.fillStyle=css(base,r()<.5?-.08:.08);g.globalAlpha=.6;g.beginPath();g.arc(r()*N,r()*N,1.5+r()*3,0,7);g.fill();}
+    g.globalAlpha=1;g.strokeStyle=css(base,-.2);g.lineWidth=2.5;g.lineCap="round";
+    for(let i=0;i<2;i++){let x=30+r()*(N-60),y=30+r()*(N-60);g.beginPath();g.moveTo(x,y);for(let j=0;j<4;j++){x+=(r()-.5)*50;y+=(r()-.5)*50;g.lineTo(x,y);}g.stroke();}
+  }else
   for(let i=0;i<260;i++){const x=r()*N,y=r()*N,h=6+r()*10,l=r()<.5?-.07:.07;g.strokeStyle=css(base,l);g.lineWidth=2+r()*1.5;g.lineCap="round";
     g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+(r()-.5)*6,y-h*.6,x+(r()-.5)*8,y-h);g.stroke();}
   for(let i=0;i<5;i++){const x=20+r()*(N-40),y=20+r()*(N-40);g.fillStyle=css(base,.14);g.beginPath();g.ellipse(x,y,10+r()*14,6+r()*8,r()*3,0,7);g.globalAlpha=.35;g.fill();g.globalAlpha=1;}
@@ -1292,10 +1297,10 @@ function tree(x,z,s=1){const g=new T.Group();const tr=part(Cy(.08,.11,.5,8),toon
 function rock(x,z,s=1){const r=part(new T.DodecahedronGeometry(.28,0),toon(0x9aa3b5),.06);r.position.set(x,0,z);r.scale.set(s,s*.7,s);r.rotation.set(Math.random(),Math.random()*6,0);return r;}
 const THEMES={
   pradera:{sky:["#3fb2ff","#bfeaff"],water:0x1e9be6,tile:[0x86d84c,0x62b73a]},
-  bosque:{sky:["#53c79a","#d6f5e4"],water:0x22a596,tile:[0x5cb845,0x4aa338]},
-  volcan:{sky:["#4a1f3a","#ff9a5e"],water:0xff5a14,lava:1,tile:[0xa3918a,0x8b7a74]},
-  trono:{sky:["#7a5cff","#e3d8ff"],water:0x5a3fd0,tile:[0xf1ecff,0xddd3ff]},
-  olimpo:{sky:["#ffd36a","#fff6dc"],water:0xffffff,tile:[0xfffaf0,0xf0e4c6]},
+  bosque:{sky:["#2fae84","#c9f2dc"],water:0x168f84,tile:[0x5cb845,0x479f35],bed:0x1d4418},
+  volcan:{sky:["#3a1730","#ff8a4e"],water:0xff5a14,lava:1,tile:[0x8e7f86,0x74656d],bed:0x24161a,stone:1},
+  trono:{sky:["#5a3fd8","#dccfff"],water:0x4a2fc0,tile:[0xc9b8ff,0xab98ee],bed:0x33235e,stone:1},
+  olimpo:{sky:["#ffc94a","#fff4d6"],water:0xffffff,tile:[0xfff4dc,0xead9b0],bed:0xa8822e,stone:1},
 };
 function skyTex(c){const cv=document.createElement("canvas");cv.width=4;cv.height=256;const g=cv.getContext("2d");const gr=g.createLinearGradient(0,0,0,256);gr.addColorStop(0,c[0]);gr.addColorStop(1,c[1]);g.fillStyle=gr;g.fillRect(0,0,4,256);const t=new T.CanvasTexture(cv);t.colorSpace=T.SRGBColorSpace;return t;}
 let theme=THEMES.pradera;
@@ -1311,6 +1316,14 @@ function build(canvasEl,R,k){
   if(!baked)GFX.loadArena(k);
   const water=new T.Mesh(new T.PlaneGeometry(80,80),new T.MeshBasicMaterial({color:theme.water}));water.rotation.x=-Math.PI/2;water.position.y=-.9;root.add(water);
   for(let i=0;i<26;i++){const f=new T.Mesh(B(.6+Math.random()*.8,.02,.06),new T.MeshBasicMaterial({color:theme.lava?0xffd27a:0xffffff,transparent:true,opacity:.55}));f.position.set(-9+Math.random()*18,-.88,-1+Math.random()*2+(Math.random()<.5?-8+Math.random()*16:0));f.userData.v=.3+Math.random()*.5;root.add(f);deco.push(f);}
+  if(!theme.lava&&theme.water!==0xffffff){/* espuma blanca alrededor de las islas */
+    const N=512,W=20,c=document.createElement("canvas");c.width=c.height=N;const g=c.getContext("2d"),px=v=>(v+W/2)/W*N;
+    const rr=(x0,z0,x1,z1,r)=>{g.beginPath();g.roundRect(px(x0),px(z0),px(x1)-px(x0),px(z1)-px(z0),r/W*N);};
+    g.filter="blur(6px)";g.strokeStyle="rgba(255,255,255,.85)";g.lineWidth=7;
+    for(const sz of [1,-1]){rr(-3.7,sz>0?.3:-6.4,3.7,sz>0?6.4:-.3,.8);g.stroke();rr(-7,sz>0?6.7:-9.4,7,sz>0?9.4:-6.7,1);g.stroke();}
+    const ft=new T.CanvasTexture(c);const foam=new T.Mesh(new T.PlaneGeometry(W,W),new T.MeshBasicMaterial({map:ft,transparent:true,depthWrite:false,opacity:.8}));
+    foam.rotation.x=-Math.PI/2;foam.position.y=-.87;foam.userData.foam=1;root.add(foam);deco.push(foam);
+  }
   if(baked){const a=baked.clone(true);const dm=detailMat();a.traverse(o=>{if(o.isMesh){if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();o.material=dm;}});root.add(a);}
   else{
     root.add(island(3.3,0x86d13f,0xe8cf9c));root.add(island(-3.3,0x86d13f,0xe8cf9c));
@@ -1325,7 +1338,7 @@ function build(canvasEl,R,k){
     for(let y=0;y<5;y++)for(let x=0;x<5;x++){
       const w=tileWorld(b,x,y),odd=(x+y)%2;
       const col=theme.tile[odd];
-      const m=new T.Mesh(TILE_GEO,new T.MeshBasicMaterial({map:tileTex(col,(x*7+y*13+(b==="p"?0:5))%6+1)}));m.castShadow=false;m.position.set(w.x,-.15,w.z);m.receiveShadow=true;m.userData={b,x,y,base:-.15};root.add(m);
+      const m=new T.Mesh(TILE_GEO,new T.MeshBasicMaterial({map:tileTex(col,(x*7+y*13+(b==="p"?0:5))%6+1,theme.stone)}));m.castShadow=false;m.position.set(w.x,-.15,w.z);m.receiveShadow=true;m.userData={b,x,y,base:-.15};root.add(m);
       const dec=new T.Mesh(new T.PlaneGeometry(.9,.9),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false}));dec.rotation.x=-Math.PI/2;dec.position.set(w.x,.012,w.z);root.add(dec);
       const icon=new T.Sprite(new T.SpriteMaterial({map:iconTex("💧"),transparent:true,depthTest:false}));icon.position.set(w.x,.55,w.z);icon.scale.setScalar(.6);icon.visible=false;icon.renderOrder=5;root.add(icon);
       const ring=new T.Mesh(ringGeo[20],new T.MeshBasicMaterial({color:0xffe25a,transparent:true,depthTest:false,side:T.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.set(w.x,.03,w.z);ring.visible=false;ring.renderOrder=4;root.add(ring);
@@ -1504,7 +1517,7 @@ function update(R,dt){
     else{f.o.scale.setScalar(1+k*4);f.o.material.opacity=.9*(1-k);}
     return true;
   });
-  for(const o of deco){if(o.userData.v){o.position.x+=o.userData.v*dt;if(o.position.x>9)o.position.x=-9;}if(o.userData.fog!=null){o.position.x+=Math.sin(t*.3+o.userData.fog)*dt*.15;}}
+  for(const o of deco){if(o.userData.foam){o.material.opacity=.6+Math.sin(t*1.6)*.2;o.scale.setScalar(1+Math.sin(t*1.6)*.006);}if(o.userData.v){o.position.x+=o.userData.v*dt;if(o.position.x>9)o.position.x=-9;}if(o.userData.fog!=null){o.position.x+=Math.sin(t*.3+o.userData.fog)*dt*.15;}}
   /* temblor de cámara */
   const sk=Math.max(0,shakeA*(1-(t-shakeT)/.35));
   if(camBase){cam.position.copy(camBase);if(sk>0)cam.position.add(V((Math.random()-.5)*sk,(Math.random()-.5)*sk,0));}
