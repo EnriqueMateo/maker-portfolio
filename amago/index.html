@@ -1110,9 +1110,10 @@ const BUILD={
 const MODEL_LIST=["flecha"],MODELS={},BASE=window.AMAGO_ASSETS||"";
 function prepModel(scn,id){
   const ref=new T.Box3().setFromObject(BUILD[id](HEROES[id])),h=(ref.max.y-ref.min.y)*1.08;
-  const box=new T.Box3().setFromObject(scn),k=h/(box.max.y-box.min.y),c=box.getCenter(new T.Vector3());
+  scn.updateMatrixWorld(true);const box=new T.Box3();scn.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}});
+  const k=h/(box.max.y-box.min.y),c=box.getCenter(new T.Vector3());
   scn.scale.setScalar(k);scn.position.set(-c.x*k,-box.min.y*k,-c.z*k);
-  scn.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;const m=o.material;if(m&&m.isMeshStandardMaterial){m.envMapIntensity=.7;m.roughness=Math.min(m.roughness??1,.6);}}});
+  scn.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;const m=o.material;if(m&&m.isMeshStandardMaterial){m.envMapIntensity=.7;m.roughness=Math.min(m.roughness??1,.6);}}});
   const g=new T.Group();g.add(scn);return g;
 }
 function loadModels(){
@@ -1130,9 +1131,12 @@ function loadArena(k){
 }
 function glbHero(id){
   const root=new T.Group(),body=new T.Group();body.name="body";body.position.y=.16;root.add(body);
-  const m=MODELS[id].clone(true);m.position.y=-.16;body.add(m);
+  const m=T.SkeletonUtils?T.SkeletonUtils.clone(MODELS[id]):MODELS[id].clone(true);m.position.y=-.16;body.add(m);
+  /* huesos: guardamos la pose de reposo para girarlos sobre ejes del mundo */
+  let rig=null;m.updateMatrixWorld(true);
+  m.traverse(o=>{if(o.isBone){rig=rig||{};const k=o.name.replace(/[^a-z]/gi,"").toLowerCase();const R=new T.Quaternion();o.getWorldQuaternion(R);rig[k]={b:o,q0:o.quaternion.clone(),R,Ri:R.clone().invert()};}});
   const d=()=>new T.Object3D(),arms=[d(),d()];arms.forEach(a=>a.userData.base=0);
-  root.userData={body,head:d(),arms,legs:[d(),d()],eyes:null,t0:Math.random()*10,glb:true};
+  root.userData={body,head:d(),arms,legs:[d(),d()],eyes:null,t0:Math.random()*10,glb:true,rig};
   return root;
 }
 function makeHero(id){const g=MODELS[id]?glbHero(id):BUILD[id](HEROES[id]);g.userData.id=id;return g;}
@@ -1144,8 +1148,25 @@ function setFlash(g,on){
     else if(o.userData.m0){o.material=o.userData.m0;o.userData.m0=null;}
   }});
 }
+const _q=new T.Quaternion(),_e=new T.Euler();
+/* gira un hueso (x: adelante/atrás, y: girar, z: abrir de lado) sobre ejes del mundo en su pose de reposo */
+function pose(rig,k,x,y,z){const r=rig[k];if(!r)return;_q.setFromEuler(_e.set(x||0,y||0,z||0));r.b.quaternion.copy(r.q0).multiply(r.Ri.clone().multiply(_q).multiply(r.R));}
+function animateRig(rig,tt,st,act,at_){
+  /* amplitudes moderadas: los modelos son de una pieza y los objetos largos (arcos, bastones) se estiran con giros grandes */
+  const walking=st.walk,w=Math.sin(tt*12),br=Math.sin(tt*2.6);
+  let lt=0,rt=0,ls=0,rs=0,la=[br*.04,0,br*.04],ra=[-br*.04,0,-br*.04],lf=0,rf=0,sp=[br*.03,Math.sin(tt*.7)*.05,0],hd=[0,Math.sin(tt*.8)*.12,0];
+  if(walking){lt=-w*.45;rt=w*.45;ls=Math.max(0,w)*.5;rs=Math.max(0,-w)*.5;la=[w*.3,0,0];ra=[-w*.3,0,0];sp=[.1,w*.06,0];}
+  if(act==="attack"){const k=Math.min(1,at_/.4),e=k<.25?k/.25:1-(k-.25)/.75;la=[-.55*e,0,.1*e];ra=[-.45*e,0,-.15*e];sp=[-.12*e,.3*e,0];hd=[0,.15*e,0];}
+  if(act==="hit"){const k=Math.min(1,at_/.4),e=Math.sin(k*Math.PI);sp=[-.3*e,0,0];hd=[-.25*e,0,0];la=[0,0,.4*e];ra=[0,0,-.4*e];}
+  if(act==="win"){const b=Math.sin(tt*10);la=[0,0,.55+b*.15];ra=[0,0,-.55+b*.15];hd=[-.15,Math.sin(tt*5)*.2,0];}
+  if(act==="ko"){la=[0,0,.5];ra=[0,0,-.5];hd=[.35,0,0];sp=[.2,0,0];}
+  pose(rig,"thighl",lt);pose(rig,"thighr",rt);pose(rig,"shinl",ls);pose(rig,"shinr",rs);
+  pose(rig,"arml",...la);pose(rig,"armr",...ra);pose(rig,"forel",lf);pose(rig,"forer",rf);
+  pose(rig,"spine",...sp);pose(rig,"head",...hd);
+}
 function animate(g,t,st){
   const u=g.userData,{body,head,arms,legs,eyes}=u;if(!body)return;
+  if(u.rig){const tt2=t+u.t0;st=st||{};animateRig(u.rig,tt2,st,st.act||null,st.actT||0);}
   const tt=t+u.t0;st=st||{};
   const walking=st.walk,act=st.act||null,at_=st.actT||0;
   body.position.set(0,.16+(walking?Math.abs(Math.sin(tt*14))*.06:Math.sin(tt*3)*.01),0);
