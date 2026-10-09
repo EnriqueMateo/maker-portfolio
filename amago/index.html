@@ -265,10 +265,11 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @keyframes ripple{from{transform:scale(.4);opacity:1}to{transform:scale(1.3);opacity:0}}
 .shieldfx{position:absolute;inset:-4px;border-radius:50%;border:3px solid #8fe3ff;box-shadow:0 0 14px #8fe3ff,inset 0 0 10px #8fe3ff;animation:pulse 1s infinite}
 .ebar{display:flex;align-items:center;gap:8px;background:var(--panel);border:3px solid var(--ink);border-radius:16px;padding:6px 10px;box-shadow:0 4px 0 var(--ink)}
-.elxn{font-family:var(--f-game);font-size:28px;width:34px;text-align:center;color:#ff8de0}
+.elxn{font-family:var(--f-game);font-size:28px;width:34px;text-align:center;color:#8fe3ff}
 .esegs{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
 .esegs i{height:20px;border-radius:5px;background:#2a1f55;overflow:hidden;border:2px solid var(--ink)}
-.esegs i b{display:block;height:100%;width:0;background:linear-gradient(#ff9ce6,#c43bd6)}
+.esegs i b{display:block;height:100%;width:0;background:linear-gradient(#8fe3ff,#1f8ef0)}
+.esegs i.cost{border-color:#ffd23a;box-shadow:0 0 0 2px #ffd23a}
 .esegs.turbo i b{background:linear-gradient(#fff07a,#ffb300)}
 .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;font-size:13px}
 .act{display:flex;align-items:center;gap:5px;background:var(--panel);border:2px solid var(--ink);border-radius:999px;padding:3px 10px}
@@ -453,6 +454,10 @@ body,body[style]{background:
 .chestc .shm svg{width:92px;height:80px}
 .bnav button{flex:0 1 96px!important}
 #app.game ~ .toast{bottom:auto!important;top:calc(118px + env(safe-area-inset-top,0px));pointer-events:none;font-size:15px!important;padding:8px 12px!important}
+.hearts i,.hbar i{font-size:20px!important}
+.side2 .mini{width:46px!important;height:46px!important}
+.tbox .stars{font-size:17px!important}
+.acts .act{background:none!important;box-shadow:none!important;border:0!important;color:#fff;font-size:15px!important;text-shadow:0 2px 0 var(--ink)}
 </style>
 </head>
 <body>
@@ -1481,7 +1486,7 @@ function build(canvasEl,R,k){
 }
 function fitCamera(aspect){
   const dir=V(0,1,.82).normalize(),tgt=V(0,0,-.15);
-  const corners=[V(-2.9,0,-5.8),V(2.9,0,-5.8),V(-2.9,0,5.8),V(2.9,0,5.8),V(-2.9,1.1,-5.8),V(2.9,1.1,-5.8)];
+  const corners=[V(-2.68,0,-5.6),V(2.68,0,-5.6),V(-2.68,0,5.6),V(2.68,0,5.6),V(-2.68,.9,-5.6),V(2.68,.9,-5.6)];
   let d=8;
   for(;d<60;d+=.25){cam.position.copy(tgt).addScaledVector(dir,d);cam.lookAt(tgt);cam.updateMatrixWorld();cam.updateProjectionMatrix();
     if(corners.every(c=>{const p=c.clone().project(cam);return Math.abs(p.x)<.96&&p.y<.66&&p.y>-.52;}))break;}
@@ -1602,11 +1607,12 @@ function update(R,dt){
       if(mp){dc=0xff9a2e;dop=.55+Math.sin(t*14)*.2;ring=1-(R.now-mp.launched)/(mp.hitAt-mp.launched);rc=0xff9a2e;}
       else if(inArea(hoverCells,x,y)){dc=0xffffff;dop=.35;}
       else if(canShoot){dc=0xffffff;dop=.04+.03*Math.sin(t*3+x+y);}
+      else{dc=0x1a0a20;dop=.38;}
       const ms=R.marks.b.filter(m=>m.x===x&&m.y===y);
       const top=ms.find(m=>m.t==="pick")||ms.find(m=>m.t==="huella")||ms.find(m=>m.t==="cerca")||ms.find(m=>m.t==="bloq")||ms.find(m=>m.t==="agua")||(Hm.ears?ms.find(m=>m.t==="step"):null);
       if(top){
         if(top.t==="pick"){icon=BOOSTS[top.k].i;isc=.75;}
-        else if(top.t==="huella"){icon="foot";iop=Math.max(.3,(top.until-R.now)/HUELLA_T);isc=.7;}
+        else if(top.t==="huella"){icon="foot";iop=Math.max(.45,(top.until-R.now)/HUELLA_T);isc=1.05+Math.sin(t*10)*.1;dc=0xffd23a;dop=.45;}
         else if(top.t==="cerca"){icon="🔥";dc=0xff8a1f;dop=.5;}
         else if(top.t==="bloq"){icon="🛡️";}
         else if(top.t==="agua"){icon="water";iop=.8;}
@@ -1614,7 +1620,7 @@ function update(R,dt){
       }
     }else{
       const ip=inc.find(p=>inArea(p.cells,x,y));
-      if(ip){dc=0xff2d55;dop=.45+Math.sin(t*16)*.25;ring=1-(R.now-ip.launched)/(ip.hitAt-ip.launched);rc=0xffffff;icon="⚠️";isc=.55;}
+      if(ip){dc=0xff1030;dop=.75+Math.sin(t*16)*.2;ring=1-(R.now-ip.launched)/(ip.hitAt-ip.launched);rc=0xffffff;icon="⚠️";isc=.55;}
       else if(dest&&dest[0]===x&&dest[1]===y){icon="dest";isc=.9;iop=.9;}
       else{const seen=R.marks.p.find(m=>m.x===x&&m.y===y&&(m.t==="huella"||m.t==="pick"));if(seen){icon=seen.fake?"foot2":"foot";iop=.45;isc=.6;}}
     }
@@ -1813,7 +1819,7 @@ function renderModal(){
     m.innerHTML=`<div class="sheet"><h2 class="out">Elige modo</h2>
       <button class="modecard ${S.mode==="bot"?"on":""}" data-a="setmode" data-m="bot"><span class="mi">⚔️</span><span><b>Contra bot</b><small>Gana trofeos y cofres</small></span></button>
       <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${(S.diff||"facil")===k?"on":""}" data-a="setdiff" data-d="${k}"><span>${d.i}</span><b>${d.n}</b><small>${d.d}</small></button>`).join("")}</div>
-      <button class="modecard ${S.mode==="friends"?"on":""}" data-a="setmode" data-m="friends"><span class="mi">👥</span><span><b>Con amigos</b><small>Sala privada con código · amistoso</small></span></button></div>`;
+      <button class="modecard ${S.mode==="friends"?"on":""}" data-a="setmode" data-m="friends"><span class="mi">👥</span><span><b>Con amigos</b><small>Sala privada con código · amistoso</small></span></button><button class="gbtn" data-a="close">LISTO</button></div>`;
   }else if(M.k==="friends"){
     if(!ONLINE_OK){
       m.innerHTML=`<div class="sheet"><h2 class="out">Con amigos</h2><div class="howc"><div class="big">🌐</div><p>El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.</p><p>Abre el juego desde la dirección del servidor y aquí podrás crear o unirte a una sala.</p></div><button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
@@ -1884,6 +1890,7 @@ function startMatch(){
   sfx("go");actx();
   const maxR=Math.min(3,1+Math.floor(S.tro/150));
   G={online:false,score:{p:0,b:0},round:0,used:{p:[],b:[]},tutorial:S.games===0,opp:{name:pick(NAMES),tro:Math.max(0,S.tro+rnd(41)-20)},oppPool:shuffle(IDS.filter(i=>HEROES[i].rar<=maxR))};
+  if(G.tutorial){G.oppPool=G.oppPool.filter(i=>!HEROES[i].stealth&&!HEROES[i].fake);if(!G.oppPool.length)G.oppPool=["flecha"];}
   UI.modal={k:"search",found:false};renderModal();
   setTimeout(()=>{if(UI.modal&&UI.modal.k==="search"){UI.modal.found=true;UI.modal.oppHero=G.oppPool[0];renderModal();sfx("banner");}},500);
   setTimeout(()=>{UI.modal=null;renderModal();G.round=1;showPick();},1300);
@@ -1938,11 +1945,14 @@ function loop(t){
 }
 async function revealFoe(x,y,type,w){
   if(B3)B3.finalReveal(x,y,w);
-  await sleep(1100);
+  const c=B3?B3.screenPos("b",x,y,0):null;if(c)floatText(c.x,c.y-40,"¡Estaba aquí!","big");
+  await sleep(2000);
 }
 async function roundBanner(w){
-  if(w==="p"){confetti();sfx("win");await banner("¡RONDA PARA TI!","","gold",1600);}
-  else if(w==="b"){sfx("lose");await banner("RONDA PARA "+G.opp.name.toUpperCase(),"","red",1600);}
+  const byTime=R&&R.heroes.p.hp>0&&R.heroes.b.hp>0,pc=s=>Math.round(R.heroes[s].hp/R.heroes[s].max*100);
+  const why=byTime?`Se acabó el tiempo: vida ${pc("p")} % contra ${pc("b")} %`:"";
+  if(w==="p"){confetti();sfx("win");await banner("¡RONDA PARA TI!",why,"gold",2200);}
+  else if(w==="b"){sfx("lose");await banner("RONDA PARA "+G.opp.name.toUpperCase(),why,"red",2200);}
   else await banner("¡EMPATE!","Nadie suma estrella","blue",1400);
 }
 async function endRound(w){
@@ -2073,7 +2083,7 @@ function buildArena(){
   </div>
   <div class="status" id="status"></div>
   <div class="gbottom">
-    <div class="ebar" id="ebar"><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},()=>`<i><b></b></i>`).join("")}</div></div>
+    <div class="ebar" id="ebar"><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},(_,i)=>`<i class="${i===H.cost-1?"cost":""}"><b></b></i>`).join("")}</div></div>
     <div class="acts"><span class="act">👟 <b>💧${H.mc}</b> moverse</span><span class="act">${patIcon(H.pat)} <b>💧${H.cost}</b> ${H.a.toLowerCase()} ${H.warn?"🔔":"⚡"}</span><span class="act bst" id="bst"></span></div>
   </div></div>`;
   B3.build($("#gl"),R,arenaOf(S.tro).a.k);B3.onTile=onTile;
@@ -2098,7 +2108,7 @@ function renderStatus(){
   const me=R.heroes.p,now=R.now;let t,c="";
   const danger=R.projs.some(p=>p.o==="b"&&p.warn&&inArea(p.cells,me.x,me.y));
   if(R.paused)t="⏳ ¡Prepárate!";
-  else if(danger){t="⚠️ ¡Muévete! Algo cae en la zona roja";c="warn";}
+  else if(danger){t="⚠️ ¡Te van a dar! Toca otra casilla verde";c="warn";}
   else if(R.marks.b.some(m=>m.t==="hit"||m.t==="ping")||me.visionUntil>now){t="👀 ¡Rival a la vista! Dispara";c="good";}
   else if(R.marks.b.some(m=>m.t==="pick")){t="👀 ¡Cogió un objeto ahí!";c="good";}
   else if(R.marks.b.some(m=>m.t==="huella")){t="👣 ¡Ha disparado desde ahí!";c="good";}
@@ -2123,7 +2133,7 @@ const ui={
     if(p.o==="p"){
       if(!HEROES[p.type].stealth)toast("myprint","👣 <b>Tu disparo te ha delatado.</b> El rival ve desde dónde. ¡Muévete!");
     }else{
-      if(p.warn){toast("incoming","⚠️ <b>¡Algo va a caer en la zona roja!</b> Toca otra casilla de tu isla para esquivarlo.");buzz(25);}
+      if(p.warn){toast("incoming","⚠️ <b>¡Te van a dar!</b> Las casillas que parpadean en tu isla verde van a recibir el golpe. Toca otra casilla para esquivar.");buzz(25);}
       if(p.hx!=null)toast("foeprint","👣 <b>¡El rival disparó desde ahí!</b> Contraataca rápido.");
     }
   },
@@ -2213,12 +2223,12 @@ function onTile(b,x,y){
     renderLive();return;
   }
   if(G.online){
-    if(R.elx.p<H.cost){ui.noElx();const c=B3.screenPos("b",x,y);floatText(c.x,c.y,"💧 Falta elixir","miss");return;}
+    if(R.elx.p<H.cost){ui.noElx();const c=B3.screenPos("b",x,y);floatText(c.x,c.y,`Faltan ${Math.ceil(H.cost-R.elx.p)} 💧`,"miss");return;}
     if(R.now<me.cdUntil)return;
     netSend({t:"fire",x,y});return;
   }
   const r=AMAGO.fire(R,"p",x,y,ui);
-  if(r==="elx"){ui.noElx();const c=B3.screenPos("b",x,y);floatText(c.x,c.y,"💧 Falta elixir","miss");}
+  if(r==="elx"){ui.noElx();const c=B3.screenPos("b",x,y);floatText(c.x,c.y,`Faltan ${Math.ceil(H.cost-R.elx.p)} 💧`,"miss");}
   else if(r==="ok")renderLive();
 }
 document.addEventListener("visibilitychange",()=>{lastT=performance.now();});
