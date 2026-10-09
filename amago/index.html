@@ -435,6 +435,8 @@ body,body[style]{background:
 /* textos de ayuda grandes y claros en partida */
 .status,.tipbox,.hint{font-size:17px!important;line-height:1.3!important}
 .act{font-size:15px!important}
+.coinpill{cursor:default}
+.keysline b{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -485,7 +487,9 @@ function areaOf(pat,tx,ty){
   switch(pat){
     case "row3":{const x0=cl(tx-1,0,N-3);return [[x0,ty],[x0+1,ty],[x0+2,ty]];}
     case "col3":{const y0=cl(ty-1,0,N-3);return [[tx,y0],[tx,y0+1],[tx,y0+2]];}
-    case "diag3":{const cx=cl(tx,1,N-2),cy=cl(ty,1,N-2);return [[cx-1,cy-1],[cx,cy],[cx+1,cy+1]];}
+    case "diag3":{/* diagonal de 3 que pasa por la casilla tocada (prefiere la centrada) */
+      for(const [dx,dy] of [[1,1],[1,-1]])for(const k0 of [-1,-2,0]){const c=[0,1,2].map(i=>[tx+(k0+i)*dx,ty+(k0+i)*dy]);if(c.every(([x,y])=>inB(x,y)))return c;}
+      return [[tx,ty]];}
     case "sq2":{const x0=Math.min(tx,N-2),y0=Math.min(ty,N-2);return [[x0,y0],[x0+1,y0],[x0,y0+1],[x0+1,y0+1]];}
     case "cross5":return [[tx,ty],...D4.map(([dx,dy])=>[tx+dx,ty+dy])].filter(([x,y])=>inB(x,y));
     default:return [[tx,ty]];
@@ -686,7 +690,8 @@ const HOW=[
   {i:"🎁",h:"Objetos cebo",p:"Salen en el mismo sitio para los dos. Si lo coges, el rival sabrá dónde estás."},
   {i:"🏆",h:"3 rondas, 3 héroes",p:"Antes de cada ronda eliges héroe. No puedes repetir. Gana quien se lleve 2 rondas."},
 ];
-const ROAD=[{t:10,r:"chest"},{t:30,r:"chest"},{t:60,r:"hero",id:"ojo"},{t:100,r:"chest"},{t:150,r:"hero",id:"truco"},{t:220,r:"chest"},{t:300,r:"hero",id:"rayo"},{t:400,r:"chest"},{t:500,r:"hero",id:"bum"},{t:650,r:"chest"},{t:800,r:"chest"},{t:1000,r:"chest"}];
+const ROAD=[{t:15,r:"chest"},{t:40,r:"hero",id:"ojo"},{t:70,r:"chest"},{t:110,r:"hero",id:"truco"},{t:160,r:"chest"},{t:220,r:"hero",id:"rayo"},{t:300,r:"chest"},{t:400,r:"hero",id:"bum"},{t:520,r:"chest"},{t:680,r:"chest"},{t:850,r:"chest"},{t:1000,r:"chest"}];
+const KEYS_PER_CHEST=3;
 const speedLabel=st=>st<=.22?"Muy rápido":st<=.32?"Rápido":st<=.42?"Normal":"Lento";
 /* servidor online: el mismo origen si el juego lo sirve el servidor, o window.AMAGO_SERVER en la app nativa y de escritorio */
 const SERVER=window.AMAGO_SERVER||"";
@@ -701,7 +706,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* ================= guardado ================= */
 const SAVE_KEY="amago-v3";
-const DEF={tro:0,unl:STARTERS.slice(),chests:0,tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",claimed:[],xp:0,hw:{}};
+const DEF={tro:0,unl:STARTERS.slice(),chests:0,tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,keys:0,claimed:[],xp:0,hw:{}};
 function loadSave(){
   let s;try{s=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");}catch(e){s=null;}
   s=Object.assign(clone(DEF),s||{});
@@ -1634,7 +1639,7 @@ function nav(active){
 function topbar(){
   return `<div class="hometop">
     <button class="prof" data-a="name" aria-label="Cambiar nombre"><span class="pav">${heroSVG(S.fav)}</span><span class="pinfo"><b>${esc(S.name)}</b><span class="lvl"><i>${level()}</i><span class="bar"><i style="width:${xpPct()}%"></i></span></span></span></button>
-    <button class="tropill" data-a="tab" data-t="road">🏆 <b class="out">${S.tro}</b>${claimable().length?'<i class="dot"></i>':""}</button>
+    <span class="tropill coinpill">🪙 <b class="out">${S.coins||0}</b></span><button class="tropill" data-a="tab" data-t="road">🏆 <b class="out">${S.tro}</b>${claimable().length?'<i class="dot"></i>':""}</button>
     <button class="iconbtn" data-a="settings" aria-label="Ajustes">⚙️</button></div>`;
 }
 function showHome(){
@@ -1751,7 +1756,7 @@ function renderModal(){
       const H=HEROES[M.reward.hero],RR=RAR[H.rar];
       m.innerHTML=`<div class="sheet"><div class="reward" style="--rc:${RR.c}"><p class="rar" style="color:${RR.c}">${RR.n} · ¡NUEVO HÉROE!</p><span class="pt glow">${heroSVG(M.reward.hero)}</span><h2 class="out">¡${H.n}!</h2></div>${statsHTML(M.reward.hero)}<button class="gbtn" data-a="rok">¡GENIAL!</button></div>`;
     }else{
-      m.innerHTML=`<div class="sheet"><div class="reward"><div style="font-size:90px">🏆</div><h2 class="out">+40 trofeos</h2><p>¡Ya tienes todos los héroes!</p></div><button class="gbtn" data-a="rok">¡GENIAL!</button></div>`;
+      m.innerHTML=`<div class="sheet"><div class="reward"><div style="font-size:90px">🪙</div><h2 class="out">+${M.reward.coins||0} monedas</h2><p>Tienes ${S.coins||0} monedas.</p></div><button class="gbtn" data-a="rok">¡GENIAL!</button></div>`;
     }
   }
   document.body.appendChild(m);
@@ -1765,11 +1770,12 @@ async function openChestTap(){
   await sleep(550);
   const locked=IDS.filter(id=>!S.unl.includes(id));
   S.chests=Math.max(0,S.chests-1);
-  if(locked.length){
+  /* casi siempre monedas; un héroe bloqueado solo con un 10 % de suerte */
+  if(locked.length&&Math.random()<.1){
     const w=locked.map(id=>({id,w:[6,3,2,1][HEROES[id].rar]}));let r=Math.random()*w.reduce((a,b)=>a+b.w,0),got=w[0].id;
     for(const it of w){r-=it.w;if(r<=0){got=it.id;break;}}
     S.unl.push(got);M.reward={hero:got};
-  }else{S.tro+=40;M.reward={tro:40};}
+  }else{const c=20+rnd(4)*10;S.coins=(S.coins||0)+c;M.reward={coins:c};}
   save();renderModal();confetti();sfx("win");
 }
 
@@ -1864,12 +1870,13 @@ async function endMatch(){
   R=null;
   const win=G.score.p>G.score.b,draw=G.score.p===G.score.b;
   const before=S.tro,lvlBefore=level(),shield=!win&&!draw&&before<30;
-  const delta=win?28+rnd(5):draw||shield?0:-Math.min(before,8+rnd(5));
-  S.tro+=delta;S.games++;S.xp+=win?40:20;if(win){S.wins++;S.chests++;}
+  const delta=win?8+rnd(3):draw||shield?0:-Math.min(before,3+rnd(2));
+  S.tro+=delta;S.games++;S.xp+=win?40:20;let gotChest=false;
+  if(win){S.wins++;S.keys=(S.keys||0)+1;if(S.keys>=KEYS_PER_CHEST){S.keys=0;S.chests++;gotChest=true;}}
   save();
   endScreen(win,draw,`<div class="trobig out">🏆 <span id="tro">${before}</span> <small class="${delta>=0?"up":"dn"}">${delta>=0?"+":""}${delta}</small></div>
     <div class="xpline">⭐ +${win?40:20} XP${level()>lvlBefore?` · <b>¡Nivel ${level()}!</b>`:""}</div>
-    ${win?`<button class="chestbtn" data-a="chest" style="align-self:center">${chestSVG()}<span>¡Has ganado un cofre!<br><b>Toca para abrir</b></span></button>`:`<p class="slogan">${draw?"¡Igualadísimo!":shield?"🛡️ Protección de novato: no pierdes trofeos":"¡Casi! La próxima es tuya."}</p>`}
+    ${win?(gotChest?`<button class="chestbtn" data-a="chest" style="align-self:center">${chestSVG()}<span>¡3 victorias: cofre!<br><b>Toca para abrir</b></span></button>`:`<p class="slogan keysline">🔑 Llaves: <b>${S.keys}/${KEYS_PER_CHEST}</b> · al llegar a ${KEYS_PER_CHEST}, cofre</p>`):`<p class="slogan">${draw?"¡Igualadísimo!":shield?"🛡️ Protección de novato: no pierdes trofeos":"¡Casi! La próxima es tuya."}</p>`}
     ${claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">🎁 ¡Tienes premios en el camino de trofeos!</button>`:""}
     <button class="gbtn play" data-a="play">JUGAR OTRA</button>
     <button class="pillbtn" data-a="home" style="align-self:center">Volver al inicio</button>`);

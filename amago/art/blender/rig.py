@@ -155,14 +155,14 @@ gate = J['arm_gate']
 for i, n in enumerate(names):
     if n.startswith(('arm', 'fore')):
         s = 1 if n.endswith('L') else -1
-        allow[:, i] = (s * x > gate * .7) & (z < J['shoulder'][1] + .15) & (V[:, 1] < .25)  # nada de la espalda (carcaj, capa)
+        allow[:, i] = (s * x > gate * .7) & (z < J['shoulder'][1] + .15) & (V[:, 1] < .25) & (V[:, 1] > J.get('arm_ymin', -9))  # nada de la espalda (carcaj, capa) ni del hocico/barriga
     if n.startswith(('thigh', 'shin')):
         s = 1 if n.endswith('L') else -1
         allow[:, i] = (s * x > -.02) & (z < hip + .08) & (np.abs(x) < gate)
     if n == 'head': allow[:, i] = (z > J['head_rigid'] - .08) & (np.abs(x) < J.get('head_w', 9))
-    if n in ('spine', 'hips'): allow[:, i] = (np.abs(x) < gate + .06) | (z > J['shoulder'][1])
+    if n in ('spine', 'hips'): allow[:, i] = (np.abs(x) < gate + .06) | (z > J['shoulder'][1]) | (V[:, 1] <= J.get('arm_ymin', -9))
 # fuera del tronco y por debajo del hombro: siempre brazo
-out = np.abs(x) > gate
+out = (np.abs(x) > gate) & (V[:, 1] > J.get('arm_ymin', -9))
 for n in names:
     if not n.startswith(('arm', 'fore')): allow[out & (z < J['shoulder'][1]), idx[n]] = False
 W = np.where(allow, 1.0 / np.maximum(D, .015) ** 4, 0)
@@ -172,7 +172,7 @@ W[hm] = 0; W[hm, idx['head']] = 1  # cabeza rígida (head_w: solo en el centro, 
 # ("prop": lados que llevan un objeto largo, como el arco, que sube por encima del hombro)
 for s_, side in ((1, 'L'), (-1, 'R')):
     top_ = 9 if side in J.get('rigid_all', []) else max(J['shoulder'][1], J.get('hand_' + side, J['hand'])[1] + .2) + .1  # rigid_all: bastones largos
-    m_ = (s_ * x > gate) & (z < top_) & (z > .14) & (V[:, 1] < .25)
+    m_ = (s_ * x > gate) & (z < top_) & (z > .14) & (V[:, 1] < .25) & (V[:, 1] > J.get('arm_ymin', -9))
     W[m_] = 0; W[m_, idx[f'fore.{side}']] = 1
 # zonas que van con el tronco aunque estén fuera (bufandas, colas, alas)
 # pies: todo lo que está por debajo de la rodilla va con la espinilla de su lado
@@ -239,6 +239,11 @@ lowz = z < .4
 print('low verts weights', {n: round(float(W[lowz, i].sum()), 1) for i, n in enumerate(names)})
 lowz = z < .12
 print('pies pesos', {n: round(float(W[lowz, i].sum()), 1) for i, n in enumerate(names) if W[lowz, i].sum() > 0})
+import os as _o
+if _o.environ.get('DBG_ARM'):
+    for i_,n_ in enumerate(names):
+        if n_.startswith(('arm','fore')):
+            m_=W[:,i_]>.5; print(n_, 'y>0.1:', int((m_&(V[:,1]>.1)).sum()), 'y range', V[m_,1].min().round(2), V[m_,1].max().round(2), 'x', V[m_,0].min().round(2), V[m_,0].max().round(2), 'z', z[m_].min().round(2), z[m_].max().round(2))
 print('weights ok', {n: int((W[:, i] > .5).sum()) for i, n in enumerate(names)})
 
 if POSE:
