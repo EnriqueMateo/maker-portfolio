@@ -11,6 +11,8 @@ from mathutils import Vector, noise
 a = sys.argv[sys.argv.index('--') + 1:]
 THEME, OUT = a[0], a[1]
 PREVIEW = a[2] if len(a) > 2 else None
+# AMAGO_BARE=1: solo islas, colinas y flores; árboles, rocas, puente y banderas los pone el juego como ilustraciones
+BARE = os.environ.get('AMAGO_BARE') == '1'
 
 TH = {
     'pradera': dict(grass='#7ccf34', grass2='#55ad26', rock='#e8cf9c', rock2='#c9a571', water='#38c3ff', leaf='#5ccc3c', leaf2='#a5e04a',
@@ -107,9 +109,9 @@ def plateau(cy, sign):
 plateau(-3.35, -1); plateau(3.35, 1)
 
 # ---------- puente de madera en el centro ----------
-for i in range(6):
+for i in range(0 if BARE else 6):
     keep(rbox('plank', (random.uniform(-.03, .03), -1.25 + i * .5, -.2), (1.05, .4, .09), bevel=.035, rot=(0, 0, random.uniform(-.05, .05)), m=WOOD))
-for sx in (-1, 1):
+for sx in (() if BARE else (-1, 1)):
     for y in (-1.3, 1.3):
         keep(rbox('post', (sx * .6, y, -.02), (.12, .12, .45), bevel=.04, m=WOOD))
     keep(tube('rope', [(sx * .6, -1.3, .18), (sx * .6, 0, .05), (sx * .6, 1.3, .18)], .025, m=TRUNK))
@@ -176,10 +178,9 @@ BIG = {'tree': tree, 'pine': pine, 'crystal': crystal, 'tower': tower, 'column':
 for sign in (-1, 1):
     cy = 3.3 * sign
     team = BLUE if sign < 0 else RED
-    banner(-2.95, cy + 2.75 * sign, team); banner(2.95, cy + 2.75 * sign, team)
+    if not BARE: banner(-2.95, cy + 2.75 * sign, team); banner(2.95, cy + 2.75 * sign, team)
     for x in (-3.15, 3.15):
-        bush(x, cy - .9, .55); bush(x, cy + 1.1, .5)
-        rock(x + random.uniform(-.1, .1), cy + .2, .55)
+        if not BARE: bush(x, cy - .9, .55); bush(x, cy + 1.1, .5); rock(x + random.uniform(-.1, .1), cy + .2, .55)
         if THEME in ('pradera', 'bosque', 'trono'): flowers(x, cy - 2.0, 5); flowers(x, cy + 2.1, 4)
 
 # colinas de fondo (detrás del rival) y de delante (delante del jugador), con la vegetación grande
@@ -197,11 +198,14 @@ def hill(cy, w, n):
     return keep(o)
 hill(8.0, 13, 9); hill(-8.1, 13, 9)
 for i, x in enumerate([-5.2, -3.4, -1.3, .9, 3.0, 5.0]):
+    if BARE: continue
     BIG(x + random.uniform(-.3, .3), 8.1 + random.uniform(-.5, .5), random.uniform(.9, 1.2))
     if i % 2 == 0: bush(x + .9, 7.2, .7)
-for x in [-4.6, -2.0, 2.3, 4.7]:
+for x in ([] if BARE else [-4.6, -2.0, 2.3, 4.7]):
     BIG(x, -8.3 + random.uniform(-.3, .3), random.uniform(.8, 1.0))
-for x in [-3.4, 3.4]: rock(x, 6.9, .9); flowers(x + .6, 7.0, 5) if THEME in ('pradera', 'bosque', 'trono') else None
+for x in [-3.4, 3.4]:
+    if not BARE: rock(x, 6.9, .9)
+    flowers(x + .6, 7.0, 5) if THEME in ('pradera', 'bosque', 'trono') else None
 
 # ---------- luz y horneado ----------
 s = bpy.context.scene

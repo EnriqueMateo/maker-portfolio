@@ -22,9 +22,11 @@ El host solo sirve ciertos tipos: los GLB se suben como JSON `{"glb":"<base64>"}
 
 Servidor local: `cd server && PORT=8091 node server.js`. Scripts Playwright en el scratchpad (`test13/testplay/testround/testend/testall.js`) con `--use-gl=swiftshader`. Simulación del bot: `simbot.js`.
 
-## Siguiente paso (en curso)
+## Arena ilustrada (hecha: Pradera)
 
-**Arena con arte pintado del mismo estilo que los personajes.** El usuario va a generar con Gemini (texto común de "Stylized 3D game asset render, Supercell / Brawl Stars / Clash Royale art style … plain pure white background") estas imágenes: `arbol`, `pino`, `arbusto`, `rocas`, `flores`, `bandera_azul`, `bandera_roja`, `puente` y dos texturas cuadradas sin costuras `hierba`, `agua`. Plan: recortarlas con `cutout_ai.py`, colocar props como tarjetas/billboards alrededor de los tableros, usar las texturas para suelo y agua (en lugar del diorama de arcilla), mantener las casillas encima. Luego repetir para bosque/volcán/trono/olimpo.
+Props de Gemini recortados con `cutout_ai.py` en `art/props_src` → `art/props_raw` → `props/*.webp` (bandera roja = azul con el tono cambiado; la azul sale de un fotograma del vídeo). `arena.py` con `AMAGO_BARE=1` genera solo islas, colinas y flores; el juego coloca los props como cartones de cara a la cámara (`PSET` y `addProps` en index.html: árboles que se mecen, banderas, rocas, puente tumbado), pinta hierba sobre lo verde del diorama (`detailMat(grass)`) y usa agua pintada que se mueve. `hierba.webp`/`agua.webp` son provisionales (`art/blender/paint_tex.py`); cambiar por las de Gemini si el usuario las sube como archivo. Al publicar, añadir `props/*.webp` a `files`.
+
+Siguiente: arbusto y flores de Gemini para Pradera; luego bosque/volcán/trono/olimpo con sus props (`PSET[k]`).
 
 ## Pendiente después
 
