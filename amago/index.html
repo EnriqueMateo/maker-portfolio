@@ -1365,6 +1365,7 @@ function skyTex(c){const cv=document.createElement("canvas");cv.width=4;cv.heigh
 let theme=THEMES.pradera;
 function build(canvasEl,R,k){
   dispose();
+  act={p:null,b:null};revealUntil=0;revealPos=null;projs=[];fxs=[];/* nada de la ronda anterior (KO, rival a la vista) pasa a la siguiente */
   canvas=canvasEl;theme=THEMES[k]||THEMES.pradera;
   rnd3=new T.WebGLRenderer({canvas,antialias:true,alpha:false});
   rnd3.setPixelRatio(Math.min(2,devicePixelRatio||1));rnd3.shadowMap.enabled=true;rnd3.shadowMap.type=T.PCFSoftShadowMap;GFX.setupRenderer(rnd3);
