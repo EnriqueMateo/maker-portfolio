@@ -1,44 +1,43 @@
 # AMAGO: prototipo jugable
 
-Hundir la flota con personajes que se mueven. Los dos jugadores deciden a la vez y cada ataque deja una huella que delata al atacante.
+Hundir la flota con héroes que se mueven. Encuéntralos antes de que te encuentren.
 
-Prototipo: tú contra un bot, todo en un solo archivo HTML sin dependencias. Abre `index.html` en el navegador del ordenador o del móvil.
+Todo el juego está en un solo archivo HTML sin dependencias (solo carga dos fuentes de Google Fonts). Abre `index.html` en el navegador del móvil o del ordenador.
 
-## Interfaz
+## Reglas (versión 3, simplificada)
 
-- Tutorial de 4 pantallas la primera vez y botón `?` con la leyenda de símbolos.
-- Órdenes guiadas: el juego te pide la orden de cada personaje uno a uno (Mover o Habilidad) y marca dónde tocar.
-- El resultado de cada turno se muestra en etiquetas cortas (💥 le diste, ❌ fallaste, 💔 te dieron...).
+- Cada jugador tiene 3 héroes escondidos en un tablero de 5×5.
+- **Una jugada por turno:** eliges un héroe y atacas en el tablero rival o lo mueves una casilla. Los dos jugáis a la vez.
+- Primero se resuelven los movimientos y después los ataques.
+- **Atacar te delata:** el rival ve una huella 👣 donde estás (salvo los héroes sigilosos).
+- Si fallas pero había un rival al lado, sale **¡CERCA! 🔥**.
+- **Radar 📡:** se carga solo (y más rápido si pierdes un héroe). Revela a un rival.
+- La mayoría de héroes cae de un golpe. Ronda de 12 turnos como máximo; en los 3 últimos el radar se carga para los dos. Partida al mejor de 3.
+
+## Héroes
+
+| Héroe | Rareza | Ataque |
+|---|---|---|
+| Flecha (Arquera) | Común | Línea de 3 en fila |
+| Brasa (Dragón) | Común | Fuego 2×2 que cae al turno siguiente (recarga 1) |
+| Sombra (Ninja) | Común | 1 casilla, sin huella |
+| Muro (Gólem) | Común | Columna de 3. Aguanta 2 golpes |
+| Ojo (Búho) | Raro | Revela una zona 2×2, sin huella |
+| Truco (Zorro) | Raro | Ataque falso y huella falsa |
+| Rayo (Mago) | Épico | Diagonal de 3 |
+| Bum (Bomba) | Legendario | Cruz de 5 (recarga 1) |
+
+## Lo que lo hace adictivo
+
+- Inicio con tus héroes en escena, trofeos y arenas con barra de progreso.
+- Búsqueda de rival con pantalla VS.
+- Proyectiles, explosiones, partículas, temblor de pantalla, textos flotantes y sonido sintetizado (Web Audio), con vibración en Android.
+- Rachas, cofres con apertura en tres toques y héroes desbloqueables por rareza.
+- Consejos en contexto la primera vez que pasa cada cosa, en lugar de un tutorial largo.
+- El jugador tiene ventaja sin que se note: primera partida contra un bot muy flojo, protección de trofeos para novatos, radar que se carga al perder héroes, aviso de ¡CERCA! y un bot que comete más errores cuando va ganando.
 
 ## Bot
 
-- **Difícil:** lleva un mapa de probabilidad de dónde están tus personajes (huellas, aciertos, fallos y movimientos posibles), ataca donde más probable es acertar, huye cuando se ha delatado y esquiva el fuego y la lava. En 400 rondas simuladas gana el 85 % contra el bot fácil.
-- **Fácil:** se mueve y ataca al azar.
+Lleva un mapa de probabilidad de dónde están tus héroes (huellas, aciertos, fallos, avisos de cerca y movimientos posibles), ataca donde más probable es acertar y huye cuando se delata. En 400 rondas simuladas gana el 94 % contra un bot aleatorio. Para repetirlo, en la consola: `__amagoSim(400, "hard", "easy")`.
 
-Para repetir la simulación, en la consola del navegador: `__amagoSim(400, "hard", "easy")`.
-
-## Reglas implementadas
-
-- Tableros ocultos de 5×5, 3 personajes por bando y 2 rocas por tablero.
-- Antes de cada ronda eliges 3 personajes de 4 ofrecidos al azar.
-- Cada turno, cada personaje se mueve una casilla o usa su habilidad. Primero se resuelven los movimientos y después los ataques.
-- Atacar deja una huella visible para el rival durante 2 turnos (la Asesina y el Caballero no la dejan).
-- Si aciertas ves "¡Tocado!" con el personaje alcanzado.
-- Pista inicial: una columna donde hay un personaje rival.
-- En el turno 6 el borde del tablero se convierte en lava (1 de daño por turno).
-- El último superviviente se mueve hasta 2 casillas.
-- Ronda de 10 turnos como máximo. Si nadie gana, gana quien hizo más daño. Partida al mejor de 3.
-- Repetición al final de cada ronda con los dos tableros al descubierto.
-
-| Personaje | Vida | Recarga | Habilidad |
-|---|---|---|---|
-| Arquera | 2 | 1 | Línea de 3 casillas, 1 de daño |
-| Monstruo | 3 | 3 | Bola de fuego 2×2, cae el turno siguiente con aviso |
-| Asesina | 1 | 2 | 1 casilla, 2 de daño, sin huella |
-| Exploradora | 2 | 1 | Revela una zona 2×2 |
-| Caballero | 3 | 2 | Escudo para él y los aliados de al lado, sin huella |
-| Ilusionista | 2 | 2 | Huella falsa y flecha falsa |
-
-## Pendiente
-
-Agua y niebla en los mapas, modo online con salas privadas, gráficos y sonido.
+El progreso (trofeos, cofres, héroes) se guarda en el navegador con `localStorage`.
