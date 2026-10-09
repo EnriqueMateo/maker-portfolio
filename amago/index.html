@@ -1138,7 +1138,7 @@ function prepModel(scn,id){
   scn.updateMatrixWorld(true);const box=new T.Box3();scn.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}});
   const k=h/(box.max.y-box.min.y),c=box.getCenter(new T.Vector3());
   scn.scale.setScalar(k);scn.position.set(-c.x*k,-box.min.y*k,-c.z*k);
-  scn.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;const m=o.material;if(m&&m.isMeshStandardMaterial){m.envMapIntensity=.7;m.roughness=Math.min(m.roughness??1,.6);}}});
+  scn.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;const m=o.material;if(m&&m.isMeshStandardMaterial){m.envMapIntensity=.22;m.roughness=.85;m.metalness=0;m.roughnessMap=null;m.metalnessMap=null;m.needsUpdate=true;}}});
   const g=new T.Group();g.add(scn);return g;
 }
 /* carga un GLB; en hosts que solo sirven JSON llega como {"glb":"base64"} y se decodifica aquí (sin fetch de data:/blob:) */
