@@ -172,11 +172,11 @@ W[hm] = 0; W[hm, idx['head']] = 1  # cabeza rígida (head_w: solo en el centro, 
 # ("prop": lados que llevan un objeto largo, como el arco, que sube por encima del hombro)
 for s_, side in ((1, 'L'), (-1, 'R')):
     top_ = 9 if side in J.get('rigid_all', []) else max(J['shoulder'][1], J.get('hand_' + side, J['hand'])[1] + .2) + .1  # rigid_all: bastones largos
-    m_ = (s_ * x > gate) & (z < top_) & (V[:, 1] < .25)
+    m_ = (s_ * x > gate) & (z < top_) & (z > .14) & (V[:, 1] < .25)
     W[m_] = 0; W[m_, idx[f'fore.{side}']] = 1
 # zonas que van con el tronco aunque estén fuera (bufandas, colas, alas)
 # pies: todo lo que está por debajo de la rodilla va con la espinilla de su lado
-fm = (z < J['knee']) & (np.abs(x) < gate + .1)
+fm = (z < J['knee']) & ((np.abs(x) < J.get('feet_w', gate + .1)) | ((z < .14) & (np.abs(x) < J['hand'][0] - .1)))  # incluye el borde de las suelas anchas
 for s_, side in ((1, 'L'), (-1, 'R')):
     m_ = fm & (s_ * x >= 0)
     W[m_] = 0; W[m_, idx[f'shin.{side}']] = 1
@@ -184,6 +184,10 @@ for bx in J.get('spine_boxes', []):
     (x0, x1), (y0, y1), (z0, z1) = bx[:3]; bn = bx[3] if len(bx) > 3 else 'spine'
     m_ = (x > x0) & (x < x1) & (V[:, 1] > y0) & (V[:, 1] < y1) & (z > z0) & (z < z1)
     W[m_] = 0; W[m_, idx[bn]] = 1
+# vértices sin ningún hueso permitido: al hueso más cercano (sin peso, el motor del juego los lleva al origen y salen pinchos)
+zero = W.sum(1) < 1e-9
+W[zero, np.argmin(D[zero], 1)] = 1
+print('sin peso arreglados', int(zero.sum()))
 W = W / np.maximum(W.sum(1, keepdims=True), 1e-9)
 # quedarse con los 2 huesos más fuertes por vértice
 order = np.argsort(-W, 1)
@@ -233,13 +237,15 @@ mesh.parent = rig
 md = mesh.modifiers.new('arm', 'ARMATURE'); md.object = rig
 lowz = z < .4
 print('low verts weights', {n: round(float(W[lowz, i].sum()), 1) for i, n in enumerate(names)})
+lowz = z < .12
+print('pies pesos', {n: round(float(W[lowz, i].sum()), 1) for i, n in enumerate(names) if W[lowz, i].sum() > 0})
 print('weights ok', {n: int((W[:, i] > .5).sum()) for i, n in enumerate(names)})
 
 if POSE:
     # pose de prueba: paso adelante, brazo derecho arriba, cabeza girada
     pb = rig.pose.bones
     for b in pb: b.rotation_mode = 'XYZ'
-    POSES = {'rest': {}, 'thigh': {'thigh.L': (35, 0, 0)}, 'arm': {'arm.R': (60, 0, 0)}, 'head': {'head': (0, 25, 0)}, 'win': {'arm.L': (0, 0, 140), 'arm.R': (0, 0, -140)}, 'atk': {'arm.L': (80, 0, 0), 'fore.R': (70, 0, 0)}}
+    POSES = {'rest': {}, 'thigh': {'thigh.L': (35, 0, 0)}, 'arm': {'arm.R': (60, 0, 0)}, 'head': {'head': (0, 25, 0)}, 'win': {'arm.L': (0, 0, 140), 'arm.R': (0, 0, -140)}, 'atk': {'arm.L': (80, 0, 0), 'fore.R': (70, 0, 0)}, 'hit': {'spine': (-17, 0, 0), 'arm.L': (0, 0, 23), 'arm.R': (0, 0, -23), 'head': (-15, 0, 0)}}
     pose = POSES[os.environ.get('POSE', 'rest')]
     for n, (rx, ry, rz) in pose.items(): pb[n].rotation_euler = (math.radians(rx), math.radians(ry), math.radians(rz))
     print('axes', {b.name: [tuple(round(c, 2) for c in b.matrix_local.to_3x3().col[i]) for i in range(3)] for b in rig.data.bones if b.name in ('thigh.L', 'arm.R', 'head')})
