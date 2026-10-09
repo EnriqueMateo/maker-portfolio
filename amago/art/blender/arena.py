@@ -13,7 +13,7 @@ THEME, OUT = a[0], a[1]
 PREVIEW = a[2] if len(a) > 2 else None
 
 TH = {
-    'pradera': dict(grass='#86d13f', grass2='#5fb62f', rock='#e8cf9c', rock2='#c9a571', water='#38c3ff', leaf='#5ccc3c', leaf2='#a5e04a',
+    'pradera': dict(grass='#7ccf34', grass2='#55ad26', rock='#e8cf9c', rock2='#c9a571', water='#38c3ff', leaf='#5ccc3c', leaf2='#a5e04a',
                     trunk='#93603a', path='#f3e2b6', props='tree', flowers=['#ffd23a', '#ff7ab8', '#ffffff'], sky='#bfe9ff', ground='#2a9be0'),
     'bosque':  dict(grass='#4fae3f', grass2='#2f8a34', rock='#9fb08a', rock2='#738a66', water='#2fb5a8', leaf='#2c9b4a', leaf2='#55c25a',
                     trunk='#6e4a2f', path='#d9c79a', props='pine', flowers=['#ff5a4f', '#ffffff', '#ffd23a'], sky='#c9f0d8', ground='#1f8a7e'),
@@ -207,9 +207,9 @@ for x in [-3.4, 3.4]: rock(x, 6.9, .9); flowers(x + .6, 7.0, 5) if THEME in ('pr
 s = bpy.context.scene
 s.render.engine = 'CYCLES'; s.cycles.device = 'CPU'; s.cycles.samples = 48
 w = bpy.data.worlds.new('w'); s.world = w; w.use_nodes = True
-w.node_tree.nodes['Background'].inputs[0].default_value = hexc(TH['sky']) + (1,); w.node_tree.nodes['Background'].inputs[1].default_value = .55
+w.node_tree.nodes['Background'].inputs[0].default_value = hexc(TH['sky']) + (1,); w.node_tree.nodes['Background'].inputs[1].default_value = .32
 bpy.ops.object.light_add(type='SUN', location=(0, 0, 10)); sun = bpy.context.object
-sun.data.energy = 2.4; sun.data.angle = math.radians(12); sun.rotation_euler = (math.radians(38), math.radians(-18), math.radians(-30))
+sun.data.energy = 3.4; sun.data.angle = math.radians(12); sun.rotation_euler = (math.radians(38), math.radians(-18), math.radians(-30))
 sun.data.color = (1, .96, .9)
 # agua provisional para que rebote su color en la luz (no se exporta)
 bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, -.9)); wat = bpy.context.object
