@@ -32,6 +32,14 @@ Siguiente: arbusto y flores de Gemini para Pradera; luego bosque/volcán/trono/o
 
 `RIG2D` en index.html marca articulaciones por héroe (coordenadas 0..1 de la imagen). `skin2D` crea huesos (raíz, columna, cabeza, brazos, piernas y extras como cola, bufanda, gorro o mecha) y pesa cada vértice de una malla 22×26 por distancia a los huesos; `applySkin` deforma la malla en CPU cada fotograma. `animateSprite` hace reposo (respira), andar (piernas por turnos, brazos, rebote), ataque según estilo (`shoot`/`throw`/`slam`/`breath`, carga corta porque el proyectil sale al instante), golpe (destello, retroceso, temblor), KO (cae girando sobre un pie) y victoria (saltos, vuelta). Regla: no girar brazos más de ~0,8 rad o la ilustración se deforma. Tamaño en arena `HSCALE=1.02`. Polvo al andar (`puff`). Banco de pruebas: `testanim3.js` / `testgif2.js` en el scratchpad.
 
+## Progresión y menús (estilo Supercell)
+
+- Monedas + Puntos de Poder (⚡) suben a los héroes del nivel 1 al 9 (`UPG`). Efecto en partida (motor, `lvBonus`): +3 % de recarga de elixir por nivel y +1 vida en los niveles 5 y 9. El bot juega a un nivel parecido, limitado por los trofeos (`startRound`). Online (amistoso) va a nivel 1.
+- Cofres en 3 tipos (`CHESTS`): Cofre, Cofre grande y Megacofre; dan monedas, ⚡ y a veces un héroe. Se abren a pantalla completa (`boxHTML`/`boxTap`). 3 victorias = 3 llaves = cofre; máximo `BOX_MAX` sin abrir.
+- Camino de trofeos (`ROAD`) con premios cada pocos trofeos y avisos de arena nueva. Pase de temporada (`PASS`, 30 escalones de 100 fichas, 14 días desde `SEASON0`). Misiones diarias (`MISSIONS`, 3 al día) dan fichas. Tienda: regalo diario gratis, 3 ofertas del día, cofres y héroes.
+- Iconos y cofres renderizados en 3D: `art/blender/icons.py` (pieza por pieza) → `art/blender/ui_icons.py` (recorte + contorno) → `ui/*.webp`. Al publicar el artifact, añadir `ui/*.webp` a `files`.
+- CSS de menús al final del `<style>` (bloque "menús (estilo Supercell)"); `.mbg` es el fondo a rayas, `.tabs` la barra de pestañas.
+
 ## Pendiente después
 
 - Pulir: KO más claro, resumen de ronda, ronda de práctica guiada, pedir nombre tras la primera partida.

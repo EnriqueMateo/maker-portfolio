@@ -409,6 +409,10 @@ canvas.bigmodel{position:relative;z-index:1;width:min(96vw,440px);height:min(118
 #app.game ~ .toast{bottom:calc(132px + env(safe-area-inset-bottom,0px))}
 .g3 .side2 .mini{width:44px;height:44px}
 .loading{margin:auto;display:flex;flex-direction:column;align-items:center;gap:22px;font-size:54px;font-weight:900;color:#fff}
+.logo2{font-family:var(--f-game);font-size:clamp(72px,24vw,110px);line-height:.9;letter-spacing:.02em;background:linear-gradient(#fff6b0 10%,#ffd23a 45%,#ff9a00 90%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:4px var(--ink);filter:drop-shadow(0 6px 0 var(--ink));animation:pulse 1.6s ease-in-out infinite}
+.lbar{width:min(70vw,260px);height:18px;border-radius:10px;background:#070c2e;border:3px solid var(--ink);overflow:hidden}
+.lbar u{display:block;height:100%;width:30%;background:linear-gradient(#7dff9c,#22c25a);border-radius:6px;animation:lbar 2.4s ease-out infinite}
+@keyframes lbar{from{width:5%}to{width:100%}}
 .loading .spin{width:46px;height:46px;border-radius:50%;border:6px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .diffrow{display:flex;gap:8px;margin:-2px 0 6px}
@@ -458,6 +462,264 @@ body,body[style]{background:
 .side2 .mini{width:46px!important;height:46px!important}
 .tbox .stars{font-size:17px!important}
 .acts .act{background:none!important;box-shadow:none!important;border:0!important;color:#fff;font-size:15px!important;text-shadow:0 2px 0 var(--ink)}
+
+/* ================= menús (estilo Supercell): fondo a rayas, piezas gruesas con contorno, iconos 3D ================= */
+.mbg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:radial-gradient(130% 70% at 50% 28%,var(--arena2,#2a8cf0) 0%,var(--arena3,#1450b8) 55%,#08103a 100%)}
+.mbg::before{content:"";position:absolute;inset:-60px;background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 26px,transparent 26px 52px);animation:stripes 18s linear infinite}
+.mbg::after{content:"";position:absolute;inset:0;background:radial-gradient(80% 55% at 50% 42%,transparent 45%,rgba(4,6,36,.6))}
+@keyframes stripes{to{transform:translate(73.5px,73.5px)}}
+.ico{display:inline-block;width:28px;height:28px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.num{font-family:var(--f-game);font-weight:400;letter-spacing:.01em}
+
+/* barra superior */
+.mtop{display:flex;align-items:center;gap:4px;padding-top:2px}
+.mprof{display:flex;align-items:center;gap:7px;background:linear-gradient(#22348e,#121e60);border:3px solid var(--ink);border-radius:14px;padding:3px 9px 3px 3px;box-shadow:0 4px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.18);cursor:pointer;min-width:0;flex:1 1 0;max-width:154px;text-align:left}
+.mav{width:40px;height:40px;border-radius:10px;background:linear-gradient(#ffe066,#f09a00);border:2px solid var(--ink);overflow:hidden;flex:none;display:grid;place-items:center;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.mav img,.mav svg{width:118%;height:118%;object-fit:cover;object-position:50% 12%}
+.mpi{display:flex;flex-direction:column;min-width:0;gap:3px;flex:1}
+.mpi b{font-family:var(--f-game);font-weight:400;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1}
+.mlv{display:flex;align-items:center;gap:4px}
+.mlv i{font-style:normal;font-family:var(--f-game);font-size:12px;background:linear-gradient(#7fe3ff,#1f7ae0);border:2px solid var(--ink);border-radius:7px;min-width:18px;padding:0 2px;text-align:center;line-height:15px}
+.xb{flex:1;height:8px;min-width:30px;border-radius:5px;background:#070c2e;border:2px solid var(--ink);overflow:hidden}
+.xb u{display:block;height:100%;background:linear-gradient(90deg,#4fd2ff,#c4f3ff);border-radius:3px}
+.rpill{position:relative;display:flex;align-items:center;justify-content:flex-end;height:30px;min-width:62px;padding:0 6px 0 22px;margin-left:16px;background:linear-gradient(rgba(4,10,44,.85),rgba(10,20,70,.85));border:2px solid var(--ink);border-radius:10px;box-shadow:inset 0 2px 0 rgba(255,255,255,.1),0 3px 0 rgba(0,0,0,.35);cursor:pointer;font-family:var(--f-game);font-size:16px;flex:none}
+.rpill .ico{position:absolute;left:-17px;top:50%;transform:translateY(-52%);width:40px;height:40px}
+.rpill.bump{animation:bump .5s}
+@keyframes bump{30%{transform:scale(1.18)}}
+.gear{width:36px;height:36px;flex:none;border-radius:11px;background:linear-gradient(#5d6fae,#36437e);border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.25);cursor:pointer;font-size:17px;display:grid;place-items:center;padding:0;margin-left:2px}
+.mroad{display:flex;align-items:center;gap:6px;background:linear-gradient(rgba(4,10,44,.8),rgba(10,20,70,.8));border:2px solid var(--ink);border-radius:12px;padding:3px 8px 3px 4px;cursor:pointer;width:min(230px,62%);box-shadow:0 3px 0 rgba(0,0,0,.35);position:relative}
+.mroad .ico{width:32px;height:32px;margin:-6px 0}
+.mroad .num{font-size:18px}
+.mroad .xb{height:10px}
+.mroad .xb u{background:linear-gradient(90deg,#ffb300,#ffe066)}
+.mroad .nx{width:26px;height:26px;margin:-4px -2px}
+.mroad .badge{top:-8px;right:-8px}
+
+/* inicio */
+#app.home{gap:6px;padding-bottom:86px}
+.hstage{position:relative;flex:1;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.hstage .rays{position:absolute;left:50%;top:44%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.13) 0 9deg,transparent 9deg 22.5deg);-webkit-mask:radial-gradient(closest-side,#000 25%,transparent 100%);mask:radial-gradient(closest-side,#000 25%,transparent 100%);animation:spin 40s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(1turn)}}
+.hstage canvas.bigmodel{position:absolute;inset:0;width:100%;height:100%}
+.hplate{position:relative;z-index:2;display:flex;align-items:center;gap:8px;background:linear-gradient(#22348e,#121e60);border:3px solid var(--ink);border-radius:16px;padding:5px 14px 5px 6px;box-shadow:0 5px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.18);cursor:pointer;margin-bottom:4px}
+.hplate b{font-family:var(--f-game);font-weight:400;font-size:24px;line-height:1}
+.hplate small{display:block;font-size:12px;color:#bcd0ff}
+.pwr{position:relative;width:42px;height:46px;flex:none;display:grid;place-items:center;font-family:var(--f-game);font-size:20px;color:#fff;background:linear-gradient(#c58bff,#7a2fe0);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.pwr::before{content:"";position:absolute;inset:3px;background:linear-gradient(#b06cff,#6a22d0);clip-path:inherit;z-index:-1}
+.pwr span{position:relative;z-index:1}
+.pwr small{position:absolute;top:2px;font-size:7px;letter-spacing:.05em;color:#f1e3ff;font-family:var(--f-body)}
+.pwr.max{background:linear-gradient(#ffe066,#e08a00)}
+.sidecol{position:absolute;top:8px;z-index:3;display:flex;flex-direction:column;gap:12px}
+.sidecol.l{left:0}.sidecol.r{right:0}
+.sbtn{width:64px;display:flex;flex-direction:column;align-items:center;background:none;border:0;cursor:pointer;position:relative;padding:0}
+.sbtn .sq{width:56px;height:56px;border-radius:16px;background:linear-gradient(#4b8bff,#1f45c8);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink),inset 0 3px 0 rgba(255,255,255,.35),inset 0 -7px 0 rgba(0,0,0,.18);display:grid;place-items:center;transition:transform .1s}
+.sbtn:active .sq{transform:translateY(3px)}
+.sbtn .sq img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3))}
+.sbtn .sq.gold{background:linear-gradient(#ffd84a,#f08a00)}
+.sbtn .sq.pur{background:linear-gradient(#c07bff,#6a2fc0)}
+.sbtn .sq.grn{background:linear-gradient(#5ff08f,#139a4a)}
+.sbtn>span{font-family:var(--f-game);font-size:13px;margin-top:5px;line-height:1}
+.sbtn.chest .sq{background:none;border:0;box-shadow:none;width:72px;height:64px}
+.sbtn.chest .sq img{width:78px;height:78px;animation:hop 1.6s ease-in-out infinite}
+@keyframes hop{0%,60%,100%{transform:translateY(0) rotate(0)}70%{transform:translateY(-8px) rotate(-6deg)}80%{transform:translateY(0) rotate(4deg)}90%{transform:translateY(-3px) rotate(0)}}
+.badge{position:absolute;top:-7px;right:-5px;z-index:2;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:linear-gradient(#ff7385,#e0193b);border:2px solid var(--ink);font-family:var(--f-game);font-size:13px;line-height:18px;text-align:center;color:#fff;font-style:normal;animation:badge 1.4s ease-in-out infinite}
+.badge.free{background:linear-gradient(#5ff08f,#14a04e)}
+@keyframes badge{50%{transform:scale(1.15)}}
+.keys{display:flex;gap:1px;justify-content:center;margin-top:2px}
+.keys img{width:20px;height:20px;filter:grayscale(1) brightness(.45)}
+.keys img.on{filter:drop-shadow(0 1px 0 rgba(0,0,0,.4))}
+.playrow2{position:relative;z-index:3;display:flex;gap:10px;align-items:stretch}
+.modebtn2{flex:0 0 38%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;background:linear-gradient(#3a6cf5,#1b3fb8);border:3px solid var(--ink);border-radius:16px;box-shadow:0 6px 0 #0d2275,0 6px 0 3px var(--ink),inset 0 3px 0 rgba(255,255,255,.3);padding:6px 10px;cursor:pointer;text-align:left}
+.modebtn2 small{font-size:10px;letter-spacing:.08em;color:#bcd0ff}
+.modebtn2 b{font-family:var(--f-game);font-weight:400;font-size:17px;line-height:1.05}
+.modebtn2 em{font-style:normal;font-size:11px;color:#ffe066}
+.gbtn.play2{flex:1;font-size:38px;padding:14px 10px;border-radius:18px}
+.gbtn.green{background:linear-gradient(#7dff9c,#22c25a);box-shadow:0 6px 0 #127a37,0 6px 0 3px var(--ink);color:#fff}
+.gbtn.green:active:not(:disabled){box-shadow:0 1px 0 #127a37,0 1px 0 3px var(--ink)}
+.gbtn.purple{background:linear-gradient(#d29bff,#8a3cf0);box-shadow:0 6px 0 #4f1a9a,0 6px 0 3px var(--ink);color:#fff}
+.gbtn .ico{width:24px;height:24px;margin:-4px 2px}
+.shine{position:relative;overflow:hidden}
+.shine::after{content:"";position:absolute;top:-20%;bottom:-20%;width:34%;left:-50%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-20deg);animation:shine 3.4s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%,55%{left:-50%}85%,100%{left:130%}}
+
+/* barra de pestañas */
+.tabs{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);z-index:20;display:flex;align-items:flex-end;gap:0;padding:0 4px max(6px,env(safe-area-inset-bottom));box-sizing:border-box;background:linear-gradient(#16236b,#0b1240);border-top:3px solid var(--ink);box-shadow:0 -4px 0 rgba(255,255,255,.08) inset}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:0;cursor:pointer;padding:6px 0 2px;position:relative;color:#9fb0e8}
+.tabs button img{width:36px;height:36px;object-fit:contain;transition:transform .15s;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.tabs button .em{font-size:28px;line-height:36px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.tabs button span{font-family:var(--f-game);font-size:12px}
+.tabs button.on{color:#fff}
+.tabs button.on::before{content:"";position:absolute;inset:-10px 2px 0;border-radius:14px 14px 0 0;background:linear-gradient(#5f8dff,#2a4fd0);border:3px solid var(--ink);border-bottom:0;z-index:-1;box-shadow:inset 0 3px 0 rgba(255,255,255,.3)}
+.tabs button.on img,.tabs button.on .em{transform:translateY(-8px) scale(1.18)}
+.tabs .badge{top:-4px;right:12%}
+
+/* títulos de sección */
+.sect{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 2px}
+.sect h2{font-family:var(--f-game);font-weight:400;font-size:30px;margin:0;line-height:1}
+.sect .ico{width:40px;height:40px}
+.ribn{position:relative;display:block;align-self:center;margin:10px auto 6px;width:max-content;max-width:90%;padding:5px 22px;font-family:var(--f-game);font-size:17px;background:linear-gradient(#ffd84a,#f08a00);border:3px solid var(--ink);border-radius:8px;box-shadow:0 3px 0 var(--ink);color:#fff;text-align:center}
+.ribn.blue{background:linear-gradient(#5fd8ff,#1f7ae0)}
+.ribn.pur{background:linear-gradient(#d29bff,#8a3cf0)}
+.ribn.grn{background:linear-gradient(#7dff9c,#22c25a)}
+.sub{text-align:center;color:#d4defc;font-size:13px;margin:0}
+.sub b{color:#fff}
+
+/* tarjetas de héroe */
+.hgrid3{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.hcard3{position:relative;display:flex;flex-direction:column;align-items:center;border:3px solid var(--ink);border-radius:16px;padding:0 0 8px;cursor:pointer;box-shadow:0 5px 0 var(--ink),inset 0 3px 0 rgba(255,255,255,.35);overflow:hidden;text-align:center}
+.hcard3::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.18) 50%,transparent 60%),radial-gradient(70% 50% at 50% 35%,rgba(255,255,255,.35),transparent 70%);pointer-events:none}
+.hcard3 .rr{align-self:stretch;font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:rgba(0,0,0,.28);padding:3px 0;color:#fff}
+.hcard3 .hm{width:100%;height:118px;display:grid;place-items:center;margin-top:2px}
+.hcard3 .hm img,.hcard3 .hm svg{max-width:92%;max-height:118px;object-fit:contain;filter:drop-shadow(0 5px 3px rgba(0,0,0,.35))}
+.hcard3 .hn{font-family:var(--f-game);font-size:20px;line-height:1;margin-top:2px}
+.hcard3 .hbot{display:flex;align-items:center;gap:6px;width:88%;margin-top:5px}
+.hcard3 .pwr{width:28px;height:31px;font-size:14px}
+.hcard3 .pwr small{display:none}
+.ppbar{display:block;flex:1;position:relative;height:18px;border-radius:7px;background:#0a0f33;border:2px solid var(--ink);overflow:hidden}
+.ppbar u{position:absolute;inset:0 auto 0 0;background:linear-gradient(#c58bff,#7a2fe0)}
+.ppbar.ok u{background:linear-gradient(#7dff9c,#22c25a)}
+.ppbar span{position:relative;font-family:var(--f-game);font-size:11px;line-height:15px;display:block;text-shadow:0 1px 0 #000}
+.hcard3 .up{position:absolute;top:24px;right:6px;width:30px;height:30px;border-radius:50%;background:linear-gradient(#7dff9c,#22c25a);border:2px solid var(--ink);display:grid;place-items:center;font-family:var(--f-game);font-size:18px;animation:badge 1.2s infinite}
+.hcard3.lock .hm img,.hcard3.lock .hm svg{filter:brightness(0) opacity(.45)}
+.hcard3.lock{filter:saturate(.35)}
+.hcard3 .lkt{font-size:12px;color:#fff;margin-top:6px;display:flex;align-items:center;gap:3px}
+.hcard3 .lkt .ico{width:20px;height:20px}
+.hcard3 .favs{position:absolute;top:22px;left:6px;font-size:20px;filter:drop-shadow(0 2px 0 #000)}
+
+/* ficha del héroe */
+.hsheet{padding:0!important;overflow:hidden}
+.hsheet .top{position:relative;padding:14px 14px 10px;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.hsheet .top::before{content:"";position:absolute;left:50%;top:50%;width:520px;height:520px;margin:-260px 0 0 -260px;background:repeating-conic-gradient(rgba(255,255,255,.16) 0 8deg,transparent 8deg 20deg);animation:spin 30s linear infinite}
+.hsheet .top img,.hsheet .top svg{position:relative;height:170px;max-width:80%;object-fit:contain;filter:drop-shadow(0 8px 4px rgba(0,0,0,.35))}
+.hsheet .nm{position:relative;display:flex;align-items:center;gap:10px;margin-top:4px}
+.hsheet .nm h3{font-family:var(--f-game);font-weight:400;font-size:32px;margin:0;line-height:1}
+.hsheet .nm small{display:block;font-size:12px}
+.hsheet .body{padding:10px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.srow{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border:2px solid rgba(0,0,0,.4);border-radius:10px;padding:6px 10px}
+.srow .k{flex:1;color:#cfd8ff;font-size:13px}
+.srow .v{font-family:var(--f-game);font-size:16px}
+.srow .nx{font-family:var(--f-game);font-size:14px;color:#7dff9c}
+.lvdots{display:flex;gap:3px;justify-content:center}
+.lvdots i{width:18px;height:8px;border-radius:3px;background:#0a0f33;border:1px solid var(--ink)}
+.lvdots i.on{background:linear-gradient(#d29bff,#8a3cf0)}
+.cost{display:flex;gap:10px;justify-content:center;align-items:center;font-family:var(--f-game);font-size:18px}
+.cost .bad{color:#ff7385}
+.perk{text-align:center;font-size:13px;color:#e8ecff;margin:0}
+.perk b{color:#7dff9c}
+
+/* tienda */
+.offers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ocard{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;border:3px solid var(--ink);border-radius:14px;padding:16px 4px 8px;box-shadow:0 4px 0 var(--ink),inset 0 3px 0 rgba(255,255,255,.3);overflow:hidden;text-align:center;background:linear-gradient(#4b8bff,#1f45c8)}
+.ocard.pur{background:linear-gradient(#c48bff,#6a2fc0)}
+.ocard.gold{background:linear-gradient(#ffd84a,#e08a00)}
+.ocard.grn{background:linear-gradient(#5ff08f,#139a4a)}
+.ocard::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 38%,rgba(255,255,255,.4),transparent 70%);pointer-events:none}
+.ocard .im{position:relative;height:74px;display:grid;place-items:center}
+.ocard .im img{max-height:74px;max-width:100%;object-fit:contain}
+.ocard .im .h3{max-height:80px}
+.ocard b{position:relative;font-family:var(--f-game);font-weight:400;font-size:15px;line-height:1.05}
+.ocard small{position:relative;font-size:10px;color:#eef2ff}
+.ocard .tag{position:absolute;top:0;left:0;right:0;font-size:10px;letter-spacing:.08em;background:#e0193b;padding:2px 0;font-family:var(--f-game)}
+.ocard .gbtn{margin-top:4px;font-size:16px;padding:5px 8px;border-radius:11px;width:92%;flex-direction:row;justify-content:center;gap:2px}
+.ocard .gbtn s{font-size:11px;opacity:.7;margin-left:3px}
+.ocard.done{filter:grayscale(.8) brightness(.75)}
+.gift{display:flex;align-items:center;gap:12px;border:3px solid var(--ink);border-radius:18px;padding:8px 12px;background:linear-gradient(#5ff08f,#139a4a);box-shadow:0 5px 0 var(--ink),inset 0 3px 0 rgba(255,255,255,.35);position:relative;overflow:hidden}
+.gift img{width:92px;height:92px;object-fit:contain;animation:hop 1.6s ease-in-out infinite}
+.gift b{font-family:var(--f-game);font-weight:400;font-size:22px;display:block}
+.gift small{font-size:12px}
+.gift .gbtn{margin-left:auto;font-size:18px;padding:8px 12px}
+.gift.done{background:linear-gradient(#5d6fae,#36437e)}
+.gift.done img{animation:none;filter:grayscale(.6)}
+.timer{text-align:center;font-size:12px;color:#d4defc;margin:-2px 0 2px}
+
+/* camino de trofeos y pase */
+.path{position:relative;display:flex;flex-direction:column;gap:10px;padding-left:56px}
+.path::before{content:"";position:absolute;left:24px;top:10px;bottom:10px;width:10px;border-radius:5px;background:#0a0f33;border:2px solid var(--ink)}
+.path .fill{position:absolute;left:26px;width:10px;bottom:12px;border-radius:5px;background:linear-gradient(#ffe066,#ff9a00);z-index:0}
+.pnode{position:relative;display:flex;align-items:center;gap:10px;background:linear-gradient(#22348e,#121e60);border:3px solid var(--ink);border-radius:14px;padding:6px 10px;box-shadow:0 4px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.15);min-height:58px}
+.pnode .tt{position:absolute;left:-56px;top:50%;transform:translateY(-50%);width:46px;height:30px;border-radius:9px;background:#26307a;border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--f-game);font-size:13px;z-index:1}
+.pnode.reach .tt{background:linear-gradient(#ffe066,#ff9a00)}
+.pnode .ri{width:52px;height:52px;flex:none;display:grid;place-items:center}
+.pnode .ri img,.pnode .ri svg{max-width:52px;max-height:52px;object-fit:contain}
+.pnode .rtx{flex:1;min-width:0;text-align:left}
+.pnode .rtx b{font-family:var(--f-game);font-weight:400;font-size:17px;display:block;line-height:1.1}
+.pnode .rtx small{font-size:11px;color:#bcd0ff}
+.pnode .gbtn{font-size:15px;padding:7px 10px;border-radius:11px}
+.pnode.got{opacity:.6}
+.pnode.got .ok{font-size:22px;color:#7dff9c}
+.pnode.arena{background:linear-gradient(#ffb300,#c25a00)}
+.pnode.reach:not(.got){box-shadow:0 4px 0 var(--ink),0 0 18px rgba(255,224,102,.55),inset 0 2px 0 rgba(255,255,255,.2)}
+.lockt{font-size:18px;opacity:.7}
+.passhead{display:flex;align-items:center;gap:10px;background:linear-gradient(#c48bff,#6a2fc0);border:3px solid var(--ink);border-radius:16px;padding:8px 12px;box-shadow:0 4px 0 var(--ink),inset 0 3px 0 rgba(255,255,255,.3)}
+.passhead .ico{width:52px;height:52px}
+.passhead b{font-family:var(--f-game);font-weight:400;font-size:20px;display:block;line-height:1}
+.passhead .xb{height:14px;margin-top:4px}
+.passhead .xb u{background:linear-gradient(90deg,#5fd8ff,#c4f3ff)}
+.passhead small{font-size:11px}
+
+/* misiones */
+.mis{display:flex;align-items:center;gap:10px;background:linear-gradient(#22348e,#121e60);border:3px solid var(--ink);border-radius:14px;padding:8px 10px;box-shadow:0 4px 0 var(--ink)}
+.mis .mt{flex:1;min-width:0}
+.mis .mt b{font-size:14px;display:block;margin-bottom:4px}
+.mis .ppbar u{background:linear-gradient(#5fd8ff,#1f7ae0)}
+.mis .rw{display:flex;align-items:center;gap:2px;font-family:var(--f-game);font-size:15px}
+.mis .rw .ico{width:26px;height:26px}
+.mis .gbtn{font-size:14px;padding:6px 8px;border-radius:10px}
+.mis.done{opacity:.55}
+
+/* apertura de cofre a pantalla completa */
+.boxov{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(70% 50% at 50% 45%,#3a3fbf 0%,#14185a 60%,#05061f 100%);overflow:hidden;cursor:pointer}
+.boxov .rays{position:absolute;left:50%;top:45%;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(rgba(255,236,150,.16) 0 7deg,transparent 7deg 18deg);-webkit-mask:radial-gradient(closest-side,#000 20%,transparent 100%);mask:radial-gradient(closest-side,#000 20%,transparent 100%);animation:spin 26s linear infinite;pointer-events:none}
+.boxov .bt{position:relative;font-family:var(--f-game);font-size:30px}
+.boxov .chimg{position:relative;width:min(78vw,330px);height:min(78vw,330px);object-fit:contain;filter:drop-shadow(0 12px 6px rgba(0,0,0,.4));animation:drop .55s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes drop{from{transform:translateY(-120vh) scale(.6)}}
+.boxov .chimg.shk{animation:shk .35s}
+@keyframes shk{20%{transform:rotate(-8deg) scale(1.06)}40%{transform:rotate(7deg) scale(1.1)}60%{transform:rotate(-5deg) scale(1.08)}80%{transform:rotate(3deg)}}
+.boxov .chimg.opened{animation:pop .4s ease-out}
+@keyframes pop{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+.boxov .hint{position:relative;font-family:var(--f-game);font-size:18px;color:#ffe066;animation:pulse 1s infinite}
+.boxov .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.boxov .flash.go{animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+.boxov .left{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px;display:flex;align-items:center;gap:4px;font-family:var(--f-game);font-size:20px}
+.boxov .left img{width:40px;height:40px}
+.item{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;animation:itemin .5s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes itemin{from{transform:translateY(120px) scale(.3);opacity:0}}
+.item img.big{width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 10px 6px rgba(0,0,0,.4))}
+.item .h3{height:230px!important;width:auto!important}
+.item .amt{font-family:var(--f-game);font-size:50px;line-height:1}
+.item .lab{font-family:var(--f-game);font-size:22px}
+.item .rar{font-family:var(--f-game);font-size:18px;letter-spacing:.06em}
+.boxov .chopen{position:relative;width:min(44vw,180px);margin-top:4px;filter:drop-shadow(0 10px 6px rgba(0,0,0,.4))}
+.boxsum{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(92vw,400px)}
+.boxsum div{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.3);border:3px solid var(--ink);border-radius:14px;padding:8px 4px}
+.boxsum img{width:64px;height:64px;object-fit:contain}
+.boxsum b{font-family:var(--f-game);font-size:20px}
+.boxsum small{font-size:11px}
+
+/* subida de nivel */
+.lvup{position:fixed;inset:0;z-index:61;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:radial-gradient(70% 50% at 50% 45%,#7a3cf0 0%,#2a1060 65%,#0a0420 100%);cursor:pointer;overflow:hidden}
+.lvup .rays{position:absolute;left:50%;top:42%;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(rgba(220,180,255,.18) 0 7deg,transparent 7deg 18deg);animation:spin 26s linear infinite}
+.lvup img,.lvup svg{position:relative;height:240px;animation:itemin .5s cubic-bezier(.3,1.5,.5,1) both}
+.lvup .pwr{width:84px;height:92px;font-size:44px;animation:pop .5s .2s both}
+.lvup h2{position:relative;font-family:var(--f-game);font-weight:400;font-size:40px;margin:0}
+.lvup p{position:relative;margin:0;font-size:16px}
+.lvup p b{color:#7dff9c}
+
+/* resultados */
+.endbox{display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(#22348e,#121e60);border:3px solid var(--ink);border-radius:18px;padding:12px;box-shadow:0 5px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.15)}
+.endrow{display:flex;align-items:center;gap:8px;width:100%}
+.endrow .ico{width:38px;height:38px}
+.endrow .k{flex:1;font-size:14px;color:#cfd8ff}
+.endrow .v{font-family:var(--f-game);font-size:22px}
+.endrow .v.up{color:#7dff9c}.endrow .v.dn{color:#ff7385}
+.keyrow{display:flex;gap:6px;align-items:center}
+.keyrow img{width:34px;height:34px;filter:grayscale(1) brightness(.4)}
+.keyrow img.on{filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
+.keyrow img.new{animation:pop .5s .4s both}
+.endchest{display:flex;align-items:center;gap:10px;background:linear-gradient(#ffd84a,#f08a00);border:3px solid var(--ink);border-radius:16px;padding:6px 12px;box-shadow:0 5px 0 var(--ink);cursor:pointer;width:100%;box-sizing:border-box}
+.endchest img{width:76px;height:76px;animation:hop 1.4s infinite}
+.endchest b{font-family:var(--f-game);font-weight:400;font-size:20px;display:block}
 </style>
 </head>
 <body>
@@ -517,7 +779,9 @@ function areaOf(pat,tx,ty){
   }
 }
 let MID=0;
-function newHero(type,x,y){const H=HEROES[type];return {type,x,y,hp:H.hp,max:H.hp,path:[],nextStep:0,cdUntil:0,shieldUntil:0,turboUntil:0,visionUntil:0};}
+/* nivel de poder del héroe (1-9): más recarga de elixir y una vida extra en los niveles 5 y 9 */
+const LV_MAX=9,lvBonus=lv=>{lv=Math.max(1,Math.min(LV_MAX,lv||1));return {hp:(lv>=5?1:0)+(lv>=9?1:0),elx:.03*(lv-1)};};
+function newHero(type,x,y,lv){const H=HEROES[type],hp=H.hp+lvBonus(lv).hp;return {type,x,y,lv:lv||1,hp,max:hp,path:[],nextStep:0,cdUntil:0,shieldUntil:0,turboUntil:0,visionUntil:0};}
 function mark(R,s,m){m.id=++MID;R.marks[s].push(m);return m;}
 function pathTo(h,x,y){
   const p=[];let cx=h.x,cy=h.y;
@@ -528,7 +792,8 @@ function pathTo(h,x,y){
 }
 function newRound(tp,tb,opts){
   opts=opts||{};
-  const R={now:0,heroes:{p:newHero(tp,rnd(N),rnd(N)),b:newHero(tb,rnd(N),rnd(N))},elx:{p:ELX_START,b:ELX_START},
+  const lv=opts.lv||{};
+  const R={now:0,heroes:{p:newHero(tp,rnd(N),rnd(N),lv.p),b:newHero(tb,rnd(N),rnd(N),lv.b)},elx:{p:ELX_START,b:ELX_START},
     boosts:[],projs:[],marks:{p:[],b:[]},nextBoost:3,sudden:false,nextPing:SUDDEN_T,over:false,dmg:{p:0,b:0},paused:true};
   if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1};
   return R;
@@ -598,7 +863,7 @@ function timeWinner(R){
 function tick(R,dt,hk){
   if(!R||R.paused||R.over)return;
   R.now+=dt;
-  for(const s of SIDES){const h=R.heroes[s],rate=(h.turboUntil>R.now?2:1)*(R.sudden?1.5:1);R.elx[s]=Math.min(ELX_MAX,R.elx[s]+rate*dt);}
+  for(const s of SIDES){const h=R.heroes[s],rate=(h.turboUntil>R.now?2:1)*(R.sudden?1.5:1)*(1+lvBonus(h.lv).elx);R.elx[s]=Math.min(ELX_MAX,R.elx[s]+rate*dt);}
   for(const s of SIDES)stepHero(R,s,hk);
   const due=R.projs.filter(p=>p.hitAt<=R.now);R.projs=R.projs.filter(p=>p.hitAt>R.now);
   for(const p of due)impact(R,p,hk);
@@ -694,13 +959,13 @@ function persp(p,s){
   if(p.vx!=null&&(p.o===s||p.d===s)){q.vx=p.vx;q.vy=p.vy;}
   return q;
 }
-return {N,D4,SIDES,ELX_MAX,ELX_START,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,HEROES,IDS,STARTERS,BOOSTS,
+return {LV_MAX,lvBonus,N,D4,SIDES,ELX_MAX,ELX_START,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,HEROES,IDS,STARTERS,BOOSTS,
   rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf,newRound,moveTo,fire,tick,viewFor,persp};
 })();
 /* ENGINE-END */
 
 /* ================= datos del cliente ================= */
-const {N,D4,HEROES,IDS,STARTERS,BOOSTS,ELX_MAX,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf}=AMAGO;
+const {LV_MAX,lvBonus,N,D4,HEROES,IDS,STARTERS,BOOSTS,ELX_MAX,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf}=AMAGO;
 const RAR=[{n:"Común",c:"#8fb4e0",bg:"linear-gradient(160deg,#6f9fe0,#3b5fb0)"},{n:"Raro",c:"#41e08a",bg:"linear-gradient(160deg,#4fdc8f,#1f8a55)"},{n:"Épico",c:"#c07bff",bg:"linear-gradient(160deg,#c48bff,#6a2fc0)"},{n:"Legendario",c:"#ffcc1f",bg:"linear-gradient(160deg,#ffe066,#e08a00)"}];
 const ARENAS=[{t:0,k:"pradera",n:"Pradera Aprendiz",bg:"#2b358d"},{t:100,k:"bosque",n:"Bosque Cazador",bg:"#1f6b4f"},{t:250,k:"volcan",n:"Volcán Estratega",bg:"#8a2d1f"},{t:500,k:"trono",n:"Trono de Leyendas",bg:"#6a2fa0"},{t:900,k:"olimpo",n:"Olimpo del Amago",bg:"#a07a10"}];
 const NAMES=["LoboSolar","Nacho_77","PixelKing","Mr.Taco","ZetaGamer","Kira09","ElPeque","Rayito_x","DonPatata","LaReina","NinjaMiau","Turbo_Ale","Chispa","Bruma_33","CapitánNube"];
@@ -711,8 +976,25 @@ const HOW=[
   {i:"🎁",h:"Objetos cebo",p:"Salen en el mismo sitio para los dos. Si lo coges, el rival sabrá dónde estás."},
   {i:"🏆",h:"3 rondas, 3 héroes",p:"Antes de cada ronda eliges héroe. No puedes repetir. Gana quien se lleve 2 rondas."},
 ];
-const ROAD=[{t:15,r:"chest"},{t:40,r:"hero",id:"ojo"},{t:70,r:"chest"},{t:110,r:"hero",id:"truco"},{t:160,r:"chest"},{t:220,r:"hero",id:"rayo"},{t:300,r:"chest"},{t:400,r:"hero",id:"bum"},{t:520,r:"chest"},{t:680,r:"chest"},{t:850,r:"chest"},{t:1000,r:"chest"}];
-const KEYS_PER_CHEST=3,CHEST_MAX=3,PRICE=[100,180,320,550],CHEST_PRICE=60;
+/* ================= progresión =================
+   Monedas y Puntos de Poder (⚡) suben de nivel a los héroes; los cofres dan sobre todo ⚡;
+   el camino de trofeos y el pase dan cofres, monedas, ⚡ y héroes; las misiones diarias llenan el pase. */
+/* camino de trofeos: un premio cada pocos trofeos (r: coins, pp, chest(tier), hero, arena) */
+const ROAD=[{t:10,r:"coins",n:30},{t:20,r:"pp",n:25},{t:30,r:"chest",tier:1},{t:40,r:"hero",id:"ojo"},{t:55,r:"pp",n:40},{t:70,r:"chest",tier:2},{t:85,r:"coins",n:60},
+  {t:100,r:"arena",k:"bosque"},{t:110,r:"hero",id:"truco"},{t:130,r:"pp",n:60},{t:150,r:"chest",tier:2},{t:175,r:"coins",n:100},{t:200,r:"chest",tier:3},{t:220,r:"hero",id:"rayo"},
+  {t:250,r:"arena",k:"volcan"},{t:275,r:"pp",n:100},{t:300,r:"chest",tier:2},{t:340,r:"coins",n:150},{t:370,r:"pp",n:150},{t:400,r:"hero",id:"bum"},{t:450,r:"chest",tier:3},
+  {t:500,r:"arena",k:"trono"},{t:550,r:"pp",n:200},{t:600,r:"chest",tier:2},{t:680,r:"coins",n:300},{t:760,r:"chest",tier:3},{t:850,r:"pp",n:300},{t:900,r:"arena",k:"olimpo"},{t:1000,r:"chest",tier:3}];
+const KEYS_PER_CHEST=3,BOX_MAX=6,PRICE=[100,180,320,550];
+/* coste de subir a cada nivel (índice = nivel al que se sube) */
+const UPG=[null,null,{pp:10,c:15},{pp:20,c:30},{pp:35,c:60},{pp:60,c:110},{pp:100,c:200},{pp:160,c:340},{pp:250,c:550},{pp:400,c:900}];
+const CHESTS={1:{n:"Cofre",coins:[15,30],pp:[15,30],hero:.08,taps:1,price:60},2:{n:"Cofre grande",coins:[45,80],pp:[50,80],hero:.2,taps:2,price:160},3:{n:"Megacofre",coins:[150,250],pp:[160,240],hero:.5,taps:3,price:420}};
+/* pase de temporada: 30 escalones de 100 fichas; la temporada dura 14 días */
+const PASS_STEP=100,PASS_N=30,SEASON_DAYS=14,SEASON0=20727;
+const PASS=Array.from({length:PASS_N},(_,i)=>{const n=i+1;
+  if(n%10===0)return {r:"chest",tier:3};if(n===15)return {r:"hero"};if(n%5===0)return {r:"chest",tier:2};
+  return [{r:"coins",n:30+n*4},{r:"pp",n:25+n*3},{r:"chest",tier:1},{r:"pp",n:30+n*4}][n%4];});
+/* misiones diarias: 3 al día, elegidas con la fecha */
+const MISSIONS=[{k:"play",n:3,t:"Juega 3 partidas",tk:40},{k:"win",n:2,t:"Gana 2 partidas",tk:60},{k:"rounds",n:4,t:"Gana 4 rondas",tk:50},{k:"dmg",n:8,t:"Quita 8 vidas a tus rivales",tk:50},{k:"hero",n:2,t:"Gana 2 rondas con ",tk:60},{k:"play",n:5,t:"Juega 5 partidas",tk:70},{k:"dmg",n:15,t:"Quita 15 vidas",tk:80}];
 const speedLabel=st=>st<=.22?"Muy rápido":st<=.32?"Rápido":st<=.42?"Normal":"Lento";
 /* servidor online: el mismo origen si el juego lo sirve el servidor, o window.AMAGO_SERVER en la app nativa y de escritorio */
 const SERVER=window.AMAGO_SERVER||"";
@@ -727,13 +1009,16 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* ================= guardado ================= */
 const SAVE_KEY="amago-v3";
-const DEF={tro:0,unl:STARTERS.slice(),chests:0,tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,keys:0,claimed:[],xp:0,hw:{}};
+const DEF={tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[]},mis:{day:-1,list:[]},gift:-1};
 function loadSave(){
   let s;try{s=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");}catch(e){s=null;}
   s=Object.assign(clone(DEF),s||{});
   if(!s.name)s.name="Jugador"+(1000+rnd(9000));
   s.unl=s.unl.filter(id=>HEROES[id]);if(s.unl.length<3)s.unl=STARTERS.slice();
   if(!s.unl.includes(s.fav))s.fav=s.unl[0];
+  /* partidas guardadas antes de los cofres por tipos */
+  if(s.chests){for(let i=0;i<s.chests;i++)s.box.push(1);s.chests=0;}
+  s.claimed=s.claimed.filter(t=>ROAD.some(m=>m.t===t));
   return s;
 }
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
@@ -1819,8 +2104,9 @@ function mount(canvas,heroId){
   unmount();
   r=new T.WebGLRenderer({canvas,antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));GFX.setupRenderer(r);r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
   sc=new T.Scene();GFX.lights(sc,true,r);
-  const plat=GFX.part(new T.CylinderGeometry(.62,.7,.18,64),GFX.mat(0x3a48e0,{r:.2,cc:1}));plat.position.y=-.11;plat.traverse(o=>{if(o.isMesh)o.receiveShadow=true;});sc.add(plat);
-  cam=new T.PerspectiveCamera(28,1,.1,30);cam.position.set(0,1.05,3.25);cam.lookAt(0,.62,0);
+  const plat=GFX.part(new T.CylinderGeometry(.5,.56,.16,64),GFX.mat(0x2a3fc8,{r:.25,cc:1}));plat.position.y=-.1;plat.traverse(o=>{if(o.isMesh)o.receiveShadow=true;});sc.add(plat);
+  const rim=new T.Mesh(new T.TorusGeometry(.5,.035,16,96),GFX.mat(0xffc21a,{r:.25,m:.5}));rim.rotation.x=Math.PI/2;rim.position.y=-.02;sc.add(rim);
+  cam=new T.PerspectiveCamera(28,1,.1,30);cam.position.set(0,1.0,4.8);cam.lookAt(0,.62,0);
   set(heroId);
   const resize=()=>{const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();};resize();
   canvas.onpointerdown=e=>{drag={x:e.clientX,r:rotY};canvas.setPointerCapture(e.pointerId);};
@@ -1842,11 +2128,11 @@ const app=$("#app");
 let UI={screen:"home",modal:null}, G=null, R=null, loopId=null, lastT=0, renderAcc=0;
 function arenaOf(t){let a=ARENAS[0],n=null;for(let i=0;i<ARENAS.length;i++){if(t>=ARENAS[i].t){a=ARENAS[i];n=ARENAS[i+1]||null;}}return {a,n};}
 function hearts(hp,max){return Array.from({length:max},(_,i)=>`<i class="${i<hp?"":"off"}">♥</i>`).join("");}
-function claimable(){return ROAD.filter(m=>S.tro>=m.t&&!S.claimed.includes(m.t));}
 function statsHTML(id){
-  const H=HEROES[id];
+  const H=HEROES[id],lv=S.unl.includes(id)?lvOf(id):1,bo=lvBonus(lv);
   return `<div class="stats">
-    <div><span>❤️ Vida</span><b class="hbar">${hearts(H.hp,H.hp)}</b></div>
+    <div><span>⚡ Poder</span><b>Nivel ${lv}${bo.elx?` · elixir +${Math.round(bo.elx*100)} %`:""}</b></div>
+    <div><span>❤️ Vida</span><b class="hbar">${hearts(H.hp+bo.hp,H.hp+bo.hp)}</b></div>
     <div><span>👟 Velocidad</span><b>${speedLabel(H.step)} · 💧${H.mc}/casilla</b></div>
     <div><span>💥 ${H.a}</span><b>${patIcon(H.pat)} quita ${H.dmg} · 💧${H.cost}</b></div>
     <div><span>${H.warn?"🔔":"⚡"} Aviso</span><b>${H.warn?"El rival lo ve venir":"Sin aviso: casi imposible de esquivar"}</b></div>
@@ -1854,112 +2140,302 @@ function statsHTML(id){
 }
 const ARENA_BG={pradera:["#2a8cf0","#1450b8"],bosque:["#23a86e","#11613f"],volcan:["#e0562a","#7a1f2a"],trono:["#7a52f0","#3a1f9a"],olimpo:["#f0b02a","#b0681a"]};
 function setBg(){const {a}=arenaOf(S.tro),c=ARENA_BG[a.k]||ARENA_BG.pradera;const st=document.body.style;st.setProperty("--arena",a.bg);st.setProperty("--arena2",c[0]);st.setProperty("--arena3",c[1]);}
+/* ---- iconos 3D y utilidades de progresión ---- */
+const UIA=(window.AMAGO_ASSETS||"")+"ui/";
+const ico=(n,c="")=>`<img class="ico ${c}" src="${UIA}${n}.webp" alt="" draggable="false">`;
+const fmt=n=>n>=10000?Math.round(n/1000)+"k":String(n);
+const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
+const lvOf=id=>Math.max(1,Math.min(LV_MAX,S.lv[id]||1));
+const upCost=id=>lvOf(id)>=LV_MAX?null:UPG[lvOf(id)+1];
+const canUp=id=>{const c=upCost(id);return !!c&&S.unl.includes(id)&&S.pp>=c.pp&&S.coins>=c.c;};
+const anyUp=()=>S.unl.some(canUp);
+function pwrHTML(lv){return `<span class="pwr ${lv>=LV_MAX?"max":""}" title="Poder ${lv}"><span class="out">${lv}</span></span>`;}
+/* misiones del día: se eligen con la fecha para que no cambien al recargar */
+function ensureDay(){
+  const d=today();
+  if(S.mis.day!==d){
+    let seed=d*9301+49297;const r=()=>(seed=(seed*9301+49297)%233280)/233280;
+    const pool=MISSIONS.map((m,i)=>i),pickd=[];while(pickd.length<3){const i=pool.splice(Math.floor(r()*pool.length),1)[0];if(!pickd.some(j=>MISSIONS[j].k===MISSIONS[i].k))pickd.push(i);if(!pool.length)break;}
+    S.mis={day:d,list:pickd.map(i=>{const m=MISSIONS[i];return {i,k:m.k,n:m.n,tk:m.tk,hero:m.k==="hero"?S.unl[Math.floor(r()*S.unl.length)]:null,v:0,got:false};})};
+  }
+  const season=Math.max(0,Math.floor((d-SEASON0)/SEASON_DAYS));
+  if(S.pass.season!==season)S.pass={season,tk:0,got:[]};
+  if(!S.offers||S.offers.day!==d)S.offers={day:d,got:[]};
+}
+function misText(m){return m.k==="hero"?MISSIONS[m.i].t+HEROES[m.hero].n:MISSIONS[m.i].t;}
+function misTrack(k,amt,hero){ensureDay();for(const m of S.mis.list){if(m.got||m.k!==k)continue;if(k==="hero"&&m.hero!==hero)continue;m.v=Math.min(m.n,m.v+amt);}}
+const misReady=()=>(ensureDay(),S.mis.list.filter(m=>!m.got&&m.v>=m.n).length);
+const passTier=()=>Math.min(PASS_N,Math.floor(S.pass.tk/PASS_STEP));
+const passReady=()=>{ensureDay();let n=0;for(let i=1;i<=passTier();i++)if(!S.pass.got.includes(i))n++;return n;};
+const giftReady=()=>S.gift!==today();
+const daysLeft=()=>SEASON_DAYS-((today()-SEASON0)%SEASON_DAYS+SEASON_DAYS)%SEASON_DAYS;
+function msToMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const s=Math.max(0,(m-n)/1000|0);return `${Math.floor(s/3600)} h ${Math.floor(s%3600/60)} min`;}
+function rewardIcon(r){
+  if(r.r==="coins")return UIA+"coin.webp";if(r.r==="pp")return UIA+"power.webp";if(r.r==="tk")return UIA+"star.webp";
+  if(r.r==="chest")return UIA+"chest"+r.tier+".webp";return null;
+}
+function rewardHTML(r,cls=""){
+  if(r.r==="hero"&&r.id)return heroSVG(r.id);
+  if(r.r==="hero")return `<img class="${cls}" src="${UIA}chest3.webp" alt="">`;
+  if(r.r==="arena")return `<span style="font-size:40px">🏟️</span>`;
+  return `<img class="${cls}" src="${rewardIcon(r)}" alt="">`;
+}
+function rewardName(r){
+  return r.r==="coins"?`${r.n} monedas`:r.r==="pp"?`${r.n} Puntos de Poder`:r.r==="chest"?CHESTS[r.tier].n:r.r==="hero"?(r.id?HEROES[r.id].n:"Héroe nuevo"):r.r==="arena"?(ARENAS.find(a=>a.k===r.k)||{}).n:"";
+}
+/* entrega un premio; los cofres se abren al momento con la animación */
+function giveReward(r){
+  if(r.r==="coins"){S.coins+=r.n;save();openItems([{k:"coins",n:r.n}]);}
+  else if(r.r==="pp"){S.pp+=r.n;save();openItems([{k:"pp",n:r.n}]);}
+  else if(r.r==="chest"){S.box.push(r.tier);save();openBox();}
+  else if(r.r==="hero"){
+    const id=r.id&&!S.unl.includes(r.id)?r.id:IDS.find(i=>!S.unl.includes(i));
+    if(id){S.unl.push(id);save();openItems([{k:"hero",id}]);}
+    else{S.coins+=150;save();openItems([{k:"coins",n:150}]);}
+  }
+}
+function rollChest(tier){
+  const C=CHESTS[tier],rr=([a,b])=>a+rnd(b-a+1),it=[{k:"coins",n:rr(C.coins)},{k:"pp",n:rr(C.pp)}];
+  const locked=IDS.filter(id=>!S.unl.includes(id));
+  if(locked.length&&Math.random()<C.hero){
+    const w=locked.map(id=>({id,w:[6,3,2,1][HEROES[id].rar]}));let x=Math.random()*w.reduce((a,b)=>a+b.w,0),got=w[0].id;
+    for(const o of w){x-=o.w;if(x<=0){got=o.id;break;}}
+    it.push({k:"hero",id:got});
+  }
+  return it;
+}
+function applyItems(items){for(const it of items){if(it.k==="coins")S.coins+=it.n;else if(it.k==="pp")S.pp+=it.n;else if(it.k==="hero"&&!S.unl.includes(it.id))S.unl.push(it.id);}save();}
+
+/* ---- barra superior y pestañas ---- */
 function nav(active){
-  const it=(t,i,l,dot)=>`<button class="${active===t?"on":""}" data-a="tab" data-t="${t}">${dot?'<i class="dot"></i>':""}<span class="ni">${i}</span><span>${l}</span></button>`;
-  return `<nav class="bnav">${it("shop","🛒","Tienda")}${it("heroes","🦸","Héroes")}${it("home","🏠","Inicio")}${it("road","🏆","Trofeos",claimable().length>0)}</nav>`;
+  const it=(t,img,l,n)=>`<button class="${active===t?"on":""}" data-a="tab" data-t="${t}">${n?`<i class="badge">${n}</i>`:""}${img}<span class="out">${l}</span></button>`;
+  const im=n=>`<img src="${UIA}${n}.webp" alt="">`;
+  return `<nav class="tabs">${it("shop",im("chest1"),"Tienda",giftReady()?"!":0)}${it("heroes",`<span class="em">🦸</span>`,"Héroes",anyUp()?"↑":0)}${it("home",`<span class="em">🏠</span>`,"Inicio")}${it("pass",im("star"),"Pase",passReady())}${it("road",im("trophy"),"Trofeos",claimable().length)}</nav>`;
 }
 function topbar(){
-  return `<div class="hometop">
-    <button class="prof" data-a="name" aria-label="Cambiar nombre"><span class="pav">${heroSVG(S.fav)}</span><span class="pinfo"><b>${esc(S.name)}</b><span class="lvl"><i>${level()}</i><span class="bar"><i style="width:${xpPct()}%"></i></span></span></span></button>
-    <button class="tropill coinpill" data-a="tab" data-t="shop">🪙 <b class="out">${S.coins||0}</b></button><button class="tropill" data-a="tab" data-t="road">🏆 <b class="out">${S.tro}</b>${claimable().length?'<i class="dot"></i>':""}</button>
-    <button class="iconbtn" data-a="settings" aria-label="Ajustes">⚙️</button></div>`;
+  ensureDay();
+  return `<div class="mbg"></div><div class="mtop">
+    <button class="mprof" data-a="name" aria-label="Cambiar nombre"><span class="mav">${heroSVG(S.fav)}</span><span class="mpi"><b class="out">${esc(S.name)}</b><span class="mlv"><i class="out">${level()}</i><span class="xb"><u style="width:${xpPct()}%"></u></span></span></span></button>
+    <button class="rpill" data-a="tab" data-t="shop" aria-label="Monedas">${ico("coin")}<span class="out" id="coinsn">${fmt(S.coins)}</span></button>
+    <button class="rpill" data-a="tab" data-t="heroes" aria-label="Puntos de poder">${ico("power")}<span class="out" id="ppn">${fmt(S.pp)}</span></button>
+    <button class="gear" data-a="settings" aria-label="Ajustes">⚙️</button></div>`;
 }
+function roadBar(){
+  const next=ROAD.find(m=>m.t>S.tro&&m.r!=="arena"),prev=[...ROAD].reverse().find(m=>m.t<=S.tro),p0=prev?prev.t:0;
+  const pct=next?Math.round((S.tro-p0)/(next.t-p0)*100):100,n=claimable().length;
+  return `<button class="mroad" data-a="tab" data-t="road">${n?`<i class="badge">${n}</i>`:""}${ico("trophy")}<span class="num out">${S.tro}</span><span class="xb"><u style="width:${pct}%"></u></span>${next?`<span class="nx">${rewardHTML(next,"ico")}</span>`:""}</button>`;
+}
+
+/* ---- inicio ---- */
 function showHome(){
-  UI.screen="home";stopLoop();app.className="home";setBg();
-  const {a}=arenaOf(S.tro),H=HEROES[S.fav],RR=RAR[H.rar];
+  UI.screen="home";stopLoop();app.className="home";setBg();ensureDay();
+  const {a}=arenaOf(S.tro),H=HEROES[S.fav],box=S.box.length,mr=misReady();
   app.innerHTML=`${topbar()}
-  <div class="arenatag">${a.n}</div>
-  <div class="showcase">
-    <span class="rays"></span>${SHOW?`<canvas class="bigmodel" id="showc" aria-label="${H.n} en 3D. Arrastra para girarlo"></canvas>`:`<span class="platform"></span><span class="bigmodel bob">${heroSVG(S.fav)}</span>`}
-    <button class="nameplate" data-a="hero" data-id="${S.fav}" style="background:${RR.bg}"><b class="out">${H.n}</b><small>${H.r} · ver ficha</small></button>
+  <div style="display:flex;align-items:center;gap:8px">${roadBar()}<span class="sub" style="margin-left:auto;text-align:right"><b class="out" style="font-family:var(--f-game);font-size:14px;font-weight:400">${a.n}</b></span></div>
+  <div class="hstage">
+    <span class="rays"></span>
+    ${SHOW?`<canvas class="bigmodel" id="showc" aria-label="${H.n}. Tócalo para verlo atacar"></canvas>`:`<span class="bigmodel bob">${heroSVG(S.fav)}</span>`}
+    <div class="sidecol l">
+      <button class="sbtn" data-a="tab" data-t="shop">${giftReady()?`<i class="badge free">GRATIS</i>`:""}<span class="sq grn"><img src="${UIA}chest1.webp" alt=""></span><span class="out">Tienda</span></button>
+      <button class="sbtn" data-a="missions">${mr?`<i class="badge">${mr}</i>`:""}<span class="sq"><img src="${UIA}mission.webp" alt=""></span><span class="out">Misiones</span></button>
+      <button class="sbtn" data-a="tab" data-t="pass">${passReady()?`<i class="badge">${passReady()}</i>`:""}<span class="sq pur"><img src="${UIA}star.webp" alt=""></span><span class="out">Pase</span></button>
+    </div>
+    <div class="sidecol r">
+      ${box?`<button class="sbtn chest" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="out">¡Ábrelo!</span></button>`:""}
+      <button class="sbtn" data-a="keysinfo"><span class="sq gold"><img src="${UIA}chest1.webp" alt=""></span><span class="keys">${[0,1,2].map(i=>`<img class="${i<S.keys?"on":""}" src="${UIA}key.webp" alt="">`).join("")}</span></button>
+    </div>
+    <button class="hplate" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>🏆 ${S.hw[S.fav]||0} · ver ficha</small></span></button>
   </div>
-  <div class="sidebtns">
-    ${S.chests?`<button class="sidebtn chest" data-a="chest">${chestSVG()}<span>${S.chests}</span></button>`:""}
-    ${claimable().length?`<button class="sidebtn" data-a="tab" data-t="road">🎁<span>¡Premio!</span></button>`:""}
-  </div>
-  <div class="playrow">
-    <button class="modebtn" data-a="mode"><small>MODO</small><b>${S.mode==="bot"?"⚔️ Bot "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase():"👥 Con amigos"}</b><em>Cambiar</em></button>
-    <button class="gbtn play pulse" data-a="play">JUGAR</button>
+  <div class="playrow2">
+    <button class="modebtn2" data-a="mode"><small>MODO</small><b class="out">${S.mode==="bot"?"⚔️ Bot "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase():"👥 Amigos"}</b><em>Cambiar</em></button>
+    <button class="gbtn play2 shine" data-a="play">JUGAR</button>
   </div>
   ${nav("home")}`;
   renderModal();
   if(SHOW)SHOW.mount($("#showc"),S.fav);
 }
 function leaveHome(){if(SHOW)SHOW.unmount();if(B3)B3.dispose();}
+
+/* ---- héroes ---- */
 function showHeroes(){
   leaveHome();
   UI.screen="heroes";stopLoop();app.className="home";setBg();
-  const order=[...IDS].sort((a,b)=>(S.unl.includes(b)-S.unl.includes(a))||HEROES[a].rar-HEROES[b].rar);
-  app.innerHTML=`${topbar()}<h2 class="sectiont out">Héroes <small>${S.unl.length}/${IDS.length}</small></h2>
-  <div class="hgrid2">${order.map(id=>{const H=HEROES[id],lock=!S.unl.includes(id),RR=RAR[H.rar];
-    return `<button class="hcard2 ${lock?"lock":""}" data-a="hero" data-id="${id}" style="background:${RR.bg}">
-      <span class="rr">${RR.n}</span>${S.fav===id?'<span class="favs">★</span>':""}<span class="hm">${heroSVG(id)}</span>
-      <span class="hn out">${H.n}</span>${lock?'<span class="lk">🔒</span>':`<span class="hw">🏆 ${S.hw[id]||0}</span>`}</button>`;}).join("")}</div>
+  const order=[...IDS].sort((a,b)=>(S.unl.includes(b)-S.unl.includes(a))||(canUp(b)-canUp(a))||HEROES[a].rar-HEROES[b].rar);
+  app.innerHTML=`${topbar()}<div class="sect"><h2 class="out">Héroes</h2><span class="sub"><b>${S.unl.length}</b>/${IDS.length}</span></div>
+  <p class="sub">Sube de nivel con ${ico("power")} Puntos de Poder y ${ico("coin")} monedas</p>
+  <div class="hgrid3">${order.map(id=>{const H=HEROES[id],lock=!S.unl.includes(id),RR=RAR[H.rar],lv=lvOf(id),c=upCost(id),road=ROAD.find(r=>r.id===id);
+    const bar=lock?"":c?`<span class="ppbar ${canUp(id)?"ok":""}"><u style="width:${Math.min(100,S.pp/c.pp*100)}%"></u><span>${ico("power")} ${fmt(S.pp)}/${c.pp}</span></span>`:`<span class="ppbar ok"><u style="width:100%"></u><span>MÁXIMO</span></span>`;
+    return `<button class="hcard3 ${lock?"lock":""}" data-a="hero" data-id="${id}" style="background:${RR.bg}">
+      <span class="rr">${RR.n}</span>${S.fav===id?'<span class="favs">⭐</span>':""}${canUp(id)?'<span class="up out">↑</span>':""}<span class="hm">${heroSVG(id)}</span>
+      <span class="hn out">${H.n}</span>${lock?`<span class="lkt">🔒 ${road?`${ico("trophy")} ${road.t}`:"Tienda o cofres"}</span>`:`<span class="hbot">${pwrHTML(lv)}${bar}</span>`}</button>`;}).join("")}</div>
   ${nav("heroes")}`;
   renderModal();
 }
-/* ---- tienda: héroes por monedas, oferta del día y cofres ---- */
-function dayOffer(){const locked=IDS.filter(id=>!S.unl.includes(id));if(!locked.length)return null;const d=Math.floor(Date.now()/864e5);return locked[d%locked.length];}
+function heroSheet(id){
+  const H=HEROES[id],lock=!S.unl.includes(id),RR=RAR[H.rar],lv=lvOf(id),c=upCost(id),b=lvBonus(lv),nb=c?lvBonus(lv+1):null,road=ROAD.find(r=>r.id===id);
+  const perk=!c?"Nivel máximo. ¡Es una leyenda!":nb.hp>b.hp?`Al nivel ${lv+1}: <b>+1 vida</b> y <b>+3 %</b> de recarga de elixir`:`Al nivel ${lv+1}: <b>+3 %</b> de recarga de elixir`;
+  return `<div class="sheet hsheet"><div class="top" style="background:${RR.bg}">${heroSVG(id)}
+    <div class="nm">${lock?"":pwrHTML(lv)}<div><h3 class="out">${H.n}</h3><small>${RR.n} · ${H.r}</small></div></div></div>
+    <div class="body">
+      ${lock?"":`<div class="lvdots">${Array.from({length:LV_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</div>`}
+      <div class="srow"><span class="k">❤️ Vida</span><span class="v hbar">${hearts(H.hp+b.hp,H.hp+b.hp)}</span>${nb&&nb.hp>b.hp&&!lock?`<span class="nx">+1</span>`:""}</div>
+      <div class="srow"><span class="k">💧 Recarga de elixir</span><span class="v">+${Math.round(b.elx*100)} %</span>${nb&&!lock?`<span class="nx">+${Math.round(nb.elx*100)} %</span>`:""}</div>
+      <div class="srow"><span class="k">👟 Velocidad</span><span class="v">${speedLabel(H.step)}</span></div>
+      <div class="srow"><span class="k">💥 ${H.a}</span><span class="v">${patIcon(H.pat)}</span><span class="v">quita ${H.dmg} · 💧${H.cost}</span></div>
+      <p class="perk">${H.d}</p>
+      ${lock?`<p class="perk">Se consigue en cofres, en la tienda${road?` o en el camino de trofeos (${ico("trophy")} ${road.t})`:""}.</p>`
+        :c?`<p class="perk">${perk}</p><button class="gbtn green shine" data-a="upgrade" data-id="${id}" ${canUp(id)?"":"disabled"}>MEJORAR
+            <small class="cost"><span class="${S.pp<c.pp?"bad":""}">${ico("power")}${c.pp}</span><span class="${S.coins<c.c?"bad":""}">${ico("coin")}${c.c}</span></small></button>`:`<p class="perk">${perk}</p>`}
+      ${!lock&&S.fav!==id?`<button class="gbtn blue" data-a="fav" data-id="${id}">PONER EN PORTADA</button>`:""}
+      <button class="pillbtn" data-a="close">Cerrar</button></div></div>`;
+}
+function upgrade(id){
+  if(!canUp(id))return;const c=upCost(id);
+  S.pp-=c.pp;S.coins-=c.c;S.lv[id]=lvOf(id)+1;save();sfx("win");confetti();
+  UI.modal={k:"lvup",id};renderModal();
+}
+
+/* ---- tienda ---- */
+function dayOffer(){const locked=IDS.filter(id=>!S.unl.includes(id));if(!locked.length)return null;return locked[today()%locked.length];}
 function heroPrice(id){const p=PRICE[HEROES[id].rar];return id===dayOffer()?Math.round(p*.7/10)*10:p;}
+function offers(){
+  const d=today(),off=dayOffer(),o=[];
+  o.push({id:"pp",r:{r:"pp",n:[60,80,100][d%3]},price:[90,120,150][d%3],cls:"pur",tag:"OFERTA"});
+  o.push({id:"c2",r:{r:"chest",tier:2},price:110,was:CHESTS[2].price,cls:"",tag:"−30 %"});
+  if(off)o.push({id:"h",r:{r:"hero",id:off},price:heroPrice(off),was:PRICE[HEROES[off].rar],cls:"gold",tag:"HÉROE"});
+  else o.push({id:"c3",r:{r:"chest",tier:3},price:300,was:CHESTS[3].price,cls:"gold",tag:"−30 %"});
+  return o;
+}
 function showShop(){
   leaveHome();
-  UI.screen="shop";stopLoop();app.className="home";setBg();
-  const off=dayOffer(),locked=IDS.filter(id=>!S.unl.includes(id)&&id!==off),coins=S.coins||0;
-  const card=(id,tag)=>{const H=HEROES[id],RR=RAR[H.rar],pr=heroPrice(id),can=coins>=pr;
-    return `<div class="shopcard" style="background:${RR.bg}">${tag?`<i class="shoptag">${tag}</i>`:""}<span class="shm">${heroSVG(id)}</span><b class="out">${H.n}</b><small>${RR.n} · ${H.r}</small>
-      <button class="gbtn mini ${can?"":"off"}" data-a="buy" data-id="${id}" ${can?"":"disabled"}>🪙 ${pr}${id===off?` <s>${PRICE[H.rar]}</s>`:""}</button></div>`;};
-  const full=S.chests>=CHEST_MAX;
-  app.innerHTML=`${topbar()}<h2 class="sectiont out">Tienda</h2>
-    <p class="slogan">Gana monedas abriendo cofres y en el camino de trofeos.</p>
-    ${off?`<h3 class="shoph out">⭐ Oferta del día · −30 %</h3><div class="shopgrid one">${card(off,"OFERTA")}</div>`:""}
-    <h3 class="shoph out">Héroes</h3>
-    ${locked.length?`<div class="shopgrid">${locked.map(id=>card(id)).join("")}</div>`:`<p class="slogan">${off?"":"¡Ya tienes todos los héroes!"}</p>`}
-    <h3 class="shoph out">Cofres</h3>
-    <div class="shopgrid one"><div class="shopcard chestc"><span class="shm">${chestSVG()}</span><b class="out">Cofre</b><small>${full?`Ya tienes ${CHEST_MAX} sin abrir`:"Monedas y, con suerte, un héroe"}</small>
-      <button class="gbtn mini" data-a="buychest" ${coins>=CHEST_PRICE&&!full?"":"disabled"}>🪙 ${CHEST_PRICE}</button></div></div>
+  UI.screen="shop";stopLoop();app.className="home";setBg();ensureDay();
+  const coins=S.coins,locked=IDS.filter(id=>!S.unl.includes(id)&&id!==dayOffer()),gift=giftReady();
+  const oc=o=>{const done=S.offers.got.includes(o.id),can=coins>=o.price&&!done;
+    return `<div class="ocard ${o.cls} ${done?"done":""}"><i class="tag">${done?"COMPRADO":o.tag}</i><span class="im">${rewardHTML(o.r)}</span><b class="out">${o.r.r==="pp"?`${o.r.n} Poder`:rewardName(o.r)}</b>
+      <button class="gbtn" data-a="offer" data-id="${o.id}" ${can?"":"disabled"}>${ico("coin")}${o.price}${o.was?`<s>${o.was}</s>`:""}</button></div>`;};
+  app.innerHTML=`${topbar()}<div class="sect"><h2 class="out">Tienda</h2></div>
+    <span class="ribn grn out">Regalo diario</span>
+    <div class="gift ${gift?"":"done"}"><img src="${UIA}chest1.webp" alt=""><span><b class="out">${gift?"¡Cofre gratis!":"Mañana, otro"}</b><small>${gift?"Un regalo cada día":"Nuevo regalo en "+msToMidnight()}</small></span>
+      <button class="gbtn ${gift?"green shine":""}" data-a="gift" ${gift?"":"disabled"}>${gift?"GRATIS":"✓"}</button></div>
+    <span class="ribn out">Ofertas del día</span><p class="timer">Cambian en ${msToMidnight()}</p>
+    <div class="offers">${offers().map(oc).join("")}</div>
+    <span class="ribn pur out">Cofres</span>
+    <div class="offers">${[1,2,3].map(t=>`<div class="ocard ${t===3?"gold":t===2?"":"grn"}"><span class="im"><img src="${UIA}chest${t}.webp" alt=""></span><b class="out">${CHESTS[t].n}</b><small>${ico("power")} ${CHESTS[t].pp[0]}–${CHESTS[t].pp[1]}</small>
+      <button class="gbtn" data-a="buybox" data-t="${t}" ${coins>=CHESTS[t].price?"":"disabled"}>${ico("coin")}${CHESTS[t].price}</button></div>`).join("")}</div>
+    ${locked.length?`<span class="ribn blue out">Héroes</span><div class="offers">${locked.map(id=>{const H=HEROES[id],pr=heroPrice(id);
+      return `<div class="ocard" style="background:${RAR[H.rar].bg}"><i class="tag" style="background:rgba(0,0,0,.35)">${RAR[H.rar].n.toUpperCase()}</i><span class="im">${heroSVG(id)}</span><b class="out">${H.n}</b>
+      <button class="gbtn" data-a="buy" data-id="${id}" ${coins>=pr?"":"disabled"}>${ico("coin")}${pr}</button></div>`;}).join("")}</div>`:""}
     ${nav("shop")}`;
   renderModal();
 }
 function buy(id){
-  if(S.unl.includes(id))return;const pr=heroPrice(id);if((S.coins||0)<pr){toast("coins","🪙 Te faltan monedas. Gana partidas y abre cofres.");return;}
-  S.coins-=pr;S.unl.push(id);save();UI.modal={k:"chest",taps:3,reward:{hero:id}};renderModal();confetti();sfx("win");showShop();
+  if(S.unl.includes(id))return;const pr=heroPrice(id);if(S.coins<pr){toast("coins","Te faltan monedas: gana partidas y abre cofres.");return;}
+  S.coins-=pr;save();giveReward({r:"hero",id});showShop();
 }
-function buyChest(){if((S.coins||0)<CHEST_PRICE||S.chests>=CHEST_MAX)return;S.coins-=CHEST_PRICE;S.chests++;save();sfx("chest");UI.modal={k:"chest",taps:0};renderModal();}
+function buyOffer(oid){
+  const o=offers().find(x=>x.id===oid);if(!o||S.offers.got.includes(oid)||S.coins<o.price)return;
+  S.coins-=o.price;S.offers.got.push(oid);save();giveReward(o.r);showShop();
+}
+function buyBox(t){const C=CHESTS[t];if(S.coins<C.price)return;S.coins-=C.price;save();giveReward({r:"chest",tier:t});showShop();}
+function claimGift(){if(!giftReady())return;S.gift=today();save();giveReward({r:"chest",tier:1});refreshScreen();}
+
+/* ---- camino de trofeos ---- */
+function claimable(){return ROAD.filter(m=>m.r!=="arena"&&S.tro>=m.t&&!S.claimed.includes(m.t));}
+function pathNodes(list,reached,got,claimAct,label){
+  return list.map((m,i)=>{const r=reached(m,i),g=got(m,i);
+    return `<div class="pnode ${r?"reach":""} ${g?"got":""} ${m.r==="arena"?"arena":""}"><span class="tt out">${label(m,i)}</span><span class="ri">${rewardHTML(m)}</span>
+      <span class="rtx"><b class="out">${m.r==="arena"?"¡Nueva arena!":rewardName(m)}</b><small>${m.r==="arena"?rewardName(m):m.r==="chest"?`${ico("power")} ${CHESTS[m.tier].pp[0]}–${CHESTS[m.tier].pp[1]} y monedas`:m.r==="hero"?"Héroe "+(m.id?RAR[HEROES[m.id].rar].n.toLowerCase():"sorpresa"):""}</small></span>
+      ${m.r==="arena"?(r?'<span class="ok">✓</span>':'<span class="lockt">🔒</span>'):g?'<span class="ok">✓</span>':r?`<button class="gbtn green shine" ${claimAct(m,i)}>RECLAMAR</button>`:'<span class="lockt">🔒</span>'}</div>`;}).reverse().join("");
+}
 function showRoad(){
   leaveHome();
   UI.screen="road";stopLoop();app.className="home";setBg();
-  const rows=ROAD.slice().reverse().map(m=>{
-    const got=S.claimed.includes(m.t),reach=S.tro>=m.t;
-    const rew=m.r==="hero"?`<span class="rwh ${S.unl.includes(m.id)&&!got?"":""}">${heroSVG(m.id)}</span><span><b>${HEROES[m.id].n}</b><small>Héroe ${RAR[HEROES[m.id].rar].n.toLowerCase()}</small></span>`:`<span class="rwh">${chestSVG()}</span><span><b>Cofre</b><small>Héroe nuevo o trofeos</small></span>`;
-    return `<div class="rrow ${reach?"reach":""} ${got?"got":""}"><span class="rt out">${m.t}</span><div class="rcard">${rew}${got?'<span class="ok">✓</span>':reach?`<button class="gbtn mini pulse" data-a="claim" data-t="${m.t}">RECLAMAR</button>`:`<span class="lockt">🔒</span>`}</div></div>`;
-  }).join("");
-  const next=ROAD.find(m=>m.t>S.tro);
-  app.innerHTML=`${topbar()}<h2 class="sectiont out">Camino de trofeos</h2>
-    <p class="slogan">${next?`Te faltan <b>${next.t-S.tro}</b> 🏆 para el siguiente premio`:"¡Lo tienes todo!"}</p>
-    <div class="road">${rows}</div>${nav("road")}`;
+  const next=ROAD.find(m=>m.t>S.tro&&m.r!=="arena");
+  app.innerHTML=`${topbar()}<div class="sect">${ico("trophy")}<h2 class="out">Camino de trofeos</h2></div>
+    <p class="sub">${next?`Te faltan <b>${next.t-S.tro}</b> trofeos para: <b>${rewardName(next)}</b>`:"¡Lo tienes todo!"}</p>
+    <div class="path">${pathNodes(ROAD,m=>S.tro>=m.t,m=>S.claimed.includes(m.t),m=>`data-a="claim" data-t="${m.t}"`,m=>m.t)}</div>${nav("road")}`;
   renderModal();
-  {const r=[...document.querySelectorAll(".rrow.reach")];const t=r[0]||document.querySelector(".rrow:last-child");if(t)t.scrollIntoView({block:"center"});}
+  {const r=[...document.querySelectorAll(".pnode.reach:not(.got)")];const t=r[r.length-1]||document.querySelector(".pnode.reach")||document.querySelector(".pnode:last-child");if(t)t.scrollIntoView({block:"center"});}
 }
 function claim(t){
-  const m=ROAD.find(r=>r.t===t);if(!m||S.claimed.includes(t)||S.tro<t)return;
-  S.claimed.push(t);
-  if(m.r==="hero"&&!S.unl.includes(m.id)){S.unl.push(m.id);save();UI.modal={k:"chest",taps:3,reward:{hero:m.id}};renderModal();confetti();sfx("win");}
-  else if(m.r==="hero"||S.chests>=CHEST_MAX){const c=m.r==="hero"?150:60;S.coins=(S.coins||0)+c;save();UI.modal={k:"chest",taps:3,reward:{coins:c}};renderModal();sfx("win");}
-  else{S.chests++;save();UI.modal={k:"chest",taps:0};renderModal();}
-  showRoad();
+  const m=ROAD.find(r=>r.t===t);if(!m||m.r==="arena"||S.claimed.includes(t)||S.tro<t)return;
+  S.claimed.push(t);save();giveReward(m);showRoad();
 }
+
+/* ---- pase de temporada ---- */
+function showPass(){
+  leaveHome();
+  UI.screen="pass";stopLoop();app.className="home";setBg();ensureDay();
+  const tier=passTier(),into=S.pass.tk%PASS_STEP;
+  app.innerHTML=`${topbar()}<div class="sect">${ico("star")}<h2 class="out">Pase AMAGO</h2></div>
+    <div class="passhead">${ico("star")}<span style="flex:1"><b class="out">Temporada ${S.pass.season+1} · escalón ${tier}/${PASS_N}</b>
+      <span class="xb"><u style="width:${tier>=PASS_N?100:into}%"></u></span><small>${tier>=PASS_N?"¡Pase completo!":`${into}/${PASS_STEP} fichas`} · quedan ${daysLeft()} días</small></span></div>
+    <p class="sub">Consigue fichas ${ico("star")} jugando y con las <b>misiones diarias</b></p>
+    <button class="gbtn blue" data-a="missions" style="padding:8px">MISIONES${misReady()?` · ${misReady()} LISTAS`:""}</button>
+    <div class="path">${pathNodes(PASS,(m,i)=>tier>=i+1,(m,i)=>S.pass.got.includes(i+1),(m,i)=>`data-a="pclaim" data-i="${i+1}"`,(m,i)=>i+1)}</div>${nav("pass")}`;
+  renderModal();
+  {const r=[...document.querySelectorAll(".pnode.reach:not(.got)")];const t=r[r.length-1]||[...document.querySelectorAll(".pnode.reach")][0]||document.querySelector(".pnode:last-child");if(t)t.scrollIntoView({block:"center"});}
+}
+function passClaim(i){if(i>passTier()||S.pass.got.includes(i))return;S.pass.got.push(i);save();giveReward(PASS[i-1]);showPass();}
+function missionsHTML(){
+  ensureDay();
+  return `<div class="sheet"><h2 class="out">Misiones diarias</h2><p class="sub">Nuevas en ${msToMidnight()}</p>
+    ${S.mis.list.map((m,i)=>`<div class="mis ${m.got?"done":""}"><span class="mt"><b>${misText(m)}</b><span class="ppbar ${m.v>=m.n?"ok":""}"><u style="width:${m.v/m.n*100}%"></u><span>${m.v}/${m.n}</span></span></span>
+      <span class="rw">${ico("star")}${m.tk}</span>${m.got?'<span class="ok">✓</span>':m.v>=m.n?`<button class="gbtn green" data-a="mclaim" data-i="${i}">COBRAR</button>`:""}</div>`).join("")}
+    <button class="gbtn" data-a="close">CERRAR</button></div>`;
+}
+function misClaim(i){const m=S.mis.list[i];if(!m||m.got||m.v<m.n)return;m.got=true;S.pass.tk+=m.tk;save();sfx("coin");floatText(innerWidth/2,innerHeight/2,`+${m.tk} fichas`,"good");renderModal();}
+
+/* ---- apertura de cofres y premios a pantalla completa ---- */
+function openBox(){if(!S.box.length)return;const tier=Math.max(...S.box);UI.modal={k:"box",tier,taps:0,items:null,step:0};renderModal();sfx("chest");}
+function openItems(items){UI.modal={k:"box",tier:0,items,step:0,direct:true};renderModal();sfx("open");}
+function boxTap(){
+  const M=UI.modal;if(!M||M.k!=="box")return;
+  if(!M.items){
+    M.taps++;sfx("chest");buzz(30);
+    const im=$(".boxov .chimg");if(im){im.classList.remove("shk");void im.offsetWidth;im.classList.add("shk");}
+    if(M.taps<CHESTS[M.tier].taps)return;
+    S.box.splice(S.box.indexOf(M.tier),1);M.items=rollChest(M.tier);applyItems(M.items);M.step=0;M.opened=true;
+    sfx("open");renderModal();const f=$(".boxov .flash");if(f)f.classList.add("go");
+    const c={x:innerWidth/2,y:innerHeight*.45};burst(c.x,c.y,["#ffcc1f","#fff","#ffe9a0","#c07bff"],80,12,.2);
+    return;
+  }
+  M.step++;
+  if(M.step>M.items.length){UI.modal=null;renderModal();if(S.box.length&&!M.direct&&UI.screen==="home"){openBox();return;}refreshScreen();return;}
+  sfx(M.items[M.step-1]&&M.items[M.step-1].k==="hero"?"win":"coin");renderModal();
+  if(M.items[M.step-1]&&M.items[M.step-1].k==="hero")confetti();
+}
+function boxHTML(M){
+  const last=M.items&&M.step>=M.items.length;
+  if(!M.items)return `<div class="boxov" data-a="boxtap"><span class="rays"></span><span class="bt out">${CHESTS[M.tier].n}</span>
+    <img class="chimg" src="${UIA}chest${M.tier}.webp" alt=""><span class="hint out">Toca para abrir${CHESTS[M.tier].taps>1?` · ${CHESTS[M.tier].taps-M.taps}`:""}</span><span class="flash"></span></div>`;
+  if(last)return `<div class="boxov" data-a="boxtap"><span class="rays"></span><span class="bt out">¡Has conseguido!</span>
+    <div class="boxsum">${M.items.map(it=>`<div>${it.k==="hero"?heroSVG(it.id):`<img src="${UIA}${it.k==="coins"?"coin":"power"}.webp" alt="">`}<b class="out">${it.k==="hero"?HEROES[it.id].n:"+"+it.n}</b><small>${it.k==="coins"?"Monedas":it.k==="pp"?"Puntos de Poder":"¡Nuevo héroe!"}</small></div>`).join("")}</div>
+    <button class="gbtn" data-a="boxtap" style="position:relative;margin-top:14px">CONTINUAR</button></div>`;
+  const it=M.items[M.step],left=M.items.length-M.step-1;
+  const body=it.k==="hero"?`<span class="rar out" style="color:${RAR[HEROES[it.id].rar].c}">${RAR[HEROES[it.id].rar].n.toUpperCase()} · ¡NUEVO HÉROE!</span>${heroSVG(it.id)}<span class="amt out">${HEROES[it.id].n}</span>`
+    :`<img class="big" src="${UIA}${it.k==="coins"?"coin":"power"}.webp" alt=""><span class="amt out">+${it.n}</span><span class="lab out">${it.k==="coins"?"Monedas":"Puntos de Poder"}</span>`;
+  return `<div class="boxov" data-a="boxtap"><span class="rays" ${it.k==="hero"?`style="background:repeating-conic-gradient(${RAR[HEROES[it.id].rar].c}55 0 7deg,transparent 7deg 18deg)"`:""}></span>
+    ${M.tier?`<span class="left">${left>0?`<img src="${UIA}chest${M.tier}_open.webp" alt="">${left}`:""}</span>`:""}
+    <div class="item" key="${M.step}">${body}</div>${M.tier?`<img class="chopen" src="${UIA}chest${M.tier}_open.webp" alt="">`:""}<span class="hint out">Toca para seguir</span><span class="flash ${M.step===0&&M.opened?"go":""}"></span></div>`;
+}
+function keysInfo(){UI.modal={k:"info2",title:"Llaves",html:`<div class="keyrow" style="justify-content:center">${[0,1,2].map(i=>`<img class="${i<S.keys?"on":""}" src="${UIA}key.webp" alt="">`).join("")}</div><p>Cada victoria te da una llave. Con <b>3 llaves</b> ganas un <b>cofre</b>.</p><p class="sub">Los cofres dan Puntos de Poder y monedas para mejorar a tus héroes.</p>`};renderModal();}
+
 function renderModal(){
   const old=$(".modal");if(old)old.remove();
+  const ob=$(".boxov,.lvup");if(ob)ob.remove();
   if(!UI.modal)return;
-  const m=document.createElement("div");m.className="modal";m.dataset.a="mback";
   const M=UI.modal;
-  if(M.k==="hero"){
-    const id=M.id,H=HEROES[id],lock=!S.unl.includes(id),RR=RAR[H.rar];
-    m.innerHTML=`<div class="sheet"><div class="hdetail big" style="background:${RR.bg}"><span class="pt ${lock?"lock":""} bob">${heroSVG(id)}</span><div><span class="rar">${RR.n}${lock?" · 🔒":""}</span><h3 class="out">${H.n}</h3><small>${H.r}</small></div></div>
-      ${statsHTML(id)}
-      ${lock?`<p>Se consigue en cofres${ROAD.find(r=>r.id===id)?` o en el camino de trofeos (🏆 ${ROAD.find(r=>r.id===id).t})`:""}.</p>`:S.fav===id?`<p>★ Es tu héroe de portada</p>`:`<button class="gbtn blue" data-a="fav" data-id="${id}">PONER EN PORTADA</button>`}
-      <button class="pillbtn" data-a="close">Cerrar</button></div>`;
-  }else if(M.k==="how"){
+  if(M.k==="box"){const w=document.createElement("div");w.innerHTML=boxHTML(M);document.body.appendChild(w.firstElementChild);return;}
+  if(M.k==="lvup"){const H=HEROES[M.id],lv=lvOf(M.id),b=lvBonus(lv),pb=lvBonus(lv-1);
+    const w=document.createElement("div");w.innerHTML=`<div class="lvup" data-a="close"><span class="rays"></span>${heroSVG(M.id)}${pwrHTML(lv)}<h2 class="out">¡${H.n} sube a ${lv}!</h2>
+      <p>${b.hp>pb.hp?"<b>+1 vida</b> · ":""}Recarga de elixir <b>+${Math.round(b.elx*100)} %</b></p><span class="hint out" style="position:relative;margin-top:10px;color:#ffe066">Toca para seguir</span></div>`;
+    document.body.appendChild(w.firstElementChild);return;}
+  const m=document.createElement("div");m.className="modal";m.dataset.a="mback";
+  if(M.k==="hero"){m.innerHTML=heroSheet(M.id);}
+  else if(M.k==="missions"){m.innerHTML=missionsHTML();}
+  else if(M.k==="info2"){m.innerHTML=`<div class="sheet"><h2 class="out">${M.title}</h2>${M.html}<button class="gbtn" data-a="close">ENTENDIDO</button></div>`;}
+  else if(M.k==="how"){
     const c=HOW[M.i],last=M.i===HOW.length-1;
     m.innerHTML=`<div class="sheet"><div class="dots">${HOW.map((_,i)=>`<i class="${i===M.i?"on":""}"></i>`).join("")}</div><div class="howc"><div class="big">${c.i}</div><h3 class="out">${c.h}</h3><p>${c.p}</p></div><button class="gbtn" data-a="hownext">${last?"¡ENTENDIDO!":"SIGUIENTE"}</button></div>`;
   }else if(M.k==="settings"){
@@ -1974,7 +2450,7 @@ function renderModal(){
       <button class="gbtn" data-a="namesave">GUARDAR</button></div>`;
   }else if(M.k==="mode"){
     m.innerHTML=`<div class="sheet"><h2 class="out">Elige modo</h2>
-      <button class="modecard ${S.mode==="bot"?"on":""}" data-a="setmode" data-m="bot"><span class="mi">⚔️</span><span><b>Contra bot</b><small>Gana trofeos y cofres</small></span></button>
+      <button class="modecard ${S.mode==="bot"?"on":""}" data-a="setmode" data-m="bot"><span class="mi">⚔️</span><span><b>Contra bot</b><small>Gana trofeos, llaves y fichas del pase</small></span></button>
       <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${(S.diff||"facil")===k?"on":""}" data-a="setdiff" data-d="${k}"><span>${d.i}</span><b>${d.n}</b><small>${d.d}</small></button>`).join("")}</div>
       <button class="modecard ${S.mode==="friends"?"on":""}" data-a="setmode" data-m="friends"><span class="mi">👥</span><span><b>Con amigos</b><small>Sala privada con código · amistoso</small></span></button><button class="gbtn" data-a="close">LISTO</button></div>`;
   }else if(M.k==="friends"){
@@ -1997,37 +2473,13 @@ function renderModal(){
     m.innerHTML=M.found?`<div class="sheet"><h2 class="out">¡Rival encontrado!</h2><div class="vs"><div class="p"><div class="av">${heroSVG(S.fav)}</div><b class="out" style="color:var(--me)">${esc(S.name)}</b><small>🏆 ${S.tro}</small></div><div class="mid out">VS</div><div class="p"><div class="av">${heroSVG(M.oppHero||"truco")}</div><b class="out" style="color:var(--foe)">${esc(G.opp.name)}</b><small>🏆 ${G.opp.tro}</small></div></div></div>`
       :`<div class="sheet"><h2 class="out">Buscando rival…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroSVG(pick(IDS))}</div></div></div>`;
   }else if(M.k==="vs"){
-    m.innerHTML=`<div class="sheet vssheet"><h2 class="out">RONDA ${G.round}</h2><div class="vs"><div class="p"><div class="av big">${heroSVG(M.p)}</div><b class="out" style="color:var(--me)">${HEROES[M.p].n}</b><small>${esc(S.name)}</small></div><div class="mid out">VS</div><div class="p"><div class="av big">${heroSVG(M.b)}</div><b class="out" style="color:var(--foe)">${HEROES[M.b].n}</b><small>${esc(G.opp.name)}</small></div></div></div>`;
+    const lp=G.lv?G.lv.p:1,lb=G.lv?G.lv.b:1;
+    m.innerHTML=`<div class="sheet vssheet"><h2 class="out">RONDA ${G.round}</h2><div class="vs"><div class="p"><div class="av big">${heroSVG(M.p)}</div><b class="out" style="color:var(--me)">${HEROES[M.p].n}</b><small>${esc(S.name)} · Poder ${lp}</small></div><div class="mid out">VS</div><div class="p"><div class="av big">${heroSVG(M.b)}</div><b class="out" style="color:var(--foe)">${HEROES[M.b].n}</b><small>${esc(G.opp.name)} · Poder ${lb}</small></div></div></div>`;
   }else if(M.k==="info"){
     m.innerHTML=`<div class="sheet"><h2 class="out">${M.title}</h2><p>${M.text}</p><button class="gbtn" data-a="home">VOLVER AL INICIO</button></div>`;
-  }else if(M.k==="chest"){
-    if(!M.reward){
-      m.innerHTML=`<div class="sheet"><h2 class="out">¡Cofre!</h2><button class="chestbig ${M.taps?"shake":""}" data-a="ctap" aria-label="Abrir cofre">${chestSVG()}</button><p>Toca el cofre</p></div>`;
-    }else if(M.reward.hero){
-      const H=HEROES[M.reward.hero],RR=RAR[H.rar];
-      m.innerHTML=`<div class="sheet"><div class="reward" style="--rc:${RR.c}"><p class="rar" style="color:${RR.c}">${RR.n} · ¡NUEVO HÉROE!</p><span class="pt glow">${heroSVG(M.reward.hero)}</span><h2 class="out">¡${H.n}!</h2></div>${statsHTML(M.reward.hero)}<button class="gbtn" data-a="rok">¡GENIAL!</button></div>`;
-    }else{
-      m.innerHTML=`<div class="sheet"><div class="reward"><div style="font-size:90px">🪙</div><h2 class="out">+${M.reward.coins||0} monedas</h2><p>Tienes ${S.coins||0} monedas.</p></div><button class="gbtn" data-a="rok">¡GENIAL!</button></div>`;
-    }
   }
   document.body.appendChild(m);
   const inp=m.querySelector("input");if(inp)setTimeout(()=>inp.focus(),50);
-}
-async function openChestTap(){
-  const M=UI.modal;M.taps=(M.taps||0)+1;sfx("chest");buzz(30);
-  if(M.taps<1){renderModal();return;}
-  const el=$(".chestbig");el.classList.add("open");sfx("open");
-  const c=center(el);burst(c.x,c.y,["#ffcc1f","#fff","#ffe9a0","#c07bff"],70,11,.2);
-  await sleep(550);
-  const locked=IDS.filter(id=>!S.unl.includes(id));
-  S.chests=Math.max(0,S.chests-1);
-  /* casi siempre monedas; un héroe bloqueado solo con un 10 % de suerte */
-  if(locked.length&&Math.random()<.1){
-    const w=locked.map(id=>({id,w:[6,3,2,1][HEROES[id].rar]}));let r=Math.random()*w.reduce((a,b)=>a+b.w,0),got=w[0].id;
-    for(const it of w){r-=it.w;if(r<=0){got=it.id;break;}}
-    S.unl.push(got);M.reward={hero:got};
-  }else{const c=20+rnd(4)*10;S.coins=(S.coins||0)+c;M.reward={coins:c};}
-  save();renderModal();confetti();sfx("win");
 }
 
 /* ================= partida contra el bot ================= */
@@ -2061,7 +2513,7 @@ function showPick(){
   if(!G.pickSel||!av.includes(G.pickSel))G.pickSel=av.includes(S.fav)?S.fav:av[0];
   const id=G.pickSel,H=HEROES[id],RR=RAR[H.rar];
   const wait=G.online&&G.picked;
-  app.innerHTML=`<div class="pickhead"><span class="stars big">${starsHTML("p")}</span><h2 class="out">RONDA ${G.round}</h2><span class="stars big">${starsHTML("b")}</span></div>
+  app.innerHTML=`<div class="mbg"></div><div class="pickhead"><span class="stars big">${starsHTML("p")}</span><h2 class="out">RONDA ${G.round}</h2><span class="stars big">${starsHTML("b")}</span></div>
     <p class="slogan">${G.online?`Contra <b>${esc(G.opp.name)}</b> · `:""}Elige héroe. No se puede repetir.</p>
     <div class="hrow">${S.unl.map(h=>{const used=!av.includes(h);return `<button class="hchip ${h===id?"on":""} ${used?"used":""}" data-a="psel" data-id="${h}" ${used||wait?"disabled":""} aria-label="${HEROES[h].n}">${heroSVG(h)}${used?"<i>✓</i>":""}</button>`;}).join("")}</div>
     <div class="pickcard"><div class="hdetail big" style="background:${RR.bg}"><span class="pt bob">${heroSVG(id)}</span><div><span class="rar">${RR.n}</span><h3 class="out">${H.n}</h3><small>${H.r}</small></div></div>${statsHTML(id)}</div>
@@ -2073,7 +2525,10 @@ function showPick(){
 async function startRound(){
   const tp=G.pickSel;
   const tb=G.oppPool.find(i=>!G.used.b.includes(i))||pick(IDS);
-  R=AMAGO.newRound(tp,tb,{bot:botParams()});
+  /* el bot va a un nivel parecido al tuyo, limitado por tus trofeos (como el emparejamiento por poder) */
+  const lp=lvOf(tp),cap=Math.min(LV_MAX,1+Math.floor(S.tro/90)),lb=G.tutorial?1:Math.max(1,Math.min(cap,lp+(S.diff==="facil"?-rnd(2):rnd(3)-1)));
+  G.lv={p:lp,b:lb};
+  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv});
   await vsAndCountdown(tp,tb);
   R.paused=false;
   toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
@@ -2118,6 +2573,7 @@ async function endRound(w){
   if(w)G.score[w]++;
   G.used.p.push(R.heroes.p.type);G.used.b.push(R.heroes.b.type);
   if(w==="p")S.hw[R.heroes.p.type]=(S.hw[R.heroes.p.type]||0)+1;
+  if(!G.online){if(w==="p"){misTrack("rounds",1);misTrack("hero",1,R.heroes.p.type);}misTrack("dmg",R.dmg.p||0);save();}
   await roundBanner(w);
   if(G.score.p>=2||G.score.b>=2||G.round>=5)return endMatch();
   G.round++;showPick();
@@ -2127,21 +2583,31 @@ async function endMatch(){
   const win=G.score.p>G.score.b,draw=G.score.p===G.score.b;
   const before=S.tro,lvlBefore=level(),shield=!win&&!draw&&before<30;
   const delta=win?8+rnd(3):draw||shield?0:-Math.min(before,3+rnd(2));
-  S.tro+=delta;S.games++;S.xp+=win?40:20;let gotChest=false;
-  if(win){S.wins++;if(S.chests>=CHEST_MAX){S.keys=KEYS_PER_CHEST-1;}else{S.keys=(S.keys||0)+1;if(S.keys>=KEYS_PER_CHEST){S.keys=0;S.chests++;gotChest=true;}}}
+  const tk=win?25:draw?15:10,xp=win?40:20;
+  S.tro+=delta;S.games++;S.xp+=xp;ensureDay();S.pass.tk+=tk;misTrack("play",1);if(win)misTrack("win",1);
+  let gotChest=false,newKey=-1;
+  if(win){S.wins++;if(S.box.length<BOX_MAX){newKey=S.keys;S.keys++;if(S.keys>=KEYS_PER_CHEST){S.keys=0;S.box.push(1);gotChest=true;}}}
   save();
-  endScreen(win,draw,`<div class="trobig out">🏆 <span id="tro">${before}</span> <small class="${delta>=0?"up":"dn"}">${delta>=0?"+":""}${delta}</small></div>
-    <div class="xpline">⭐ +${win?40:20} XP${level()>lvlBefore?` · <b>¡Nivel ${level()}!</b>`:""}</div>
-    ${win?(gotChest?`<button class="chestbtn" data-a="chest" style="align-self:center">${chestSVG()}<span>¡3 victorias: cofre!<br><b>Toca para abrir</b></span></button>`:(S.chests>=CHEST_MAX?`<p class="slogan keysline">📦 Tienes ${CHEST_MAX} cofres sin abrir. ¡Ábrelos para ganar más!</p>`:`<p class="slogan keysline">🔑 Llaves: <b>${S.keys}/${KEYS_PER_CHEST}</b> · al llegar a ${KEYS_PER_CHEST}, cofre</p>`)):`<p class="slogan">${draw?"¡Igualadísimo!":shield?"🛡️ Protección de novato: no pierdes trofeos":"¡Casi! La próxima es tuya."}</p>`}
-    ${claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">🎁 ¡Tienes premios en el camino de trofeos!</button>`:""}
-    <button class="gbtn play" data-a="play">JUGAR OTRA</button>
+  const keys=gotChest?3:S.keys;
+  endScreen(win,draw,`<div class="endbox">
+      <div class="endrow">${ico("trophy")}<span class="k">Trofeos</span><span class="v out" id="tro">${before}</span><span class="v out ${delta>=0?"up":"dn"}">${delta>=0?"+":""}${delta}</span></div>
+      <div class="endrow">${ico("star")}<span class="k">Fichas del pase</span><span class="v out up">+${tk}</span></div>
+      <div class="endrow"><span style="font-size:28px;width:38px;text-align:center">⭐</span><span class="k">Experiencia${level()>lvlBefore?` · <b style="color:#ffe066">¡Nivel ${level()}!</b>`:""}</span><span class="v out up">+${xp}</span></div>
+      ${win&&!gotChest&&S.box.length<BOX_MAX?`<div class="endrow">${ico("key")}<span class="k">Llaves · con 3, cofre</span><span class="keyrow">${[0,1,2].map(i=>`<img class="${i<keys?"on":""} ${i===newKey?"new":""}" src="${UIA}key.webp" alt="">`).join("")}</span></div>`:""}
+      ${win&&S.box.length>=BOX_MAX&&!gotChest?`<p class="sub">Tienes ${BOX_MAX} cofres sin abrir: ¡ábrelos para seguir ganando llaves!</p>`:""}
+      ${!win?`<p class="sub">${draw?"¡Igualadísimo!":shield?"🛡️ Protección de novato: no pierdes trofeos":"¡Casi! La próxima es tuya."}</p>`:""}
+    </div>
+    ${gotChest?`<button class="endchest shine" data-a="openbox"><img src="${UIA}chest1.webp" alt=""><span><b class="out">¡3 llaves: cofre!</b><small>Toca para abrirlo</small></span></button>`:""}
+    ${claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">🎁 ¡Premios en el camino de trofeos!</button>`:""}
+    ${misReady()?`<button class="pillbtn" data-a="missions" style="align-self:center">✅ ¡Misión completada! Cóbrala</button>`:""}
+    <button class="gbtn play shine" data-a="play">JUGAR OTRA</button>
     <button class="pillbtn" data-a="home" style="align-self:center">Volver al inicio</button>`);
   for(let i=1;i<=20;i++){await sleep(45);const el=$("#tro");if(!el)break;el.textContent=Math.round(before+delta*i/20);if(i%2)sfx("coin");}
 }
 function endScreen(win,draw,body){
   leaveHome();if(B3)B3.dispose();
   UI.screen="end";app.className="center";setBg();
-  app.innerHTML=`<p class="endt out ${win?"win":draw?"draw":"lose"}">${win?"¡VICTORIA!":draw?"EMPATE":"DERROTA"}</p>
+  app.innerHTML=`<div class="mbg"></div><p class="endt out ${win?"win":draw?"draw":"lose"}">${win?"¡VICTORIA!":draw?"EMPATE":"DERROTA"}</p>
     <div class="stage">${G.used.p.slice(0,3).map(t=>`<div class="hst"><div class="bob">${heroSVG(t)}</div></div>`).join("")}</div>${body}`;
   if(win){confetti();sfx("win");}else if(!draw)sfx("lose");
 }
@@ -2329,14 +2795,23 @@ const ui={
 document.addEventListener("click",e=>{
   const el=e.target.closest("[data-a]");if(!el)return;
   const a=el.dataset.a;
-  if(a==="mback"){if(e.target===el&&UI.modal&&["hero","how","settings","name","mode"].includes(UI.modal.k)){UI.modal=null;renderModal();}return;}
+  if(a==="mback"){if(e.target===el&&UI.modal&&["hero","how","settings","name","mode","missions","info2"].includes(UI.modal.k)){UI.modal=null;renderModal();}return;}
   if(a==="toast"){el.remove();return;}
   switch(a){
     case "play":sfx("tap");if(S.mode==="friends"){UI.modal={k:"friends",st:"menu"};renderModal();}else startMatch();break;
     case "home":sfx("tap");UI.modal=null;renderModal();if(G&&G.online)netClose();G=null;R=null;showHome();break;
-    case "tab":sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop})[el.dataset.t]();break;
+    case "tab":sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop,pass:showPass})[el.dataset.t]();break;
+    case "upgrade":upgrade(el.dataset.id);break;
+    case "offer":sfx("tap");buyOffer(el.dataset.id);break;
+    case "buybox":sfx("tap");buyBox(+el.dataset.t);break;
+    case "gift":sfx("tap");claimGift();break;
+    case "pclaim":sfx("chest");passClaim(+el.dataset.i);break;
+    case "mclaim":misClaim(+el.dataset.i);break;
+    case "missions":sfx("tap");UI.modal={k:"missions"};renderModal();break;
+    case "keysinfo":sfx("tap");keysInfo();break;
+    case "openbox":openBox();break;
+    case "boxtap":boxTap();break;
     case "buy":buy(el.dataset.id);break;
-    case "buychest":buyChest();break;
     case "settings":sfx("tap");UI.modal={k:"settings"};renderModal();break;
     case "tsnd":S.snd=S.snd?0:1;save();sfx("tap");renderModal();break;
     case "reset1":UI.modal.confirm=true;renderModal();break;
@@ -2353,8 +2828,7 @@ document.addEventListener("click",e=>{
     case "claim":sfx("chest");claim(+el.dataset.t);break;
     case "how":sfx("tap");UI.modal={k:"how",i:0};renderModal();break;
     case "hownext":sfx("tap");if(UI.modal.i<HOW.length-1){UI.modal.i++;renderModal();}else{UI.modal=null;renderModal();}break;
-    case "chest":sfx("chest");UI.modal={k:"chest",taps:0};renderModal();break;
-    case "ctap":openChestTap();break;
+    case "chest":openBox();break;
     case "rok":sfx("tap");UI.modal=null;renderModal();refreshScreen();break;
     case "psel":sfx("sel");G.pickSel=el.dataset.id;showPick();break;
     case "fight":sfx("go");if(G.online){G.picked=true;netSend({t:"pick",hero:G.pickSel});showPick();}else startRound();break;
@@ -2370,7 +2844,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&UI.modal){if(UI.modal.k==="name")$("[data-a=namesave]")?.click();if(UI.modal.k==="friends"&&$("#codeinp")===document.activeElement)$("[data-a=netjoin]")?.click();}
 });
 function loadSaveFresh(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}return loadSave();}
-function refreshScreen(){({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop})[UI.screen]?.();}
+function refreshScreen(){({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop,pass:showPass})[UI.screen]?.();}
 function onTile(b,x,y){
   if(!R||R.paused||R.over)return;
   const me=R.heroes.p,H=HEROES[me.type];
@@ -2397,7 +2871,7 @@ function bootGame(){
   else showHome();
   if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
 }
-if(GFX){app.innerHTML=`<div class="loading"><div class="out">AMAGO</div><div class="spin"></div></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
+if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
   Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
   /* si la conexión es lenta y los modelos llegan después, se cambian al momento */
   all.then(()=>{if(late&&booted){try{GFX.bakePortraits();}catch(e){}if(UI.screen!=="game"&&UI.screen!=="pick")refreshScreen();}});}}
