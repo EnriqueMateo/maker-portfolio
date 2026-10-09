@@ -29,6 +29,11 @@ const server = http.createServer((req, res) => {
     res.end("ok");
     return;
   }
+  if (url === "/vendor/three.min.js") {
+    res.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "public, max-age=86400" });
+    res.end(fs.readFileSync(path.join(__dirname, "..", "vendor", "three.min.js")));
+    return;
+  }
   if (url === "/" || url === "/index.html") {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" });
     res.end(fs.readFileSync(INDEX));

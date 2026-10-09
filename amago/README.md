@@ -2,7 +2,7 @@
 
 Hundir la flota con héroes que se mueven. Encuéntralos antes de que te encuentren.
 
-Todo el juego está en un solo archivo HTML sin dependencias (solo carga dos fuentes de Google Fonts). Abre `index.html` en el navegador del móvil o del ordenador para jugar contra el bot.
+El juego está en un solo archivo HTML. Usa Three.js (incluido en `vendor/three.min.js`, licencia MIT en `vendor/THREE-LICENSE.txt`) para la arena y los héroes en 3D, y carga dos fuentes de Google Fonts. Abre `index.html` en el navegador del móvil o del ordenador para jugar contra el bot.
 
 ## Modo online con amigos
 
