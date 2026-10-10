@@ -24,6 +24,7 @@ const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 const MM_BASE = 80; // ±trofeos al entrar en la cola
 const MM_GROW = 40; // +trofeos por segundo de espera
 const MM_EVERY_MS = 1000;
+const BOT_AFTER_MS = 10000; // sin rival humano en este tiempo: rival bot de tu nivel
 // límites contra abuso
 const MAX_MSG_BYTES = 2048;
 const MSG_PER_SEC = 30; // por conexión; muy por encima de lo que manda un jugador
@@ -136,6 +137,34 @@ function startPick(room) {
     score: { you: room.score[s], opp: room.score[other(s)] },
     used: room.used[s],
   }));
+  const bot = room.players.b;
+  if (bot && bot.isBot) {
+    const R0 = room.R;
+    setTimeout(() => {
+      if (rooms.get(room.code) !== room || room.state !== "pick" || room.picks.b) return;
+      const av = available(room, "b");
+      room.picks.b = av[Math.floor(Math.random() * av.length)];
+      send(room.players.p, { t: "oppPicked" });
+      if (room.picks.p && room.picks.b) startRound(room);
+    }, 1500 + Math.random() * 2500);
+  }
+}
+
+/* rival bot para el online: nombre, trofeos y héroes como los de un jugador de tu nivel */
+function makeBot(forWs) {
+  const tro = Math.max(0, (forWs.player.tro || 0) + Math.floor(Math.random() * 41) - 20);
+  const maxR = Math.min(3, 1 + Math.floor(tro / 150));
+  const pool = E.IDS.filter((id) => E.HEROES[id].rar <= maxR).sort(() => Math.random() - 0.5);
+  const k = tro / 400; // 0 = flojo, 1+ = fuerte
+  const lerp = (a, b) => a + (b - a) * Math.min(1, k) + (Math.random() - 0.5) * (b - a) * 0.2;
+  const name = alias();
+  return {
+    isBot: true,
+    readyState: 0, // send() lo ignora
+    alias: name,
+    player: { name, tro, unl: pool.slice(0, Math.max(3, pool.length)) },
+    params: { think: lerp(0.8, 0.25), react: lerp(0.9, 0.5), dodge: lerp(0.45, 0.85), eps: lerp(0.35, 0.1), passive: lerp(4, 1.5), gap: lerp(3, 0.4), thr: lerp(1.3, 1), moveP: lerp(0.5, 0.95) },
+  };
 }
 
 function available(room, s) {
@@ -184,7 +213,8 @@ function makeHooks(room) {
 }
 
 function startRound(room) {
-  const R = E.newRound(room.picks.p, room.picks.b);
+  const bot = room.players.b && room.players.b.isBot ? room.players.b : null;
+  const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params } : undefined);
   room.R = R;
   room.state = "count";
   room.hooks = makeHooks(room);
@@ -330,7 +360,21 @@ function matchmake() {
     } else i++;
   }
 }
-setInterval(matchmake, MM_EVERY_MS);
+function botFill() {
+  const now = Date.now();
+  for (let i = queue.length - 1; i >= 0; i--) {
+    const ws = queue[i];
+    if (ws.readyState !== 1 || now - ws.qAt < BOT_AFTER_MS) continue;
+    queue.splice(i, 1);
+    const r = makeRoom(ws, makeBot(ws), true);
+    if (r) matchRoom(r);
+    else queue.push(ws);
+  }
+}
+setInterval(() => {
+  matchmake();
+  botFill();
+}, MM_EVERY_MS);
 
 function leave(ws, notify = true) {
   unqueue(ws);
@@ -341,7 +385,8 @@ function leave(ws, notify = true) {
   if (!room) return;
   stopRound(room);
   const s = sideOf(room, ws);
-  const o = s && room.players[other(s)];
+  let o = s && room.players[other(s)];
+  if (o && o.isBot) o = null;
   const midMatch = room.ranked && room.state !== "end" && room.state !== "lobby";
   if (midMatch) rankedResult(ws, "lose");
   if (notify && o) {
