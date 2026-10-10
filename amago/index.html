@@ -1918,7 +1918,52 @@ function animateSprite(u,tt,st,act,at_){
   u.mat.color.setRGB(1,1-tint*.55,1-tint*.55);
   if(act==="hit"&&at_<.08)u.mat.color.setRGB(3,3,3);/* destello blanco al recibir */
 }
-function makeHero(id){const g=SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):BUILD[id](HEROES[id]);g.userData.id=id;return g;}
+/* ---- héroes con animación 3D pre-renderizada (técnica de Clash Royale): tiras de fotogramas por vista y animación ---- */
+const ANIM3D={brasa: {"fw": 188, "fh": 248, "ih": 0.5, "foot": 0.31, "n": {"attack": 10, "hit": 6, "idle": 8, "ko": 8, "walk": 10, "win": 10}}},A3={};
+function loadAnim3d(){
+  const L=new T.TextureLoader(),jobs=[];
+  for(const [id,m] of Object.entries(ANIM3D))for(const vw of ["f","b"])for(const an of Object.keys(m.n))
+    jobs.push(new Promise(res=>L.load(BASE+"anim/"+id+"_"+vw+"_"+an+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;t.repeat.x=1/m.n[an];((A3[id]=A3[id]||{})[vw]=A3[id][vw]||{})[an]=t;res();},undefined,()=>res())));
+  return Promise.all(jobs);
+}
+function anim3dHero(id){
+  const m=ANIM3D[id],ref=new T.Box3().setFromObject(BUILD[id](HEROES[id])),h0=(ref.max.y-ref.min.y)*1.12*(SPRITE_H[id]||1)*(m.k||1);
+  const H=h0/m.ih,W=H*m.fw/m.fh,geo=new T.PlaneGeometry(W,H);geo.translate(0,H/2-H*m.foot,0);
+  /* cada héroe usa su propia copia de las texturas (el desplazamiento del fotograma es por instancia) */
+  const tex={};for(const vw of ["f","b"]){tex[vw]={};for(const an in A3[id][vw]){const t=A3[id][vw][an].clone();t.needsUpdate=true;tex[vw][an]=t;}}
+  const mat=new T.MeshBasicMaterial({map:tex.f.idle,transparent:true,alphaTest:.3,side:T.DoubleSide,toneMapped:false});
+  const card=new T.Mesh(geo,mat);card.renderOrder=3;
+  const root=new T.Group(),body=new T.Group(),pivot=new T.Group();body.name="body";root.add(body);body.add(pivot);pivot.add(card);
+  const u={body,head:new T.Object3D(),arms:[new T.Object3D(),new T.Object3D()],legs:[new T.Object3D(),new T.Object3D()],eyes:null,t0:Math.random()*10,sprite:true,a3:true,card,mat,pivot,flip:1,view:"f",tex,m,id,h:H};
+  u.arms.forEach(a=>a.userData.base=0);root.userData=u;
+  card.onBeforeRender=(r,sc,cam)=>{
+    root.getWorldQuaternion(_pq);_fw.set(0,0,1).applyQuaternion(_pq);
+    const cr=new T.Vector3(1,0,0).applyQuaternion(cam.quaternion),cf=new T.Vector3(0,0,-1).applyQuaternion(cam.quaternion);cf.y=0;cf.normalize();
+    const side=_fw.dot(cr),away=_fw.x*cf.x+_fw.z*cf.z;
+    if(side>.3)u.flip=-1;else if(side<-.3)u.flip=1;
+    u.away=away>.35;
+    pivot.parent.getWorldQuaternion(_pq);pivot.quaternion.copy(_pq.invert().multiply(cam.quaternion));
+    card.scale.x=Math.abs(card.scale.x)*u.flip;pivot.updateMatrixWorld(true);
+  };
+  return root;
+}
+/* elige animación, fotograma y vista: de espaldas solo al andar o atacar alejándose de la cámara */
+function animate3d(u,tt,st,act,at_){
+  const m=u.m;let an="idle",fr=0,tint=0;const n=k=>m.n[k]||1;
+  if(act==="ko"){an="ko";fr=Math.min(n("ko")-1,Math.floor(at_/.07));tint=.35*Math.min(1,at_*3);}
+  else if(act==="hit"){an="hit";fr=Math.min(n("hit")-1,Math.floor(at_/.08));tint=Math.sin(Math.min(1,at_/.4)*Math.PI);}
+  else if(act==="attack"){an="attack";fr=Math.min(n("attack")-1,Math.floor(at_/.06));}
+  else if(act==="win"){an="win";fr=Math.floor(tt*12)%n("win");}
+  else if(st.walk){an="walk";fr=Math.floor(tt*15)%n("walk");}
+  else{fr=Math.floor(tt*7)%n("idle");}
+  const vw=(st.walk&&u.away)||(act==="attack"&&st.mine)?"b":"f",t=(u.tex[vw]&&u.tex[vw][an])||u.tex.f[an]||u.tex.f.idle;
+  if(u.mat.map!==t){u.mat.map=t;u.mat.needsUpdate=true;}
+  t.offset.x=fr/n(an);
+  u.body.position.y=0;u.card.rotation.z=0;
+  u.mat.color.setRGB(1,1-tint*.55,1-tint*.55);
+  if(act==="hit"&&at_<.08)u.mat.color.setRGB(3,3,3);
+}
+function makeHero(id){const g=A3[id]&&A3[id].f&&A3[id].f.idle?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):BUILD[id](HEROES[id]);g.userData.id=id;return g;}
 
 /* ---- animación procedural ---- */
 function setFlash(g,on){
@@ -1947,6 +1992,7 @@ function animateRig(rig,tt,st,act,at_){
 }
 function animate(g,t,st){
   const u=g.userData,{body,head,arms,legs,eyes}=u;if(!body)return;
+  if(u.a3){st=st||{};animate3d(u,t+u.t0,st,st.act||null,st.actT||0);return;}
   if(u.sprite){st=st||{};animateSprite(u,t+u.t0,st,st.act||null,st.actT||0);return;}
   if(u.rig){const tt2=t+u.t0;st=st||{};animateRig(u.rig,tt2,st,st.act||null,st.actT||0);}
   const tt=t+u.t0;st=st||{};
@@ -2013,7 +2059,7 @@ function bakePortraits(size=320){
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -2296,7 +2342,7 @@ function update(R,dt){
   else if(!R.paused&&R.projs.some(p=>p.o==="p"))heroFace=Math.PI;
   hero.rotation.y+=(((heroFace-hero.rotation.y+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI)*Math.min(1,dt*12);
   const aP=act.p&&(t-act.p.t<(act.p.k==="win"||act.p.k==="ko"?99:.62))?act.p:null;
-  GFX.animate(hero,t,{walk:dist>.03,act:aP&&aP.k,actT:aP?t-aP.t:0});
+  GFX.animate(hero,t,{walk:dist>.03,act:aP&&aP.k,actT:aP?t-aP.t:0,mine:true});
   /* rival: visible con visión, impacto o radar */
   let fp=null;
   if(me.visionUntil>R.now&&R.heroes.b.x>=0)fp=tileWorld("b",R.heroes.b.x,R.heroes.b.y);
@@ -3608,7 +3654,7 @@ function bootGame(){
   else showHome();
   if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
 }
-if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
+if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadAnim3d(),GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
   Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
   /* si la conexión es lenta y los modelos llegan después, se cambian al momento */
   all.then(()=>{if(late&&booted){try{GFX.bakePortraits();}catch(e){}if(UI.screen!=="game"&&UI.screen!=="pick")refreshScreen();}});}}
