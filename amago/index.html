@@ -1919,7 +1919,16 @@ function animateSprite(u,tt,st,act,at_){
   if(act==="hit"&&at_<.08)u.mat.color.setRGB(3,3,3);/* destello blanco al recibir */
 }
 /* ---- héroes con animación 3D pre-renderizada (técnica de Clash Royale): tiras de fotogramas por vista y animación ---- */
-const ANIM3D={brasa: {"fw": 188, "fh": 248, "ih": 0.5, "foot": 0.31, "n": {"attack": 10, "hit": 6, "idle": 8, "ko": 8, "walk": 10, "win": 10}}},A3={};
+const ANIM3D={
+  brasa:{"fw":188,"fh":248,"ih":0.5,"foot":0.31,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
+  flecha:{"fw":182,"fh":249,"ih":0.486,"foot":0.39,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
+  sombra:{"fw":206,"fh":239,"ih":0.527,"foot":0.335,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
+  muro:{"fw":239,"fh":237,"ih":0.502,"foot":0.363,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
+  ojo:{"fw":230,"fh":256,"ih":0.539,"foot":0.328,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
+  truco:{"fw":194,"fh":244,"ih":0.508,"foot":0.311,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
+  rayo:{"fw":206,"fh":251,"ih":0.502,"foot":0.367,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
+  bum:{"fw":186,"fh":248,"ih":0.528,"foot":0.331,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}}
+},A3={};
 function loadAnim3d(){
   const L=new T.TextureLoader(),jobs=[];
   for(const [id,m] of Object.entries(ANIM3D))for(const vw of ["f","b"])for(const an of Object.keys(m.n))

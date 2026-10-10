@@ -1,7 +1,7 @@
 # Sprites pre-renderizados (técnica de Clash Royale): anima el héroe 3D con su esqueleto y renderiza cada
 # fotograma desde el ángulo de la cámara del juego, de frente (f) o de espaldas (b).
 # Uso: python anim_sprites.py -- in.glb out_dir vista [anims] [estilo]
-#   vista: f | b; anims: idle,walk,attack,hit,ko,win; estilo de ataque: breath | swing
+#   vista: f | b; anims: idle,walk,attack,hit,ko,win; estilo de ataque: breath | swing | stomp | cast
 import sys, os, math, json, bpy
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib import *
@@ -28,7 +28,7 @@ v = bpy.context.scene.view_settings; v.view_transform = 'Standard'; v.look = 'No
 # cámara del juego: ~42° de elevación; de frente en 3/4, o de espaldas
 r = 9.0; el = math.radians(42); az = math.radians(-28 if VIEW == 'f' else 180 - 28)
 tgt = Vector((0, 0, 1.05))
-camera((tgt.x + r * math.cos(el) * math.sin(az), tgt.y - r * math.cos(el) * math.cos(az), tgt.z + r * math.sin(el)), tuple(tgt), lens=118)
+camera((tgt.x + r * math.cos(el) * math.sin(az), tgt.y - r * math.cos(el) * math.cos(az), tgt.z + r * math.sin(el)), tuple(tgt), lens=float(os.environ.get('LENS', 118)))
 P = arm.pose.bones
 def rot(name, x=0, y=0, z=0):
     b = P.get(name)
@@ -56,6 +56,14 @@ for an in ANIMS:
             p = -ease(t / .35) if t < .35 else (-1 + 2.3 * ease((t - .35) / .15) if t < .5 else 1.3 * (1 - ease((t - .5) / .5)))
             if STYLE == 'breath':
                 rot('head', .35 * p); rot('spine', .18 * p); rot('arm.L', -.3 * max(0, -p)); rot('arm.R', -.3 * max(0, -p))
+            elif STYLE == 'stomp':
+                # pisotón: brazos arriba en la carga y golpe al suelo con los dos
+                rot('arm.L', -1.3 * max(0, -p) + .5 * max(0, p)); rot('arm.R', -1.3 * max(0, -p) + .5 * max(0, p))
+                rot('spine', -.15 * max(0, -p) + .3 * max(0, p)); rot('thigh.L', -.4 * max(0, -p))
+                root.location.z = base.z + .25 * max(0, -p)
+            elif STYLE == 'cast':
+                # conjuro: los dos brazos al frente y hacia arriba
+                rot('arm.L', -1.4 * p); rot('arm.R', -1.4 * p); rot('head', -.2 * p); rot('spine', .12 * p)
             else:
                 rot('arm.R', -1.1 * p); rot('fore.R', -.5 * max(0, -p)); rot('arm.L', .35 * p); rot('spine', .15 * p, 0, -.1 * p)
             root.location.y = base.y - .12 * max(0, p)
