@@ -49,8 +49,10 @@ Railway no duerme el servidor, pero tiene un consumo mínimo mensual de pago tra
 
 ### Mensajes del protocolo
 
-Cliente → servidor: `hello`, `queue`, `create`, `join {code}`, `pick {hero}`, `move {x,y}`, `fire {x,y}`, `rematch`, `leave`.
-Servidor → cliente: `queued`, `room {code}`, `matched {opp, ranked}`, `pickPhase`, `oppPicked`, `roundStart {you, opp, view}`, `go`, `view {v}` (10 veces por segundo), `ev` (disparos, impactos, objetos), `roundEnd`, `matchEnd`, `rematchAsk`, `oppLeft`, `error`.
+Cliente → servidor: `hello {name, tro, unl, id?, secret?}`, `queue`, `create`, `join {code}`, `pick {hero}`, `move {x,y}`, `fire {x,y}`, `amago {x,y}`, `resume {code, token}`, `rematch`, `leave`.
+Servidor → cliente: `queued`, `room {code}`, `matched {opp, ranked, token}`, `pickPhase`, `oppPicked`, `roundStart {you, opp, view}`, `go`, `view {v}` (10 veces por segundo), `ev` (disparos, impactos, objetos), `roundEnd`, `matchEnd {tro?}`, `rematchAsk`, `oppAway`, `oppBack`, `oppLeft {tro?}`, `resumed`, `resumeFail`, `error`.
+
+Reglas del servidor: si nadie aparece en la cola en 10 s, rival bot de tu nivel; quien no elige héroe en 20 s juega con uno al azar; si se corta una conexión, la ronda se pausa y hay 15 s para volver con `resume` (si no, cuenta como abandono y derrota).
 
 ## Reglas (versión 4: tiempo real con elixir)
 
