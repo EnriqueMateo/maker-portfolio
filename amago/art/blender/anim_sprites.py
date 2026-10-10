@@ -29,7 +29,7 @@ for o in bpy.data.objects:
 k = 2.0 / (mx.z - mn.z); root.scale = (k, k, k)
 base = Vector((-(mn.x + mx.x) / 2 * k, -(mn.y + mx.y) / 2 * k, -mn.z * k)); root.location = base
 RES = int(os.environ.get('RES', 256)); studio(res=(RES, RES), samples=int(os.environ.get('SAMPLES', 20)))
-v = bpy.context.scene.view_settings; v.view_transform = 'Standard'; v.look = 'None'; v.exposure = 0
+v = bpy.context.scene.view_settings; v.view_transform = 'Standard'; v.look = 'None'; v.exposure = float(os.environ.get('EXPO', 0))
 # cámara del juego: ~42° de elevación; de frente en 3/4, o de espaldas
 r = 9.0; el = math.radians(42); az = math.radians(-28 if VIEW == 'f' else 180 - 28)
 tgt = Vector((0, 0, 1.05))
@@ -45,7 +45,7 @@ def ease(t): return t * t * (3 - 2 * t)
 N = {'idle': 8, 'walk': 10, 'attack': 10, 'hit': 6, 'ko': 8, 'win': 10}
 meta = {}
 for an in ANIMS:
-    for f in range(N[an]):
+    for f in range(1 if os.environ.get('ONE') else N[an]):
         t = f / N[an]; reset_pose(); w = math.sin(t * 2 * math.pi)
         if an == 'idle':
             rot('spine', .03 * w); rot('head', .04 * w, .05 * math.sin(t * 2 * math.pi + 1)); rot('arm.L', .06 * w); rot('arm.R', -.06 * w)
