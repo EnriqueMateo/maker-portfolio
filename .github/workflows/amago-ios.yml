@@ -1,0 +1,99 @@
+# Compila AMAGO para iOS en un Mac de GitHub y lo sube a App Store Connect (TestFlight).
+# Se lanza al subir una etiqueta amago-ios-v1.0.0 (la versión sale de la etiqueta) o a mano desde Actions.
+# Necesita en el repo (Settings → Secrets and variables → Actions):
+#   secretos: APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (contenido del .p8)
+#   variable: AMAGO_SERVER (https://… del servidor en Railway)
+name: AMAGO iOS → App Store Connect
+
+on:
+  push:
+    tags: ["amago-ios-v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versión (ej. 1.0.0)"
+        required: true
+        default: "1.0.0"
+
+concurrency:
+  group: amago-ios
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    runs-on: macos-15
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: amago/app
+    env:
+      AMAGO_SERVER: ${{ vars.AMAGO_SERVER }}
+      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comprobar configuración
+        env:
+          HAS_P8: ${{ secrets.ASC_KEY_P8 != '' }}
+        run: |
+          for v in AMAGO_SERVER TEAM_ID ASC_KEY_ID ASC_ISSUER_ID; do
+            if [ -z "${!v}" ]; then echo "::error::Falta $v en los secretos o variables del repositorio"; exit 1; fi
+          done
+          if [ "$HAS_P8" != "true" ]; then echo "::error::Falta el secreto ASC_KEY_P8"; exit 1; fi
+
+      - name: Versión y número de compilación
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then V="${GITHUB_REF_NAME#amago-ios-v}"; else V="${{ inputs.version }}"; fi
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+          echo "BUILD=$(( ${{ github.run_number }} + 100 ))" >> "$GITHUB_ENV"
+
+      - name: Elegir el Xcode más reciente
+        run: |
+          X=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$X"
+          xcodebuild -version
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Preparar el juego dentro de la app
+        run: |
+          npm ci
+          npm run www
+          npx cap sync ios
+
+      - name: Clave de la API de App Store Connect
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8"
+          echo "KEY_PATH=$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
+
+      - name: Compilar (archive)
+        run: |
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination "generic/platform=iOS" -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD"
+
+      - name: Firmar y subir a App Store Connect
+        run: |
+          sed "s/__TEAM_ID__/$TEAM_ID/" ios/ExportOptions.plist > "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          echo "### AMAGO $VERSION ($BUILD) subido a App Store Connect" >> "$GITHUB_STEP_SUMMARY"
+          echo "Aparecerá en TestFlight cuando Apple termine de procesarlo (5–30 min)." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Borrar la clave
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/keys"
