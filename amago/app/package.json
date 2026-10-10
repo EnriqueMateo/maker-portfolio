@@ -2,12 +2,14 @@
   "name": "amago-app",
   "version": "1.0.0",
   "private": true,
-  "description": "AMAGO como app nativa (Capacitor): el juego va dentro de la app y el online conecta con el servidor",
+  "description": "AMAGO como app nativa (Capacitor) para iOS y Android: el juego va dentro de la app y el online conecta con el servidor",
   "scripts": {
     "www": "node scripts/build-www.js",
-    "sync": "npm run www && npx cap sync ios"
+    "sync": "npm run www && npx cap sync ios",
+    "sync:android": "npm run www && npx cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
     "@capacitor/core": "^8.0.0",
     "@capacitor/ios": "^8.0.0"
   },

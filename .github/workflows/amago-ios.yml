@@ -15,6 +15,9 @@ on:
         required: true
         default: "1.0.0"
 
+permissions:
+  contents: read
+
 concurrency:
   group: amago-ios
   cancel-in-progress: false
@@ -29,6 +32,7 @@ jobs:
     env:
       AMAGO_SERVER: ${{ vars.AMAGO_SERVER }}
       TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      INPUT_VERSION: ${{ inputs.version }}
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
     steps:
@@ -45,13 +49,14 @@ jobs:
 
       - name: Versión y número de compilación
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then V="${GITHUB_REF_NAME#amago-ios-v}"; else V="${{ inputs.version }}"; fi
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then V="${GITHUB_REF_NAME#amago-ios-v}"; else V="$INPUT_VERSION"; fi
+          if ! [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::Versión no válida: $V (usa 1.2.3)"; exit 1; fi
           echo "VERSION=$V" >> "$GITHUB_ENV"
-          echo "BUILD=$(( ${{ github.run_number }} + 100 ))" >> "$GITHUB_ENV"
+          echo "BUILD=$(( GITHUB_RUN_NUMBER + 100 ))" >> "$GITHUB_ENV"
 
-      - name: Elegir el Xcode más reciente
+      - name: Elegir el Xcode estable más reciente (Apple rechaza compilaciones hechas con betas)
         run: |
-          X=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          X=$(ls -d /Applications/Xcode_*.app | grep -viE "beta|rc" | sort -V | tail -1)
           sudo xcode-select -s "$X"
           xcodebuild -version
 

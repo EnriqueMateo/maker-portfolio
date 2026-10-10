@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AMAGO</string>
+    <string name="title_activity_main">AMAGO</string>
+    <string name="package_name">com.enriquemateo.amago</string>
+    <string name="custom_url_scheme">com.enriquemateo.amago</string>
+</resources>

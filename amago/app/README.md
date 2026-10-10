@@ -1,4 +1,4 @@
-# AMAGO para iOS (App Store Connect)
+# AMAGO para iOS y Android
 
 La app es el juego (`../index.html` y sus recursos) dentro de una app nativa hecha con [Capacitor](https://capacitorjs.com). El modo contra el bot funciona sin internet; el online conecta con el servidor de Railway.
 
@@ -39,3 +39,27 @@ npx cap open ios
 - Solo iPhone y en vertical. Sin cifrado propio (`ITSAppUsesNonExemptEncryption = false`), así que no hay trámite de exportación.
 - Las compras con dinero real están desactivadas en la app hasta integrar las compras de Apple (StoreKit).
 - El icono (`ios/App/App/Assets.xcassets/AppIcon.appiconset`, 1024×1024 sin transparencia) y la pantalla de carga son provisionales.
+
+
+## Android (Google Play)
+
+El proyecto está en `android/` y el workflow en `.github/workflows/amago-android.yml`: compila un AAB firmado en un Linux de GitHub y lo sube a la **prueba interna** de Google Play.
+
+### Una sola vez
+
+1. **Cuenta de desarrollador de Google Play** (pago único de 25 $): [play.google.com/console](https://play.google.com/console).
+2. **Crear la app** en Play Console con el nombre del paquete `com.enriquemateo.amago`.
+3. **Keystore de subida** (en tu ordenador, guárdalo bien y nunca lo subas al repositorio):
+   ```bash
+   keytool -genkeypair -v -keystore amago-upload.jks -alias amago -keyalg RSA -keysize 2048 -validity 10000
+   base64 -i amago-upload.jks | pbcopy   # en Mac; copia el texto en el secreto ANDROID_KEYSTORE_BASE64
+   ```
+4. **Secretos en GitHub:** `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`amago`), `ANDROID_KEY_PASSWORD`. La variable `AMAGO_SERVER` es la misma que en iOS.
+5. **La primera subida es manual** (Google lo exige): lanza el workflow, descarga el AAB de la ejecución (Artifacts) y súbelo a mano en Play Console → Pruebas → Prueba interna.
+6. **Para que las siguientes suban solas:** en Google Cloud crea una cuenta de servicio, descarga su clave JSON y dale permisos en Play Console → Usuarios y permisos. Pega el JSON en el secreto `PLAY_SERVICE_ACCOUNT_JSON`.
+
+Sin keystore, el workflow compila igualmente un AAB sin firmar: sirve para comprobar que todo compila.
+
+### Cada versión
+
+`git tag amago-android-v1.0.0 && git push origin amago-android-v1.0.0`. El número de versión de Android sube solo.
