@@ -67,6 +67,9 @@ const server = http.createServer((req, res) => {
   if (url === "/vendor/three.min.js") return serve(req, res, path.join(root, "vendor", "three.min.js"), "text/javascript; charset=utf-8", 86400);
   const asset = url.match(/^\/(models|portraits|arenas|sprites|props|ui|anim)\/([a-z0-9_-]+)\.(glb|webp)$/);
   if (asset) return serve(req, res, path.join(root, asset[1], asset[2] + "." + asset[3]), asset[3] === "glb" ? "model/gltf-binary" : "image/webp", 86400);
+  const font = url.match(/^\/fonts\/([a-z0-9_-]+)\.woff2$/);
+  if (font) return serve(req, res, path.join(root, "fonts", font[1] + ".woff2"), "font/woff2", 604800);
+  if (url === "/privacidad" || url === "/privacy") return serve(req, res, path.join(root, "privacidad.html"), "text/html; charset=utf-8", 3600);
   if (url === "/" || url === "/index.html") return serve(req, res, INDEX, "text/html; charset=utf-8", 0);
   res.writeHead(404, { "content-type": "text/plain" });
   res.end("No encontrado");
@@ -89,8 +92,20 @@ function newCode() {
   return null;
 }
 
+// nombres: filtro de insultos (con acentos y "leet" normalizados); si no pasa, apodo automático
+const BAD = ["puta", "puto", "mierda", "polla", "cono", "joder", "cabron", "maricon", "gilipollas", "zorra", "subnormal", "follar", "pene", "verga", "pendejo", "culero", "chinga", "nazi", "hitler", "fuck", "shit", "bitch", "nigg", "cunt", "dick", "pussy", "retard", "porn", "sexo", "sex", "kkk", "faggot", "whore", "slut", "rape", "viola"];
+const norm = (t) =>
+  t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/0/g, "o").replace(/1/g, "i").replace(/3/g, "e").replace(/4/g, "a").replace(/5/g, "s").replace(/7/g, "t").replace(/@/g, "a").replace(/\$/g, "s")
+    .replace(/[^a-z]/g, "");
+const isClean = (name) => { const n = norm(name); return !BAD.some((w) => n.includes(w)); };
+const ANIMALS = ["Lince", "Zorro", "Búho", "Halcón", "Tejón", "Lobo", "Nutria", "Puma", "Erizo", "Cuervo", "Gecko", "Panda", "Koala", "Tigre", "Delfín", "Cobra"];
+const ADJ = ["Veloz", "Astuto", "Sigiloso", "Bravo", "Rojo", "Azul", "Dorado", "Feroz", "Listo", "Loco"];
+const alias = () => `${ANIMALS[Math.floor(Math.random() * ANIMALS.length)]} ${ADJ[Math.floor(Math.random() * ADJ.length)]} ${10 + Math.floor(Math.random() * 90)}`;
+
 function cleanPlayer(m) {
-  const name = String(m.name || "Jugador").replace(/[<>&"]/g, "").trim().slice(0, 14) || "Jugador";
+  let name = String(m.name || "Jugador").replace(/[<>&"]/g, "").replace(/\s+/g, " ").trim().slice(0, 14) || "Jugador";
+  if (!isClean(name)) name = alias();
   const tro = Math.max(0, Math.min(99999, Number(m.tro) || 0));
   let unl = Array.isArray(m.unl) ? m.unl.slice(0, 32).filter(isHero) : [];
   unl = [...new Set(unl)];
@@ -248,12 +263,11 @@ function makeRoom(a, b, ranked) {
 }
 
 function matchRoom(r) {
-  broadcast(r, (s) => ({
-    t: "matched",
-    code: r.code,
-    ranked: !!r.ranked,
-    opp: { name: r.players[other(s)].player.name, tro: r.players[other(s)].player.tro },
-  }));
+  // en el modo Online el rival ve un apodo automático (nada escrito por otros jugadores); con amigos, el nombre filtrado
+  broadcast(r, (s) => {
+    const o = r.players[other(s)];
+    return { t: "matched", code: r.code, ranked: !!r.ranked, opp: { name: r.ranked ? o.alias : o.player.name, tro: o.player.tro } };
+  });
   setTimeout(() => rooms.get(r.code) === r && startPick(r), 1500);
 }
 
@@ -393,6 +407,7 @@ wss.on("connection", (ws, req) => {
   ws.badJoins = 0;
   ws.rate = { t: Date.now(), n: 0 };
   ws.player = cleanPlayer({});
+  ws.alias = alias();
   ws.room = null;
   ws.alive = true;
   ws.on("pong", () => (ws.alive = true));

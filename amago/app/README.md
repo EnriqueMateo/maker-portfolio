@@ -28,6 +28,12 @@ AMAGO_SERVER=https://tu-servidor npm run sync
 npx cap open ios
 ```
 
+## Privacidad (obligatorio en App Store Connect)
+
+- **URL de la política de privacidad:** `https://<tu-servidor-de-railway>/privacidad` (el archivo es `amago/privacidad.html`; rellena antes `[NOMBRE DEL RESPONSABLE]` y `[CORREO DE CONTACTO]`). También se abre desde Ajustes dentro del juego.
+- **App Privacy** (cuestionario de Apple): no hay seguimiento ni anuncios. Datos que se envían: el nombre de jugador y los trofeos durante las partidas online (función de la app, no vinculados a la identidad).
+- **Contenido de usuarios:** en el modo Online el rival ve un apodo automático; en salas con amigos los nombres pasan por un filtro de insultos.
+
 ## Notas
 
 - Solo iPhone y en vertical. Sin cifrado propio (`ITSAppUsesNonExemptEncryption = false`), así que no hay trámite de exportación.

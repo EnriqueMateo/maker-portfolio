@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--ARTIFACT-START-->
 <title>AMAGO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800;900&display=swap">
 <style>
+/* fuentes dentro del juego (licencia OFL, en fonts/): sin pedir nada a terceros y funcionan sin red */
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/lilitaone.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:200 1000;font-display:swap;src:url(fonts/nunito.woff2) format('woff2')}
 /* Layout: juego móvil vertical. Inicio con héroes en escena; partida con tablero rival arriba, el tuyo abajo y un dock de acción al pie */
 :root{
   --bg:#141846; --bg2:#0a0c27; --panel:#1d2260; --panel2:#2a3185; --ink:#0b0a1f;
@@ -3264,6 +3265,7 @@ function renderModal(){
       <button class="toggle" data-a="tvib"><span>📳 Vibración</span><i class="${S.vib?"on":""}">${S.vib?"Sí":"No"}</i></button>
       <button class="toggle" data-a="how"><span>❓ Cómo se juega</span><i>Ver</i></button>
       <button class="toggle" data-a="purchinfo"><span>🧾 Compras y probabilidades</span><i>Ver</i></button>
+      <button class="toggle" data-a="privacy"><span>🔒 Política de privacidad</span><i>Ver</i></button>
       <button class="toggle" data-a="restore"><span>♻️ Restaurar compras</span><i>Ir</i></button>
       ${M.confirm?`<button class="gbtn red" data-a="reset2">SÍ, BORRAR TODO</button><button class="pillbtn" data-a="reset0">Cancelar</button>`:`<button class="pillbtn" data-a="reset1">Borrar progreso</button>`}</div>`;
   }else if(M.k==="name"){
@@ -3856,6 +3858,7 @@ document.addEventListener("click",e=>{
     case "hero":sfx("tap");UI.modal={k:"heropage",id:el.dataset.id};renderModal();break;
     case "fav":S.fav=el.dataset.id;save();sfx("sel");renderModal();refreshScreen();break;
     case "claim":sfx("chest");claim(+el.dataset.t);break;
+    case "privacy":sfx("tap");window.open((SERVER||"")+"/privacidad","_blank","noopener");break;
     case "how":sfx("tap");UI.modal={k:"how",i:0};renderModal();break;
     case "hownext":sfx("tap");if(UI.modal.i<HOW.length-1){UI.modal.i++;renderModal();}else{UI.modal=null;renderModal();}break;
     case "chest":openBox();break;
