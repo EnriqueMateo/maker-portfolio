@@ -14,6 +14,11 @@ os.makedirs(out, exist_ok=True)
 reset()
 bpy.ops.import_scene.gltf(filepath=src)
 meshes = [o for o in bpy.data.objects if o.type == 'MESH']
+# la piel principal de los modelos viene marcada como metal al 100 %: sale apagada y grisácea; mate satinado
+for m in bpy.data.materials:
+    b = m.node_tree.nodes.get('Principled BSDF') if m.use_nodes else None
+    if b and any(l.to_node == b and l.to_socket.name == 'Base Color' for l in m.node_tree.links):
+        b.inputs['Metallic'].default_value = 0.0; b.inputs['Roughness'].default_value = 0.62
 arm = next((o for o in bpy.data.objects if o.type == 'ARMATURE'), None)
 pts = [o.matrix_world @ Vector(c) for o in meshes for c in o.bound_box]
 mn = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))

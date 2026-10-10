@@ -601,6 +601,13 @@ body,body[style]{background:
 .godrays.b{animation-direction:reverse;animation-duration:60s;opacity:.55}
 .floorglow{position:absolute;left:50%;bottom:58px;width:300px;height:70px;margin-left:-150px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,240,180,.5),transparent);pointer-events:none}
 .hstage canvas.bigmodel{position:absolute;inset:0;width:100%;height:100%}
+/* inicio 3D: la escena ocupa toda la pantalla por detrás del menú */
+#home3d{position:fixed;inset:0;width:100vw;height:100vh;height:100lvh;z-index:0;display:none}
+body.h3d #home3d{display:block}
+body.h3d #app{z-index:1}
+body.h3d .mbg{display:none}
+body.h3d::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(8,14,48,.55),rgba(8,14,48,0) 24%,rgba(8,14,48,0) 64%,rgba(8,14,48,.62))}
+body.h3d .hstage{touch-action:none;cursor:grab}
 .sidecol{position:absolute;top:6px;z-index:3;display:flex;flex-direction:column;gap:14px}
 .sidecol.l{left:0}.sidecol.r{right:0;align-items:flex-end}
 .sbtn{width:66px;display:flex;flex-direction:column;align-items:center;background:none;border:0;cursor:pointer;position:relative;padding:0;color:#fff}
@@ -2074,7 +2081,7 @@ function bakePortraits(size=320){
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,loadGLB,BASE,EXT,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -2442,30 +2449,125 @@ return {build,update,dispose,resize,fireFx,impactFx,screenPos,areaScreen,shake,f
 })();
 
 /* ================= escaparate 3D del inicio ================= */
+/* ================= inicio 3D: el héroe de verdad en su isla, a pantalla completa =================
+   Modelo 3D con esqueleto (los mismos huesos que en Blender), animado en vivo: respira, mira alrededor,
+   se gira con el dedo (con inercia) y al tocarlo salta, ataca, da una voltereta o se queja. */
 const SHOW=(function(){
-if(!GFX)return null;
-const T=GFX.T;let r=null,sc,cam,model,id=null,raf=0,rotY=.32,drag=null,winT=-1,winK="win";/* al tocarlo: ataca o celebra, por turnos */
-function mount(canvas,heroId){
-  unmount();
-  r=new T.WebGLRenderer({canvas,antialias:true,alpha:true});r.setPixelRatio(Math.min(3,devicePixelRatio||1));GFX.setupRenderer(r);r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
-  sc=new T.Scene();GFX.lights(sc,true,r);
-  const plat=GFX.part(new T.CylinderGeometry(.5,.56,.16,64),GFX.mat(0x2a3fc8,{r:.25,cc:1}));plat.position.y=-.1;plat.traverse(o=>{if(o.isMesh)o.receiveShadow=true;});sc.add(plat);
-  const rim=new T.Mesh(new T.TorusGeometry(.5,.035,16,96),GFX.mat(0xffc21a,{r:.25,m:.5}));rim.rotation.x=Math.PI/2;rim.position.y=-.02;sc.add(rim);
-  cam=new T.PerspectiveCamera(28,1,.1,30);cam.position.set(0,1.0,4.8);cam.lookAt(0,.62,0);
-  set(heroId);
-  const resize=()=>{const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();};resize();
-  canvas.onpointerdown=e=>{drag={x:e.clientX,r:rotY};canvas.setPointerCapture(e.pointerId);};
-  canvas.onpointermove=e=>{if(drag)rotY=drag.r+(e.clientX-drag.x)*.012;};
-  canvas.onpointerup=e=>{if(drag&&Math.abs(e.clientX-drag.x)<6){winT=performance.now()/1000;winK=winK==="attack"?"win":"attack";}drag=null;};
-  const loop=()=>{if(!r)return;resize();const t=performance.now()/1000;if(!drag)rotY+=(.32-rotY)*.02;model.rotation.y=rotY;
-    const w=winT>0&&t-winT<(winK==="win"?1.6:.7);GFX.animate(model,t,{act:w?winK:null,actT:w?t-winT:0});r.render(sc,cam);raf=requestAnimationFrame(loop);};
-  loop();
+if(!GFX||!GFX.T.GLTFLoader)return null;
+const T=GFX.T,V3=(x,y,z)=>new T.Vector3(x,y,z);
+const STYLE={brasa:"breath",ojo:"breath",muro:"stomp",rayo:"cast"};
+const ACTS=["jump","attack","flip","jump","attack","hit"];
+const HH=1.25;/* altura del héroe en la escena */
+let r=null,cv=null,sc,cam,isle,hero=null,heroId=null,raf=0,stage=null,on=false,anim=[],water=null,clouds=[],trees=[];
+let rotY=.3,vel=0,drag=null,lastTouch=0,act=null,actT=0,actI=0,pop=1,loadTok=0;
+const GLB={};
+function loadHero(id){return GLB[id]||(GLB[id]=new Promise(res=>GFX.loadGLB(GFX.BASE+"models/"+id+GFX.EXT,g=>res(prep(g.scene)),()=>{delete GLB[id];res(null);})));}
+function prep(m){
+  /* los anchos (Muro) se encajan por anchura para que no tapen el menú */
+  m.updateMatrixWorld(true);const b=new T.Box3().setFromObject(m,true);m.scale.multiplyScalar(Math.min(HH/(b.max.y-b.min.y),HH*1.05/(b.max.x-b.min.x)));m.updateMatrixWorld(true);
+  const b2=new T.Box3().setFromObject(m,true);m.position.set(-(b2.min.x+b2.max.x)/2,-b2.min.y,-(b2.min.z+b2.max.z)/2);
+  const B={};m.traverse(o=>{if(o.isBone){o.userData.q0=o.quaternion.clone();B[o.name.replace(/[^a-z]/gi,"").toLowerCase()]=o;}if(o.isMesh){o.castShadow=true;o.frustumCulled=false;
+    /* la piel principal viene marcada como metal al 100 % (sale negra): mate satinado; los adornos metálicos se quedan */
+    const mt=o.material;if(mt&&mt.isMeshStandardMaterial&&mt.map){mt.metalness=0;mt.roughness=.62;mt.metalnessMap=null;mt.envMapIntensity=.35;mt.needsUpdate=true;}}});
+  const g=new T.Group(),body=new T.Group();body.add(m);g.add(body);g.userData={B,body};return g;
 }
-function set(heroId){if(!sc)return;if(model)sc.remove(model);id=heroId;model=GFX.makeHero(heroId);sc.add(model);
-  /* los muy anchos (Muro) se encogen para caber en el escaparate */
-  const u=model.userData;if(u.sprite){const w=u.card.geometry.parameters.width;model.scale.setScalar(Math.min(1,1.2/w));}}
-function unmount(){cancelAnimationFrame(raf);if(r){r.dispose();r.forceContextLoss&&r.forceContextLoss();}r=null;}
-return {mount,unmount,set};
+const _e=new T.Euler(),_q=new T.Quaternion();
+function pose(B,n,x=0,y=0,z=0){const b=B[n];if(!b)return;_e.set(x,y,z,"XYZ");b.quaternion.copy(b.userData.q0).multiply(_q.setFromEuler(_e));}
+const ease=t=>t*t*(3-2*t),cl=t=>Math.max(0,Math.min(1,t));
+/* una pose por fotograma: reposo + respiración + la acción en curso (misma lógica que los renders de Blender) */
+function animate(t){
+  const {B,body}=hero.userData,w=Math.sin(t*2.2),st=STYLE[heroId]||"swing";
+  let P={spine:[.03*w,0,0],head:[.04*w,.12*Math.sin(t*.45)*Math.max(0,Math.sin(t*.21)),0],armL:[.06*w,0,-.72],armR:[-.06*w,0,.72],foreL:[0,0,0],foreR:[0,0,0],thighL:[0,0,0],thighR:[0,0,0],shinL:[0,0,0],shinR:[0,0,0]};
+  let y=.012*(w+1),rx=0,ry=0,sq=1;
+  const k=act?(t-actT):0,add=(n,x,yy,z)=>{P[n][0]+=x;P[n][1]+=yy;P[n][2]+=z;};
+  if(act==="jump"){const d=1.1,u=cl(k/d);
+    const crouch=u<.18?ease(u/.18):u<.3?1-ease((u-.18)/.12):0,air=u>=.25&&u<.85?Math.sin((u-.25)/.6*Math.PI):0,land=u>=.85?Math.sin((u-.85)/.15*Math.PI):0;
+    y+=air*.55-crouch*.06-land*.04;sq=1-crouch*.12+air*.08-land*.1;
+    add("armL",0,0,1.5*air+.2*crouch);add("armR",0,0,-1.5*air-.2*crouch);add("head",-.25*air,0,0);add("thighL",-.5*air,0,0);add("thighR",-.5*air,0,0);add("shinL",.7*air,0,0);add("shinR",.7*air,0,0);
+    if(u>=1)act=null;}
+  else if(act==="flip"){const d=1.15,u=cl(k/d),air=u>.15&&u<.85?Math.sin((u-.15)/.7*Math.PI):0;
+    y+=air*.7;ry=ease(cl((u-.15)/.7))*Math.PI*2;add("armL",0,0,1.2*air);add("armR",0,0,-1.2*air);add("thighL",-.9*air,0,0);add("thighR",-.9*air,0,0);add("shinL",1.3*air,0,0);add("shinR",1.3*air,0,0);sq=u<.15?1-.12*Math.sin(u/.15*Math.PI):1;
+    if(u>=1)act=null;}
+  else if(act==="attack"){const d=.85,u=cl(k/d),p=u<.35?-ease(u/.35):u<.5?-1+2.3*ease((u-.35)/.15):1.3*(1-ease((u-.5)/.5));
+    if(st==="breath"){add("head",.35*p,0,0);add("spine",.18*p,0,0);add("armL",-.3*Math.max(0,-p),0,0);add("armR",-.3*Math.max(0,-p),0,0);}
+    else if(st==="stomp"){add("armL",-1.3*Math.max(0,-p)+.5*Math.max(0,p),0,.4*Math.max(0,-p));add("armR",-1.3*Math.max(0,-p)+.5*Math.max(0,p),0,-.4*Math.max(0,-p));add("spine",-.15*Math.max(0,-p)+.3*Math.max(0,p),0,0);y+=.2*Math.max(0,-p);}
+    else if(st==="cast"){add("armL",-1.4*p,0,.5*Math.max(0,p));add("armR",-1.4*p,0,-.5*Math.max(0,p));add("head",-.2*p,0,0);add("spine",.12*p,0,0);}
+    else{add("armR",-1.1*p,0,0);add("foreR",-.5*Math.max(0,-p),0,0);add("armL",.35*p,0,0);add("spine",.15*p,0,-.1*p);}
+    rx=.06*Math.max(0,p);if(u>=1)act=null;}
+  else if(act==="hit"){const d=.6,u=cl(k/d),e=Math.sin(Math.min(1,u*1.6)*Math.PI);
+    add("spine",-.32*e,0,0);add("head",-.3*e,.25*Math.sin(u*30)*(1-u),0);add("armL",0,0,.5*e);add("armR",0,0,-.5*e);rx=-.12*e;sq=1-.06*e;if(u>=1)act=null;}
+  for(const n in P)pose(B,n,...P[n]);
+  body.position.y=y;body.rotation.set(rx,ry,0);body.scale.set(1/Math.sqrt(sq)*pop,sq*pop,1/Math.sqrt(sq)*pop);
+}
+function skyTex(){const c=document.createElement("canvas");c.width=4;c.height=512;const g=c.getContext("2d"),gr=g.createLinearGradient(0,0,0,512);
+  gr.addColorStop(0,"#2f7cff");gr.addColorStop(.5,"#86ccff");gr.addColorStop(.72,"#d9f2ff");gr.addColorStop(1,"#c4ebff");g.fillStyle=gr;g.fillRect(0,0,4,512);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;}
+function puffTex(){const c=document.createElement("canvas");c.width=256;c.height=128;const g=c.getContext("2d");
+  for(const [x,y,rr] of [[70,82,44],[122,62,58],[182,84,42],[140,92,40],[100,92,38]]){const q=g.createRadialGradient(x,y,0,x,y,rr);q.addColorStop(0,"rgba(255,255,255,1)");q.addColorStop(.72,"rgba(255,255,255,.92)");q.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=q;g.fillRect(0,0,256,128);}
+  const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;}
+function shadowTex(){const c=document.createElement("canvas");c.width=c.height=128;const g=c.getContext("2d"),q=g.createRadialGradient(64,64,0,64,64,64);q.addColorStop(0,"rgba(20,40,10,.5)");q.addColorStop(1,"rgba(20,40,10,0)");g.fillStyle=q;g.fillRect(0,0,128,128);return new T.CanvasTexture(c);}
+function build(){
+  const P=GFX.PROPS;sc=new T.Scene();sc.background=skyTex();sc.fog=new T.Fog(0xcdeeff,10,36);
+  const tex=(t,n)=>{if(!t)return null;const c=t.clone();c.needsUpdate=true;c.wrapS=c.wrapT=T.RepeatWrapping;c.repeat.set(n,n);return c;};
+  if(P.agua){water=tex(P.agua,10);const sea=new T.Mesh(new T.PlaneGeometry(90,90),new T.MeshBasicMaterial({map:water,color:0xd4f1ff}));sea.rotation.x=-Math.PI/2;sea.position.y=-.9;sc.add(sea);}
+  const grass=new T.MeshStandardMaterial({map:tex(P.hierba,2.2),color:P.hierba?0xffffff:0x7fd04a,roughness:.95}),soil=new T.MeshStandardMaterial({color:0xc8925a,roughness:1,flatShading:true});
+  const island=(x,z,rad,main)=>{const g=new T.Group();const top=new T.Mesh(new T.CylinderGeometry(rad,rad,.12,64),grass);top.position.y=-.06;top.receiveShadow=main;g.add(top);
+    const lip=new T.Mesh(new T.TorusGeometry(rad,.08,10,80),new T.MeshStandardMaterial({color:0x62c23c,roughness:.9}));lip.rotation.x=Math.PI/2;lip.position.y=-.02;g.add(lip);
+    const so=new T.Mesh(new T.CylinderGeometry(rad*1.02,rad*.52,1.1,40,3),soil);so.position.y=-.67;g.add(so);g.position.set(x,0,z);sc.add(g);return g;};
+  isle=island(0,0,1.7,true);island(-3.3,-9,1.6);island(3.7,-13,2);
+  const bill=(t,h,x,z,sway)=>{if(!t)return;const a=t.image.width/t.image.height,m=new T.Mesh(new T.PlaneGeometry(h*a,h),new T.MeshBasicMaterial({map:t,transparent:true,alphaTest:.05,depthWrite:false}));
+    m.geometry.translate(0,h/2,0);m.position.set(x,-.05,z);sc.add(m);if(sway!=null){m.userData.sway=sway;trees.push(m);}};
+  trees=[];bill(P.arbol,1.9,-1.25,-1.5,0);bill(P.pino,2.1,1.35,-1.8,1.7);bill(P.rocas,.45,.98,.45);bill(P.bandera_azul,1.0,-1.1,.25,3.1);
+  bill(P.pino,1.8,-3.7,-9.3,.5);bill(P.arbol,1.5,-2.7,-8.6,2.2);bill(P.bandera_roja,1.2,3.2,-12.6,4);bill(P.arbol,1.8,4.4,-13.4,1.1);
+  const pt=puffTex();clouds=[];for(const [x,y,z,w] of [[-2.6,4.4,-14,6],[3.2,5.6,-18,8],[.4,3.3,-22,7],[-5.5,6.2,-20,7],[6,3.8,-24,6]]){const m=new T.Mesh(new T.PlaneGeometry(w,w/2),new T.MeshBasicMaterial({map:pt,transparent:true,depthWrite:false,fog:false,opacity:.95}));m.position.set(x,y,z);m.userData.x0=x;sc.add(m);clouds.push(m);}
+  const blob=new T.Mesh(new T.PlaneGeometry(1.1,.75),new T.MeshBasicMaterial({map:shadowTex(),transparent:true,depthWrite:false}));blob.rotation.x=-Math.PI/2;blob.position.y=.006;sc.add(blob);sc.userData.blob=blob;
+  sc.add(new T.HemisphereLight(0xeaf6ff,0x7fae5a,1.5));
+  const d=new T.DirectionalLight(0xfff1dc,2.8);d.position.set(3,6,4);d.castShadow=true;d.shadow.mapSize.set(1024,1024);d.shadow.radius=6;d.shadow.bias=-.0006;const c=d.shadow.camera;c.left=c.bottom=-2.5;c.right=c.top=2.5;c.near=1;c.far=20;sc.add(d);
+  const rim=new T.DirectionalLight(0xbfe6ff,3);rim.position.set(-3,2.5,-4);sc.add(rim);
+  cam=new T.PerspectiveCamera(34,1,.1,120);
+}
+function frame(){
+  if(!r||!stage)return;
+  const W=innerWidth,H=innerHeight,pr=Math.min(3,devicePixelRatio||1);
+  if(cv.width!==Math.round(W*pr)||cv.height!==Math.round(H*pr)){r.setPixelRatio(pr);r.setSize(W,H,false);}
+  /* encuadre: el héroe ocupa ~60 % del alto del escenario y queda centrado en él */
+  const rc=stage.getBoundingClientRect(),want=Math.max(160,rc.height*.56),tan=Math.tan(cam.fov*Math.PI/360),dist=HH*H/(2*tan*want),mid=HH*.5;
+  cam.aspect=W/H;cam.position.set(0,mid+dist*.16,dist);cam.lookAt(0,mid,0);
+  const cy=rc.top+rc.height*.43;cam.setViewOffset(W,H,0,H/2-cy,W,H);cam.updateProjectionMatrix();
+}
+function loop(){
+  if(!on)return;raf=requestAnimationFrame(loop);
+  const t=performance.now()/1000;frame();
+  if(water){water.offset.x=t*.012;water.offset.y=Math.sin(t*.4)*.012;}
+  for(const c of clouds)c.position.x=c.userData.x0+Math.sin(t*.05+c.userData.x0)*1.5;
+  for(const m of trees)m.rotation.z=Math.sin(t*1.2+m.userData.sway)*.02;
+  if(hero){
+    if(!drag){rotY+=vel;vel*=.94;if(Math.abs(vel)<.0005&&t-lastTouch>2.5)rotY+=(.3-norm(rotY))*.03;}
+    hero.rotation.y=rotY;pop+=(1-pop)*.18;animate(t);
+    const b=sc.userData.blob,yy=hero.userData.body.position.y;b.scale.setScalar(1-Math.min(.5,yy*.6));b.material.opacity=1-Math.min(.6,yy);
+  }
+  r.render(sc,cam);
+}
+const norm=a=>{a=(a+Math.PI)%(Math.PI*2);if(a<0)a+=Math.PI*2;return a-Math.PI;};
+function play(k){act=k;actT=performance.now()/1000;}
+function onDown(e){if(e.target.closest("button,a,input"))return;drag={x:e.clientX,y:e.clientY,r:rotY,t:performance.now(),lx:e.clientX,lt:performance.now(),moved:false};vel=0;lastTouch=performance.now()/1000;try{stage.setPointerCapture(e.pointerId);}catch(err){}}
+function onMove(e){if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>6)drag.moved=true;rotY=drag.r+dx*.013;const now=performance.now();vel=(e.clientX-drag.lx)*.013/Math.max(1,(now-drag.lt)/16);drag.lx=e.clientX;drag.lt=now;}
+function onUp(){if(!drag)return;const d=drag;drag=null;lastTouch=performance.now()/1000;
+  if(!d.moved){vel=0;const k=ACTS[actI++%ACTS.length];play(k);if(typeof sfx==="function")sfx(k==="hit"?"hit":k==="attack"?"pop":"tap");if(typeof hap==="function")hap(8);}
+  else vel=Math.max(-.25,Math.min(.25,vel));}
+function mount(stageEl,id){
+  if(!cv){cv=document.createElement("canvas");cv.id="home3d";cv.setAttribute("aria-hidden","true");document.body.prepend(cv);
+    r=new T.WebGLRenderer({canvas:cv,antialias:true});r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=1.05;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;build();sc.environment=GFX.envFor(r);}
+  stage=stageEl;document.body.classList.add("h3d");
+  stage.addEventListener("pointerdown",onDown);stage.addEventListener("pointermove",onMove);stage.addEventListener("pointerup",onUp);stage.addEventListener("pointercancel",onUp);
+  set(id);if(!on){on=true;loop();}
+}
+function set(id){
+  if(!sc||id===heroId&&hero)return;heroId=id;const tok=++loadTok;
+  loadHero(id).then(g=>{if(tok!==loadTok||!g)return;if(hero)sc.remove(hero);hero=g;sc.add(hero);pop=.6;act=null;play("jump");});
+}
+function unmount(){on=false;cancelAnimationFrame(raf);document.body.classList.remove("h3d");
+  if(stage){stage.removeEventListener("pointerdown",onDown);stage.removeEventListener("pointermove",onMove);stage.removeEventListener("pointerup",onUp);stage.removeEventListener("pointercancel",onUp);}stage=null;}
+return {mount,unmount,set,preload:loadHero};
 })();
 
 /* ================= pantallas ================= */
@@ -2483,6 +2585,7 @@ function statsHTML(id){
     <div><span>${H.warn?"🔔":"⚡"} Aviso</span><b>${H.warn?"El rival lo ve venir":"Sin aviso: casi imposible de esquivar"}</b></div>
   </div><p class="special">${H.d}</p>`;
 }
+const ARENA_PROP={pradera:"arbol",bosque:"pino",volcan:"rocas",trono:"bandera_roja",olimpo:"bandera_azul"};
 const ARENA_BG={pradera:["#2a8cf0","#1450b8"],bosque:["#23a86e","#11613f"],volcan:["#e0562a","#7a1f2a"],trono:["#7a52f0","#3a1f9a"],olimpo:["#f0b02a","#b0681a"]};
 function setBg(){const {a}=arenaOf(S.tro),c=ARENA_BG[a.k]||ARENA_BG.pradera;const st=document.body.style;st.setProperty("--arena",a.bg);st.setProperty("--arena2",c[0]);st.setProperty("--arena3",c[1]);}
 /* ---- utilidades de progresión ---- */
@@ -2683,10 +2786,9 @@ function showHome(){
   const missDone=S.mis.list.filter(m=>m.v>=m.n).length,tier=passTier();
   const fwOn=S.fw!==today()&&S.games>=1;
   app.innerHTML=`${topbar()}
-  <div class="hrow2">${roadBar()}<button class="arenab pnl" data-a="tab" data-t="road"><span class="ab" style="background:linear-gradient(${(ARENA_BG[a.k]||ARENA_BG.pradera).join(",")})"></span><b class="out">${a.n.replace(" ","<br>")}</b></button></div>
+  <div class="hrow2">${roadBar()}<button class="arenab pnl" data-a="tab" data-t="road"><span class="ab" style="background:url(${(window.AMAGO_ASSETS||"")}props/${ARENA_PROP[a.k]||"arbol"}.webp) center 70%/86% no-repeat,radial-gradient(circle at 50% 30%,#fff6,transparent 60%),linear-gradient(${(ARENA_BG[a.k]||ARENA_BG.pradera).join(",")})"></span><b class="out">${a.n.replace(" ","<br>")}</b></button></div>
   <div class="hstage">
-    <span class="godrays"></span><span class="godrays b"></span><span class="spot"></span><span class="floorglow"></span>
-    ${SHOW?`<canvas class="bigmodel" id="showc" aria-label="${H.n}. Tócalo para verlo atacar"></canvas>`:`<span class="bigmodel bob">${heroArt(S.fav)}</span>`}
+    ${SHOW?`<span class="stagehint" aria-hidden="true"></span>`:`<span class="godrays"></span><span class="godrays b"></span><span class="spot"></span><span class="floorglow"></span><span class="bigmodel bob">${heroArt(S.fav)}</span>`}
     <div class="sidecol l">
       <button class="sbtn" data-a="missions">${mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt=""><span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>
       <button class="sbtn" data-a="tab" data-t="pass">${passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt=""><span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>
@@ -2705,7 +2807,7 @@ function showHome(){
   </div>
   ${nav("home")}`;
   renderModal();
-  if(SHOW)SHOW.mount($("#showc"),S.fav);
+  if(SHOW)SHOW.mount($(".hstage"),S.fav);
   if(!UI.modal)homeEvents();
 }
 /* al llegar al inicio: regreso, calendario y (como mucho) una oferta al día */
@@ -3705,7 +3807,7 @@ function bootGame(){
   else showHome();
   if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
 }
-if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadAnim3d([S.fav]),GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
+if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadAnim3d([S.fav]),SHOW?SHOW.preload(S.fav):0,GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
   Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
   /* si la conexión es lenta y los modelos llegan después, se cambian al momento */
   all.then(()=>setTimeout(()=>GFX.loadAnim3d(S.unl),1200));/* tus héroes, en segundo plano */
