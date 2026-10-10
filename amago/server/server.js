@@ -226,6 +226,7 @@ function makeHooks(room) {
 
 function startRound(room) {
   clearTimeout(room.pickTimer);
+  room.track = { p: [], b: [] };
   const bot = room.players.b && room.players.b.isBot ? room.players.b : null;
   const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params } : undefined);
   room.R = R;
@@ -249,6 +250,16 @@ function startRound(room) {
       const now = Date.now();
       E.tick(R, Math.min(0.1, (now - last) / 1000), room.hooks);
       last = now;
+      if (!R.paused) {
+        const tr = (room.track = room.track || { p: [], b: [] });
+        for (const s of ["p", "b"]) {
+          const h = R.heroes[s];
+          const a = tr[s];
+          const lt = a[a.length - 1];
+          if (!lt || lt[1] !== h.x || lt[2] !== h.y) a.push([Math.round(R.now * 100) / 100, h.x, h.y]);
+          while (a.length > 1 && R.now - a[1][0] > 7) a.shift(); // siempre queda la última casilla conocida
+        }
+      }
       if (room.R === R && !R.over && ++n % VIEW_EVERY === 0) {
         broadcast(room, (s) => ({ t: "view", v: E.viewFor(R, s) }));
       }
@@ -279,6 +290,7 @@ function endRound(room, w) {
       w: w === null ? null : w === s ? "you" : "opp",
       score: { you: room.score[s], opp: room.score[o] },
       reveal: { x: h.x, y: h.y, type: h.type },
+      track: room.track ? room.track[o] : [], // por dónde se movió el rival en los últimos segundos (para la repetición)
       hp: { you: R.heroes[s].hp, opp: h.hp },
     };
   });

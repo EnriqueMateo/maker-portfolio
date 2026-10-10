@@ -617,6 +617,9 @@ body,body[style]{background:
 .acts .act.amagob{background:linear-gradient(#b06bff,#7a3ae0)!important;border:2px solid var(--ink)!important;box-shadow:0 3px 0 var(--ink),inset 0 1px 0 #fff6!important;border-radius:12px!important;padding:4px 10px!important;min-height:40px}
 .acts .act.amagob.off{filter:grayscale(.85) brightness(.75)}
 .reconn{position:fixed;inset:0;z-index:95;display:grid;place-items:center;background:rgba(5,8,30,.6);padding:16px}
+.replay{position:fixed;inset:0;z-index:70;cursor:pointer;box-shadow:inset 0 0 120px 30px rgba(10,6,40,.55);pointer-events:auto}
+.replay .rtag{position:absolute;left:50%;top:calc(110px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-game);font-size:24px;color:#ffd23a;background:rgba(11,16,48,.75);border:3px solid var(--ink);border-radius:999px;padding:4px 16px;animation:pulse .8s infinite alternate}
+.replay .rskip{position:absolute;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:13px;color:#fff;opacity:.8}
 /* tutorial: mano que señala dónde tocar */
 .tuthand{position:fixed;z-index:60;font-size:46px;pointer-events:none;transform:translate(-20%,-10%);opacity:0;transition:opacity .3s;filter:drop-shadow(0 3px 2px #0008)}
 .tuthand.on{opacity:1;animation:tuttap 1s ease-in-out infinite}
@@ -3485,7 +3488,7 @@ async function startRound(){
   /* tu nivel en partida está limitado por la arena; el bot sube con los trofeos (nunca más de 1 por encima de ti) */
   const lp=effLv(tp),base=1+Math.floor(S.tro/110)+(S.diff==="dificil"?1:S.diff==="facil"?-1:0),lb=G.tutorial?1:Math.max(1,Math.min(LV_MAX,LV_CAP[arenaIdx()],base,lp+1));
   G.lv={p:lp,b:lb};
-  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv});
+  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv});recReset();
   await vsAndCountdown(tp,tb);
   R.paused=false;
   EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
@@ -3517,6 +3520,64 @@ async function vsAndCountdown(tp,tb){
   banner("¡YA!","","red",550);
 }
 function startLoop(){stopLoop();lastT=performance.now();loopId=requestAnimationFrame(loop);}
+/* ================= repetición del final de ronda (y clip para compartir) =================
+   Se guardan los últimos segundos de la ronda (casillas de los dos héroes y disparos). Al acabar la ronda
+   decisiva por K.O. se repiten a cámara lenta enseñando dónde estaba de verdad el rival, y se graba un vídeo vertical. */
+const REC={snaps:[],evs:[],clip:null};
+function recReset(){REC.snaps=[];REC.evs=[];}
+function recTick(){
+  if(!R||R.over||R.paused)return;const l=REC.snaps[REC.snaps.length-1];if(l&&R.now-l.t<.08)return;
+  const a=R.heroes.p,b=R.heroes.b;
+  REC.snaps.push({t:R.now,p:[a.x,a.y],b:b.x>=0?[b.x,b.y]:null,hp:[a.hp,b.hp]});
+  while(REC.snaps.length&&R.now-REC.snaps[0].t>7)REC.snaps.shift();
+}
+function recEv(k,p){if(!R)return;REC.evs.push({t:R.now,k,p:JSON.parse(JSON.stringify(p))});while(REC.evs.length&&R.now-REC.evs[0].t>7)REC.evs.shift();}
+/* online: el servidor manda por dónde se movió el rival */
+function recFoeTrack(track){if(!track||!track.length)return;for(const sn of REC.snaps){let q=null;for(const tr of track){if(tr[0]<=sn.t+.02)q=tr;else break;}if(q)sn.b=[q[1],q[2]];}}
+function clipMime(){if(!window.MediaRecorder)return null;for(const m of ["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm"])try{if(MediaRecorder.isTypeSupported(m))return m;}catch(e){}return null;}
+async function playReplay(winner){
+  const sn=REC.snaps.filter(x=>x.b);if(!B3||sn.length<6||!R)return;
+  const end=sn[sn.length-1].t,start=Math.max(sn[0].t,end-4.2),live=R,speed=.5;
+  const RR=JSON.parse(JSON.stringify(live));RR.over=true;RR.paused=false;RR.projs=[];RR.marks={p:[],b:[]};RR.boosts=[];RR.heroes.p.path=[];RR.heroes.p.visionUntil=1e9;
+  const evs=REC.evs.filter(e=>e.t>=start-.05);let ei=0,t=start;
+  stopLoop();G.skipReplay=false;
+  const ov=document.createElement("div");ov.className="replay";ov.dataset.a="skipreplay";
+  ov.innerHTML=`<span class="rtag out">⏪ REPETICIÓN</span><span class="rskip">Toca para saltar</span>`;document.body.appendChild(ov);
+  /* clip vertical: el lienzo 3D + título, a 30 fps */
+  let rec=null,cv2=null,g2=null,chunks=[];const mime=clipMime(),src=document.querySelector("#gl");
+  if(mime&&src&&src.captureStream!==undefined){try{cv2=document.createElement("canvas");cv2.width=540;cv2.height=960;g2=cv2.getContext("2d");
+    rec=new MediaRecorder(cv2.captureStream(30),{mimeType:mime,videoBitsPerSecond:2500000});rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);rec.start();}catch(e){rec=null;}}
+  const drawClip=()=>{if(!g2)return;const W=540,H=960,r=src.width/src.height,h=W/r;g2.fillStyle="#0b1030";g2.fillRect(0,0,W,H);
+    const sh=Math.min(H,h),sy=(H-sh)/2;g2.drawImage(src,0,0,src.width,src.height,(W-sh*r)/2,sy,sh*r,sh);
+    g2.font="bold 46px 'Lilita One',sans-serif";g2.textAlign="center";g2.lineWidth=8;g2.strokeStyle="#0b1030";g2.fillStyle="#ffd23a";
+    g2.strokeText("¿DÓNDE ESTABA?",W/2,96);g2.fillText("¿DÓNDE ESTABA?",W/2,96);
+    g2.font="bold 30px 'Lilita One',sans-serif";g2.fillStyle="#fff";g2.strokeText("AMAGO",W/2,H-48);g2.fillText("AMAGO",W/2,H-48);};
+  await new Promise(res=>{const t0=performance.now();let last=t0;
+    const step=now=>{
+      /* por reloj real: dura lo mismo vaya el móvil a 60 o a 20 fotogramas por segundo */
+      const dt=Math.min(.25,(now-last)/1000);last=now;t=start+(now-t0)/1000*speed;
+      if(G.skipReplay||t>end+.7)return res();
+      let s0=sn[0];for(const x of sn){if(x.t<=t)s0=x;else break;}
+      const sp=REC.snaps.filter(x=>x.t<=t).pop()||s0;
+      RR.now=t;RR.heroes.p.x=sp.p[0];RR.heroes.p.y=sp.p[1];RR.heroes.b.x=s0.b[0];RR.heroes.b.y=s0.b[1];RR.heroes.p.hp=sp.hp[0];RR.heroes.b.hp=sp.hp[1];
+      while(ei<evs.length&&evs[ei].t<=t){const e=evs[ei++];if(e.k==="fired")B3.fireFx(e.p.o,e.p);else B3.impactFx(e.p);}
+      R=RR;B3.update(RR,dt*speed);drawClip();requestAnimationFrame(step);};
+    requestAnimationFrame(step);});
+  R=live;ov.remove();
+  if(rec){await new Promise(r=>{rec.onstop=r;try{rec.stop();}catch(e){r();}});if(chunks.length)REC.clip={blob:new Blob(chunks,{type:mime.split(";")[0]}),ext:mime.includes("mp4")?"mp4":"webm"};}
+}
+/* compartir el clip: hoja nativa del móvil (Web Share o el plugin de la app); si no, descarga */
+async function shareClip(){
+  const c=REC.clip;if(!c)return;const name="amago-repeticion."+c.ext;
+  try{
+    const Cap=window.Capacitor&&window.Capacitor.Plugins;
+    if(Cap&&Cap.Filesystem&&Cap.Share){const b64=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(String(fr.result).split(",")[1]);fr.readAsDataURL(c.blob);});
+      const w=await Cap.Filesystem.writeFile({path:name,data:b64,directory:"CACHE"});await Cap.Share.share({title:"AMAGO",text:"¿Dónde estaba? 👀 #AMAGO",files:[w.uri]});EV.add("clip_share",{via:"app"});return;}
+    const f=new File([c.blob],name,{type:c.blob.type});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:"AMAGO",text:"¿Dónde estaba? 👀 #AMAGO"});EV.add("clip_share",{via:"web"});return;}
+  }catch(e){if(e&&e.name==="AbortError")return;}
+  const a=document.createElement("a");a.href=URL.createObjectURL(c.blob);a.download=name;document.body.appendChild(a);a.click();a.remove();EV.add("clip_share",{via:"download"});
+}
 function stopLoop(){if(loopId)cancelAnimationFrame(loopId);loopId=null;}
 function loop(t){
   if(!R||UI.screen!=="game")return;
@@ -3525,6 +3586,7 @@ function loop(t){
     if(G.online){if(!R.paused)R.now+=dt;}
     else if(!document.hidden&&!UI.modal)AMAGO.tick(R,dt,ui);
   }
+  recTick();
   if(R&&B3)B3.update(R,dt);
   renderAcc+=dt;if(renderAcc>=.08){renderAcc=0;renderLive();}
   if(R&&UI.screen==="game")loopId=requestAnimationFrame(loop);
@@ -3544,6 +3606,8 @@ async function roundBanner(w){
 async function endRound(w){
   renderLive();EV.add("round_end",{win:w==="p",draw:!w,dur:Math.round(R.now*10)/10,hero:R.heroes.p.type,opp:R.heroes.b.type,n:G.round,mode:"bot",tut:!!G.tutorial});
   const b=R.heroes.b;await revealFoe(b.x,b.y,b.type,w);
+  const ko=R.heroes.p.hp<=0||R.heroes.b.hp<=0,decisive=w&&(G.score[w]+1>=2||G.round>=5);
+  if(ko&&decisive&&!G.tutorial){REC.clip=null;await playReplay(w);}
   if(w)G.score[w]++;
   G.used.p.push(R.heroes.p.type);G.used.b.push(R.heroes.b.type);
   if(w==="p")S.hw[R.heroes.p.type]=(S.hw[R.heroes.p.type]||0)+1;
@@ -3619,6 +3683,7 @@ async function endMatch(){
       ${gotChest?`<button class="endchest feat gold shine" data-a="openbox"><img src="${UIA}chest1.webp" alt=""><span><b class="out">¡3 llaves: cofre!</b><small>Toca para abrirlo</small></span></button>`:""}
       ${misReady()?`<button class="pillbtn" data-a="missions" style="align-self:center">✅ ¡Misión completada! Cóbrala</button>`:claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">${ico("trophy","s")} ¡Premios en el camino de trofeos!</button>`:""}
     </div>
+    ${REC.clip?`<button class="pillbtn" data-a="shareclip" style="align-self:center">📤 Compartir la repetición</button>`:""}
     <div class="endbtns"><button class="gbtn blue" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt="" style="width:34px;height:34px"></button><button class="gbtn xl shine" data-a="play">${win||draw?"JUGAR OTRA":"¡REVANCHA!"}</button></div>`);
   /* revelado en secuencia; un toque en cualquier parte lo acelera */
   UI.fast=false;const skip=()=>{UI.fast=true;};document.addEventListener("pointerdown",skip,{once:true});
@@ -3724,7 +3789,7 @@ function netMsg(m){
   }
 }
 async function onlineRoundStart(m){
-  R=m.view;R.paused=true;EV.add("round_start",{n:m.round,hero:m.you,opp:m.opp,mode:G.ranked?"online":"amigos"});
+  R=m.view;R.paused=true;recReset();EV.add("round_start",{n:m.round,hero:m.you,opp:m.opp,mode:G.ranked?"online":"amigos"});
   await vsAndCountdown(m.you,m.opp);
   toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
 }
@@ -3744,7 +3809,9 @@ async function onlineRoundEnd(m){
   if(!R)return;EV.add("round_end",{win:m.w==="you",draw:!m.w,dur:Math.round(R.now*10)/10,hero:R.heroes.p.type,opp:m.reveal.type,n:G.round,mode:G.ranked?"online":"amigos"});
   R.over=true;
   R.heroes.p.hp=m.hp.you;R.heroes.b.hp=m.hp.opp;renderLive();
+  recFoeTrack(m.track);
   await revealFoe(m.reveal.x,m.reveal.y,m.reveal.type,m.w==="you"?"p":m.w==="opp"?"b":null);
+  if((m.hp.you<=0||m.hp.opp<=0)&&(m.score.you>=2||m.score.opp>=2||G.round>=5)){REC.clip=null;await playReplay(m.w==="you"?"p":"b");}
   G.score={p:m.score.you,b:m.score.opp};
   G.used.p.push(R.heroes.p.type);
   await roundBanner(m.w==="you"?"p":m.w==="opp"?"b":null);
@@ -3823,6 +3890,7 @@ function toast(k,txt){
 }
 const ui={
   fired(p){
+    recEv("fired",p);
     if(UI.screen!=="game")return;
     sfx("shoot");B3.fireFx(p.o,p);
     if(p.o==="p"){
@@ -3835,6 +3903,7 @@ const ui={
     }
   },
   impact(p){
+    recEv("impact",p);
     if(UI.screen!=="game")return;
     B3.impactFx(p);
     const mine=p.o==="p",to=B3.areaScreen(p.d,p.cells);
@@ -3927,6 +3996,8 @@ document.addEventListener("click",e=>{
     case "namesave":{const v=($("#nameinp").value||"").replace(/[<>&"]/g,"").trim().slice(0,14);if(v){S.name=v;if(!S.gemOnce.name){S.gemOnce.name=1;addGems(10,false);}save();}UI.modal=null;renderModal();refreshScreen();break;}
     case "mode":sfx("tap");UI.modal={k:"mode"};renderModal();break;
     case "setdiff":S.diff=el.dataset.d;S.mode="bot";save();sfx("sel");renderModal();showHome();break;
+    case "skipreplay":G.skipReplay=true;break;
+    case "shareclip":sfx("tap");shareClip();break;
     case "amago":if(R&&UI.screen==="game"){G.decoyArm=!G.decoyArm;el.classList.toggle("on",G.decoyArm);sfx("sel");if(G.decoyArm)toast("amagohow","🎭 <b>Amago armado:</b> toca una casilla de <b>tu isla</b> para dejar una huella falsa allí.");}break;
     case "setmode":S.mode=el.dataset.m;save();sfx("sel");UI.modal=null;renderModal();showHome();break;
     case "hero":sfx("tap");UI.modal={k:"heropage",id:el.dataset.id};renderModal();break;
