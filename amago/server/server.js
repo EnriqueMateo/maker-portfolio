@@ -347,6 +347,7 @@ function handle(ws, m) {
       break;
     }
     case "move":
+    case "amago":
     case "fire": {
       if (!room || room.state !== "play" || !room.R) return;
       const s = sideOf(room, ws);
@@ -354,6 +355,7 @@ function handle(ws, m) {
       const y = Number(m.y);
       if (!Number.isInteger(x) || !Number.isInteger(y)) return;
       if (m.t === "move") E.moveTo(room.R, s, x, y);
+      else if (m.t === "amago") E.amago(room.R, s, x, y, room.hooks);
       else E.fire(room.R, s, x, y, room.hooks);
       break;
     }
