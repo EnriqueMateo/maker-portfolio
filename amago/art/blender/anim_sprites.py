@@ -31,7 +31,7 @@ base = Vector((-(mn.x + mx.x) / 2 * k, -(mn.y + mx.y) / 2 * k, -mn.z * k)); root
 RES = int(os.environ.get('RES', 256)); studio(res=(RES, RES), samples=int(os.environ.get('SAMPLES', 20)))
 v = bpy.context.scene.view_settings; v.view_transform = 'Standard'; v.look = 'None'; v.exposure = float(os.environ.get('EXPO', 0))
 # cámara del juego: ~42° de elevación; de frente en 3/4, o de espaldas
-r = 9.0; el = math.radians(42); az = math.radians(-28 if VIEW == 'f' else 180 - 28)
+r = 9.0; el = math.radians(float(os.environ.get('ELEV', 42))); az = math.radians(-28 if VIEW == 'f' else 180 - 28)
 tgt = Vector((0, 0, 1.05))
 camera((tgt.x + r * math.cos(el) * math.sin(az), tgt.y - r * math.cos(el) * math.cos(az), tgt.z + r * math.sin(el)), tuple(tgt), lens=float(os.environ.get('LENS', 118)))
 P = arm.pose.bones
