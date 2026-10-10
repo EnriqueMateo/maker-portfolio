@@ -1929,18 +1929,24 @@ const ANIM3D={
   rayo:{"fw":206,"fh":251,"ih":0.502,"foot":0.367,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}},
   bum:{"fw":186,"fh":248,"ih":0.528,"foot":0.331,"n":{"attack":10,"hit":6,"idle":8,"ko":8,"walk":10,"win":10}}
 },A3={};
-function loadAnim3d(){
-  const L=new T.TextureLoader(),jobs=[];
-  for(const [id,m] of Object.entries(ANIM3D))for(const vw of ["f","b"])for(const an of Object.keys(m.n))
-    jobs.push(new Promise(res=>L.load(BASE+"anim/"+id+"_"+vw+"_"+an+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;t.repeat.x=1/m.n[an];((A3[id]=A3[id]||{})[vw]=A3[id][vw]||{})[an]=t;res();},undefined,()=>res())));
-  return Promise.all(jobs);
+/* animaciones bajo demanda: cada héroe pesa ~2 MB, se cargan los que van a salir (y el resto en segundo plano) */
+const A3P={};
+function loadAnim3d(ids=Object.keys(ANIM3D)){
+  const L=new T.TextureLoader();
+  return Promise.all(ids.filter(id=>ANIM3D[id]).map(id=>A3P[id]||(A3P[id]=(()=>{const m=ANIM3D[id],jobs=[];
+    for(const vw of ["f","b"])for(const an of Object.keys(m.n))
+      jobs.push(new Promise(res=>L.load(BASE+"anim/"+id+"_"+vw+"_"+an+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.anisotropy=8;t.repeat.x=1/m.n[an];((A3[id]=A3[id]||{})[vw]=A3[id][vw]||{})[an]=t;res();},undefined,()=>res())));
+    return Promise.all(jobs);})())));
 }
+/* espera a que estén las animaciones de estos héroes, como mucho ms (si no, salen con su imagen fija) */
+const ensureAnim=(ids,ms=4000)=>Promise.race([loadAnim3d(ids),new Promise(r=>setTimeout(r,ms))]);
+const HERO_K=1.35;/* tamaño de los héroes en la arena: que se lean bien en el móvil */
 function anim3dHero(id){
-  const m=ANIM3D[id],ref=new T.Box3().setFromObject(BUILD[id](HEROES[id])),h0=(ref.max.y-ref.min.y)*1.12*(SPRITE_H[id]||1)*(m.k||1);
+  const m=ANIM3D[id],ref=new T.Box3().setFromObject(BUILD[id](HEROES[id])),h0=(ref.max.y-ref.min.y)*1.12*(SPRITE_H[id]||1)*(m.k||1)*HERO_K;
   const H=h0/m.ih,W=H*m.fw/m.fh,geo=new T.PlaneGeometry(W,H);geo.translate(0,H/2-H*m.foot,0);
   /* cada héroe usa su propia copia de las texturas (el desplazamiento del fotograma es por instancia) */
   const tex={};for(const vw of ["f","b"]){tex[vw]={};for(const an in A3[id][vw]){const t=A3[id][vw][an].clone();t.needsUpdate=true;tex[vw][an]=t;}}
-  const mat=new T.MeshBasicMaterial({map:tex.f.idle,transparent:true,alphaTest:.3,side:T.DoubleSide,toneMapped:false});
+  const mat=new T.MeshBasicMaterial({map:tex.f.idle,transparent:true,alphaTest:.04,depthWrite:false,side:T.DoubleSide,toneMapped:false});
   const card=new T.Mesh(geo,mat);card.renderOrder=3;
   const root=new T.Group(),body=new T.Group(),pivot=new T.Group();body.name="body";root.add(body);body.add(pivot);pivot.add(card);
   const u={body,head:new T.Object3D(),arms:[new T.Object3D(),new T.Object3D()],legs:[new T.Object3D(),new T.Object3D()],eyes:null,t0:Math.random()*10,sprite:true,a3:true,card,mat,pivot,flip:1,view:"f",tex,m,id,h:H};
@@ -1972,7 +1978,7 @@ function animate3d(u,tt,st,act,at_){
   u.mat.color.setRGB(1,1-tint*.55,1-tint*.55);
   if(act==="hit"&&at_<.08)u.mat.color.setRGB(3,3,3);
 }
-function makeHero(id){const g=A3[id]&&A3[id].f&&A3[id].f.idle?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):BUILD[id](HEROES[id]);g.userData.id=id;return g;}
+function makeHero(id){const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):BUILD[id](HEROES[id]);g.userData.id=id;return g;}
 
 /* ---- animación procedural ---- */
 function setFlash(g,on){
@@ -2068,7 +2074,7 @@ function bakePortraits(size=320){
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -2195,7 +2201,7 @@ function build(canvasEl,R,k){
   act={p:null,b:null};revealUntil=0;revealPos=null;projs=[];fxs=[];/* nada de la ronda anterior (KO, rival a la vista) pasa a la siguiente */
   theme=THEMES[k]||THEMES.pradera;
   /* un único renderer para todas las rondas: su canvas sustituye al del HTML (sin recompilar shaders cada ronda) */
-  if(!keepR){keepR=new T.WebGLRenderer({antialias:true,alpha:false});keepR.setPixelRatio(Math.min(2,devicePixelRatio||1));keepR.shadowMap.enabled=true;keepR.shadowMap.type=T.PCFSoftShadowMap;GFX.setupRenderer(keepR);}
+  if(!keepR){keepR=new T.WebGLRenderer({antialias:true,alpha:false});keepR.setPixelRatio(prNow);keepR.shadowMap.enabled=true;keepR.shadowMap.type=T.PCFSoftShadowMap;GFX.setupRenderer(keepR);}
   rnd3=keepR;const kc=rnd3.domElement;kc.id=canvasEl.id;kc.className=canvasEl.className;kc.setAttribute("aria-label",canvasEl.getAttribute("aria-label")||"");canvasEl.replaceWith(kc);canvas=kc;
   scene=new T.Scene();scene.background=skyTex(theme.sky);
   GFX.lights(scene,true,rnd3);
@@ -2260,7 +2266,15 @@ function resize(){
   const w=canvas.clientWidth||innerWidth,h=canvas.clientHeight||innerHeight;
   rnd3.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();fitCamera(cam.aspect);
 }
-let keepR=null;
+let keepR=null,prNow=Math.min(3,devicePixelRatio||1),prT=0,prN=0,prAt=0;
+/* calidad adaptativa: mide los fotogramas y baja la resolución de dibujo si va lento (nunca por debajo de 1,5×) */
+function prWatch(){
+  const now=performance.now();if(!prAt){prAt=now;return;}
+  const dt=now-prAt;prAt=now;if(dt>250)return;/* pestaña en segundo plano */
+  prT+=dt;prN++;
+  if(prN>=90){const avg=prT/prN;prT=0;prN=0;
+    if(avg>26&&prNow>1.5){prNow=Math.max(1.5,prNow-.5);rnd3.setPixelRatio(prNow);resize();}}
+}
 const HSCALE=1.02;/* tamaño de los héroes en la arena: caben en su casilla sin tapar las de alrededor */
 function dispose(){
   if(canvas){canvas.removeEventListener("pointerdown",onDown);canvas.removeEventListener("pointermove",onMove);}
@@ -2422,7 +2436,7 @@ function update(R,dt){
   /* temblor de cámara */
   const sk=Math.max(0,shakeA*(1-(t-shakeT)/.35));
   if(camBase){cam.position.copy(camBase);if(sk>0)cam.position.add(V((Math.random()-.5)*sk,(Math.random()-.5)*sk,0));}
-  rnd3.render(scene,cam);
+  prWatch();rnd3.render(scene,cam);
 }
 return {build,update,dispose,resize,fireFx,impactFx,screenPos,areaScreen,shake,finalReveal,burst,tileWorld,onTile:null,heroScreen(){if(!hero||!cam)return {x:innerWidth/2,y:innerHeight/2};const p=hero.position.clone();p.y=.8;p.project(cam);const r=canvas.getBoundingClientRect();return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height};}};
 })();
@@ -2433,7 +2447,7 @@ if(!GFX)return null;
 const T=GFX.T;let r=null,sc,cam,model,id=null,raf=0,rotY=.32,drag=null,winT=-1,winK="win";/* al tocarlo: ataca o celebra, por turnos */
 function mount(canvas,heroId){
   unmount();
-  r=new T.WebGLRenderer({canvas,antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));GFX.setupRenderer(r);r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
+  r=new T.WebGLRenderer({canvas,antialias:true,alpha:true});r.setPixelRatio(Math.min(3,devicePixelRatio||1));GFX.setupRenderer(r);r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
   sc=new T.Scene();GFX.lights(sc,true,r);
   const plat=GFX.part(new T.CylinderGeometry(.5,.56,.16,64),GFX.mat(0x2a3fc8,{r:.25,cc:1}));plat.position.y=-.1;plat.traverse(o=>{if(o.isMesh)o.receiveShadow=true;});sc.add(plat);
   const rim=new T.Mesh(new T.TorusGeometry(.5,.035,16,96),GFX.mat(0xffc21a,{r:.25,m:.5}));rim.rotation.x=Math.PI/2;rim.position.y=-.02;sc.add(rim);
@@ -3255,7 +3269,7 @@ async function startRound(){
 }
 async function vsAndCountdown(tp,tb){
   UI.modal={k:"vs",p:tp,b:tb};renderModal();sfx("banner");
-  await sleep(G.round>1?700:1000);
+  await Promise.all([sleep(G.round>1?700:1000),GFX?GFX.ensureAnim([tp,tb]):0]);
   UI.modal=null;renderModal();
   buildArena();renderLive();startLoop();
   if(G.round===1)for(const n of ["3","2","1"]){sfx("tick");await banner(n,"","gold",420);}
@@ -3691,9 +3705,10 @@ function bootGame(){
   else showHome();
   if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
 }
-if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadAnim3d(),GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
+if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadAnim3d([S.fav]),GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
   Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
   /* si la conexión es lenta y los modelos llegan después, se cambian al momento */
+  all.then(()=>setTimeout(()=>GFX.loadAnim3d(S.unl),1200));/* tus héroes, en segundo plano */
   all.then(()=>{if(late&&booted){try{GFX.bakePortraits();}catch(e){}if(UI.screen!=="game"&&UI.screen!=="pick")refreshScreen();}});}}
 else bootGame();
 

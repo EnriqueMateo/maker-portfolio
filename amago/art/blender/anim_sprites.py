@@ -23,7 +23,7 @@ for o in bpy.data.objects:
     if o.parent is None and o != root: o.parent = root
 k = 2.0 / (mx.z - mn.z); root.scale = (k, k, k)
 base = Vector((-(mn.x + mx.x) / 2 * k, -(mn.y + mx.y) / 2 * k, -mn.z * k)); root.location = base
-studio(res=(256, 256), samples=20)
+RES = int(os.environ.get('RES', 256)); studio(res=(RES, RES), samples=int(os.environ.get('SAMPLES', 20)))
 v = bpy.context.scene.view_settings; v.view_transform = 'Standard'; v.look = 'None'; v.exposure = 0
 # cámara del juego: ~42° de elevación; de frente en 3/4, o de espaldas
 r = 9.0; el = math.radians(42); az = math.radians(-28 if VIEW == 'f' else 180 - 28)
