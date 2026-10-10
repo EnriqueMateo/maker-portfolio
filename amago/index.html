@@ -616,6 +616,7 @@ body,body[style]{background:
 .gbottom .acts .act{font-size:13px!important;white-space:nowrap}
 .acts .act.amagob{background:linear-gradient(#b06bff,#7a3ae0)!important;border:2px solid var(--ink)!important;box-shadow:0 3px 0 var(--ink),inset 0 1px 0 #fff6!important;border-radius:12px!important;padding:4px 10px!important;min-height:40px}
 .acts .act.amagob.off{filter:grayscale(.85) brightness(.75)}
+.reconn{position:fixed;inset:0;z-index:95;display:grid;place-items:center;background:rgba(5,8,30,.6);padding:16px}
 /* tutorial: mano que señala dónde tocar */
 .tuthand{position:fixed;z-index:60;font-size:46px;pointer-events:none;transform:translate(-20%,-10%);opacity:0;transition:opacity .3s;filter:drop-shadow(0 3px 2px #0008)}
 .tuthand.on{opacity:1;animation:tuttap 1s ease-in-out infinite}
@@ -1374,7 +1375,10 @@ function actx(){if(!S.snd)return null;try{if(!AU.ctx){AU.ctx=new (window.AudioCo
   /* bus maestro con compresor: varias capas a la vez no saturan */
   const comp=AU.ctx.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=6;comp.attack.value=.003;comp.release.value=.15;
   AU.bus=AU.ctx.createGain();AU.bus.gain.value=.9;AU.bus.connect(comp).connect(AU.ctx.destination);}
-  if(AU.ctx.state==="suspended")AU.ctx.resume();return AU.ctx;}catch(e){return null;}}
+  if(AU.ctx.state==="suspended"||AU.ctx.state==="interrupted")AU.ctx.resume();return AU.ctx;}catch(e){return null;}}
+document.addEventListener("visibilitychange",()=>{try{if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else AU.ctx.resume();}catch(e){}
+  /* al volver de segundo plano: si la conexión online se cortó, intentar volver a la partida */
+  if(!document.hidden&&G&&G.online&&G.token&&(!NET.ws||NET.ws.readyState!==1)&&UI.screen!=="home"&&UI.screen!=="end")netResume();});
 function tone(f,d,type="sine",vol=.12,to=null,delay=0){
   const c=actx();if(!c)return;const t=c.currentTime+delay;
   const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
@@ -3653,7 +3657,19 @@ function netOpen(){
 }
 function netSend(o){if(NET.ws&&NET.ws.readyState===1)NET.ws.send(JSON.stringify(o));}
 function netClose(){NET.closing=true;if(NET.ws){netSend({t:"leave"});NET.ws.close();}NET.ws=null;}
+/* si se corta la conexión en mitad de una partida online, se intenta volver durante ~14 s */
+function reconnectUI(on){let el=$("#reconn");if(on&&!el){el=document.createElement("div");el.id="reconn";el.className="reconn";el.innerHTML=`<div class="sheet"><h2 class="out">Reconectando…</h2><p>Se ha cortado la conexión. Volviendo a tu partida.</p></div>`;document.body.appendChild(el);}if(!on&&el)el.remove();}
+async function netResume(){
+  if(NET.resuming)return;NET.resuming=true;reconnectUI(true);const t0=Date.now();
+  while(Date.now()-t0<14000){
+    try{await netOpen();netSend({t:"resume",code:G.code,token:G.token});NET.resuming=false;return;}catch(e){}
+    await sleep(1500);
+  }
+  NET.resuming=false;reconnectUI(false);netGiveUp();
+}
+function netGiveUp(){stopLoop();R=null;UI.modal={k:"info",title:"Conexión perdida",text:"No se pudo volver a la partida. Si estaba a medias, cuenta como derrota."};renderModal();}
 function netLost(){
+  if(G&&G.online&&G.token&&UI.screen!=="home"&&UI.screen!=="end"){netResume();return;}
   if(G&&G.online&&UI.screen!=="home"){stopLoop();R=null;UI.modal={k:"info",title:"Conexión perdida",text:"Se ha cortado la conexión con el servidor."};renderModal();}
   else if(UI.modal&&UI.modal.k==="friends"){UI.modal={k:"friends",st:"menu",err:"No se pudo conectar con el servidor."};renderModal();}
 }
@@ -3679,9 +3695,18 @@ function netMsg(m){
     case "room":UI.modal={k:"friends",st:"wait",code:m.code};renderModal();break;
     case "error":UI.modal={k:"friends",st:"menu",err:m.msg};renderModal();break;
     case "queued":break;
+    case "resumed":
+      reconnectUI(false);if(!G)break;
+      G.score={p:m.score.you,b:m.score.opp};G.round=m.round;G.used.p=m.used.slice();
+      if(m.state==="pick"){G.picked=m.picked;R=null;showPick();}
+      else if(m.view&&R&&UI.screen==="game"){R=m.view;}
+      toast("back","🔌 <b>¡De vuelta!</b> La partida estaba en pausa mientras volvías.");break;
+    case "resumeFail":reconnectUI(false);netGiveUp();break;
+    case "oppAway":if(G)G.oppAway=true;if(R)R.paused=true;renderStatus();break;
+    case "oppBack":if(G)G.oppAway=false;toast("oppback","🔌 Tu rival ha vuelto. ¡Seguid!");break;
     case "matched":
       clearInterval(qTimer);
-      actx();G={online:true,ranked:!!m.ranked,diff:m.ranked?"normal":null,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false};
+      actx();G={online:true,code:m.code,token:m.token,ranked:!!m.ranked,diff:m.ranked?"normal":null,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false};
       UI.modal={k:"search",found:true};renderModal();sfx("banner");break;
     case "pickPhase":
       G.round=m.round;G.score={p:m.score.you,b:m.score.opp};G.used.p=m.used.slice();G.picked=false;G.oppReady=false;R=null;
@@ -3775,7 +3800,8 @@ function renderStatus(){
   if(R.over){el.innerHTML="";return;}
   const me=R.heroes.p,now=R.now;let t,c="";
   const danger=R.projs.some(p=>p.o==="b"&&p.warn&&inArea(p.cells,me.x,me.y));
-  if(R.paused)t="⏳ ¡Prepárate!";
+  if(R.paused&&G&&G.oppAway){t="⏳ Tu rival se ha desconectado. Esperándolo…";c="warn";}
+  else if(R.paused)t="⏳ ¡Prepárate!";
   else if(now<AMAGO.HIDE_T){t=`🫣 ¡Escóndete! Disparos en ${Math.ceil(AMAGO.HIDE_T-now)}`;c="hint";}
   else if(danger){t="⚠️ ¡Te van a dar! Toca otra casilla verde";c="warn";}
   else if(R.marks.b.some(m=>m.t==="hit"||m.t==="ping")||me.visionUntil>now){t="👀 ¡Rival a la vista! Dispara";c="good";}

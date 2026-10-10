@@ -24,7 +24,9 @@ const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 const MM_BASE = 80; // ±trofeos al entrar en la cola
 const MM_GROW = 40; // +trofeos por segundo de espera
 const MM_EVERY_MS = 1000;
-const BOT_AFTER_MS = 10000; // sin rival humano en este tiempo: rival bot de tu nivel
+const BOT_AFTER_MS = 10000;
+const GRACE_MS = 15000;
+const PICK_MS = 20000; // quien no elige héroe en 20 s juega con uno al azar (nadie puede bloquear la partida) // si se corta la conexión (llamada, app en segundo plano), 15 s para volver a la partida // sin rival humano en este tiempo: rival bot de tu nivel
 // límites contra abuso
 const MAX_MSG_BYTES = 2048;
 const MSG_PER_SEC = 30; // por conexión; muy por encima de lo que manda un jugador
@@ -137,6 +139,16 @@ function startPick(room) {
     score: { you: room.score[s], opp: room.score[other(s)] },
     used: room.used[s],
   }));
+  clearTimeout(room.pickTimer);
+  room.pickTimer = setTimeout(() => {
+    if (rooms.get(room.code) !== room || room.state !== "pick") return;
+    for (const s of ["p", "b"])
+      if (!room.picks[s] && room.players[s]) {
+        const av = available(room, s);
+        room.picks[s] = av[Math.floor(Math.random() * av.length)];
+      }
+    if (room.picks.p && room.picks.b) startRound(room);
+  }, PICK_MS);
   const bot = room.players.b;
   if (bot && bot.isBot) {
     const R0 = room.R;
@@ -213,6 +225,7 @@ function makeHooks(room) {
 }
 
 function startRound(room) {
+  clearTimeout(room.pickTimer);
   const bot = room.players.b && room.players.b.isBot ? room.players.b : null;
   const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params } : undefined);
   room.R = R;
@@ -227,7 +240,7 @@ function startRound(room) {
   }));
   room.timer = setTimeout(() => {
     if (room.R !== R) return;
-    R.paused = false;
+    R.paused = !!(room.away && Object.keys(room.away).length); // si alguien se ha desconectado, sigue en pausa
     room.state = "play";
     broadcast(room, () => ({ t: "go" }));
     let last = Date.now();
@@ -244,6 +257,7 @@ function startRound(room) {
 }
 
 function stopRound(room) {
+  clearTimeout(room.pickTimer);
   clearInterval(room.loop);
   clearTimeout(room.timer);
   room.loop = null;
@@ -326,10 +340,11 @@ function makeRoom(a, b, ranked) {
 }
 
 function matchRoom(r) {
+  r.tokens = { p: require("crypto").randomBytes(12).toString("base64url"), b: require("crypto").randomBytes(12).toString("base64url") };
   // en el modo Online el rival ve un apodo automático (nada escrito por otros jugadores); con amigos, el nombre filtrado
   broadcast(r, (s) => {
     const o = r.players[other(s)];
-    return { t: "matched", code: r.code, ranked: !!r.ranked, opp: { name: r.ranked ? o.alias : o.player.name, tro: o.player.tro } };
+    return { t: "matched", code: r.code, token: r.tokens[s], ranked: !!r.ranked, opp: { name: r.ranked ? o.alias : o.player.name, tro: o.player.tro } };
   });
   setTimeout(() => rooms.get(r.code) === r && startPick(r), 1500);
 }
@@ -375,6 +390,25 @@ setInterval(() => {
   matchmake();
   botFill();
 }, MM_EVERY_MS);
+
+/* conexión cortada en mitad de una partida: se pausa y se espera GRACE_MS antes de darla por abandonada */
+function onClose(ws) {
+  unqueue(ws);
+  const room = ws.room && rooms.get(ws.room);
+  const s = room && sideOf(room, ws);
+  if (room && s && ["pick", "count", "play", "roundEnd"].includes(room.state)) {
+    room.away = room.away || {};
+    if (room.R && !room.R.over) room.R.paused = true;
+    send(room.players[other(s)], { t: "oppAway", sec: GRACE_MS / 1000 });
+    room.away[s] = setTimeout(() => {
+      if (room.players[s] !== ws) return; // ya volvió con otra conexión
+      delete room.away[s];
+      leave(ws);
+    }, GRACE_MS);
+    return;
+  }
+  leave(ws);
+}
 
 function leave(ws, notify = true) {
   unqueue(ws);
@@ -472,6 +506,35 @@ function handle(ws, m) {
       } else send(room.players[other(s)], { t: "rematchAsk" });
       break;
     }
+    case "resume": {
+      const r = rooms.get(String(m.code || ""));
+      const s = r && r.tokens && ["p", "b"].find((k) => r.tokens[k] && r.tokens[k] === m.token);
+      if (!r || !s || !r.away || !r.away[s]) return send(ws, { t: "resumeFail" });
+      clearTimeout(r.away[s]);
+      delete r.away[s];
+      const old = r.players[s];
+      ws.player = old.player;
+      ws.uid = old.uid;
+      ws.alias = old.alias;
+      old.room = null;
+      leave(ws, false); // por si estaba en otra cola o sala
+      r.players[s] = ws;
+      ws.room = r.code;
+      if (r.R && !r.R.over && r.state === "play" && !Object.keys(r.away).length) r.R.paused = false;
+      send(r.players[other(s)], { t: "oppBack" });
+      send(ws, {
+        t: "resumed",
+        state: r.state,
+        round: r.round,
+        score: { you: r.score[s], opp: r.score[other(s)] },
+        used: r.used[s],
+        picked: !!(r.picks && r.picks[s]),
+        you: r.picks && r.picks[s],
+        opp: r.picks && r.picks[other(s)],
+        view: r.R && !r.R.over ? E.viewFor(r.R, s) : null,
+      });
+      break;
+    }
     case "leave":
       leave(ws);
       break;
@@ -519,7 +582,7 @@ wss.on("connection", (ws, req) => {
       console.error("Mensaje que rompe el servidor:", m.t, e.message);
     }
   });
-  ws.on("close", () => leave(ws));
+  ws.on("close", () => onClose(ws));
 });
 
 setInterval(() => {
