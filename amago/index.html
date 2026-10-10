@@ -2686,7 +2686,7 @@ function showHome(){
     <button class="hplate pnl" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>${ico("trophy")} ${S.hw[S.fav]||0}${mastery(S.fav).t>=0?" · "+MASTERY[mastery(S.fav).t].t:""}</small></span><span class="chev">›</span></button>
   </div>
   <div class="playrow2">
-    <button class="modebtn2 pnl" data-a="mode"><small>MODO</small><b class="out">${S.mode==="bot"?ico("swords")+" Bot "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase():ico("crown")+" Amigos"}</b><em>Cambiar</em></button>
+    <button class="modebtn2 pnl" data-a="mode"><small>MODO</small><b class="out">${S.mode==="bot"?ico("swords")+" Bot "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase():S.mode==="online"?ico("trophy")+" Online":ico("crown")+" Amigos"}</b><em>Cambiar</em></button>
     <button class="gbtn xl play2 shine" data-a="play">JUGAR</button>
   </div>
   ${nav("home")}`;
@@ -3093,6 +3093,7 @@ function renderModal(){
     m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Elige modo</h2>
       <button class="modecard ${S.mode==="bot"?"on":""}" data-a="setmode" data-m="bot"><span class="mi">${ico("swords","m")}</span><span><b>Contra bot</b><small>Trofeos, monedas, llaves y fichas del pase</small></span></button>
       <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${(S.diff||"facil")===k?"on":""}" data-a="setdiff" data-d="${k}"><span>${d.i}</span><b>${d.n}</b><small>${d.d} · ${WIN_COINS[k]}${ico("coin","s")}</small></button>`).join("")}</div>
+      <button class="modecard ${S.mode==="online"?"on":""}" data-a="setmode" data-m="online"><span class="mi">${ico("trophy","m")}</span><span><b>Online</b><small>${ONLINE_OK?"Rival real con tus trofeos · mismas recompensas que Normal":"Disponible al abrir el juego desde su servidor"}</small></span></button>
       <button class="modecard ${S.mode==="friends"?"on":""}" data-a="setmode" data-m="friends"><span class="mi">${ico("crown","m")}</span><span><b>Con amigos</b><small>Sala privada con código · cuenta para misiones y pase</small></span></button><button class="gbtn" data-a="close">LISTO</button></div>`;
   }else if(M.k==="friends"){
     if(!ONLINE_OK){
@@ -3109,6 +3110,14 @@ function renderModal(){
         <button class="gbtn" data-a="netcreate">CREAR SALA</button>
         <div class="joinrow"><input id="codeinp" class="inp code" maxlength="4" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" aria-label="Código de sala"><button class="gbtn blue" data-a="netjoin">UNIRSE</button></div></div>`;
     }
+  }else if(M.k==="queue"){
+    if(!ONLINE_OK)m.innerHTML=`<div class="sheet"><h2 class="out">Online</h2><div class="howc"><div class="big">🌐</div><p>El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.</p><p>Abre el juego desde la dirección del servidor para jugar contra rivales reales.</p></div><button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
+    else if(M.err)m.innerHTML=`<div class="sheet"><h2 class="out">Online</h2><p class="errp">${esc(M.err)}</p><button class="gbtn" data-a="qbot">JUGAR CONTRA BOT</button><button class="pillbtn" data-a="qcancel" style="align-self:center">Volver</button></div>`;
+    else{const sec=Math.floor((Date.now()-M.t0)/1000),slow=sec>=QUEUE_SLOW;
+      m.innerHTML=`<div class="sheet"><h2 class="out">Buscando rival…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroArt(S.fav)}</div></div>
+        <p class="waitdots">🏆 ${S.tro} · <b id="qsec">${sec}</b> s<span>.</span><span>.</span><span>.</span></p>
+        ${slow?`<p>Ahora mismo hay pocos jugadores conectados.</p><button class="gbtn" data-a="qbot">JUGAR CONTRA BOT</button>`:""}
+        <button class="pillbtn" data-a="qcancel" style="align-self:center">Cancelar</button></div>`;}
   }else if(M.k==="search"){
     m.innerHTML=M.found?`<div class="sheet"><h2 class="out">¡Rival encontrado!</h2><div class="vs"><div class="p"><div class="av">${heroArt(S.fav)}</div><b class="out" style="color:var(--me)">${esc(S.name)}</b><small>🏆 ${S.tro}</small></div><div class="mid out">VS</div><div class="p"><div class="av">${heroSVG(M.oppHero||"truco")}</div><b class="out" style="color:var(--foe)">${esc(G.opp.name)}</b><small>🏆 ${G.opp.tro}</small></div></div></div>`
       :`<div class="sheet"><h2 class="out">Buscando rival…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroSVG(pick(IDS))}</div></div></div>`;
@@ -3291,7 +3300,7 @@ async function endRound(w){
 }
 async function endMatch(){
   R=null;ensureDay();
-  const win=G.score.p>G.score.b,draw=G.score.p===G.score.b,d=today(),diff=S.diff||"facil";
+  const win=G.score.p>G.score.b,draw=G.score.p===G.score.b,d=today(),diff=G.diff||S.diff||"facil";
   const before=S.tro,lvlBefore=level(),arenaBefore=arenaOf(S.troMax).a.k;
   /* trofeos: según la dificultad, con racha; derrotas suaves y escudos */
   let delta=0,note="";
@@ -3307,6 +3316,7 @@ async function endMatch(){
     else if(S.ls>=3){delta=0;note="🛡️ Escudo: tras dos derrotas seguidas, esta no te quita trofeos.";S.ls=0;}
     else delta=-Math.min(before,loss);
   }
+  if(G.left&&!note)note="🏳️ Tu rival abandonó la partida: la victoria es tuya.";
   S.tro=Math.max(0,S.tro+delta);S.troMax=Math.max(S.troMax||0,S.tro);S.games++;S.lastLoss=!win&&!draw;
   /* monedas por victoria (tope diario) y primera victoria del día */
   let coins=0,pp=0,firstWin=false,keysGot=0;
@@ -3394,6 +3404,18 @@ function netLost(){
   if(G&&G.online&&UI.screen!=="home"){stopLoop();R=null;UI.modal={k:"info",title:"Conexión perdida",text:"Se ha cortado la conexión con el servidor."};renderModal();}
   else if(UI.modal&&UI.modal.k==="friends"){UI.modal={k:"friends",st:"menu",err:"No se pudo conectar con el servidor."};renderModal();}
 }
+/* online: cola de emparejamiento por trofeos */
+const QUEUE_SLOW=25;let qTimer=null;
+async function queueStart(){
+  UI.modal={k:"queue",t0:Date.now()};renderModal();
+  if(!ONLINE_OK)return;
+  try{await netOpen();}catch(e){UI.modal={k:"queue",err:"No se pudo conectar con el servidor."};renderModal();return;}
+  netSend({t:"queue"});
+  clearInterval(qTimer);
+  qTimer=setInterval(()=>{if(!UI.modal||UI.modal.k!=="queue"||UI.modal.err){clearInterval(qTimer);return;}
+    const sec=Math.floor((Date.now()-UI.modal.t0)/1000),el=$("#qsec");if(el)el.textContent=sec;if(sec===QUEUE_SLOW)renderModal();},1000);
+}
+function queueStop(){clearInterval(qTimer);netClose();}
 async function netStart(kind,code){
   UI.modal={k:"friends",st:"busy"};renderModal();
   try{await netOpen();}catch(e){UI.modal={k:"friends",st:"menu",err:"No se pudo conectar con el servidor."};renderModal();return;}
@@ -3403,8 +3425,10 @@ function netMsg(m){
   switch(m.t){
     case "room":UI.modal={k:"friends",st:"wait",code:m.code};renderModal();break;
     case "error":UI.modal={k:"friends",st:"menu",err:m.msg};renderModal();break;
+    case "queued":break;
     case "matched":
-      actx();G={online:true,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false};
+      clearInterval(qTimer);
+      actx();G={online:true,ranked:!!m.ranked,diff:m.ranked?"normal":null,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false};
       UI.modal={k:"search",found:true};renderModal();sfx("banner");break;
     case "pickPhase":
       G.round=m.round;G.score={p:m.score.you,b:m.score.opp};G.used.p=m.used.slice();G.picked=false;G.oppReady=false;R=null;
@@ -3417,7 +3441,8 @@ function netMsg(m){
     case "roundEnd":onlineRoundEnd(m);break;
     case "matchEnd":onlineMatchEnd(m);break;
     case "rematchAsk":{const el=$("#rematchmsg");if(el)el.innerHTML=`🔁 ¡${esc(G.opp.name)} quiere la revancha!`;sfx("banner");break;}
-    case "oppLeft":stopLoop();R=null;NET.closing=true;if(NET.ws)NET.ws.close();UI.modal={k:"info",title:"Tu rival se ha ido",text:`${esc(G?G.opp.name:"Tu rival")} ha salido de la sala.`};renderModal();break;
+    case "oppLeft":if(G&&G.ranked){stopLoop();R=null;NET.closing=true;if(NET.ws)NET.ws.close();UI.modal=null;renderModal();G.score.p=Math.max(G.score.p,G.score.b+1);G.left=true;endMatch();break;}
+      stopLoop();R=null;NET.closing=true;if(NET.ws)NET.ws.close();UI.modal={k:"info",title:"Tu rival se ha ido",text:`${esc(G?G.opp.name:"Tu rival")} ha salido de la sala.`};renderModal();break;
   }
 }
 async function onlineRoundStart(m){
@@ -3447,6 +3472,7 @@ async function onlineRoundEnd(m){
   await roundBanner(m.w==="you"?"p":m.w==="opp"?"b":null);
 }
 function onlineMatchEnd(m){
+  if(G.ranked){netClose();G.score={p:m.score.you,b:m.score.opp};endMatch();return;}
   R=null;ensureDay();const tkF=m.result==="win"?25:m.result==="draw"?15:10;
   if(S.fr&&S.fr.day===today()?S.fr.n<5:true){S.fr=S.fr&&S.fr.day===today()?S.fr:{day:today(),n:0};S.fr.n++;S.pass.tk+=tkF;}
   S.xp+=m.result==="win"?40:20;misTrack("friend",1);misTrack("play",1);if(m.result==="win")misTrack("win",1);save();
@@ -3563,7 +3589,9 @@ document.addEventListener("click",e=>{
   if(a==="mback"){if(e.target===el&&UI.modal&&["how","settings","name","mode","missions","calendar","info2","purchinfo","nogems","seasonnew","starter"].includes(UI.modal.k)){UI.modal=null;renderModal();}return;}
   if(a==="toast"){el.remove();return;}
   switch(a){
-    case "play":sfx("tap");if(S.mode==="friends"){UI.modal={k:"friends",st:"menu"};renderModal();}else startMatch();break;
+    case "play":sfx("tap");if(S.mode==="friends"){UI.modal={k:"friends",st:"menu"};renderModal();}else if(S.mode==="online")queueStart();else startMatch();break;
+    case "qcancel":sfx("tap");queueStop();UI.modal=null;renderModal();break;
+    case "qbot":sfx("tap");queueStop();UI.modal=null;renderModal();startMatch();break;
     case "home":sfx("tap");UI.modal=null;renderModal();if(G&&G.online)netClose();G=null;R=null;showHome();break;
     case "tab":sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop,pass:showPass})[el.dataset.t]();break;
     case "upgrade":upgrade(el.dataset.id);break;

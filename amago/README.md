@@ -4,39 +4,44 @@ Hundir la flota con héroes que se mueven. Encuéntralos antes de que te encuent
 
 El juego está en un solo archivo HTML. Usa Three.js (incluido en `vendor/three.min.js`, licencia MIT en `vendor/THREE-LICENSE.txt`) para la arena y los héroes en 3D, y carga dos fuentes de Google Fonts. Abre `index.html` en el navegador del móvil o del ordenador para jugar contra el bot.
 
-## Modo online con amigos
+## Modo online
 
-El modo online necesita el servidor de `server/`. El servidor sirve el propio juego y gestiona las salas con WebSocket. Es autoritativo: simula la partida y a cada jugador solo le envía lo que puede ver, así que nadie puede saber dónde está el rival mirando el código.
+Hay dos modos online:
+- **Online:** cola de emparejamiento. El servidor te junta con un rival real de trofeos parecidos (empieza en ±80 y el rango se abre 40 trofeos por segundo de espera). Da trofeos y las recompensas de la dificultad Normal. Si tras 25 s no hay nadie, el juego ofrece jugar contra el bot. Si el rival abandona, ganas tú.
+- **Con amigos:** sala privada con código de 4 letras, con revancha.
+
+El modo online necesita el servidor de `server/`. El servidor sirve el propio juego y gestiona las partidas con WebSocket. Es autoritativo: simula la partida y a cada jugador solo le envía lo que puede ver, así que nadie puede saber dónde está el rival mirando el código.
 
 El motor de reglas vive una sola vez, dentro de `index.html`, entre los comentarios `ENGINE-START` y `ENGINE-END`. El servidor lo lee de ahí al arrancar, así que el juego contra el bot y el online siempre usan las mismas reglas.
 
 ### Probarlo en tu ordenador
 
 ```bash
-cd amago/server
+cd amago
 npm install
 npm start
 ```
 
-Abre `http://localhost:8080` en dos pestañas (o en el móvil, con la IP de tu ordenador en la misma wifi). En una pestaña: modo **Con amigos** → **Crear sala**. En la otra: escribe el código de 4 letras → **Unirse**.
+Abre `http://localhost:8080` en dos pestañas (o en el móvil, con la IP de tu ordenador en la misma wifi). En las dos: **Modo → Online → Jugar**. Para salas privadas: **Con amigos → Crear sala** en una y el código en la otra.
 
-### Publicarlo para jugar desde cualquier móvil (Render, plan gratuito)
+### Publicarlo en Railway
 
-1. Crea una cuenta en [render.com](https://render.com) y conecta tu GitHub.
-2. **New → Web Service** y elige este repositorio.
-3. Configura:
-   - **Root Directory:** `amago/server`
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-   - **Health Check Path:** `/health`
-4. Crea el servicio. Render te dará una dirección tipo `https://amago-xxxx.onrender.com`: ábrela en el móvil y comparte el código de sala con tus amigos.
+La configuración ya está en `amago/railway.json` (arranque y comprobación de salud en `/health`) y `amago/package.json`.
 
-En el plan gratuito el servidor se duerme tras un rato sin uso y tarda unos segundos en despertar con la primera visita.
+1. Entra en [railway.com](https://railway.com) con tu cuenta de GitHub.
+2. **New Project → Deploy from GitHub repo** y elige este repositorio.
+3. En el servicio: **Settings → Source → Root Directory:** `amago`. Elige la rama que quieras desplegar.
+4. **Settings → Networking → Generate Domain.** Railway te dará una dirección tipo `https://amago-production.up.railway.app`.
+5. Ábrela en el móvil. Cada `git push` a esa rama vuelve a desplegar el juego solo.
+
+`/health` muestra cuántos jugadores hay conectados, las salas abiertas y la gente en cola.
+
+Railway no duerme el servidor, pero tiene un consumo mínimo mensual de pago tras la prueba gratuita. Las partidas online usan muy poca CPU.
 
 ### Mensajes del protocolo
 
-Cliente → servidor: `hello`, `create`, `join {code}`, `pick {hero}`, `move {x,y}`, `fire {x,y}`, `rematch`, `leave`.
-Servidor → cliente: `room {code}`, `matched {opp}`, `pickPhase`, `oppPicked`, `roundStart {you, opp, view}`, `go`, `view {v}` (10 veces por segundo), `ev` (disparos, impactos, objetos), `roundEnd`, `matchEnd`, `rematchAsk`, `oppLeft`, `error`.
+Cliente → servidor: `hello`, `queue`, `create`, `join {code}`, `pick {hero}`, `move {x,y}`, `fire {x,y}`, `rematch`, `leave`.
+Servidor → cliente: `queued`, `room {code}`, `matched {opp, ranked}`, `pickPhase`, `oppPicked`, `roundStart {you, opp, view}`, `go`, `view {v}` (10 veces por segundo), `ev` (disparos, impactos, objetos), `roundEnd`, `matchEnd`, `rematchAsk`, `oppLeft`, `error`.
 
 ## Reglas (versión 4: tiempo real con elixir)
 

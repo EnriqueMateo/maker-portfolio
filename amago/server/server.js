@@ -1,9 +1,11 @@
 // Servidor online de AMAGO: sirve el juego y gestiona las salas con WebSocket.
+// Modos: sala privada con código (amigos) y cola de emparejamiento por trofeos (online).
 // El motor de reglas se lee del propio index.html (bloque ENGINE), así cliente y servidor juegan con las mismas reglas.
 "use strict";
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
 const { WebSocketServer } = require("ws");
 
 const INDEX = path.join(__dirname, "..", "index.html");
@@ -13,6 +15,10 @@ const VIEW_EVERY = 2; // envía la vista cada 2 ticks (10 veces por segundo)
 const COUNTDOWN_MS = 3300; // VS + 3, 2, 1
 const BETWEEN_ROUNDS_MS = 4200;
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+// emparejamiento: rango de trofeos que se abre con la espera
+const MM_BASE = 80; // ±trofeos al entrar en la cola
+const MM_GROW = 40; // +trofeos por segundo de espera
+const MM_EVERY_MS = 1000;
 
 function loadEngine() {
   const html = fs.readFileSync(INDEX, "utf8");
@@ -22,36 +28,38 @@ function loadEngine() {
 }
 const E = loadEngine();
 
+// archivos en memoria (y en gzip si es texto): el juego entero son unos MB
+const cache = new Map();
+function serve(req, res, file, type, maxAge) {
+  let c = cache.get(file);
+  if (!c) {
+    if (!fs.existsSync(file)) {
+      res.writeHead(404, { "content-type": "text/plain" });
+      return res.end("No encontrado");
+    }
+    const body = fs.readFileSync(file);
+    c = { body, gz: /text|javascript/.test(type) ? zlib.gzipSync(body) : null };
+    if (process.env.NODE_ENV === "production" || process.env.RAILWAY_ENVIRONMENT) cache.set(file, c);
+  }
+  const gz = c.gz && /\bgzip\b/.test(req.headers["accept-encoding"] || "");
+  const h = { "content-type": type, "cache-control": maxAge ? "public, max-age=" + maxAge : "no-cache" };
+  if (gz) h["content-encoding"] = "gzip";
+  res.writeHead(200, h);
+  res.end(gz ? c.gz : c.body);
+}
+
 const server = http.createServer((req, res) => {
   const url = req.url.split("?")[0];
   if (url === "/health") {
     res.writeHead(200, { "content-type": "text/plain" });
-    res.end("ok");
+    res.end("ok " + wss.clients.size + " conectados, " + rooms.size + " salas, " + queue.length + " en cola");
     return;
   }
-  if (url === "/vendor/three.min.js") {
-    res.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "public, max-age=86400" });
-    res.end(fs.readFileSync(path.join(__dirname, "..", "vendor", "three.min.js")));
-    return;
-  }
+  const root = path.join(__dirname, "..");
+  if (url === "/vendor/three.min.js") return serve(req, res, path.join(root, "vendor", "three.min.js"), "text/javascript; charset=utf-8", 86400);
   const asset = url.match(/^\/(models|portraits|arenas|sprites|props|ui|anim)\/([a-z0-9_-]+)\.(glb|webp)$/);
-  if (asset) {
-    const file = path.join(__dirname, "..", asset[1], asset[2] + "." + asset[3]);
-    if (!fs.existsSync(file)) {
-      res.writeHead(404, { "content-type": "text/plain" });
-      res.end("No encontrado");
-      return;
-    }
-    const type = asset[3] === "glb" ? "model/gltf-binary" : "image/webp";
-    res.writeHead(200, { "content-type": type, "cache-control": "public, max-age=86400" });
-    res.end(fs.readFileSync(file));
-    return;
-  }
-  if (url === "/" || url === "/index.html") {
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" });
-    res.end(fs.readFileSync(INDEX));
-    return;
-  }
+  if (asset) return serve(req, res, path.join(root, asset[1], asset[2] + "." + asset[3]), asset[3] === "glb" ? "model/gltf-binary" : "image/webp", 86400);
+  if (url === "/" || url === "/index.html") return serve(req, res, INDEX, "text/html; charset=utf-8", 0);
   res.writeHead(404, { "content-type": "text/plain" });
   res.end("No encontrado");
 });
@@ -212,7 +220,51 @@ function resetMatch(room) {
   room.R = null;
 }
 
+function makeRoom(a, b, ranked) {
+  const code = newCode();
+  const r = { code, players: { p: a, b }, state: "lobby", rematch: {}, ranked };
+  resetMatch(r);
+  rooms.set(code, r);
+  a.room = code;
+  if (b) b.room = code;
+  return r;
+}
+
+function matchRoom(r) {
+  broadcast(r, (s) => ({
+    t: "matched",
+    code: r.code,
+    ranked: !!r.ranked,
+    opp: { name: r.players[other(s)].player.name, tro: r.players[other(s)].player.tro },
+  }));
+  setTimeout(() => rooms.get(r.code) === r && startPick(r), 1500);
+}
+
+/* cola online: empareja por trofeos; el rango crece con la espera de los dos */
+const queue = [];
+const unqueue = (ws) => {
+  const i = queue.indexOf(ws);
+  if (i >= 0) queue.splice(i, 1);
+};
+const range = (ws, now) => MM_BASE + MM_GROW * ((now - ws.qAt) / 1000);
+function matchmake() {
+  const now = Date.now();
+  for (let i = queue.length - 1; i >= 0; i--) if (queue[i].readyState !== 1) queue.splice(i, 1);
+  queue.sort((x, y) => x.player.tro - y.player.tro);
+  for (let i = 0; i < queue.length - 1; ) {
+    const a = queue[i];
+    const b = queue[i + 1];
+    const gap = Math.abs(a.player.tro - b.player.tro);
+    if (gap <= Math.min(range(a, now), range(b, now))) {
+      queue.splice(i, 2);
+      matchRoom(makeRoom(a, b, true));
+    } else i++;
+  }
+}
+setInterval(matchmake, MM_EVERY_MS);
+
 function leave(ws, notify = true) {
+  unqueue(ws);
   const code = ws.room;
   if (!code) return;
   const room = rooms.get(code);
@@ -236,12 +288,16 @@ function handle(ws, m) {
       break;
     case "create": {
       leave(ws);
-      const code = newCode();
-      const r = { code, players: { p: ws, b: null }, state: "lobby", rematch: {} };
-      resetMatch(r);
-      rooms.set(code, r);
-      ws.room = code;
-      send(ws, { t: "room", code });
+      const r = makeRoom(ws, null, false);
+      send(ws, { t: "room", code: r.code });
+      break;
+    }
+    case "queue": {
+      leave(ws);
+      ws.qAt = Date.now();
+      queue.push(ws);
+      send(ws, { t: "queued", n: queue.length });
+      matchmake();
       break;
     }
     case "join": {
@@ -252,8 +308,7 @@ function handle(ws, m) {
       leave(ws);
       r.players.b = ws;
       ws.room = code;
-      broadcast(r, (s) => ({ t: "matched", code, opp: { name: r.players[other(s)].player.name, tro: r.players[other(s)].player.tro } }));
-      setTimeout(() => rooms.get(code) === r && startPick(r), 1500);
+      matchRoom(r);
       break;
     }
     case "pick": {
@@ -277,7 +332,7 @@ function handle(ws, m) {
       break;
     }
     case "rematch": {
-      if (!room || room.state !== "end") return;
+      if (!room || room.state !== "end" || room.ranked) return;
       const s = sideOf(room, ws);
       room.rematch[s] = true;
       if (room.rematch.p && room.rematch.b) {
