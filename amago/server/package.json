@@ -2,7 +2,7 @@
   "name": "amago-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Servidor online de AMAGO: salas por código con WebSocket",
+  "description": "Servidor online de AMAGO: salas por c\u00f3digo con WebSocket",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -11,6 +11,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "pg": "^8.13.0"
   }
 }

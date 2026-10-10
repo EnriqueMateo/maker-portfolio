@@ -36,6 +36,15 @@ La configuración ya está en `amago/railway.json` (arranque y comprobación de 
 
 `/health` muestra cuántos jugadores hay conectados, las salas abiertas y la gente en cola.
 
+### Base de datos y métricas (para la beta)
+
+El servidor guarda las cuentas anónimas (copia del progreso en la nube, trofeos online) y las estadísticas de uso.
+
+1. En el proyecto de Railway: **+ New → Database → PostgreSQL**. Railway crea la variable `DATABASE_URL`; en el servicio del juego, **Variables → Add reference → DATABASE_URL**. Sin base de datos, el servidor guarda en archivos que **se pierden en cada despliegue**.
+2. Variable `STATS_KEY` con una clave larga inventada. El panel de métricas queda en `https://<tu-dominio>/stats?k=<STATS_KEY>`: retención D1/D7/D30, embudo de la primera sesión, duración de rondas, uso de héroes y jugadores por día.
+
+API (JSON, POST): `/api/acc` crea cuenta anónima · `/api/load` y `/api/save` guardado en la nube · `/api/link` y `/api/claim` código de 6 caracteres para pasar el progreso a otro móvil · `/api/del` borra la cuenta · `/api/ev` eventos de uso. Todo con límite de peticiones por IP.
+
 Railway no duerme el servidor, pero tiene un consumo mínimo mensual de pago tras la prueba gratuita. Las partidas online usan muy poca CPU.
 
 ### Mensajes del protocolo

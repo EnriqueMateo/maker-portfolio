@@ -7,6 +7,11 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const { WebSocketServer } = require("ws");
+const Store = require("./store");
+const { makeApi, auth } = require("./api");
+const { statsPage } = require("./stats");
+let STORE = null;
+let API = null;
 
 const INDEX = path.join(__dirname, "..", "index.html");
 const PORT = Number(process.env.PORT) || 8080;
@@ -56,8 +61,13 @@ function serve(req, res, file, type, maxAge) {
   res.end(gz ? c.gz : c.body);
 }
 
+const clientIp = (req) => String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
 const server = http.createServer((req, res) => {
   const url = req.url.split("?")[0];
+  if (API && (url.startsWith("/api/") || url === "/stats")) {
+    API(req, res, url, clientIp(req));
+    return;
+  }
   if (url === "/health") {
     res.writeHead(200, { "content-type": "text/plain" });
     res.end("ok " + wss.clients.size + " conectados, " + rooms.size + " salas, " + queue.length + " en cola");
@@ -235,13 +245,36 @@ function endRound(room, w) {
       broadcast(room, (s) => {
         const a = room.score[s];
         const b = room.score[other(s)];
-        return { t: "matchEnd", result: a > b ? "win" : a < b ? "lose" : "draw", score: { you: a, opp: b } };
+        const result = a > b ? "win" : a < b ? "lose" : "draw";
+        const msg = { t: "matchEnd", result, score: { you: a, opp: b } };
+        if (room.ranked && room.players[s]) msg.tro = rankedResult(room.players[s], result);
+        return msg;
       });
     } else {
       room.round++;
       startPick(room);
     }
   }, BETWEEN_ROUNDS_MS);
+}
+
+/* trofeos de las partidas online: los calcula y guarda el servidor */
+const troLoss = (t) => (t < 30 ? 0 : t < 300 ? 2 : t < 600 ? 4 : 6);
+function rankedResult(ws, res) {
+  const before = ws.player.tro || 0;
+  const d = res === "win" ? 8 + Math.floor(Math.random() * 3) : res === "lose" ? -Math.min(before, troLoss(before)) : 0;
+  ws.player.tro = Math.max(0, before + d);
+  if (STORE && ws.uid)
+    STORE.get(ws.uid)
+      .then((u) => {
+        if (!u) return;
+        u.tro = Math.max(0, (u.tro || 0) + d);
+        u.ranked = u.ranked || { w: 0, l: 0 };
+        if (res === "win") u.ranked.w++;
+        if (res === "lose") u.ranked.l++;
+        return STORE.put(u);
+      })
+      .catch(() => {});
+  return { d, now: ws.player.tro };
 }
 
 function resetMatch(room) {
@@ -309,8 +342,10 @@ function leave(ws, notify = true) {
   stopRound(room);
   const s = sideOf(room, ws);
   const o = s && room.players[other(s)];
+  const midMatch = room.ranked && room.state !== "end" && room.state !== "lobby";
+  if (midMatch) rankedResult(ws, "lose");
   if (notify && o) {
-    send(o, { t: "oppLeft" });
+    send(o, midMatch ? { t: "oppLeft", tro: rankedResult(o, "win") } : { t: "oppLeft" });
     o.room = null;
   }
   rooms.delete(code);
@@ -321,6 +356,14 @@ function handle(ws, m) {
   switch (m.t) {
     case "hello":
       ws.player = cleanPlayer(m);
+      if (STORE && m.id && m.secret)
+        auth(STORE, m.id, m.secret)
+          .then((u) => {
+            if (!u) return;
+            ws.uid = u.id;
+            ws.player.tro = u.tro || 0; // para emparejar cuentan los trofeos guardados en el servidor
+          })
+          .catch(() => {});
       break;
     case "create": {
       leave(ws);
@@ -445,4 +488,14 @@ setInterval(() => {
   }
 }, 20000);
 
-server.listen(PORT, () => console.log("AMAGO online en http://localhost:" + PORT));
+Store.open()
+  .then((st) => {
+    STORE = st;
+    API = makeApi(st, { statsPage });
+    // la política de privacidad promete borrar lo que lleve 24 meses sin uso
+    const purge = () => st.purge(Date.now() - 730 * 864e5).catch((e) => console.error("Limpieza:", e.message));
+    purge();
+    setInterval(purge, 864e5).unref();
+  })
+  .catch((e) => console.error("Sin almacenamiento:", e.message))
+  .finally(() => server.listen(PORT, () => console.log("AMAGO online en http://localhost:" + PORT)));

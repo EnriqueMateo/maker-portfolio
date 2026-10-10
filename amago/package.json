@@ -2,7 +2,7 @@
   "name": "amago",
   "version": "1.0.0",
   "private": true,
-  "description": "AMAGO: juego de duelos 1v1 con servidor online (salas con código y emparejamiento por trofeos)",
+  "description": "AMAGO: juego de duelos 1v1 con servidor online (salas con c\u00f3digo y emparejamiento por trofeos)",
   "scripts": {
     "start": "node server/server.js"
   },
@@ -10,6 +10,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "pg": "^8.13.0"
   }
 }

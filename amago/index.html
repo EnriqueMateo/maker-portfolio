@@ -1326,8 +1326,46 @@ function loadSave(){
   s.troMax=Math.max(s.troMax||0,s.tro);
   return s;
 }
-function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function save(){S.at=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}CLOUD.push();}
 let S=loadSave();
+
+/* ================= cuenta anónima en la nube y estadísticas de uso =================
+   Sin registro: el móvil guarda un id y un secreto. El progreso se copia al servidor (para no perderlo y poder
+   pasarlo a otro móvil con un código) y se envían eventos de uso anónimos para medir la beta. */
+const ACC_KEY="amago-acc",APIU=(SERVER||"")+"/api/";
+let ACC=null;try{ACC=JSON.parse(localStorage.getItem(ACC_KEY)||"null");}catch(e){}
+const apiPost=(p,b)=>fetch(APIU+p,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json().then(j=>({ok:r.ok,status:r.status,j})));
+const setAcc=a=>{ACC=a?{id:a.id,secret:a.secret}:null;try{a?localStorage.setItem(ACC_KEY,JSON.stringify(ACC)):localStorage.removeItem(ACC_KEY);}catch(e){}};
+function restoreSave(sv){S=Object.assign(sv,{at:Date.now()});try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}S=loadSave();if(UI.screen==="home")showHome();}
+const CLOUD={ready:false,tried:false,timer:0,
+  async init(retry){
+    if(!ONLINE_OK){this.tried=true;return;}
+    try{
+      if(!ACC){const r=await apiPost("acc",{});if(!r.ok)throw 0;setAcc(r.j);}
+      const r=await apiPost("load",ACC);
+      if(r.status===401&&!retry){setAcc(null);return this.init(true);}/* la cuenta ya no existe en el servidor: una nueva */
+      if(!r.ok)throw 0;
+      this.ready=true;
+      const c=r.j;
+      /* el servidor tiene un guardado más nuevo (otro móvil o reinstalación): se recupera */
+      if(c.save&&c.saveAt>(S.at||0)&&(c.save.games||0)>=S.games)restoreSave(c.save);
+      else this.push(true);
+    }catch(e){}
+    this.tried=true;EV.flush();
+  },
+  push(now){if(!this.ready||!ACC)return;clearTimeout(this.timer);this.timer=setTimeout(()=>apiPost("save",{...ACC,save:S,at:S.at||Date.now()}).catch(()=>{}),now?0:4000);}
+};
+const EV={q:[],
+  add(k,d){this.q.push(d?{k,t:Date.now(),d}:{k,t:Date.now()});if(this.q.length>=30)this.flush();},
+  flush(beacon){
+    if(!ONLINE_OK||!CLOUD.tried||!this.q.length)return;
+    let id=ACC&&ACC.id;if(!id){try{id=localStorage.getItem("amago-uid")||("a"+Math.random().toString(36).slice(2,12));localStorage.setItem("amago-uid",id);}catch(e){id="anon";}}
+    const body=JSON.stringify({id,ev:this.q.splice(0,60)});
+    try{if(beacon&&navigator.sendBeacon)navigator.sendBeacon(APIU+"ev",new Blob([body],{type:"application/json"}));
+      else fetch(APIU+"ev",{method:"POST",headers:{"content-type":"application/json"},body,keepalive:true}).catch(()=>{});}catch(e){}
+  }};
+setInterval(()=>EV.flush(),15000);
+document.addEventListener("visibilitychange",()=>{if(document.hidden){EV.flush(true);if(CLOUD.ready&&ACC)CLOUD.push(true);}});
 const level=()=>1+Math.floor(S.xp/120), xpPct=()=>Math.round(S.xp%120/120*100);
 
 /* ================= sonido ================= */
@@ -3258,6 +3296,13 @@ function renderModal(){
   else if(M.k==="starter"){m.innerHTML=`<div class="sheet paysheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><span class="ribn gold">Pack de Inicio · solo una vez</span><img src="${UIA}chest2.webp" alt="" style="width:120px;align-self:center"><p>200 gemas, 600 monedas, 300 de Poder, un Cofre grande y el aspecto Truco Ártico. Disponible hasta que llegues al Volcán.</p><button class="gbtn premium" data-a="iap" data-id="amago.starter">VER PACK · ${fmtEur(1.99)}</button><button class="pillbtn" data-a="close">Ahora no</button></div>`;}
   else if(M.k==="comeback"){const r=M.gap>=30?[C_(3),{r:"hero"}]:M.gap>=10?[C_(3)]:[C_(2)];m.innerHTML=`<div class="sheet paysheet"><span class="ribn gold">¡Bienvenido de vuelta!</span><p>Te hemos guardado un regalo por volver${M.gap>=10?" y fichas dobles en tus próximas partidas":""}.</p><div style="display:flex;justify-content:center;gap:10px">${r.map(x=>rewardImg(x,"ico l")).join("")}</div><button class="gbtn green" data-a="comebackok" data-g="${M.gap}">RECOGER</button></div>`;}
   else if(M.k==="seasonsum"){m.innerHTML=`<div class="sheet paysheet"><span class="ribn gold">Fin de la Temporada ${M.season+1}</span><p>Te guardamos lo que alcanzaste y no cobraste${M.items.length?":":". ¡No te falta nada!"}</p>${M.items.length?`<div class="boxsum2" style="position:static;margin:0 auto">${M.items.slice(0,6).map(it=>`<div class="pnl">${it.k==="hero"?heroArt(it.id):`<img src="${UIA}${({coins:"coin",pp:"power",gems:"gem",tk:"star",skin:"crown",frame:"crown"})[it.k]}.webp" alt="">`}<b class="out">${it.n?"+"+it.n:""}</b></div>`).join("")}</div>`:""}<button class="gbtn" data-a="close">GENIAL</button></div>`;}
+  else if(M.k==="cloud"){
+    m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Tu progreso</h2>
+      ${M.code?`<p>En el otro móvil, abre AMAGO → Ajustes → <b>Pasar mi progreso</b> → <b>Tengo un código</b> y escribe:</p><div class="codebig out">${M.code}</div><p class="sub">Caduca en 15 minutos. Después, este móvil dejará de guardar en esa cuenta.</p>`
+        :M.claim?`<p>Escribe el código que te ha dado el otro móvil:</p>${M.err?`<p class="errp">${esc(M.err)}</p>`:""}<input id="claiminp" class="inp code" maxlength="6" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" aria-label="Código de traspaso"><button class="gbtn" data-a="cloudclaim2">RECUPERAR</button><p class="sub">Ojo: el progreso de este móvil se sustituye por el del código.</p>`
+        :`<p>Tu progreso se guarda solo en la nube${CLOUD.ready?" ✅":" (sin conexión ahora mismo)"}. Para llevarlo a otro móvil:</p>${M.err?`<p class="errp">${esc(M.err)}</p>`:""}
+          <button class="gbtn" data-a="cloudlink">DAR UN CÓDIGO</button><button class="gbtn blue" data-a="cloudclaim">TENGO UN CÓDIGO</button>`}</div>`;
+  }
   else if(M.k==="settings"){
     m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Ajustes</h2>
       <button class="toggle" data-a="name"><span>✏️ Nombre: ${esc(S.name)}</span><i>Cambiar</i></button>
@@ -3265,6 +3310,7 @@ function renderModal(){
       <button class="toggle" data-a="tvib"><span>📳 Vibración</span><i class="${S.vib?"on":""}">${S.vib?"Sí":"No"}</i></button>
       <button class="toggle" data-a="how"><span>❓ Cómo se juega</span><i>Ver</i></button>
       <button class="toggle" data-a="purchinfo"><span>🧾 Compras y probabilidades</span><i>Ver</i></button>
+      ${ONLINE_OK?`<button class="toggle" data-a="cloud"><span>☁️ Pasar mi progreso a otro móvil</span><i>Código</i></button>`:""}
       <button class="toggle" data-a="privacy"><span>🔒 Política de privacidad</span><i>Ver</i></button>
       <button class="toggle" data-a="restore"><span>♻️ Restaurar compras</span><i>Ir</i></button>
       ${M.confirm?`<button class="gbtn red" data-a="reset2">SÍ, BORRAR TODO</button><button class="pillbtn" data-a="reset0">Cancelar</button>`:`<button class="pillbtn" data-a="reset1">Borrar progreso</button>`}</div>`;
@@ -3438,6 +3484,7 @@ async function startRound(){
   R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv});
   await vsAndCountdown(tp,tb);
   R.paused=false;
+  EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
   if(!G.tutorial&&S.games<=3&&$("#amagob"))toast("amagonew","🎭 <b>¡Nuevo: AMAGO!</b> Deja una huella falsa en tu isla para que el rival dispare donde no estás.");
   if(G.tutorial&&G.round===1){toast("tut1","🫣 Tu héroe está escondido en tu isla <b>verde</b>. El rival, en la <b>roja</b>: ¡adivina dónde y dispárale!");tutHand();}
   else toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
@@ -3491,7 +3538,7 @@ async function roundBanner(w){
   else await banner("¡EMPATE!","Nadie suma estrella","blue",1400);
 }
 async function endRound(w){
-  renderLive();
+  renderLive();EV.add("round_end",{win:w==="p",draw:!w,dur:Math.round(R.now*10)/10,hero:R.heroes.p.type,opp:R.heroes.b.type,n:G.round,mode:"bot",tut:!!G.tutorial});
   const b=R.heroes.b;await revealFoe(b.x,b.y,b.type,w);
   if(w)G.score[w]++;
   G.used.p.push(R.heroes.p.type);G.used.b.push(R.heroes.b.type);
@@ -3502,7 +3549,7 @@ async function endRound(w){
   G.round++;showPick();
 }
 async function endMatch(){
-  R=null;ensureDay();
+  R=null;ensureDay();EV.add("match_end",{win:G.score.p>G.score.b,draw:G.score.p===G.score.b,score:G.score.p+"-"+G.score.b,mode:G.online?(G.ranked?"online":"amigos"):"bot",diff:G.online?null:S.diff,n:S.games+1,left:!!G.left});
   const win=G.score.p>G.score.b,draw=G.score.p===G.score.b,d=today(),diff=G.diff||S.diff||"facil";
   const before=S.tro,lvlBefore=level(),arenaBefore=arenaOf(S.troMax).a.k;
   /* trofeos: según la dificultad, con racha; derrotas suaves y escudos */
@@ -3519,6 +3566,7 @@ async function endMatch(){
     else if(S.ls>=3){delta=0;note="🛡️ Escudo: tras dos derrotas seguidas, esta no te quita trofeos.";S.ls=0;}
     else delta=-Math.min(before,loss);
   }
+  if(G.forceDelta!=null){delta=G.forceDelta;if(!G.left)note="";}/* online: los trofeos los calcula el servidor */
   if(G.left&&!note)note="🏳️ Tu rival abandonó la partida: la victoria es tuya.";
   S.tro=Math.max(0,S.tro+delta);S.troMax=Math.max(S.troMax||0,S.tro);S.games++;S.lastLoss=!win&&!draw;
   /* monedas por victoria (tope diario) y primera victoria del día */
@@ -3597,7 +3645,7 @@ function netOpen(){
     if(NET.ws&&NET.ws.readyState===1)return res();
     let ws;try{ws=new WebSocket(SERVER?SERVER.replace(/^http/,"ws"):(location.protocol==="https:"?"wss://":"ws://")+location.host);}catch(e){return rej(e);}
     NET.closing=false;
-    ws.onopen=()=>{NET.ws=ws;netSend({t:"hello",name:S.name,tro:S.tro,unl:S.unl});res();};
+    ws.onopen=()=>{NET.ws=ws;netSend({t:"hello",name:S.name,tro:S.tro,unl:S.unl,...(ACC||{})});res();};
     ws.onerror=()=>rej(new Error("conexión"));
     ws.onclose=()=>{const was=NET.ws===ws;NET.ws=null;if(was&&!NET.closing)netLost();};
     ws.onmessage=e=>{let m;try{m=JSON.parse(e.data);}catch(err){return;}netMsg(m);};
@@ -3646,12 +3694,12 @@ function netMsg(m){
     case "roundEnd":onlineRoundEnd(m);break;
     case "matchEnd":onlineMatchEnd(m);break;
     case "rematchAsk":{const el=$("#rematchmsg");if(el)el.innerHTML=`🔁 ¡${esc(G.opp.name)} quiere la revancha!`;sfx("banner");break;}
-    case "oppLeft":if(G&&G.ranked){stopLoop();R=null;NET.closing=true;if(NET.ws)NET.ws.close();UI.modal=null;renderModal();G.score.p=Math.max(G.score.p,G.score.b+1);G.left=true;endMatch();break;}
+    case "oppLeft":if(G&&G.ranked){if(m.tro){G.forceDelta=m.tro.d;G.forceTro=m.tro.now;}stopLoop();R=null;NET.closing=true;if(NET.ws)NET.ws.close();UI.modal=null;renderModal();G.score.p=Math.max(G.score.p,G.score.b+1);G.left=true;endMatch();break;}
       stopLoop();R=null;NET.closing=true;if(NET.ws)NET.ws.close();UI.modal={k:"info",title:"Tu rival se ha ido",text:`${esc(G?G.opp.name:"Tu rival")} ha salido de la sala.`};renderModal();break;
   }
 }
 async function onlineRoundStart(m){
-  R=m.view;R.paused=true;
+  R=m.view;R.paused=true;EV.add("round_start",{n:m.round,hero:m.you,opp:m.opp,mode:G.ranked?"online":"amigos"});
   await vsAndCountdown(m.you,m.opp);
   toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
 }
@@ -3668,7 +3716,7 @@ function onlineEv(m){
   }
 }
 async function onlineRoundEnd(m){
-  if(!R)return;
+  if(!R)return;EV.add("round_end",{win:m.w==="you",draw:!m.w,dur:Math.round(R.now*10)/10,hero:R.heroes.p.type,opp:m.reveal.type,n:G.round,mode:G.ranked?"online":"amigos"});
   R.over=true;
   R.heroes.p.hp=m.hp.you;R.heroes.b.hp=m.hp.opp;renderLive();
   await revealFoe(m.reveal.x,m.reveal.y,m.reveal.type,m.w==="you"?"p":m.w==="opp"?"b":null);
@@ -3677,7 +3725,7 @@ async function onlineRoundEnd(m){
   await roundBanner(m.w==="you"?"p":m.w==="opp"?"b":null);
 }
 function onlineMatchEnd(m){
-  if(G.ranked){netClose();G.score={p:m.score.you,b:m.score.opp};endMatch();return;}
+  if(G.ranked){netClose();G.score={p:m.score.you,b:m.score.opp};if(m.tro){G.forceDelta=m.tro.d;G.forceTro=m.tro.now;}endMatch();return;}
   R=null;ensureDay();const tkF=m.result==="win"?25:m.result==="draw"?15:10;
   if(S.fr&&S.fr.day===today()?S.fr.n<5:true){S.fr=S.fr&&S.fr.day===today()?S.fr:{day:today(),n:0};S.fr.n++;S.pass.tk+=tkF;}
   S.xp+=m.result==="win"?40:20;misTrack("friend",1);misTrack("play",1);if(m.result==="win")misTrack("win",1);save();
@@ -3799,13 +3847,13 @@ document.addEventListener("click",e=>{
   if(a==="mback"){if(e.target===el&&UI.modal&&["how","settings","name","mode","missions","calendar","info2","purchinfo","nogems","seasonnew","starter"].includes(UI.modal.k)){UI.modal=null;renderModal();}return;}
   if(a==="toast"){el.remove();return;}
   switch(a){
-    case "play":sfx("tap");if(S.mode==="friends"){UI.modal={k:"friends",st:"menu"};renderModal();}else if(S.mode==="online")queueStart();else startMatch();break;
+    case "play":sfx("tap");EV.add("play_tap",{mode:S.mode,games:S.games});if(S.mode==="friends"){UI.modal={k:"friends",st:"menu"};renderModal();}else if(S.mode==="online")queueStart();else startMatch();break;
     case "qcancel":sfx("tap");queueStop();UI.modal=null;renderModal();break;
     case "qbot":sfx("tap");queueStop();UI.modal=null;renderModal();startMatch();break;
-    case "home":sfx("tap");UI.modal=null;renderModal();if(G&&G.online)netClose();G=null;R=null;showHome();break;
+    case "home":sfx("tap");if(UI.screen==="game"||UI.screen==="pick")EV.add("quit_mid",{screen:UI.screen,mode:G&&G.online?"online":"bot"});UI.modal=null;renderModal();if(G&&G.online)netClose();G=null;R=null;showHome();break;
     case "tab":if(!unlocked(el.dataset.t)){sfx("tap");const r=el.getBoundingClientRect();floatText(r.left+r.width/2,r.top-10,`🔒 Juega ${UNLOCK[el.dataset.t]-S.games} partida${UNLOCK[el.dataset.t]-S.games>1?"s":""} más`,"miss");break;}
-      sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop,pass:showPass})[el.dataset.t]();break;
-    case "upgrade":upgrade(el.dataset.id);break;
+      sfx("tap");EV.add("screen",{s:el.dataset.t});UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop,pass:showPass})[el.dataset.t]();break;
+    case "upgrade":EV.add("upgrade",{h:el.dataset.id});upgrade(el.dataset.id);break;
     case "offer":sfx("tap");buyOffer(el.dataset.id);break;
     case "buybox":sfx("tap");buyBox(+el.dataset.t);break;
     case "gift":sfx("tap");claimGift();break;
@@ -3815,7 +3863,7 @@ document.addEventListener("click",e=>{
     case "mclaim":misClaim(+el.dataset.i,el.dataset.w==="1");break;
     case "reroll":reroll(+el.dataset.i);break;
     case "calendar":sfx("tap");UI.modal={k:"calendar"};renderModal();break;
-    case "calclaim":sfx("chest");calClaim();break;
+    case "calclaim":sfx("chest");EV.add("cal_claim",{i:S.cal.i});calClaim();break;
     case "comebackok":{const g=+el.dataset.g;S.back=g>=10?10:5;save();UI.modal=null;renderModal();const l=g>=30?[C_(3),{r:"hero"},T_("tk",1000)]:g>=10?[C_(3)]:[C_(2)];claimMany(l);break;}
     case "mclaimh":{const id=el.dataset.id,g=S.mgot[id]=S.mgot[id]||[];const l=[];MASTERY.forEach((m,i)=>{if((S.hw[id]||0)>=m.n&&!g.includes(i)){g.push(i);l.push(m.r);}});save();UI.modal=null;renderModal();claimMany(l);break;}
     case "equipskin":S.equip.skin[el.dataset.id]=el.dataset.s||"";save();sfx("sel");renderModal();if(UI.screen!=="game")refreshScreen();break;
@@ -3840,14 +3888,14 @@ document.addEventListener("click",e=>{
     case "arenaclose":el.remove();break;
     case "missions":sfx("tap");UI.modal={k:"missions"};renderModal();break;
     case "keysinfo":sfx("tap");keysInfo();break;
-    case "openbox":openBox();break;
+    case "openbox":EV.add("chest_open",{n:S.box.length});openBox();break;
     case "boxtap":boxTap();break;
     case "buy":buy(el.dataset.id);break;
     case "settings":sfx("tap");UI.modal={k:"settings"};renderModal();break;
     case "tsnd":S.snd=S.snd?0:1;save();sfx("tap");renderModal();break;
     case "reset1":UI.modal.confirm=true;renderModal();break;
     case "reset0":UI.modal.confirm=false;renderModal();break;
-    case "reset2":S=loadSaveFresh();save();UI.modal=null;showHome();break;
+    case "reset2":if(ACC){apiPost("del",ACC).catch(()=>{});setAcc(null);CLOUD.ready=false;}S=loadSaveFresh();save();CLOUD.init();UI.modal=null;showHome();break;
     case "close":sfx("tap");UI.modal=null;renderModal();break;
     case "name":sfx("tap");UI.modal={k:"name"};renderModal();break;
     case "namesave":{const v=($("#nameinp").value||"").replace(/[<>&"]/g,"").trim().slice(0,14);if(v){S.name=v;if(!S.gemOnce.name){S.gemOnce.name=1;addGems(10,false);}save();}UI.modal=null;renderModal();refreshScreen();break;}
@@ -3858,6 +3906,14 @@ document.addEventListener("click",e=>{
     case "hero":sfx("tap");UI.modal={k:"heropage",id:el.dataset.id};renderModal();break;
     case "fav":S.fav=el.dataset.id;save();sfx("sel");renderModal();refreshScreen();break;
     case "claim":sfx("chest");claim(+el.dataset.t);break;
+    case "cloud":sfx("tap");UI.modal={k:"cloud"};renderModal();break;
+    case "cloudlink":sfx("tap");if(!ACC){UI.modal={k:"cloud",err:"Sin conexión con el servidor. Prueba en un rato."};renderModal();break;}
+      apiPost("link",ACC).then(r=>{UI.modal=r.ok?{k:"cloud",code:r.j.code}:{k:"cloud",err:"No se pudo crear el código."};renderModal();}).catch(()=>{UI.modal={k:"cloud",err:"Sin conexión."};renderModal();});break;
+    case "cloudclaim":sfx("tap");UI.modal={k:"cloud",claim:true};renderModal();break;
+    case "cloudclaim2":{const c=($("#claiminp").value||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(c.length!==6){UI.modal={k:"cloud",claim:true,err:"El código tiene 6 caracteres."};renderModal();break;}
+      apiPost("claim",{code:c}).then(r=>{if(!r.ok){UI.modal={k:"cloud",claim:true,err:r.j.error||"Código no válido."};renderModal();return;}
+        setAcc(r.j);CLOUD.ready=true;if(r.j.save)restoreSave(r.j.save);UI.modal={k:"info",title:"¡Progreso recuperado!",text:"Ya tienes aquí tus héroes, trofeos y recompensas."};renderModal();sfx("win");})
+        .catch(()=>{UI.modal={k:"cloud",claim:true,err:"Sin conexión."};renderModal();});break;}
     case "privacy":sfx("tap");window.open((SERVER||"")+"/privacidad","_blank","noopener");break;
     case "how":sfx("tap");UI.modal={k:"how",i:0};renderModal();break;
     case "hownext":sfx("tap");if(UI.modal.i<HOW.length-1){UI.modal.i++;renderModal();}else{UI.modal=null;renderModal();}break;
@@ -3887,8 +3943,8 @@ function onTile(b,x,y){
     const cost=AMAGO.decoyCost(me);
     if(R.elx.p<cost){ui.noElx();return;}
     if(R.now<(me.decoyUntil||0)){const c=B3.screenPos("p",x,y);floatText(c.x,c.y,"🎭 Recargando…","miss");return;}
-    if(G.online){netSend({t:"amago",x,y});return;}
-    if(AMAGO.amago(R,"p",x,y,ui)==="ok")renderLive();
+    if(G.online){netSend({t:"amago",x,y});EV.add("amago");return;}
+    if(AMAGO.amago(R,"p",x,y,ui)==="ok"){renderLive();EV.add("amago");}
     return;
   }
   if(b==="p"){
@@ -3904,13 +3960,14 @@ function onTile(b,x,y){
   }
   const r=AMAGO.fire(R,"p",x,y,ui);
   if(r==="elx"){ui.noElx();const c=B3.screenPos("b",x,y);floatText(c.x,c.y,`Faltan ${Math.ceil(H.cost-R.elx.p)} 💧`,"miss");}
-  else if(r==="ok")renderLive();
+  else if(r==="ok"){renderLive();if(!S.tips.fshot){S.tips.fshot=1;save();EV.add("first_shot",{t:Math.round(R.now*10)/10});}}
 }
 document.addEventListener("visibilitychange",()=>{lastT=performance.now();});
 
 fxInit();
 function bootGame(){
   if(GFX){try{GFX.bakePortraits();}catch(e){console.warn("Sin retratos 3D",e);}}
+  EV.add("app_open",{ms:Math.round(performance.now()),games:S.games,app:!!window.AMAGO_APP});CLOUD.init();
   if(!B3){app.innerHTML=`<div class="sheet" style="margin:auto"><h2 class="out">AMAGO</h2><p>Tu navegador no puede mostrar gráficos 3D (WebGL). Prueba con Chrome, Safari o Edge actualizados.</p></div>`;}
   else showHome();
 }
