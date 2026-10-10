@@ -7,7 +7,7 @@ const path = require("path");
 const SRC = path.join(__dirname, "..", "..");
 const OUT = path.join(__dirname, "..", "www");
 const SERVER = (process.env.AMAGO_SERVER || "").replace(/\/+$/, "");
-const DIRS = ["vendor", "portraits", "arenas", "sprites", "props", "ui", "anim"];
+const DIRS = ["vendor", "models", "portraits", "arenas", "sprites", "props", "ui", "anim"];
 
 if (!/^https:\/\//.test(SERVER) && !/^http:\/\/localhost(:\d+)?$/.test(SERVER)) {
   console.error("Falta AMAGO_SERVER (https://…), la dirección del servidor en Railway.");

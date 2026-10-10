@@ -3400,7 +3400,7 @@ async function roundBanner(w){
   const byTime=R&&R.heroes.p.hp>0&&R.heroes.b.hp>0,pc=s=>Math.round(R.heroes[s].hp/R.heroes[s].max*100);
   const why=byTime?`Se acabó el tiempo: vida ${pc("p")} % contra ${pc("b")} %`:"";
   if(w==="p"){confetti();sfx("win");await banner("¡RONDA PARA TI!",why,"gold",2200);}
-  else if(w==="b"){sfx("lose");await banner("RONDA PARA "+G.opp.name.toUpperCase(),why,"red",2200);}
+  else if(w==="b"){sfx("lose");await banner("RONDA PARA "+esc(G.opp.name.toUpperCase()),why,"red",2200);}
   else await banner("¡EMPATE!","Nadie suma estrella","blue",1400);
 }
 async function endRound(w){

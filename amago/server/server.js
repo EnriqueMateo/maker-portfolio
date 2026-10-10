@@ -19,6 +19,14 @@ const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 const MM_BASE = 80; // ±trofeos al entrar en la cola
 const MM_GROW = 40; // +trofeos por segundo de espera
 const MM_EVERY_MS = 1000;
+// límites contra abuso
+const MAX_MSG_BYTES = 2048;
+const MSG_PER_SEC = 30; // por conexión; muy por encima de lo que manda un jugador
+const MAX_CONN_PER_IP = 8;
+const MAX_CONN = 3000;
+const MAX_ROOMS = 4000;
+const MAX_BAD_JOINS = 8; // códigos erróneos por conexión antes de cortarla
+const isHero = (id) => typeof id === "string" && Object.prototype.hasOwnProperty.call(E.HEROES, id);
 
 function loadEngine() {
   const html = fs.readFileSync(INDEX, "utf8");
@@ -64,7 +72,7 @@ const server = http.createServer((req, res) => {
   res.end("No encontrado");
 });
 
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ server, maxPayload: MAX_MSG_BYTES });
 const rooms = new Map();
 
 const send = (ws, msg) => {
@@ -74,16 +82,17 @@ const sideOf = (room, ws) => (room.players.p === ws ? "p" : room.players.b === w
 const other = (s) => (s === "p" ? "b" : "p");
 
 function newCode() {
-  let c;
-  do c = Array.from({ length: 4 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join("");
-  while (rooms.has(c));
-  return c;
+  for (let i = 0; i < 50; i++) {
+    const c = Array.from({ length: 4 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join("");
+    if (!rooms.has(c)) return c;
+  }
+  return null;
 }
 
 function cleanPlayer(m) {
   const name = String(m.name || "Jugador").replace(/[<>&"]/g, "").trim().slice(0, 14) || "Jugador";
   const tro = Math.max(0, Math.min(99999, Number(m.tro) || 0));
-  let unl = Array.isArray(m.unl) ? m.unl.filter((id) => E.HEROES[id]) : [];
+  let unl = Array.isArray(m.unl) ? m.unl.slice(0, 32).filter(isHero) : [];
   unl = [...new Set(unl)];
   if (unl.length < 3) unl = E.STARTERS.slice();
   return { name, tro, unl };
@@ -115,7 +124,14 @@ function makeHooks(room) {
   return {
     fired(p) {
       ev(p.o, { e: "fired", p: E.persp(p, p.o) });
-      if (p.warn || p.hx != null) ev(p.d, { e: "fired", p: E.persp(p, p.d) });
+      if (p.warn) ev(p.d, { e: "fired", p: E.persp(p, p.d) });
+      else if (p.hx != null) {
+        // sin aviso: el defensor solo ve desde dónde se disparó, nunca a qué casillas ni cuándo cae
+        const q = E.persp(p, p.d);
+        delete q.cells;
+        delete q.hitAt;
+        ev(p.d, { e: "fired", p: q });
+      }
     },
     impact(p) {
       for (const s of ["p", "b"]) ev(s, { e: "impact", p: E.persp(p, s) });
@@ -221,7 +237,8 @@ function resetMatch(room) {
 }
 
 function makeRoom(a, b, ranked) {
-  const code = newCode();
+  const code = rooms.size < MAX_ROOMS ? newCode() : null;
+  if (!code) return null;
   const r = { code, players: { p: a, b }, state: "lobby", rematch: {}, ranked };
   resetMatch(r);
   rooms.set(code, r);
@@ -257,7 +274,12 @@ function matchmake() {
     const gap = Math.abs(a.player.tro - b.player.tro);
     if (gap <= Math.min(range(a, now), range(b, now))) {
       queue.splice(i, 2);
-      matchRoom(makeRoom(a, b, true));
+      const r = makeRoom(a, b, true);
+      if (r) matchRoom(r);
+      else {
+        queue.push(a, b); // sin salas libres: siguen en cola
+        break;
+      }
     } else i++;
   }
 }
@@ -289,6 +311,7 @@ function handle(ws, m) {
     case "create": {
       leave(ws);
       const r = makeRoom(ws, null, false);
+      if (!r) return send(ws, { t: "error", msg: "El servidor está lleno. Prueba en un rato." });
       send(ws, { t: "room", code: r.code });
       break;
     }
@@ -303,7 +326,10 @@ function handle(ws, m) {
     case "join": {
       const code = String(m.code || "").toUpperCase().trim();
       const r = rooms.get(code);
-      if (!r) return send(ws, { t: "error", msg: "No existe ninguna sala con el código " + code + "." });
+      if (!r) {
+        if (++ws.badJoins > MAX_BAD_JOINS) return ws.terminate();
+        return send(ws, { t: "error", msg: "No existe ninguna sala con el código " + code.replace(/[^A-Z]/g, "").slice(0, 4) + "." });
+      }
       if (r.players.b || r.players.p === ws) return send(ws, { t: "error", msg: "Esa sala ya está llena." });
       leave(ws);
       r.players.b = ws;
@@ -314,7 +340,7 @@ function handle(ws, m) {
     case "pick": {
       if (!room || room.state !== "pick") return;
       const s = sideOf(room, ws);
-      if (!available(room, s).includes(m.hero) || room.picks[s]) return;
+      if (!isHero(m.hero) || !available(room, s).includes(m.hero) || room.picks[s]) return;
       room.picks[s] = m.hero;
       send(room.players[other(s)], { t: "oppPicked" });
       if (room.picks.p && room.picks.b) startRound(room);
@@ -348,19 +374,45 @@ function handle(ws, m) {
   }
 }
 
-wss.on("connection", (ws) => {
+const perIp = new Map();
+wss.on("connection", (ws, req) => {
+  // un error en una conexión (mensaje gigante, cierre brusco) no puede tumbar el servidor
+  ws.on("error", () => ws.terminate());
+  // Railway pone la IP real en x-forwarded-for
+  const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
+  const n = (perIp.get(ip) || 0) + 1;
+  if (n > MAX_CONN_PER_IP || wss.clients.size > MAX_CONN) return ws.close(1013, "demasiadas conexiones");
+  perIp.set(ip, n);
+  ws.on("close", () => {
+    const k = (perIp.get(ip) || 1) - 1;
+    if (k > 0) perIp.set(ip, k);
+    else perIp.delete(ip);
+  });
+  ws.badJoins = 0;
+  ws.rate = { t: Date.now(), n: 0 };
   ws.player = cleanPlayer({});
   ws.room = null;
   ws.alive = true;
   ws.on("pong", () => (ws.alive = true));
   ws.on("message", (data) => {
+    const now = Date.now();
+    if (now - ws.rate.t >= 1000) ws.rate = { t: now, n: 0 };
+    if (++ws.rate.n > MSG_PER_SEC) {
+      if (ws.rate.n > MSG_PER_SEC * 3) ws.terminate();
+      return;
+    }
     let m;
     try {
       m = JSON.parse(data);
     } catch (e) {
       return;
     }
-    if (m && typeof m.t === "string") handle(ws, m);
+    if (!m || typeof m.t !== "string") return;
+    try {
+      handle(ws, m);
+    } catch (e) {
+      console.error("Mensaje que rompe el servidor:", m.t, e.message);
+    }
   });
   ws.on("close", () => leave(ws));
 });
