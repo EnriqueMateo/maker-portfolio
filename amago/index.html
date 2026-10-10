@@ -573,7 +573,7 @@ body,body[style]{background:
 .tabs{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);z-index:20;display:flex;align-items:flex-end;padding:0 4px max(6px,env(safe-area-inset-bottom));box-sizing:border-box;background:linear-gradient(#27339a,#121957);border-top:3px solid var(--ink);box-shadow:inset 0 3px 0 rgba(255,255,255,.12)}
 .tabs button{flex:1;display:flex;flex-direction:column;align-items:center;background:none;border:0;cursor:pointer;padding:7px 0 4px;position:relative;color:#fff;filter:brightness(.78)}
 .tabs button img{width:40px;height:40px;object-fit:contain;transition:transform .16s var(--e-pop);filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
-.tabs button span{font-family:var(--f-game);font-size:13px;height:0;overflow:hidden;opacity:0}
+.tabs button span{font-family:var(--f-game);font-size:11px;opacity:.8;margin-top:-2px}
 .tabs button.on{filter:none}
 .tabs button.on::before{content:"";position:absolute;inset:-14px 3px -2px;border-radius:16px 16px 0 0;background:linear-gradient(var(--ice-1),var(--ice-2));border:3px solid var(--ink);border-bottom:0;z-index:-1;box-shadow:inset 0 3px 0 #fff}
 .tabs button.on img{transform:translateY(-12px) scale(1.3)}
@@ -601,6 +601,10 @@ body,body[style]{background:
 .godrays.b{animation-direction:reverse;animation-duration:60s;opacity:.55}
 .floorglow{position:absolute;left:50%;bottom:58px;width:300px;height:70px;margin-left:-150px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,240,180,.5),transparent);pointer-events:none}
 .hstage canvas.bigmodel{position:absolute;inset:0;width:100%;height:100%}
+/* tutorial: mano que señala dónde tocar */
+.tuthand{position:fixed;z-index:60;font-size:46px;pointer-events:none;transform:translate(-20%,-10%);opacity:0;transition:opacity .3s;filter:drop-shadow(0 3px 2px #0008)}
+.tuthand.on{opacity:1;animation:tuttap 1s ease-in-out infinite}
+@keyframes tuttap{0%,100%{transform:translate(-20%,-10%) scale(1)}50%{transform:translate(-20%,5%) scale(.88)}}
 /* botón AMAGO del HUD */
 .act.amagob{font:inherit;color:inherit;border:0;cursor:pointer;background:linear-gradient(#b06bff,#7a3ae0);box-shadow:0 3px 0 #3c1585,inset 0 1px 0 #fff5;border-radius:12px;padding:6px 10px;min-height:44px}
 .act.amagob.off{filter:grayscale(.8) brightness(.8)}
@@ -2676,6 +2680,10 @@ const passReady=()=>{ensureDay();let n=0;for(let i=1;i<=passTier();i++){if(!S.pa
 const premWaiting=()=>{let n=0;for(let i=1;i<=passTier();i++)if(!S.pass.gotP.includes(i))n++;return n;};
 const giftReady=()=>S.gift!==today();
 const calReady=()=>S.cal.day!==today()&&S.games>=1;
+/* los sistemas se abren poco a poco: primero jugar; luego diario, misiones, pase y tienda, maestrías */
+const UNLOCK={cal:1,mis:2,pass:3,shop:3,mastery:10},unlocked=k=>S.games>=(UNLOCK[k]||0);
+function calNext(){const c=(S.cal.cyc?CAL2:CAL1)[Math.min(6,S.cal.i||0)]||{};
+  return c.r==="coins"?c.n+" monedas":c.r==="pp"?c.n+" de Poder":c.r==="chest"?"un cofre":c.r==="hero"?"¡un héroe raro!":"un premio";}
 const daysLeft=()=>SEASON_DAYS-((today()-SEASON0)%SEASON_DAYS+SEASON_DAYS)%SEASON_DAYS;
 const seasonDay=()=>SEASON_DAYS-daysLeft()+1;
 function msToMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const s=Math.max(0,(m-n)/1000|0);return `${Math.floor(s/3600)} h ${Math.floor(s%3600/60)} min`;}
@@ -2793,7 +2801,8 @@ function confirmGems(n,label,onOk){
 const PEND={coins:0,pp:0,gems:0};
 function nav(active){
   const it=(t,img,l,n)=>`<button class="${active===t?"on":""}" data-a="tab" data-t="${t}" aria-label="${l}">${n?`<i class="badge">${n}</i>`:""}<img src="${UIA}${img}.webp" alt=""><span class="out">${l}</span></button>`;
-  return `<nav class="tabs">${it("shop","gem","Tienda",giftReady()?"!":0)}${it("heroes","swords","Héroes",anyUp()?"↑":0)}${it("home","house","Inicio")}${it("pass","crown","Pase",passReady())}${it("road","trophy","Trofeos",claimable().length)}</nav>`;
+  const lk=S.games<3;/* al principio, sin avisos rojos en todas partes */
+  return `<nav class="tabs">${it("shop","gem","Tienda",!lk&&giftReady()?"!":0)}${it("heroes","swords","Héroes",!lk&&anyUp()?"↑":0)}${it("home","house","Inicio")}${it("pass","crown","Pase",!lk&&passReady())}${it("road","trophy","Trofeos",claimable().length)}</nav>`;
 }
 function topbar(){
   ensureDay();
@@ -2811,7 +2820,7 @@ function roadBar(){
 }
 /* una sola llamada de atención animada a la vez */
 function attention(){
-  if(S.box.length)return "box";if(calReady())return "cal";if(giftReady())return "gift";if(misReady())return "mis";if(passReady())return "pass";if(claimable().length)return "road";if(anyUp())return "up";return "";
+  if(S.box.length)return "box";if(calReady())return "cal";if(unlocked("shop")&&giftReady())return "gift";if(unlocked("mis")&&misReady())return "mis";if(unlocked("pass")&&passReady())return "pass";if(claimable().length)return "road";if(anyUp())return "up";return "";
 }
 
 /* ---- inicio ---- */
@@ -2825,15 +2834,15 @@ function showHome(){
   <div class="hstage">
     ${SHOW?`<span class="stagehint" aria-hidden="true"></span>`:`<span class="godrays"></span><span class="godrays b"></span><span class="spot"></span><span class="floorglow"></span><span class="bigmodel bob">${heroArt(S.fav)}</span>`}
     <div class="sidecol l">
-      <button class="sbtn" data-a="missions">${mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt=""><span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>
-      <button class="sbtn" data-a="tab" data-t="pass">${passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt=""><span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>
+      ${unlocked("mis")?`<button class="sbtn" data-a="missions">${mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt=""><span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>`:""}
+      ${unlocked("pass")?`<button class="sbtn" data-a="tab" data-t="pass">${passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt=""><span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>`:""}
       ${calReady()?`<button class="sbtn" data-a="calendar"><i class="badge ${at==="cal"?"bob":""}">!</i><span class="sq pnl"><img src="${UIA}chest1.webp" alt=""></span><span class="lb out">Diario</span></button>`:""}
     </div>
     <div class="sidecol r">
       ${box?`<button class="sbtn chest ${at==="box"?"hop":""}" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="lb out">¡Ábrelo!</span></button>`:""}
       <button class="keymod pnl" data-a="keysinfo"><img class="c" src="${UIA}chest1.webp" alt=""><span class="slots">${[0,1,2].map(i=>`<i class="well ${i===S.keys&&S.keys===2?"glow":""}"><img class="${i<S.keys?"":"off"}" src="${UIA}key.webp" alt=""></i>`).join("")}</span></button>
     </div>
-    ${fwOn?`<span class="firstwin pnl">${ico("key")}1.ª victoria del día: llave doble y +30 ${ico("coin","s")}</span>`:S.ws>=2?`<span class="firstwin pnl"><span class="streak">🔥 ${S.ws}</span> victorias seguidas</span>`:""}
+    ${fwOn?`<span class="firstwin pnl">${ico("key")}1.ª victoria del día: llave doble, +30 ${ico("coin","s")} y +20 ${ico("power","s")}</span>`:S.ws>=2?`<span class="firstwin pnl"><span class="streak">🔥 ${S.ws}</span> victorias seguidas</span>`:""}
     <button class="hplate pnl" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>${ico("trophy")} ${S.hw[S.fav]||0}${mastery(S.fav).t>=0?" · "+MASTERY[mastery(S.fav).t].t:""}</small></span><span class="chev">›</span></button>
   </div>
   <div class="playrow2">
@@ -2850,11 +2859,11 @@ function homeEvents(){
   const d=today();
   if(S.seen>=0&&d-S.seen>=3&&S.games>0){const gap=d-S.seen;S.seen=d;save();UI.modal={k:"comeback",gap};renderModal();return;}
   S.seen=d;save();
-  if(calReady()&&S.cal.shown!==d){S.cal.shown=d;save();UI.modal={k:"calendar"};renderModal();return;}
+  if(calReady()&&S.games>=2&&S.cal.shown!==d){S.cal.shown=d;save();UI.modal={k:"calendar"};renderModal();return;}
   maybeOffer();
 }
 function maybeOffer(){
-  const d=today();if(S.games<3||S.lastLoss||S.offerSeen.day===d||S.age.band==="u13"||PAY.none)return;
+  const d=today();if(S.games<3||S.lastLoss||S.offerSeen.day===d||!S.age.band||S.age.band==="u13"||PAY.none)return;
   if(S.offerSeen.keys.season!==S.pass.season&&!S.pass.prem&&S.games>=3){S.offerSeen={day:d,keys:{...S.offerSeen.keys,season:S.pass.season}};save();UI.modal={k:"seasonnew"};renderModal();return;}
   if(!S.purch.starter&&!S.offerSeen.keys.starter&&S.games>=6&&S.troMax<250){S.offerSeen={day:d,keys:{...S.offerSeen.keys,starter:1}};save();UI.modal={k:"starter"};renderModal();return;}
 }
@@ -3373,7 +3382,8 @@ function startMatch(){
   if(G.tutorial){G.oppPool=G.oppPool.filter(i=>!HEROES[i].stealth&&!HEROES[i].fake);if(!G.oppPool.length)G.oppPool=["flecha"];}
   UI.modal={k:"search",found:false};renderModal();
   setTimeout(()=>{if(UI.modal&&UI.modal.k==="search"){UI.modal.found=true;UI.modal.oppHero=G.oppPool[0];renderModal();sfx("banner");}},500);
-  setTimeout(()=>{UI.modal=null;renderModal();G.round=1;showPick();},1300);
+  setTimeout(()=>{UI.modal=null;renderModal();G.round=1;
+    if(G.tutorial){G.pickSel=S.unl.includes("flecha")?"flecha":S.unl[0];startRound();}else showPick();},1300);
 }
 function availP(){const a=S.unl.filter(i=>!G.used.p.includes(i));return a.length?a:S.unl.slice();}
 function starsHTML(s){return [0,1].map(i=>`<span class="${i<G.score[s]?"on":"off"}">★</span>`).join("");}
@@ -3402,7 +3412,23 @@ async function startRound(){
   R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv});
   await vsAndCountdown(tp,tb);
   R.paused=false;
-  toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
+  if(!G.tutorial&&S.games<=3&&$("#amagob"))toast("amagonew","🎭 <b>¡Nuevo: AMAGO!</b> Deja una huella falsa en tu isla para que el rival dispare donde no estás.");
+  if(G.tutorial&&G.round===1){toast("tut1","🫣 Tu héroe está escondido en tu isla <b>verde</b>. El rival, en la <b>roja</b>: ¡adivina dónde y dispárale!");tutHand();}
+  else toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
+}
+/* tutorial: una mano señala una casilla roja cerca del rival hasta que disparas por primera vez */
+function tutHand(){
+  const h=document.createElement("div");h.className="tuthand";h.textContent="👆";document.body.appendChild(h);
+  let target=null;
+  const tick=()=>{
+    if(!R||R.over||UI.screen!=="game"||R.projs.some(p=>p.o==="p")||R.marks.p.some(m=>m.t==="huella")){h.remove();return;}
+    if(R.now>=AMAGO.HIDE_T){
+      if(!target){const f=R.heroes.b;target=[Math.max(0,Math.min(4,f.x+(Math.random()<.5?0:Math.sign(2-f.x)))),f.y];}
+      const c=B3.screenPos("b",target[0],target[1]);h.style.left=c.x+"px";h.style.top=c.y+"px";h.classList.add("on");
+    }
+    requestAnimationFrame(tick);
+  };
+  tick();
 }
 async function vsAndCountdown(tp,tb){
   UI.modal={k:"vs",p:tp,b:tb};renderModal();sfx("banner");
@@ -3479,6 +3505,7 @@ async function endMatch(){
     keysGot=firstWin?2:1;
     if(!S.gemOnce.firstwin){S.gemOnce.firstwin=1;addGems(10,false);}
   }
+  if(!win&&S.games===1)keysGot=1;/* la primera partida siempre da algo, aunque pierdas */
   S.coins+=coins;S.pp+=pp;
   /* llaves → cofre */
   let gotChest=0;const keysBefore=S.keys;
@@ -3500,20 +3527,21 @@ async function endMatch(){
     <div class="chips">
       <div class="chip pnl" data-d="0">${ico("trophy")}<b class="out ${delta>0?"up":delta<0?"dn":""}" id="tro">${delta>0?"+":""}${delta}</b><small>Trofeos · ${before}</small></div>
       <div class="chip pnl" data-d="1">${ico("coin")}<b class="out up" data-cu="${coins}">+0</b><small>Monedas${S.wc.n>=WIN_COINS_CAP&&win?" · tope de hoy":""}</small></div>
-      <div class="chip pnl" data-d="2">${ico("star")}<b class="out up" data-cu="${tk}">+0</b><small>Fichas${tkMult>=2?" ×2":""}</small></div>
+      ${S.games>2?`<div class="chip pnl" data-d="2">${ico("star")}<b class="out up" data-cu="${tk}">+0</b><small>Fichas del pase${tkMult>=2?" ×2":""}</small></div>`:""}
     </div>
     <div class="endrows">
-      ${firstWin?`<div class="erow pnl">${ico("key")}<span>¡Primera victoria del día! Llave doble y +20 de Poder</span><b class="out" style="color:var(--tx-up)">×2</b></div>`:""}
+      ${firstWin?`<div class="erow pnl">${ico("key")}<span>¡Primera victoria del día! Llave doble, +30 monedas y +20 de Poder</span><b class="out" style="color:var(--tx-up)">×2</b></div>`:""}
       ${win&&S.ws>=2?`<div class="erow pnl"><span style="font-size:22px;width:30px;text-align:center">🔥</span><span>${S.ws} victorias seguidas${Math.min(4,S.ws-1)?` · +${Math.min(4,S.ws-1)} trofeos extra`:""}</span></div>`:""}
-      ${keysGot&&!gotChest&&S.box.length<BOX_MAX?`<div class="erow pnl">${ico("chest1")}<span>Llaves: con 3, cofre</span><span class="keyrow">${[0,1,2].map(i=>`<img class="${i<kNow?"":"off"} ${i>=keysBefore&&i<kNow?"new":""}" src="${UIA}key.webp" alt="">`).join("")}</span></div>`:""}
+      ${keysGot&&!gotChest&&S.box.length<BOX_MAX?`<div class="erow pnl">${ico("chest1")}<span>Junta 3 llaves y abres un cofre</span><span class="keyrow">${[0,1,2].map(i=>`<img class="${i<kNow?"":"off"} ${i>=keysBefore&&i<kNow?"new":""}" src="${UIA}key.webp" alt="">`).join("")}</span></div>`:""}
       ${welcome?`<div class="erow pnl">${ico("power")}<span>Regalo de bienvenida: 60 monedas y 40 de Poder. ¡Mejora a tu héroe!</span></div>`:""}
       ${lvGems?`<div class="erow pnl">${ico("gem")}<span>¡Nivel ${level()}! +10 gemas</span></div>`:level()>lvlBefore?`<div class="erow pnl"><span style="font-size:22px;width:30px;text-align:center">⭐</span><span>¡Nivel de jugador ${level()}!</span></div>`:""}
       ${note?`<div class="erow pnl"><span>${note}</span></div>`:""}
+      ${S.games<=3?`<div class="erow pnl"><span style="font-size:22px;width:30px;text-align:center">📅</span><span>${calReady()?`Premio diario esperándote en Inicio: <b>${calNext()}</b>`:`Mañana te espera: <b>${calNext()}</b>`}</span></div>`:""}
       ${!win&&!note?`<p class="sub">${draw?"¡Igualadísimo!":"¡Casi! La próxima es tuya."}</p>`:""}
       ${gotChest?`<button class="endchest feat gold shine" data-a="openbox"><img src="${UIA}chest1.webp" alt=""><span><b class="out">¡3 llaves: cofre!</b><small>Toca para abrirlo</small></span></button>`:""}
       ${misReady()?`<button class="pillbtn" data-a="missions" style="align-self:center">✅ ¡Misión completada! Cóbrala</button>`:claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">${ico("trophy","s")} ¡Premios en el camino de trofeos!</button>`:""}
     </div>
-    <div class="endbtns"><button class="gbtn blue" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt="" style="width:34px;height:34px"></button><button class="gbtn xl shine" data-a="play">JUGAR OTRA</button></div>`);
+    <div class="endbtns"><button class="gbtn blue" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt="" style="width:34px;height:34px"></button><button class="gbtn xl shine" data-a="play">${win||draw?"JUGAR OTRA":"¡REVANCHA!"}</button></div>`);
   /* revelado en secuencia; un toque en cualquier parte lo acelera */
   UI.fast=false;const skip=()=>{UI.fast=true;};document.addEventListener("pointerdown",skip,{once:true});
   const wait=ms=>UI.fast?Promise.resolve():sleep(ms);
@@ -3649,7 +3677,7 @@ function buildArena(){
   <div class="status" id="status"></div>
   <div class="gbottom">
     <div class="ebar" id="ebar"><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},(_,i)=>`<i class="${i===H.cost-1?"cost":""}"><b></b></i>`).join("")}</div></div>
-    <div class="acts"><span class="act">👟 <b>💧${H.mc}</b> moverse</span><span class="act">${patIcon(H.pat)} <b>💧${H.cost}</b> ${H.a.toLowerCase()} ${H.warn?"🔔":"⚡"}</span><button class="act amagob" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla">🎭 <b>💧${AMAGO.decoyCost({type:hp.type})}</b> amago</button><span class="act bst" id="bst"></span></div>
+    <div class="acts"><span class="act">👟 <b>💧${H.mc}</b> moverse</span><span class="act">${patIcon(H.pat)} <b>💧${H.cost}</b> ${H.a.toLowerCase()} ${H.warn?"🔔":"⚡"}</span>${G.tutorial?"":`<button class="act amagob" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla">🎭 <b>💧${AMAGO.decoyCost({type:hp.type})}</b> amago</button>`}<span class="act bst" id="bst"></span></div>
   </div></div>`;
   B3.build($("#gl"),R,arenaOf(S.tro).a.k);B3.onTile=onTile;
 }
@@ -3749,7 +3777,8 @@ document.addEventListener("click",e=>{
     case "qcancel":sfx("tap");queueStop();UI.modal=null;renderModal();break;
     case "qbot":sfx("tap");queueStop();UI.modal=null;renderModal();startMatch();break;
     case "home":sfx("tap");UI.modal=null;renderModal();if(G&&G.online)netClose();G=null;R=null;showHome();break;
-    case "tab":sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop,pass:showPass})[el.dataset.t]();break;
+    case "tab":if(!unlocked(el.dataset.t)){sfx("tap");const r=el.getBoundingClientRect();floatText(r.left+r.width/2,r.top-10,`🔒 Juega ${UNLOCK[el.dataset.t]-S.games} partida${UNLOCK[el.dataset.t]-S.games>1?"s":""} más`,"miss");break;}
+      sfx("tap");UI.modal=null;renderModal();({home:showHome,heroes:showHeroes,road:showRoad,shop:showShop,pass:showPass})[el.dataset.t]();break;
     case "upgrade":upgrade(el.dataset.id);break;
     case "offer":sfx("tap");buyOffer(el.dataset.id);break;
     case "buybox":sfx("tap");buyBox(+el.dataset.t);break;
@@ -3857,7 +3886,6 @@ function bootGame(){
   if(GFX){try{GFX.bakePortraits();}catch(e){console.warn("Sin retratos 3D",e);}}
   if(!B3){app.innerHTML=`<div class="sheet" style="margin:auto"><h2 class="out">AMAGO</h2><p>Tu navegador no puede mostrar gráficos 3D (WebGL). Prueba con Chrome, Safari o Edge actualizados.</p></div>`;}
   else showHome();
-  if(S.games===0&&!S.tips.welcome){S.tips.welcome=1;save();UI.modal={k:"how",i:0};renderModal();}
 }
 if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadAnim3d([S.fav]),SHOW?SHOW.preload(S.fav):0,GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
   Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
