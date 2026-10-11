@@ -87,6 +87,62 @@ async function passCheck(pass, stored) {
 }
 const failed = new Map(); // correo → { n, until }: bloqueo tras muchos intentos fallidos
 
+/* ---- Iniciar sesión con Apple ----
+   Se comprueba la firma del identityToken con las claves públicas de Apple, el emisor, la audiencia (bundle id),
+   la caducidad y el nonce. Con APPLE_TEAM_ID, APPLE_KEY_ID y APPLE_PRIVATE_KEY (clave .p8 de "Sign in with Apple")
+   se guarda además el refresh token para revocarlo al borrar la cuenta, como pide Apple. */
+const APPLE_AUD = (process.env.APPLE_BUNDLE_ID || "com.enriquemateo.amago").split(",");
+const b64u = (s) => Buffer.from(s, "base64url");
+let appleKeys = { at: 0, keys: [] };
+async function appleJwks(force) {
+  if (!force && Date.now() - appleKeys.at < 3600e3 && appleKeys.keys.length) return appleKeys.keys;
+  const r = await fetch("https://appleid.apple.com/auth/keys");
+  if (!r.ok) throw new Error("jwks");
+  appleKeys = { at: Date.now(), keys: (await r.json()).keys || [] };
+  return appleKeys.keys;
+}
+async function appleVerify(token, rawNonce) {
+  const [h64, p64, s64] = String(token || "").split(".");
+  if (!h64 || !p64 || !s64) return null;
+  const head = JSON.parse(b64u(h64).toString("utf8"));
+  const pay = JSON.parse(b64u(p64).toString("utf8"));
+  if (head.alg !== "RS256") return null;
+  let jwk = (await appleJwks()).find((k) => k.kid === head.kid);
+  if (!jwk) jwk = (await appleJwks(true)).find((k) => k.kid === head.kid);
+  if (!jwk) return null;
+  const ok = crypto.verify("RSA-SHA256", Buffer.from(h64 + "." + p64), crypto.createPublicKey({ key: jwk, format: "jwk" }), b64u(s64));
+  if (!ok || pay.iss !== "https://appleid.apple.com" || !APPLE_AUD.includes(pay.aud) || !(pay.exp * 1000 > Date.now()) || !pay.sub) return null;
+  if (pay.nonce && crypto.createHash("sha256").update(String(rawNonce || "")).digest("hex") !== pay.nonce) return null;
+  return pay;
+}
+const appleCfg = () => process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY;
+function appleClientSecret() {
+  const now = Math.floor(Date.now() / 1000);
+  const enc = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  const data = enc({ alg: "ES256", kid: process.env.APPLE_KEY_ID }) + "." + enc({ iss: process.env.APPLE_TEAM_ID, iat: now, exp: now + 300, aud: "https://appleid.apple.com", sub: APPLE_AUD[0] });
+  const key = crypto.createPrivateKey(process.env.APPLE_PRIVATE_KEY.replace(/\\n/g, "\n"));
+  return data + "." + crypto.sign("sha256", Buffer.from(data), { key, dsaEncoding: "ieee-p1363" }).toString("base64url");
+}
+async function appleForm(path, fields) {
+  return fetch("https://appleid.apple.com/auth/" + path, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: APPLE_AUD[0], client_secret: appleClientSecret(), ...fields }) });
+}
+async function appleRefreshToken(code) {
+  if (!appleCfg() || !code) return null;
+  try {
+    const r = await appleForm("token", { code, grant_type: "authorization_code" });
+    const j = await r.json();
+    return j.refresh_token || null;
+  } catch (e) {
+    return null;
+  }
+}
+async function appleRevoke(rt) {
+  if (!appleCfg() || !rt) return;
+  try {
+    await appleForm("revoke", { token: rt, token_type_hint: "refresh_token" });
+  } catch (e) {}
+}
+
 function makeApi(store, opts) {
   const statsKey = process.env.STATS_KEY || (process.env.RAILWAY_ENVIRONMENT ? null : "local");
   return async function api(req, res, url, ip) {
@@ -163,6 +219,45 @@ function makeApi(store, opts) {
           await store.put(u);
           return json(res, 200, { id: u.id, secret, email: u.email, save: u.save, saveAt: u.saveAt }), true;
         }
+        case "/api/apple": {
+          if (limited(ip, "apple", 10)) return json(res, 429, { error: "Demasiados intentos. Espera un minuto." }), true;
+          let pay = null;
+          try {
+            pay = await appleVerify(b.token, b.nonce);
+          } catch (e) {
+            return json(res, 503, { error: "No se pudo comprobar con Apple. Prueba en un rato." }), true;
+          }
+          if (!pay) return json(res, 401, { error: "Apple no ha confirmado tu identidad." }), true;
+          const key = "apple:" + pay.sub;
+          const shown = (pay.email && !pay.is_private_email ? pay.email : "") || "Apple ID";
+          const uid = await store.loginGet(key);
+          if (uid) {
+            // ya tiene cuenta: nueva sesión en este móvil
+            const u = await store.get(uid);
+            if (!u) return json(res, 404, { error: "Cuenta no encontrada." }), true;
+            const secret = newSecret();
+            u.shs = [...(u.shs || []), hash(secret)].slice(-MAX_SESSIONS);
+            u.last = Date.now();
+            if (!u.appleRt) u.appleRt = await appleRefreshToken(b.code);
+            await store.put(u);
+            return json(res, 200, { id: u.id, secret, email: u.email, save: u.save, saveAt: u.saveAt }), true;
+          }
+          // primera vez con Apple: la partida de invitado de este móvil pasa a esta cuenta
+          let u = await auth(store, b.id, b.secret);
+          let secret = b.secret;
+          if (!u || u.email) {
+            const now = Date.now();
+            secret = newSecret();
+            u = { id: newId(), sh: hash(secret), created: now, last: now, name: "", tro: 0, save: null, saveAt: 0, ranked: { w: 0, l: 0 } };
+          }
+          if (!(await store.loginAdd(key, u.id))) return json(res, 409, { error: "Prueba otra vez." }), true;
+          u.apple = pay.sub;
+          u.email = shown;
+          u.regAt = Date.now();
+          u.appleRt = await appleRefreshToken(b.code);
+          await store.put(u);
+          return json(res, 200, { id: u.id, secret, email: u.email, linked: true, save: u.save, saveAt: u.saveAt }), true;
+        }
         case "/api/logout": {
           if (limited(ip, "logout", 10)) return json(res, 429, { error: "espera" }), true;
           const u = await auth(store, b.id, b.secret);
@@ -219,6 +314,7 @@ function makeApi(store, opts) {
           if (limited(ip, "del", 5)) return json(res, 429, { error: "espera" }), true;
           const u = await auth(store, b.id, b.secret);
           if (!u) return json(res, 401, { error: "cuenta" }), true;
+          if (u.appleRt) await appleRevoke(u.appleRt);
           await store.del(u.id);
           return json(res, 200, { ok: true }), true;
         }
