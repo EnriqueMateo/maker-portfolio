@@ -23,6 +23,7 @@ function limited(ip, kind, perMin) {
 }
 setInterval(() => {
   const now = Date.now();
+  for (const [e, f] of failed) if (f.until < now - 15 * 60000) failed.delete(e);
   for (const [k, h] of hits) if (now - h.t > 60000) hits.delete(k);
   for (const [c, l] of links) if (l.until < now) links.delete(c);
 }, 60000).unref();
@@ -53,15 +54,38 @@ const json = (res, code, obj) => {
   res.end(JSON.stringify(obj));
 };
 
-/* comprueba id + secreto; devuelve el usuario o null */
+/* comprueba id + secreto; devuelve el usuario o null.
+   Cada móvil tiene su propio secreto: sh (el que creó la cuenta) y shs (sesiones abiertas con correo y contraseña). */
 async function auth(store, id, secret) {
   if (typeof id !== "string" || typeof secret !== "string" || id.length > 40 || secret.length > 80) return null;
   const u = await store.get(id);
   if (!u) return null;
-  const a = Buffer.from(u.sh, "hex");
   const b = Buffer.from(hash(secret), "hex");
-  return a.length === b.length && crypto.timingSafeEqual(a, b) ? u : null;
+  const same = (h) => {
+    const a = Buffer.from(h || "", "hex");
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  };
+  return same(u.sh) || (u.shs || []).some(same) ? u : null;
 }
+
+/* cuentas con correo y contraseña (scrypt con sal) */
+const MAX_SESSIONS = 6;
+const normEmail = (e) => String(e || "").trim().toLowerCase();
+const okEmail = (e) => e.length <= 120 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+const okPass = (p) => typeof p === "string" && p.length >= 6 && p.length <= 128;
+const scrypt = (pass, salt) => new Promise((res, rej) => crypto.scrypt(pass, salt, 32, { N: 16384, r: 8, p: 1 }, (e, k) => (e ? rej(e) : res(k))));
+async function passHash(pass) {
+  const salt = crypto.randomBytes(16);
+  return salt.toString("hex") + ":" + (await scrypt(pass, salt)).toString("hex");
+}
+async function passCheck(pass, stored) {
+  const [salt, h] = String(stored || "").split(":");
+  if (!salt || !h) return false;
+  const a = Buffer.from(h, "hex");
+  const b = await scrypt(pass, Buffer.from(salt, "hex"));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+const failed = new Map(); // correo → { n, until }: bloqueo tras muchos intentos fallidos
 
 function makeApi(store, opts) {
   const statsKey = process.env.STATS_KEY || (process.env.RAILWAY_ENVIRONMENT ? null : "local");
@@ -101,7 +125,53 @@ function makeApi(store, opts) {
           if (!u) return json(res, 401, { error: "cuenta" }), true;
           u.last = Date.now();
           await store.put(u);
-          return json(res, 200, { save: u.save, saveAt: u.saveAt, tro: u.tro }), true;
+          return json(res, 200, { save: u.save, saveAt: u.saveAt, tro: u.tro, email: u.email || null }), true;
+        }
+        case "/api/register": {
+          // el invitado se da de alta: su cuenta (y su progreso) pasa a tener correo y contraseña
+          if (limited(ip, "reg", 6)) return json(res, 429, { error: "Demasiados intentos. Espera un minuto." }), true;
+          const u = await auth(store, b.id, b.secret);
+          if (!u) return json(res, 401, { error: "cuenta" }), true;
+          if (u.email) return json(res, 409, { error: "Esta partida ya tiene cuenta." }), true;
+          const email = normEmail(b.email);
+          if (!okEmail(email)) return json(res, 400, { error: "Ese correo no parece válido." }), true;
+          if (!okPass(b.pass)) return json(res, 400, { error: "La contraseña necesita al menos 6 caracteres." }), true;
+          if (!(await store.loginAdd(email, u.id))) return json(res, 409, { error: "Ya hay una cuenta con ese correo. Inicia sesión." }), true;
+          u.email = email;
+          u.ph = await passHash(b.pass);
+          u.regAt = Date.now();
+          await store.put(u);
+          return json(res, 200, { ok: true, email }), true;
+        }
+        case "/api/login": {
+          if (limited(ip, "login", 10)) return json(res, 429, { error: "Demasiados intentos. Espera un minuto." }), true;
+          const email = normEmail(b.email);
+          const f = failed.get(email);
+          if (f && f.until > Date.now()) return json(res, 429, { error: "Demasiados intentos con ese correo. Espera 15 minutos." }), true;
+          const uid = okEmail(email) && typeof b.pass === "string" ? await store.loginGet(email) : null;
+          const u = uid ? await store.get(uid) : null;
+          if (!u || !(await passCheck(b.pass, u.ph))) {
+            const n = (f && f.until > Date.now() - 15 * 60000 ? f.n : 0) + 1;
+            failed.set(email, { n, until: n >= 8 ? Date.now() + 15 * 60000 : 0 });
+            return json(res, 401, { error: "Correo o contraseña incorrectos." }), true;
+          }
+          failed.delete(email);
+          // nueva sesión para este móvil (las más antiguas caducan)
+          const secret = newSecret();
+          u.shs = [...(u.shs || []), hash(secret)].slice(-MAX_SESSIONS);
+          u.last = Date.now();
+          await store.put(u);
+          return json(res, 200, { id: u.id, secret, email: u.email, save: u.save, saveAt: u.saveAt }), true;
+        }
+        case "/api/logout": {
+          if (limited(ip, "logout", 10)) return json(res, 429, { error: "espera" }), true;
+          const u = await auth(store, b.id, b.secret);
+          if (!u) return json(res, 200, { ok: true }), true;
+          const h = hash(b.secret);
+          u.shs = (u.shs || []).filter((x) => x !== h);
+          if (u.sh === h && u.email) u.sh = "";
+          await store.put(u);
+          return json(res, 200, { ok: true }), true;
         }
         case "/api/save": {
           if (limited(ip, "save", 30)) return json(res, 429, { error: "espera" }), true;

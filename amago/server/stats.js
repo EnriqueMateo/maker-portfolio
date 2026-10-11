@@ -32,6 +32,10 @@ async function statsPage(store) {
   const has = (u, k, f) => by[u].some((e) => e.k === k && (!f || f(e)));
   const fn = [
     ["Abre el juego", (u) => has(u, "app_open")],
+    ["Empieza el entrenamiento", (u) => has(u, "tut", (e) => e.d && e.d.s === "start")],
+    ["Primer disparo del entrenamiento", (u) => has(u, "tut", (e) => e.d && e.d.s === "escape")],
+    ["Aprende el amago", (u) => has(u, "tut", (e) => e.d && e.d.s === "free2")],
+    ["Termina el entrenamiento", (u) => has(u, "tut", (e) => e.d && e.d.s === "done")],
     ["Toca JUGAR", (u) => has(u, "play_tap")],
     ["Empieza la ronda 1", (u) => has(u, "round_start")],
     ["Primer disparo", (u) => has(u, "first_shot")],
@@ -39,6 +43,7 @@ async function statsPage(store) {
     ["Juega una 2.ª partida", (u) => by[u].filter((e) => e.k === "match_end").length >= 2],
     ["Juega 5 partidas", (u) => by[u].filter((e) => e.k === "match_end").length >= 5],
     ["Vuelve otro día", (u) => days[u].size >= 2],
+    ["Crea cuenta", (u) => has(u, "acc_reg")],
   ];
   const fnRows = fn.map(([n, f]) => [n, uids.filter(f).length]);
 

@@ -13,7 +13,13 @@ function fileStore(dir) {
   fs.mkdirSync(dir, { recursive: true });
   const uf = path.join(dir, "users.json");
   const ef = path.join(dir, "events.ndjson");
+  const lf = path.join(dir, "logins.json");
   let users = {};
+  let logins = {};
+  try {
+    logins = JSON.parse(fs.readFileSync(lf, "utf8"));
+  } catch (e) {}
+  const saveLogins = () => fs.writeFile(lf + ".tmp", JSON.stringify(logins), (err) => !err && fs.rename(lf + ".tmp", lf, () => {}));
   try {
     users = JSON.parse(fs.readFileSync(uf, "utf8"));
   } catch (e) {}
@@ -35,9 +41,20 @@ function fileStore(dir) {
     async del(id) {
       delete users[id];
       dirty = true;
+      for (const [e, u] of Object.entries(logins)) if (u === id) delete logins[e];
+      saveLogins();
+    },
+    async loginGet(email) {
+      return logins[email] || null;
+    },
+    async loginAdd(email, id) {
+      if (logins[email]) return false;
+      logins[email] = id;
+      saveLogins();
+      return true;
     },
     async purge(cutoff) {
-      for (const [id, u] of Object.entries(users)) if ((u.last || 0) < cutoff) delete users[id];
+      for (const [id, u] of Object.entries(users)) if ((u.last || 0) < cutoff && !u.email) delete users[id];
       dirty = true;
       try {
         const keep = fs.readFileSync(ef, "utf8").split("\n").filter((l) => l && JSON.parse(l).t >= cutoff);
@@ -55,7 +72,7 @@ function fileStore(dir) {
       }
     },
     async allUsers() {
-      return Object.values(users);
+      return Object.values(users).map(({ save, ...u }) => u);
     },
   };
 }
@@ -65,7 +82,9 @@ async function pgStore(url) {
   const pool = new Pool({ connectionString: url, ssl: /localhost|127\.0\.0\.1/.test(url) ? false : { rejectUnauthorized: false }, max: 5 });
   await pool.query(`create table if not exists users (id text primary key, data jsonb not null, updated timestamptz default now());
     create table if not exists events (id bigserial primary key, uid text, k text, t bigint, d jsonb);
-    create index if not exists events_t on events (t);`);
+    create index if not exists events_t on events (t);
+    create table if not exists logins (email text primary key, uid text not null, created timestamptz default now());
+    create index if not exists logins_uid on logins (uid);`);
   return {
     kind: "postgres",
     async get(id) {
@@ -78,9 +97,19 @@ async function pgStore(url) {
     async del(id) {
       await pool.query("delete from users where id=$1", [id]);
       await pool.query("delete from events where uid=$1", [id]);
+      await pool.query("delete from logins where uid=$1", [id]);
+    },
+    async loginGet(email) {
+      const r = await pool.query("select uid from logins where email=$1", [email]);
+      return r.rows[0] ? r.rows[0].uid : null;
+    },
+    async loginAdd(email, id) {
+      const r = await pool.query("insert into logins (email,uid) values ($1,$2) on conflict do nothing", [email, id]);
+      return r.rowCount === 1;
     },
     async purge(cutoff) {
-      await pool.query("delete from users where coalesce((data->>'last')::bigint,0) < $1", [cutoff]);
+      // las cuentas registradas no se borran por inactividad; las de invitado, a los 2 años
+      await pool.query("delete from users where coalesce((data->>'last')::bigint,0) < $1 and data->>'email' is null", [cutoff]);
       await pool.query("delete from events where t < $1", [cutoff]);
     },
     async addEvents(rows) {
@@ -97,7 +126,7 @@ async function pgStore(url) {
       return r.rows.map((x) => ({ uid: x.uid, k: x.k, t: Number(x.t), d: x.d }));
     },
     async allUsers() {
-      const r = await pool.query("select data from users");
+      const r = await pool.query("select data - 'save' as data from users");
       return r.rows.map((x) => x.data);
     },
   };

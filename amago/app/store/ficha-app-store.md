@@ -67,15 +67,18 @@ No ads. No sign-up: your progress is saved to the cloud automatically.
 ## Privacidad de la app (App Privacy)
 - **¿Se recopilan datos?** Sí.
 - **Rastreo (tracking) entre apps o webs:** **No**. No se usa el identificador de publicidad.
-- Tipos de datos (todos **no vinculados a tu identidad** y sin rastreo):
+- **Información de contacto → Correo electrónico:** solo si el jugador crea cuenta (es opcional; se puede jugar como invitado). Uso: funcionalidad de la app (iniciar sesión). **Vinculado a la identidad**, sin rastreo.
+- Resto de tipos de datos (**no vinculados a tu identidad** y sin rastreo):
   - **Identificadores → ID de usuario:** identificador anónimo creado por la app. Uso: funcionalidad de la app (guardado en la nube, emparejamiento).
   - **Uso → Interacción con el producto:** pantallas, partidas, duración de rondas. Uso: analítica propia.
   - **Contenido del usuario → Otro contenido:** nombre de jugador y progreso del juego. Uso: funcionalidad de la app.
-- No se recopilan: correo, nombre real, teléfono, ubicación, contactos, fotos, datos de salud, financieros ni de navegación.
+- No se recopilan: nombre real, teléfono, ubicación, contactos, fotos, datos de salud, financieros ni de navegación.
 
 ## Notas para la revisión de Apple
 ```
-No account or login is needed. Tap PLAY to start a guided first match against a bot.
+No account or login is needed: you can play as a guest. The first launch starts a guided training match.
+Creating an account (email + password) is optional and only used to save progress across devices (Settings → Account).
+Account deletion: Settings → Delete account and progress (removes the account and all its data from our server).
 Online mode (Mode → Online) matches you with another player or a bot within ~10 seconds.
 There are no in-app purchases in this version. The game is fully playable offline against bots.
 Content is bundled inside the app; the server is only used for online matches and the optional cloud save.
