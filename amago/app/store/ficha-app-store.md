@@ -5,8 +5,8 @@ Copia y pega cada campo. Los límites de caracteres están comprobados.
 ## Datos generales
 - **Bundle ID:** `com.enriquemateo.amago` · **SKU:** `amago`
 - **Categoría principal:** Juegos → Estrategia · **Secundaria:** Juegos → Acción
-- **URL de soporte:** `https://<tu-dominio-de-railway>/soporte`
-- **URL de la política de privacidad:** `https://<tu-dominio-de-railway>/privacidad` (inglés: `/privacy`)
+- **URL de soporte:** `https://maker-portfolio-production-7712.up.railway.app/soporte`
+- **URL de la política de privacidad:** `https://maker-portfolio-production-7712.up.railway.app/privacidad` (inglés: `/privacy`)
 - **Copyright:** `2026 [NOMBRE DEL RESPONSABLE]`
 - **Precio:** gratis. Sin compras dentro de la app en esta versión.
 
