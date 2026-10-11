@@ -104,8 +104,13 @@ async function appleJwks(force) {
 async function appleVerify(token, rawNonce) {
   const [h64, p64, s64] = String(token || "").split(".");
   if (!h64 || !p64 || !s64) return null;
-  const head = JSON.parse(b64u(h64).toString("utf8"));
-  const pay = JSON.parse(b64u(p64).toString("utf8"));
+  let head, pay;
+  try {
+    head = JSON.parse(b64u(h64).toString("utf8"));
+    pay = JSON.parse(b64u(p64).toString("utf8"));
+  } catch (e) {
+    return null;
+  }
   if (head.alg !== "RS256") return null;
   let jwk = (await appleJwks()).find((k) => k.kid === head.kid);
   if (!jwk) jwk = (await appleJwks(true)).find((k) => k.kid === head.kid);
