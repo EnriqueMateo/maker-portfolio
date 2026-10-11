@@ -1,0 +1,10 @@
+@font-face{font-family:Lilita;src:url(../../../../fonts/lilitaone.woff2)}
+@font-face{font-family:Nunito;src:url(../../../../fonts/nunito.woff2);font-weight:200 1000}
+*{margin:0;box-sizing:border-box}
+body{width:var(--w);height:var(--h);overflow:hidden;position:relative;font-family:Lilita;background:radial-gradient(60% 75% at 50% 42%,#3a8cff 0%,#1d4fd0 40%,#0b1a6a 75%,#070d3a 100%)}
+.rays{position:absolute;inset:-40%;background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.075) 0deg 7deg,transparent 7deg 18deg);}
+.logo{font-family:Lilita;line-height:.9;letter-spacing:.02em;background:linear-gradient(#fff6b0 10%,#ffd23a 45%,#ff9a00 90%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:calc(var(--ls)*0.045) #13163a;filter:drop-shadow(0 calc(var(--ls)*.06) 0 #13163a);font-size:var(--ls)}
+.hero{position:absolute;bottom:0;filter:drop-shadow(0 24px 0 rgba(10,14,50,.45))}
+.sil{filter:brightness(0) drop-shadow(0 0 40px rgba(255,80,90,.9)) opacity(.92)}
+.q{position:absolute;font-family:Lilita;color:#fff;-webkit-text-stroke:10px #13163a;text-shadow:0 14px 0 #13163a}
+.glow{position:absolute;border-radius:50%;filter:blur(60px)}
