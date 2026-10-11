@@ -82,7 +82,9 @@ const server = http.createServer((req, res) => {
   if (asset) return serve(req, res, path.join(root, asset[1], asset[2] + "." + asset[3]), asset[3] === "glb" ? "model/gltf-binary" : "image/webp", 86400);
   const font = url.match(/^\/fonts\/([a-z0-9_-]+)\.woff2$/);
   if (font) return serve(req, res, path.join(root, "fonts", font[1] + ".woff2"), "font/woff2", 604800);
-  if (url === "/privacidad" || url === "/privacy") return serve(req, res, path.join(root, "privacidad.html"), "text/html; charset=utf-8", 3600);
+  if (url === "/privacidad") return serve(req, res, path.join(root, "privacidad.html"), "text/html; charset=utf-8", 3600);
+  if (url === "/privacy") return serve(req, res, path.join(root, "privacy.html"), "text/html; charset=utf-8", 3600);
+  if (url === "/soporte" || url === "/support") return serve(req, res, path.join(root, "soporte.html"), "text/html; charset=utf-8", 3600);
   if (url === "/" || url === "/index.html") return serve(req, res, INDEX, "text/html; charset=utf-8", 0);
   res.writeHead(404, { "content-type": "text/plain" });
   res.end("No encontrado");

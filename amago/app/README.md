@@ -30,7 +30,10 @@ npx cap open ios
 
 ## Privacidad (obligatorio en App Store Connect)
 
-- **URL de la política de privacidad:** `https://<tu-servidor-de-railway>/privacidad` (el archivo es `amago/privacidad.html`; rellena antes `[NOMBRE DEL RESPONSABLE]` y `[CORREO DE CONTACTO]`). También se abre desde Ajustes dentro del juego.
+- **URL de la política de privacidad:** `https://<tu-servidor-de-railway>/privacidad` (en inglés: `/privacy`). Los archivos son `amago/privacidad.html` y `amago/privacy.html`; rellena antes `[NOMBRE DEL RESPONSABLE]` y `[CORREO DE CONTACTO]`. También se abre desde Ajustes dentro del juego.
+- **URL de soporte:** `https://<tu-servidor-de-railway>/soporte` (en inglés: `/support`, archivo `amago/soporte.html`; rellena `[CORREO DE CONTACTO]`).
+- **Textos de la ficha** (nombre, subtítulo, palabras clave, descripción, clasificación por edades, App Privacy y notas para el revisor): `store/ficha-app-store.md`.
+- **Capturas de pantalla** (iPhone 6,9", 1290×2796, en español y en inglés): `store/capturas/es` y `store/capturas/en`.
 - **App Privacy** (cuestionario de Apple): no hay seguimiento ni anuncios. Datos que se envían: el nombre de jugador y los trofeos durante las partidas online (función de la app, no vinculados a la identidad).
 - **Contenido de usuarios:** en el modo Online el rival ve un apodo automático; en salas con amigos los nombres pasan por un filtro de insultos.
 
@@ -38,7 +41,7 @@ npx cap open ios
 
 - Solo iPhone y en vertical. Sin cifrado propio (`ITSAppUsesNonExemptEncryption = false`), así que no hay trámite de exportación.
 - Las compras con dinero real están desactivadas en la app hasta integrar las compras de Apple (StoreKit).
-- El icono (`ios/App/App/Assets.xcassets/AppIcon.appiconset`, 1024×1024 sin transparencia) y la pantalla de carga son provisionales.
+- Icono: `ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png` (1024×1024, sin transparencia) y los `mipmap-*` de Android (icono adaptable con fondo azul). La pantalla de carga está en `Splash.imageset` y en los `drawable*/splash.png` de Android.
 
 
 ## Android (Google Play)
