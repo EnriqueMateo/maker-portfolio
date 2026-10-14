@@ -94,9 +94,11 @@ const failed = new Map(); // correo → { n, until }: bloqueo tras muchos intent
 const APPLE_AUD = (process.env.APPLE_BUNDLE_ID || "com.enriquemateo.amago").split(",");
 const b64u = (s) => Buffer.from(s, "base64url");
 let appleKeys = { at: 0, keys: [] };
+const TIMEOUT = () => AbortSignal.timeout(6000);
 async function appleJwks(force) {
-  if (!force && Date.now() - appleKeys.at < 3600e3 && appleKeys.keys.length) return appleKeys.keys;
-  const r = await fetch("https://appleid.apple.com/auth/keys");
+  // forzar la recarga (kid desconocido) como mucho una vez por minuto
+  if (appleKeys.keys.length && (Date.now() - appleKeys.at < (force ? 60e3 : 3600e3))) return appleKeys.keys;
+  const r = await fetch("https://appleid.apple.com/auth/keys", { signal: TIMEOUT() });
   if (!r.ok) throw new Error("jwks");
   appleKeys = { at: Date.now(), keys: (await r.json()).keys || [] };
   return appleKeys.keys;
@@ -117,9 +119,19 @@ async function appleVerify(token, rawNonce) {
   if (!jwk) return null;
   const ok = crypto.verify("RSA-SHA256", Buffer.from(h64 + "." + p64), crypto.createPublicKey({ key: jwk, format: "jwk" }), b64u(s64));
   if (!ok || pay.iss !== "https://appleid.apple.com" || !APPLE_AUD.includes(pay.aud) || !(pay.exp * 1000 > Date.now()) || !pay.sub) return null;
-  if (pay.nonce && crypto.createHash("sha256").update(String(rawNonce || "")).digest("hex") !== pay.nonce) return null;
+  // nonce obligatorio: el móvil pide a Apple un token atado a un valor secreto que solo él conoce
+  if (!pay.nonce || crypto.createHash("sha256").update(String(rawNonce || "")).digest("hex") !== pay.nonce) return null;
+  // cada token sirve una sola vez (no se puede repetir una petición capturada)
+  const th = crypto.createHash("sha256").update(token).digest("hex");
+  if (usedTokens.has(th)) return null;
+  usedTokens.set(th, pay.exp * 1000);
   return pay;
 }
+const usedTokens = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, exp] of usedTokens) if (exp < now) usedTokens.delete(k);
+}, 60000).unref();
 const appleCfg = () => process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY;
 function appleClientSecret() {
   const now = Math.floor(Date.now() / 1000);
@@ -129,23 +141,40 @@ function appleClientSecret() {
   return data + "." + crypto.sign("sha256", Buffer.from(data), { key, dsaEncoding: "ieee-p1363" }).toString("base64url");
 }
 async function appleForm(path, fields) {
-  return fetch("https://appleid.apple.com/auth/" + path, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: APPLE_AUD[0], client_secret: appleClientSecret(), ...fields }) });
+  return fetch("https://appleid.apple.com/auth/" + path, { method: "POST", signal: TIMEOUT(), headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: APPLE_AUD[0], client_secret: appleClientSecret(), ...fields }) });
 }
+if (!appleCfg()) console.warn("Aviso: faltan APPLE_TEAM_ID / APPLE_KEY_ID / APPLE_PRIVATE_KEY: al borrar una cuenta de Apple no se revocará el acceso.");
 async function appleRefreshToken(code) {
   if (!appleCfg() || !code) return null;
   try {
     const r = await appleForm("token", { code, grant_type: "authorization_code" });
     const j = await r.json();
+    if (!j.refresh_token) console.error("Apple token: sin refresh_token", r.status, j.error || "");
     return j.refresh_token || null;
   } catch (e) {
+    console.error("Apple token: error", e.message);
     return null;
   }
 }
-async function appleRevoke(rt) {
-  if (!appleCfg() || !rt) return;
+/* revoca el acceso en Apple; con refresh token guardado o con un authorizationCode recién pedido al borrar */
+async function appleRevoke(rt, code) {
+  if (!appleCfg()) return false;
   try {
-    await appleForm("revoke", { token: rt, token_type_hint: "refresh_token" });
-  } catch (e) {}
+    let token = rt, hint = "refresh_token";
+    if (!token && code) {
+      const r = await appleForm("token", { code, grant_type: "authorization_code" });
+      const j = await r.json();
+      token = j.refresh_token || j.access_token;
+      hint = j.refresh_token ? "refresh_token" : "access_token";
+    }
+    if (!token) return false;
+    const r = await appleForm("revoke", { token, token_type_hint: hint });
+    if (!r.ok) console.error("Apple revoke: HTTP", r.status);
+    return r.ok;
+  } catch (e) {
+    console.error("Apple revoke: error", e.message);
+    return false;
+  }
 }
 
 function makeApi(store, opts) {
@@ -186,7 +215,7 @@ function makeApi(store, opts) {
           if (!u) return json(res, 401, { error: "cuenta" }), true;
           u.last = Date.now();
           await store.put(u);
-          return json(res, 200, { save: u.save, saveAt: u.saveAt, tro: u.tro, email: u.email || null }), true;
+          return json(res, 200, { save: u.save, saveAt: u.saveAt, rev: u.rev || 0, tro: u.tro, email: u.email || null, via: u.apple ? "apple" : u.email ? "email" : null, now: Date.now() }), true;
         }
         case "/api/register": {
           // el invitado se da de alta: su cuenta (y su progreso) pasa a tener correo y contraseña
@@ -222,7 +251,7 @@ function makeApi(store, opts) {
           u.shs = [...(u.shs || []), hash(secret)].slice(-MAX_SESSIONS);
           u.last = Date.now();
           await store.put(u);
-          return json(res, 200, { id: u.id, secret, email: u.email, save: u.save, saveAt: u.saveAt }), true;
+          return json(res, 200, { id: u.id, secret, email: u.email, via: u.apple ? "apple" : "email", save: u.save, saveAt: u.saveAt, rev: u.rev || 0 }), true;
         }
         case "/api/apple": {
           if (limited(ip, "apple", 10)) return json(res, 429, { error: "Demasiados intentos. Espera un minuto." }), true;
@@ -234,7 +263,7 @@ function makeApi(store, opts) {
           }
           if (!pay) return json(res, 401, { error: "Apple no ha confirmado tu identidad." }), true;
           const key = "apple:" + pay.sub;
-          const shown = (pay.email && !pay.is_private_email ? pay.email : "") || "Apple ID";
+          const shown = "Apple ID";
           const uid = await store.loginGet(key);
           if (uid) {
             // ya tiene cuenta: nueva sesión en este móvil
@@ -245,7 +274,7 @@ function makeApi(store, opts) {
             u.last = Date.now();
             if (!u.appleRt) u.appleRt = await appleRefreshToken(b.code);
             await store.put(u);
-            return json(res, 200, { id: u.id, secret, email: u.email, save: u.save, saveAt: u.saveAt }), true;
+            return json(res, 200, { id: u.id, secret, email: u.email, via: u.apple ? "apple" : "email", save: u.save, saveAt: u.saveAt, rev: u.rev || 0 }), true;
           }
           // primera vez con Apple: la partida de invitado de este móvil pasa a esta cuenta
           let u = await auth(store, b.id, b.secret);
@@ -261,7 +290,7 @@ function makeApi(store, opts) {
           u.regAt = Date.now();
           u.appleRt = await appleRefreshToken(b.code);
           await store.put(u);
-          return json(res, 200, { id: u.id, secret, email: u.email, linked: true, save: u.save, saveAt: u.saveAt }), true;
+          return json(res, 200, { id: u.id, secret, email: u.email, via: "apple", linked: true, save: u.save, saveAt: u.saveAt, rev: u.rev || 0 }), true;
         }
         case "/api/logout": {
           if (limited(ip, "logout", 10)) return json(res, 429, { error: "espera" }), true;
@@ -277,17 +306,29 @@ function makeApi(store, opts) {
           if (limited(ip, "save", 30)) return json(res, 429, { error: "espera" }), true;
           const u = await auth(store, b.id, b.secret);
           if (!u) return json(res, 401, { error: "cuenta" }), true;
-          const at = Number(b.at) || 0;
-          if (!b.save || typeof b.save !== "object") return json(res, 400, { error: "datos" }), true;
+          if (!b.save || typeof b.save !== "object" || Array.isArray(b.save)) return json(res, 400, { error: "datos" }), true;
           if (JSON.stringify(b.save).length > MAX_SAVE) return json(res, 413, { error: "grande" }), true;
-          if (at <= (u.saveAt || 0)) return json(res, 200, { ok: false, newer: true, saveAt: u.saveAt }), true;
+          // versión del guardado: la pone el servidor (la hora del móvil se puede adelantar y bloquear a los demás)
+          const rev = Number(b.rev);
+          if (u.rev && rev !== u.rev) return json(res, 200, { ok: false, newer: true, rev: u.rev, save: u.save, saveAt: u.saveAt }), true;
+          const now = Date.now();
+          // trofeos: los de las partidas contra el bot llegan en el guardado, pero solo pueden moverse lo que permiten
+          // las partidas jugadas desde el último guardado (y como mucho una partida cada ~45 s). Los online los pone el servidor.
+          const games = Math.max(0, Math.min(1e6, Math.floor(Number(b.save.games) || 0)));
+          const prevG = u.games || 0;
+          const dG = Math.max(0, Math.min(games - prevG, Math.floor((now - (u.saveAt || u.created || now)) / 45000) + 2));
+          if (typeof b.save.tro === "number" && Number.isFinite(b.save.tro)) {
+            const cur = u.tro || 0;
+            u.tro = Math.max(0, Math.max(cur - dG * 6, Math.min(cur + dG * 20, Math.round(b.save.tro))));
+          }
+          u.games = prevG + dG;
+          b.save.tro = u.tro || 0;
           u.save = b.save;
-          u.saveAt = at;
-          u.last = Date.now();
-          // trofeos: el guardado trae los de las partidas contra el bot; los de las partidas online los suma el servidor
-          if (typeof b.save.tro === "number") u.tro = Math.max(0, Math.min(99999, Math.round(b.save.tro)));
+          u.rev = (u.rev || 0) + 1;
+          u.saveAt = now;
+          u.last = now;
           await store.put(u);
-          return json(res, 200, { ok: true }), true;
+          return json(res, 200, { ok: true, rev: u.rev, tro: u.tro || 0 }), true;
         }
         case "/api/link": {
           // código de 6 letras para pasar la cuenta a otro móvil (15 min)
@@ -311,15 +352,16 @@ function makeApi(store, opts) {
           // nuevo secreto: el móvil antiguo deja de poder guardar en esta cuenta
           const secret = newSecret();
           u.sh = hash(secret);
+          u.shs = [];
           await store.put(u);
-          return json(res, 200, { id: u.id, secret, save: u.save, saveAt: u.saveAt }), true;
+          return json(res, 200, { id: u.id, secret, save: u.save, saveAt: u.saveAt, rev: u.rev || 0, email: u.email || null }), true;
         }
         case "/api/del": {
           // borrar progreso: la cuenta y su guardado desaparecen del servidor
           if (limited(ip, "del", 5)) return json(res, 429, { error: "espera" }), true;
           const u = await auth(store, b.id, b.secret);
           if (!u) return json(res, 401, { error: "cuenta" }), true;
-          if (u.appleRt) await appleRevoke(u.appleRt);
+          if (u.apple) await appleRevoke(u.appleRt, typeof b.code === "string" ? b.code : null);
           await store.del(u.id);
           return json(res, 200, { ok: true }), true;
         }

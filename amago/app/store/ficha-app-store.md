@@ -7,7 +7,7 @@ Copia y pega cada campo. Los límites de caracteres están comprobados.
 - **Categoría principal:** Juegos → Estrategia · **Secundaria:** Juegos → Acción
 - **URL de soporte:** `https://maker-portfolio-production-7712.up.railway.app/soporte`
 - **URL de la política de privacidad:** `https://maker-portfolio-production-7712.up.railway.app/privacidad` (inglés: `/privacy`)
-- **Copyright:** `2026 [NOMBRE DEL RESPONSABLE]`
+- **Copyright:** `2026 Enrique Mateo Cobo`
 - **Precio:** gratis. Sin compras dentro de la app en esta versión.
 
 ## Español (España y México)
@@ -30,7 +30,7 @@ AMAGO es un duelo 1 contra 1 en tiempo real en el que nadie ve al otro. Tu héro
 • REPETICIÓN: mira dónde estaba de verdad tu rival y comparte el clip.
 • PROGRESA: trofeos, 5 arenas, cofres, misiones diarias y un pase de temporada gratis.
 
-Sin anuncios. Sin registro: tu progreso se guarda solo en la nube.
+Sin anuncios. Juega como invitado al momento; crea una cuenta gratis (Apple o correo) para no perder tu progreso y jugar en cualquier móvil.
 ```
 
 ## English (EE. UU., Reino Unido…)
@@ -53,7 +53,7 @@ AMAGO is a real-time 1v1 duel where nobody can see the other player. Your hero h
 • REPLAY: see where your rival really was and share the clip.
 • PROGRESS: trophies, 5 arenas, chests, daily quests and a free season pass.
 
-No ads. No sign-up: your progress is saved to the cloud automatically.
+No ads. Play instantly as a guest; create a free account (Apple or email) to keep your progress on any device.
 ```
 
 ## Clasificación por edad (cuestionario de Apple)

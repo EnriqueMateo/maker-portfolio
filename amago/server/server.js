@@ -2,6 +2,7 @@
 // Modos: sala privada con código (amigos) y cola de emparejamiento por trofeos (online).
 // El motor de reglas se lee del propio index.html (bloque ENGINE), así cliente y servidor juegan con las mismas reglas.
 "use strict";
+const crypto = require("crypto");
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -24,7 +25,6 @@ const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 const MM_BASE = 80; // ±trofeos al entrar en la cola
 const MM_GROW = 40; // +trofeos por segundo de espera
 const MM_EVERY_MS = 1000;
-const BOT_AFTER_MS = 10000;
 const GRACE_MS = 15000;
 const PICK_MS = 20000; // quien no elige héroe en 20 s juega con uno al azar (nadie puede bloquear la partida) // si se corta la conexión (llamada, app en segundo plano), 15 s para volver a la partida // sin rival humano en este tiempo: rival bot de tu nivel
 // límites contra abuso
@@ -34,6 +34,10 @@ const MAX_CONN_PER_IP = 8;
 const MAX_CONN = 3000;
 const MAX_ROOMS = 4000;
 const MAX_BAD_JOINS = 8; // códigos erróneos por conexión antes de cortarla
+const BAD_JOINS_PER_IP = 30; // códigos erróneos por IP en 10 min antes de bloquear las uniones
+const ROOMS_PER_IP_MIN = 6; // salas privadas creadas por IP y minuto
+const LOBBY_TTL_MS = 10 * 60000; // una sala privada sin rival caduca a los 10 min
+const AWAY_BUDGET_MS = 25000; // tiempo total que un jugador puede estar desconectado en una partida
 const isHero = (id) => typeof id === "string" && Object.prototype.hasOwnProperty.call(E.HEROES, id);
 
 function loadEngine() {
@@ -64,7 +68,14 @@ function serve(req, res, file, type, maxAge) {
   res.end(gz ? c.gz : c.body);
 }
 
-const clientIp = (req) => String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
+/* IP real del cliente: x-real-ip (la pone el proxy de Railway) o el ÚLTIMO valor de x-forwarded-for.
+   El primero lo puede escribir el propio cliente y serviría para saltarse los límites por IP. */
+const clientIp = (req) => {
+  const real = String(req.headers["x-real-ip"] || "").trim();
+  if (real) return real;
+  const xff = String(req.headers["x-forwarded-for"] || "").split(",").map((x) => x.trim()).filter(Boolean);
+  return xff.length ? xff[xff.length - 1] : String(req.socket.remoteAddress || "");
+};
 const server = http.createServer((req, res) => {
   const url = req.url.split("?")[0];
   if (API && (url.startsWith("/api/") || url === "/stats")) {
@@ -73,7 +84,7 @@ const server = http.createServer((req, res) => {
   }
   if (url === "/health") {
     res.writeHead(200, { "content-type": "text/plain" });
-    res.end("ok " + wss.clients.size + " conectados, " + rooms.size + " salas, " + queue.length + " en cola");
+    res.end("ok");
     return;
   }
   const root = path.join(__dirname, "..");
@@ -160,13 +171,13 @@ function startPick(room) {
       room.picks.b = av[Math.floor(Math.random() * av.length)];
       send(room.players.p, { t: "oppPicked" });
       if (room.picks.p && room.picks.b) startRound(room);
-    }, 1500 + Math.random() * 2500);
+    }, 1500 + Math.random() * Math.random() * 9000);
   }
 }
 
 /* rival bot para el online: nombre, trofeos y héroes como los de un jugador de tu nivel */
 function makeBot(forWs) {
-  const tro = Math.max(0, (forWs.player.tro || 0) + Math.floor(Math.random() * 41) - 20);
+  const tro = Math.max(0, (forWs.player.tro || 0) + Math.round((Math.random() + Math.random() - 1) * 55));
   const maxR = Math.min(3, 1 + Math.floor(tro / 150));
   const pool = E.IDS.filter((id) => E.HEROES[id].rar <= maxR).sort(() => Math.random() - 0.5);
   const k = tro / 400; // 0 = flojo, 1+ = fuerte
@@ -187,8 +198,28 @@ function available(room, s) {
   return left.length ? left : p.unl;
 }
 
+/* ids opacos por sala: el contador global del motor deja huecos con los pasos que no ves */
+function oid(room, id) {
+  if (id == null) return id;
+  let v = room.ids.get(id);
+  if (v === undefined) {
+    v = crypto.randomInt(1, 2 ** 31);
+    room.ids.set(id, v);
+  }
+  return v;
+}
+function opaque(room, x) {
+  if (Array.isArray(x)) return x.map((y) => opaque(room, y));
+  if (x && typeof x === "object") {
+    const o = {};
+    for (const [k, v] of Object.entries(x)) o[k] = k === "id" && typeof v === "number" ? oid(room, v) : opaque(room, v);
+    return o;
+  }
+  return x;
+}
+const viewOf = (room, R, s) => opaque(room, E.viewFor(R, s));
 function makeHooks(room) {
-  const ev = (s, e) => send(room.players[s], Object.assign({ t: "ev" }, e));
+  const ev = (s, e) => send(room.players[s], opaque(room, Object.assign({ t: "ev" }, e)));
   return {
     fired(p) {
       ev(p.o, { e: "fired", p: E.persp(p, p.o) });
@@ -232,6 +263,7 @@ function startRound(room) {
   const bot = room.players.b && room.players.b.isBot ? room.players.b : null;
   const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params } : undefined);
   room.R = R;
+  room.ids = new Map();
   room.state = "count";
   room.hooks = makeHooks(room);
   broadcast(room, (s) => ({
@@ -239,7 +271,7 @@ function startRound(room) {
     round: room.round,
     you: room.picks[s],
     opp: room.picks[other(s)],
-    view: E.viewFor(R, s),
+    view: viewOf(room, R, s),
   }));
   room.timer = setTimeout(() => {
     if (room.R !== R) return;
@@ -263,7 +295,7 @@ function startRound(room) {
         }
       }
       if (room.R === R && !R.over && ++n % VIEW_EVERY === 0) {
-        broadcast(room, (s) => ({ t: "view", v: E.viewFor(R, s) }));
+        broadcast(room, (s) => ({ t: "view", v: viewOf(room, R, s) }));
       }
     }, TICK_MS);
   }, COUNTDOWN_MS);
@@ -345,16 +377,18 @@ function resetMatch(room) {
 function makeRoom(a, b, ranked) {
   const code = rooms.size < MAX_ROOMS ? newCode() : null;
   if (!code) return null;
-  const r = { code, players: { p: a, b }, state: "lobby", rematch: {}, ranked };
+  const r = { code, players: { p: a, b }, state: "lobby", rematch: {}, ranked, awayUsed: {}, awaySince: {}, ids: new Map() };
   resetMatch(r);
   rooms.set(code, r);
+  // sala privada esperando rival: caduca a los 10 min (no se acumulan salas vacías ni códigos que adivinar)
+  if (!b) setTimeout(() => { if (rooms.get(code) === r && r.state === "lobby" && !r.players.b) leave(r.players.p); }, LOBBY_TTL_MS).unref();
   a.room = code;
   if (b) b.room = code;
   return r;
 }
 
 function matchRoom(r) {
-  r.tokens = { p: require("crypto").randomBytes(12).toString("base64url"), b: require("crypto").randomBytes(12).toString("base64url") };
+  r.tokens = { p: crypto.randomBytes(12).toString("base64url"), b: crypto.randomBytes(12).toString("base64url") };
   // en el modo Online el rival ve un apodo automático (nada escrito por otros jugadores); con amigos, el nombre filtrado
   broadcast(r, (s) => {
     const o = r.players[other(s)];
@@ -365,6 +399,29 @@ function matchRoom(r) {
 
 /* cola online: empareja por trofeos; el rango crece con la espera de los dos */
 const queue = [];
+function enqueue(ws) {
+  ws.qAt = Date.now();
+  ws.botAt = ws.qAt + 8000 + Math.random() * 10000; // si no hay nadie, rival en 8-18 s (como un emparejamiento real)
+  queue.push(ws);
+  send(ws, { t: "queued" });
+  matchmake();
+}
+/* contadores por IP con ventana; se limpian solos */
+const badJoins = new Map();
+const roomsByIp = new Map();
+function rateIp(map, ip, win) {
+  const now = Date.now();
+  let e = map.get(ip);
+  if (!e || now - e.t > win) e = { t: now, n: 0 };
+  e.n++;
+  map.set(ip, e);
+  return e.n;
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, e] of badJoins) if (now - e.t > 600000) badJoins.delete(k);
+  for (const [k, e] of roomsByIp) if (now - e.t > 60000) roomsByIp.delete(k);
+}, 60000).unref();
 const unqueue = (ws) => {
   const i = queue.indexOf(ws);
   if (i >= 0) queue.splice(i, 1);
@@ -393,7 +450,7 @@ function botFill() {
   const now = Date.now();
   for (let i = queue.length - 1; i >= 0; i--) {
     const ws = queue[i];
-    if (ws.readyState !== 1 || now - ws.qAt < BOT_AFTER_MS) continue;
+    if (ws.readyState !== 1 || now < ws.botAt) continue;
     queue.splice(i, 1);
     const r = makeRoom(ws, makeBot(ws), true);
     if (r) matchRoom(r);
@@ -412,13 +469,17 @@ function onClose(ws) {
   const s = room && sideOf(room, ws);
   if (room && s && ["pick", "count", "play", "roundEnd"].includes(room.state)) {
     room.away = room.away || {};
+    // presupuesto total de ausencia por partida: cortar y volver una y otra vez no puede congelar la partida
+    const left = Math.min(GRACE_MS, AWAY_BUDGET_MS - (room.awayUsed[s] || 0));
+    if (left <= 1000) return leave(ws);
     if (room.R && !room.R.over) room.R.paused = true;
-    send(room.players[other(s)], { t: "oppAway", sec: GRACE_MS / 1000 });
+    room.awaySince[s] = Date.now();
+    send(room.players[other(s)], { t: "oppAway", sec: Math.round(left / 1000) });
     room.away[s] = setTimeout(() => {
       if (room.players[s] !== ws) return; // ya volvió con otra conexión
       delete room.away[s];
       leave(ws);
-    }, GRACE_MS);
+    }, left);
     return;
   }
   leave(ws);
@@ -447,18 +508,38 @@ function leave(ws, notify = true) {
 function handle(ws, m) {
   const room = ws.room ? rooms.get(ws.room) : null;
   switch (m.t) {
-    case "hello":
+    case "hello": {
+      // una sola presentación por conexión: cambiarla a mitad de partida permitiría cambiar trofeos o de cuenta
+      if (ws.helloed) return;
+      ws.helloed = true;
       ws.player = cleanPlayer(m);
-      if (STORE && m.id && m.secret)
+      if (STORE) {
+        // con base de datos, trofeos y héroes salen de la cuenta, nunca de lo que diga el móvil
+        ws.player.tro = 0;
+        ws.player.unl = E.STARTERS.slice();
+        if (!m.id || !m.secret) break;
+        ws.authPending = true;
         auth(STORE, m.id, m.secret)
           .then((u) => {
             if (!u) return;
             ws.uid = u.id;
-            ws.player.tro = u.tro || 0; // para emparejar cuentan los trofeos guardados en el servidor
+            ws.player.tro = u.tro || 0;
+            const unl = u.save && Array.isArray(u.save.unl) ? [...new Set(u.save.unl.filter(isHero))] : [];
+            if (unl.length >= 3) ws.player.unl = unl;
           })
-          .catch(() => {});
+          .catch(() => {})
+          .finally(() => {
+            ws.authPending = false;
+            if (ws.wantQueue && ws.readyState === 1) {
+              ws.wantQueue = false;
+              enqueue(ws);
+            }
+          });
+      }
       break;
+    }
     case "create": {
+      if (rateIp(roomsByIp, ws.ip, 60000) > ROOMS_PER_IP_MIN) return send(ws, { t: "error", msg: "Espera un momento antes de crear otra sala." });
       leave(ws);
       const r = makeRoom(ws, null, false);
       if (!r) return send(ws, { t: "error", msg: "El servidor está lleno. Prueba en un rato." });
@@ -467,16 +548,21 @@ function handle(ws, m) {
     }
     case "queue": {
       leave(ws);
-      ws.qAt = Date.now();
-      queue.push(ws);
-      send(ws, { t: "queued", n: queue.length });
-      matchmake();
+      if (STORE && !ws.uid && !ws.authPending) return send(ws, { t: "error", msg: "No se pudo comprobar tu cuenta. Revisa la conexión y vuelve a intentarlo." });
+      if (ws.authPending) {
+        ws.wantQueue = true; // se pone en cola en cuanto se compruebe la cuenta
+        return send(ws, { t: "queued" });
+      }
+      enqueue(ws);
       break;
     }
     case "join": {
       const code = String(m.code || "").toUpperCase().trim();
+      const bad = badJoins.get(ws.ip);
+      if (bad && bad.n >= BAD_JOINS_PER_IP && Date.now() - bad.t < 600000) return send(ws, { t: "error", msg: "Demasiados códigos erróneos. Espera unos minutos." });
       const r = rooms.get(code);
       if (!r) {
+        rateIp(badJoins, ws.ip, 600000);
         if (++ws.badJoins > MAX_BAD_JOINS) return ws.terminate();
         return send(ws, { t: "error", msg: "No existe ninguna sala con el código " + code.replace(/[^A-Z]/g, "").slice(0, 4) + "." });
       }
@@ -526,12 +612,14 @@ function handle(ws, m) {
       if (!r || !s || !r.away || !r.away[s]) return send(ws, { t: "resumeFail" });
       clearTimeout(r.away[s]);
       delete r.away[s];
+      r.awayUsed[s] = (r.awayUsed[s] || 0) + (Date.now() - (r.awaySince[s] || Date.now()));
+      leave(ws, false); // por si estaba en otra cola o sala (con su propia cuenta, antes de tomar la de esta partida)
       const old = r.players[s];
       ws.player = old.player;
       ws.uid = old.uid;
       ws.alias = old.alias;
+      ws.helloed = true;
       old.room = null;
-      leave(ws, false); // por si estaba en otra cola o sala
       r.players[s] = ws;
       ws.room = r.code;
       if (r.R && !r.R.over && r.state === "play" && !Object.keys(r.away).length) r.R.paused = false;
@@ -545,7 +633,7 @@ function handle(ws, m) {
         picked: !!(r.picks && r.picks[s]),
         you: r.picks && r.picks[s],
         opp: r.picks && r.picks[other(s)],
-        view: r.R && !r.R.over ? E.viewFor(r.R, s) : null,
+        view: r.R && !r.R.over ? viewOf(r, r.R, s) : null,
       });
       break;
     }
@@ -559,8 +647,8 @@ const perIp = new Map();
 wss.on("connection", (ws, req) => {
   // un error en una conexión (mensaje gigante, cierre brusco) no puede tumbar el servidor
   ws.on("error", () => ws.terminate());
-  // Railway pone la IP real en x-forwarded-for
-  const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
+  const ip = clientIp(req);
+  ws.ip = ip;
   const n = (perIp.get(ip) || 0) + 1;
   if (n > MAX_CONN_PER_IP || wss.clients.size > MAX_CONN) return ws.close(1013, "demasiadas conexiones");
   perIp.set(ip, n);

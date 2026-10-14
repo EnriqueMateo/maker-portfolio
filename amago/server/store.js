@@ -41,6 +41,10 @@ function fileStore(dir) {
     async del(id) {
       delete users[id];
       dirty = true;
+      try {
+        const keep = fs.readFileSync(ef, "utf8").split("\n").filter((l) => l && JSON.parse(l).uid !== id);
+        fs.writeFileSync(ef, keep.join("\n") + (keep.length ? "\n" : ""));
+      } catch (e) {}
       for (const [e, u] of Object.entries(logins)) if (u === id) delete logins[e];
       saveLogins();
     },
