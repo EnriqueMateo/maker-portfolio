@@ -2211,7 +2211,7 @@ function glbHero(id){
   return root;
 }
 /* ---- héroes 2D: la ilustración como una figura de cartón que siempre mira a la cámara ---- */
-const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco"],SPRITES={},SPRITE_H={flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05};
+const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira"],SPRITES={},SPRITE_H={flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
 const SKIN_LIST=["brasa_glacial","muro_magma","sombra_carmesi","truco_artico","ojo_nevado"];
 function loadSprites(){
   const L=new T.TextureLoader();
@@ -2240,6 +2240,7 @@ const RIG2D={
   mina:{h:[.48,.68],n:[.47,.42],c:[.47,.25],sL:[.22,.48],hL:[.2,.8],sR:[.7,.46],hR:[.85,.5],pL:[.38,.76],fL:[.33,.96],pR:[.6,.76],fR:[.62,.96],atk:"throw",m:"R"},
   salto:{h:[.5,.68],n:[.5,.45],c:[.5,.25],sL:[.32,.5],hL:[.2,.9],sR:[.68,.48],hR:[.88,.6],pL:[.4,.74],fL:[.45,.95],pR:[.62,.74],fR:[.74,.92],x:[["cinta","head",[.22,.18],[.02,.32]]],atk:"throw",m:"R"},
   savia:{h:[.42,.65],n:[.4,.45],c:[.38,.28],sL:[.33,.5],hL:[.2,.6],sR:[.5,.5],hR:[.64,.62],pL:[.4,.75],fL:[.42,.96],pR:[.47,.75],fR:[.5,.92],x:[["alaL","spine",[.32,.45],[.12,.3]],["alaR","spine",[.52,.42],[.8,.25]]],atk:"shoot",m:"L"},
+  mira:{h:[.38,.66],n:[.35,.42],c:[.33,.27],sL:[.25,.48],hL:[.4,.52],sR:[.5,.48],hR:[.6,.5],pL:[.3,.74],fL:[.22,.95],pR:[.45,.74],fR:[.48,.95],x:[["capa","spine",[.2,.5],[.06,.78]]],atk:"shoot",m:"R"},
   eco:{h:[.5,.65],n:[.5,.48],c:[.5,.32],sL:[.38,.5],hL:[.1,.62],sR:[.62,.5],hR:[.9,.62],pL:[.45,.76],fL:[.4,.95],pR:[.55,.76],fR:[.6,.92],atk:"breath",m:"R"},
   brasa_glacial:{h:[.58,.68],n:[.58,.42],c:[.6,.25],sL:[.42,.48],hL:[.38,.6],sR:[.75,.48],hR:[.82,.62],pL:[.5,.78],fL:[.45,.96],pR:[.72,.78],fR:[.8,.96],x:[["cola","root",[.35,.72],[.08,.5]]],atk:"breath",m:"R"},
   muro_magma:{h:[.5,.65],n:[.5,.42],c:[.5,.3],sL:[.25,.3],hL:[.14,.72],sR:[.75,.3],hR:[.85,.72],pL:[.4,.78],fL:[.38,.96],pR:[.6,.78],fR:[.62,.96],atk:"slam",m:"R"},
