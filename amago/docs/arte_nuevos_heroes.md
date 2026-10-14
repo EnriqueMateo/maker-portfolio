@@ -35,3 +35,28 @@ Uno cada 2–3 semanas como **novedad**:
 2. Se puede conseguir **jugando** en el camino de trofeos o en el pase.
 
 Orden recomendado (de más fácil de entender a más raro): Mira → Salto → Mina → Savia → Eco.
+
+## Aspectos de verdad (sustituyen al filtro de color actual)
+
+Ahora un aspecto es el mismo dibujo con otro tono (`SKINS` en `index.html`, campo `f`). Para que se vendan, cada aspecto necesita **su propia ilustración**: otra ropa, otros accesorios y otra paleta, misma silueta para que se reconozca al héroe.
+Usa la misma base de estilo y adjunta la imagen del héroe original como referencia («el mismo personaje, misma pose y proporciones, pero con este aspecto»). Guarda cada uno como `art/concepts/<héroe>_<aspecto>.jpg`.
+
+**Los 5 que ya existen en la tienda (prioridad):**
+
+| Aspecto | Prompt |
+|---|---|
+| Brasa Glacial (`brasa_glacial`) | Dragón de hielo: escamas azul claro translúcidas, cuernos de carámbano, su llama de la cola es fuego azul helado, bufanda de lana blanca. |
+| Muro Magma (`muro_magma`) | Gólem de roca volcánica negra con grietas de lava naranja brillante, humo saliendo de los hombros, puños incandescentes. |
+| Sombra Carmesí (`sombra_carmesi`) | Ninja con traje rojo intenso y negro, máscara de demonio oni, bufanda larga roja ondeando, shurikens dorados. |
+| Truco Ártico (`truco_artico`) | Zorro ártico blanco con pelaje esponjoso, gorro de lana azul con pompón, guantes, aliento visible de frío. |
+| Ojo Nevado (`ojo_nevado`) | Búho nival blanco con manchas grises, gafas de aviador de esquí, orejeras, catalejo plateado. |
+
+**Ideas para los siguientes (de temporada, 2 por héroe):**
+
+- Flecha: «Flecha Pirata» (sombrero de tricornio, parche, arco de madera de barco) · «Flecha Neón» (traje futurista con luces cian, arco holográfico).
+- Brasa: «Brasa Dorada» (escamas de oro, corona pequeña) · «Brasa Robot» (dragón mecánico con remaches y llama azul de propulsor).
+- Rayo: «Rayo Galáctico» (túnica con estrellas, báculo con planeta) · «Rayo Halloween» (sombrero de bruja con calabaza).
+- Bum: «Bum Fiesta» (bomba con confeti y gorro de fiesta) · «Bum Pingüino».
+- Muro: «Muro Jardín» (musgo, flores y setas por el cuerpo).
+
+Precio orientativo: aspectos normales 150 gemas; de temporada o con efectos, 300 gemas. Siempre se ve el aspecto antes de comprarlo (nada al azar).
