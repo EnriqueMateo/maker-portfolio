@@ -1162,7 +1162,7 @@ function newRound(tp,tb,opts){
   const sp=spawn(),sb=spawn();
   const R={now:0,heroes:{p:newHero(tp,sp[0],sp[1],lv.p),b:newHero(tb,sb[0],sb[1],lv.b)},elx:{p:ELX_START,b:ELX_START},
     boosts:[],projs:[],marks:{p:[],b:[]},nextBoost:3,sudden:false,nextPing:SUDDEN_T,over:false,dmg:{p:0,b:0},paused:true};
-  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1};
+  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,perc:opts.bot.perc??.35,pend:[],dr:{},lastPrint:null,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1};
   return R;
 }
 function moveTo(R,s,x,y){
@@ -1297,9 +1297,19 @@ function botUpdate(R,dt,hk){
   const B=R.bot,me=R.heroes.b,foe=R.heroes.p,H=HEROES[me.type],HF=HEROES[foe.type];
   B.belief=normalize(diffuseB(B.belief,Math.min(.9,dt/HF.step*.35)));
   const setExact=(x,y,w)=>{const b=B.belief.map(r=>r.map(v=>v*(1-w)));b[y][x]+=w;B.belief=normalize(b);};
+  /* percepción con retraso humano: cada marca nueva se "ve" un poco después de aparecer */
   for(const m of R.marks.p){
     if(B.seen.has(m.id))continue;B.seen.add(m.id);
-    if(m.t==="huella")setExact(m.x,m.y,m.blur?.4:.75);
+    B.pend.push({m,at:R.now+B.perc*(.8+Math.random()*.7)});
+  }
+  const ready=B.pend.filter(q=>q.at<=R.now);B.pend=B.pend.filter(q=>q.at>R.now);
+  for(const {m} of ready){
+    if(m.t==="huella"){
+      /* dos huellas casi a la vez y lejos: una puede ser un amago, el peso se reparte */
+      const lp=B.lastPrint,two=lp&&R.now-lp.t<2.5&&Math.abs(lp.x-m.x)+Math.abs(lp.y-m.y)>=2;
+      setExact(m.x,m.y,m.blur?.4:two?.4:.75);B.lastPrint={x:m.x,y:m.y,t:R.now};
+      if(two){B.belief[lp.y][lp.x]+=.25;B.belief=normalize(B.belief);}
+    }
     else if(m.t==="pick"||m.t==="hit"||m.t==="ping"||m.t==="bloq")setExact(m.x,m.y,.92);
     else if(m.t==="step"&&H.ears)setExact(m.x,m.y,.55);
     else if(m.t==="agua"){B.belief[m.y][m.x]*=.05;B.belief=normalize(B.belief);}
@@ -1308,13 +1318,16 @@ function botUpdate(R,dt,hk){
   if(me.visionUntil>R.now)setExact(foe.x,foe.y,.95);
   if(R.now<B.next)return;B.next=R.now+B.think*(.75+Math.random()*.5);
   const hpLead=me.hp/me.max-foe.hp/foe.max,eps=B.eps+(hpLead>.34?.15:0);
+  /* react = tiempo de reacción al aviso; la decisión de esquivar se tira UNA vez por disparo */
   const danger=R.projs.filter(p=>p.d==="b"&&p.warn&&R.now-p.launched>=B.react);
   const unsafe=(x,y)=>danger.some(p=>inArea(p.cells,x,y));
   const adj=()=>D4.map(([dx,dy])=>[me.x+dx,me.y+dy]).filter(([x,y])=>inB(x,y)&&!unsafe(x,y));
-  if(unsafe(me.x,me.y)&&Math.random()<B.dodge){const o=adj();if(o.length&&R.elx.b>=H.mc){me.path=[pick(o)];return;}}
+  const threat=danger.filter(p=>inArea(p.cells,me.x,me.y)).some(p=>(B.dr[p.id]??=Math.random()<B.dodge));
+  if(threat){const o=adj();if(o.length&&R.elx.b>=H.mc){me.path=[pick(o)];return;}}
   if(B.relocateAt&&R.now>=B.relocateAt&&!me.path.length){
     B.relocateAt=0;
-    const o=allCells().filter(([x,y])=>{const d=Math.abs(x-me.x)+Math.abs(y-me.y);return d>=1&&d<=2&&!unsafe(x,y);});
+    const far=Math.random()<.3?3:2;
+    const o=allCells().filter(([x,y])=>{const d=Math.abs(x-me.x)+Math.abs(y-me.y);return d>=1&&d<=far&&!unsafe(x,y);});
     if(o.length&&R.elx.b>=H.mc*2){const c=pick(o);me.path=pathTo(me,c[0],c[1]);return;}
   }
   if(R.now<B.passiveUntil)return;
@@ -1326,13 +1339,20 @@ function botUpdate(R,dt,hk){
     if(H.travel>.6)bel=diffuseB(bel,Math.min(.9,H.travel/HF.step*.35));
     const best=bestArea(H.pat,bel);
     let thr=(H.pat==="one"?.42:.38)*B.thr;if(R.elx.b>=9)thr*=.55;
+    /* a veces amaga ANTES de disparar (así la primera huella no siempre es la buena) */
+    if(best.v>=thr&&Math.random()<.12&&R.now>=me.decoyUntil&&R.elx.b>=H.cost+decoyCost(me)){
+      const o=allCells().filter(([x,y])=>Math.abs(x-me.x)+Math.abs(y-me.y)>=2);const c=pick(o);
+      if(amago(R,"b",c[0],c[1],hk)==="ok"){B.next=R.now+.4+Math.random()*.6;return;}
+    }
+    /* sin pistas durante mucho rato, a veces dispara a ciegas como haría una persona */
+    if(best.v<thr&&R.now-B.lastShot>6&&R.elx.b>=H.cost+2&&Math.random()<.15)best.v=thr,best.t=[rnd(N),rnd(N)];
     if(best.v>=thr){
       let t=best.t;
       if(Math.random()<eps)t=[clampN(t[0]+rnd(3)-1),clampN(t[1]+rnd(3)-1)];
       if(Math.random()<eps*.5)t=[rnd(N),rnd(N)];
       fire(R,"b",t[0],t[1],hk);B.lastShot=R.now;
       if(Math.random()<.25)B.decoyAt=R.now+.6+Math.random()*1.2;
-      if(!H.stealth&&Math.random()<B.moveP)B.relocateAt=R.now+.25+Math.random()*.6;
+      if(Math.random()<B.moveP*(H.stealth?.4:1))B.relocateAt=R.now+.2+Math.random()*1.2;
       return;
     }
   }
@@ -3754,13 +3774,13 @@ function flyRes(kind,n,from){
 /* ================= partida contra el bot ================= */
 /* dificultad del bot: Fácil está pensada para quien juega por primera vez */
 const DIFFS={
-  facil:{n:"Fácil",i:"🙂",d:"Tranquilo, falla bastante",think:1.15,react:1.1,dodge:.25,eps:.6,passive:7,gap:5,thr:1.6,moveP:.35},
-  normal:{n:"Normal",i:"😎",d:"Para quien ya sabe jugar",think:.55,react:.6,dodge:.7,eps:.22,passive:3,gap:1.8,thr:1.1,moveP:.75},
-  dificil:{n:"Difícil",i:"😈",d:"Rápido y certero",think:.2,react:.45,dodge:.85,eps:.08,passive:1.5,gap:0,thr:1,moveP:1},
+  facil:{n:"Fácil",i:"🙂",d:"Tranquilo, falla bastante",think:1.15,react:.5,perc:.45,dodge:.25,eps:.6,passive:7,gap:5,thr:1.6,moveP:.35},
+  normal:{n:"Normal",i:"😎",d:"Para quien ya sabe jugar",think:.55,react:.4,perc:.35,dodge:.7,eps:.22,passive:3,gap:1.8,thr:1.1,moveP:.75},
+  dificil:{n:"Difícil",i:"😈",d:"Rápido y certero",think:.2,react:.32,perc:.28,dodge:.85,eps:.08,passive:1.5,gap:0,thr:1,moveP:1},
 };
 function botParams(){
   const P=Object.assign({},DIFFS[S.diff]||DIFFS.facil);
-  if(G.tutorial){P.react=Math.max(P.react,.9);P.eps=Math.max(P.eps,.45);P.passive=Math.max(P.passive,7);}
+  if(G.tutorial){P.react=Math.max(P.react,.9);P.eps=Math.max(P.eps,.7);P.gap=Math.max(P.gap,6);P.passive=Math.max(P.passive,7);}
   if(G.score.b>G.score.p){P.react+=.2;P.eps+=.15;}
   if((S.ls||0)>=2){P.react+=.1;}/* tras dos derrotas seguidas, el bot afloja un poco */
   return P;

@@ -188,7 +188,8 @@ function makeBot(forWs) {
     readyState: 0, // send() lo ignora
     alias: name,
     player: { name, tro, unl: pool.slice(0, Math.max(3, pool.length)) },
-    params: { think: lerp(0.8, 0.25), react: lerp(0.9, 0.5), dodge: lerp(0.45, 0.85), eps: lerp(0.35, 0.1), passive: lerp(4, 1.5), gap: lerp(3, 0.4), thr: lerp(1.3, 1), moveP: lerp(0.5, 0.95) },
+    // a 0 trofeos juega como el bot Fácil; con trofeos se acerca al Difícil
+    params: { think: lerp(1.1, 0.35), react: lerp(0.5, 0.38), perc: lerp(0.45, 0.28), dodge: lerp(0.2, 0.7), eps: lerp(0.6, 0.15), passive: lerp(7, 2), gap: lerp(5, 1), thr: lerp(1.6, 1.05), moveP: lerp(0.35, 0.9) },
   };
 }
 
