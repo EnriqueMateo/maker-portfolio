@@ -65,19 +65,20 @@ No ads. Play instantly as a guest; create a free account (Apple or email) to kee
 - Resultado esperado: **9+**.
 
 ## Privacidad de la app (App Privacy)
-- **¿Se recopilan datos?** Sí.
-- **Rastreo (tracking) entre apps o webs:** **No**. No se usa el identificador de publicidad.
-- **Información de contacto → Correo electrónico:** solo si el jugador crea cuenta (es opcional; se puede jugar como invitado). Uso: funcionalidad de la app (iniciar sesión). **Vinculado a la identidad**, sin rastreo.
-- Resto de tipos de datos (**no vinculados a tu identidad** y sin rastreo):
-  - **Identificadores → ID de usuario:** identificador anónimo creado por la app. Uso: funcionalidad de la app (guardado en la nube, emparejamiento).
-  - **Uso → Interacción con el producto:** pantallas, partidas, duración de rondas. Uso: analítica propia.
-  - **Contenido del usuario → Otro contenido:** nombre de jugador y progreso del juego. Uso: funcionalidad de la app.
-- No se recopilan: nombre real, teléfono, ubicación, contactos, fotos, datos de salud, financieros ni de navegación.
+- **¿Se recopilan datos?** Sí. **Rastreo (tracking):** **No** (sin identificador de publicidad ni SDK de terceros).
+- Todos **vinculados a la identidad** (los eventos llevan el id de la cuenta), sin rastreo:
+  - **Información de contacto → Correo electrónico:** solo si el jugador crea cuenta (correo o Apple). Uso: funcionalidad de la app.
+  - **Identificadores → ID de usuario:** id de la cuenta creado por la app. Uso: funcionalidad de la app.
+  - **Uso → Interacción con el producto:** pantallas, partidas, duración de rondas. Uso: analítica (se puede desactivar en Ajustes).
+  - **Contenido del usuario → Contenido de juego:** progreso y nombre de jugador. Uso: funcionalidad de la app.
+  - **Diagnóstico → Datos de rendimiento:** tiempo de carga al abrir. Uso: analítica.
+- No se recopilan: nombre real, teléfono, ubicación, contactos, fotos, salud, datos financieros ni historial de navegación.
+- Coincide con `app/ios/App/App/PrivacyInfo.xcprivacy`.
 
 ## Notas para la revisión de Apple
 ```
 No account or login is needed: you can play as a guest. The first launch starts a guided training match.
-Creating an account (email + password) is optional and only used to save progress across devices (Settings → Account).
+Creating an account is optional (Sign in with Apple or email + password) and only used to save progress across devices (Settings → Account).
 Account deletion: Settings → Delete account and progress (removes the account and all its data from our server).
 Online mode (Mode → Online) matches you with another player or a bot within ~10 seconds.
 There are no in-app purchases in this version. The game is fully playable offline against bots.
