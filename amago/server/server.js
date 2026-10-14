@@ -38,7 +38,7 @@ const BAD_JOINS_PER_IP = 30; // códigos erróneos por IP en 10 min antes de blo
 const ROOMS_PER_IP_MIN = 6; // salas privadas creadas por IP y minuto
 const LOBBY_TTL_MS = 10 * 60000; // una sala privada sin rival caduca a los 10 min
 const AWAY_BUDGET_MS = 25000; // tiempo total que un jugador puede estar desconectado en una partida
-const isHero = (id) => typeof id === "string" && Object.prototype.hasOwnProperty.call(E.HEROES, id);
+const isHero = (id) => typeof id === "string" && E.IDS.includes(id); // solo héroes publicados
 
 function loadEngine() {
   const html = fs.readFileSync(INDEX, "utf8");
