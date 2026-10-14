@@ -28,6 +28,11 @@ Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://
 - `art/props_src/`: Volcán (`roca_lava`, `geiser_lava`, `arbol_quemado`), Trono (`estatua`, `columna_rota`, `antorcha`), Olimpo (`nube_dorada`, `columna_dorada`, `veleta`) y cofres (`cofre_madera`, `cofre_oro_esmeraldas`, `cofre_epico`). Originales con varios objetos en `art/props_src/originales/`.
 - Cobertura de arte: antes 7 de 38 piezas necesarias (18 %); ahora 29 de 38 (76 %). Faltan: **Mira (lince)** y los iconos llave, gema, moneda, frasco de Poder, trofeo y corona (+ revisar el resto de `ui/`).
 
+**Prompts de Gemini que faltan por hacer (dárselos al usuario al retomar)** — base de estilo en `docs/arte_nuevos_heroes.md`:
+- Héroe: `[BASE] Lince francotirador serio y elegante: orejas con pinceles, capa corta gris, ballesta larga con mira telescópica dorada, un ojo entrecerrado apuntando. Colores amarillo dorado y gris.` → `art/concepts/mira.jpg`
+- Iconos (`[BASE OBJETO] Icono de videojuego: …, estilo Clash Royale.`): llave dorada, gema verde tallada, moneda dorada con estrella, frasco de Poder morado, trofeo dorado, corona dorada → `art/props_src/<nombre>.png`
+- Opcional: rehacer la rana (Salto) con la cinta de otro color (la roja recuerda a las Tortugas Ninja) y murciélago/gólem a más resolución.
+
 **Siguiente**
 1. Meter el arte nuevo: recorte (`art/blender/cutout_ai.py`), contorno (`outline.py`), retratos y tiras de animación (`anim/<id>_f|b_<anim>.webp` + `ANIM3D`); aspectos como ilustración propia en vez del filtro `f` de `SKINS`; props en `PSET` para volcán/trono/olimpo; cofres en `ui/chest1-3.webp`.
 2. Cuando estén Mira y las animaciones: activar los héroes de uno en uno (`live:true`), con pack fijo (sin azar) y desbloqueo jugando.
