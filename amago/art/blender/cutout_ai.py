@@ -1,10 +1,10 @@
-# Recorte con IA (rembg, isnet-general-use): python cutout_ai.py in out.webp [alto]
-import sys, numpy as np, cv2
+# Recorte con IA (rembg, isnet-general-use; AMAGO_CUT_MODEL=u2net si se come zonas claras): python cutout_ai.py in out.webp [alto]
+import sys, os, numpy as np, cv2
 from rembg import remove, new_session
 from PIL import Image
 src, out = sys.argv[1], sys.argv[2]; H = int(sys.argv[3]) if len(sys.argv) > 3 else 640
 im = Image.open(src).convert('RGB')
-cut = remove(im, session=new_session('isnet-general-use'))
+cut = remove(im, session=new_session(os.environ.get('AMAGO_CUT_MODEL', 'isnet-general-use')))
 a = np.array(cut); a[:, :, :3] = np.array(im)  # color original, solo usamos la máscara de la IA
 al = a[:, :, 3]
 # quitar motas sueltas: quedarse con piezas grandes

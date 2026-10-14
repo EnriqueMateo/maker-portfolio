@@ -33,8 +33,15 @@ Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://
 - Iconos (`[BASE OBJETO] Icono de videojuego: …, estilo Clash Royale.`): llave dorada, gema verde tallada, moneda dorada con estrella, frasco de Poder morado, trofeo dorado, corona dorada → `art/props_src/<nombre>.png`
 - Opcional: rehacer la rana (Salto) con la cinta de otro color (la roja recuerda a las Tortugas Ninja) y murciélago/gólem a más resolución.
 
+**Arte metido en el juego (14 oct, noche)** — build 10
+- Aspectos con ilustración propia (`skins/<id>.webp`, `img:1` en `SKINS`): en menús, tienda, inicio (`SHOW.skinHero`) y en partida (figura 2D con esqueleto `RIG2D[<aspecto>]`).
+- Héroes nuevos con figura 2D (`sprites/mina|salto|savia|eco.webp` + `RIG2D`); siguen ocultos (`live:false`). Retrato de Flecha de Gemini.
+- Cofres nuevos en `ui/chest1-3.webp` (madera, morado, oro con esmeraldas); el abierto es el mismo con luz (`.lidglow`), ya no hay `_open`.
+- Props de Volcán/Trono/Olimpo en `PSET` (tipos nuevos `k` fuego y `b` flota). Trono y Olimpo: `bareMesh` quita al cargar los objetos 3D viejos del GLB (todo lo que sobresale del suelo, salvo tableros) y deja islas + ilustraciones; Volcán solo cambia el puente roto por el dibujado. Blender ya no está instalado: si se reinstala, mejor rehornear con `AMAGO_BARE=1`.
+- Recorte: entorno `~/Developer/AMAGO/.venv-art` (rembg). `AMAGO_CUT_MODEL=u2net` para imágenes con zonas claras (zorro ártico).
+
 **Siguiente**
-1. Meter el arte nuevo: recorte (`art/blender/cutout_ai.py`), contorno (`outline.py`), retratos y tiras de animación (`anim/<id>_f|b_<anim>.webp` + `ANIM3D`); aspectos como ilustración propia en vez del filtro `f` de `SKINS`; props en `PSET` para volcán/trono/olimpo; cofres en `ui/chest1-3.webp`.
+1. Arte que queda por meter: recorte (`art/blender/cutout_ai.py`), contorno (`outline.py`), retratos y tiras de animación (`anim/<id>_f|b_<anim>.webp` + `ANIM3D`); aspectos como ilustración propia en vez del filtro `f` de `SKINS`; props en `PSET` para volcán/trono/olimpo; cofres en `ui/chest1-3.webp`.
 2. Cuando estén Mira y las animaciones: activar los héroes de uno en uno (`live:true`), con pack fijo (sin azar) y desbloqueo jugando.
 3. Reglas de arena online (los dos jugadores en la misma arena).
 4. Tras la aprobación de Apple: StoreKit con validación de recibos en el servidor (`/api/iap`), gemas de pago y pase en el servidor, aspectos de pago.

@@ -89,7 +89,7 @@ const server = http.createServer((req, res) => {
   }
   const root = path.join(__dirname, "..");
   if (url === "/vendor/three.min.js") return serve(req, res, path.join(root, "vendor", "three.min.js"), "text/javascript; charset=utf-8", 86400);
-  const asset = url.match(/^\/(models|portraits|arenas|sprites|props|ui|anim)\/([a-z0-9_-]+)\.(glb|webp)$/);
+  const asset = url.match(/^\/(models|portraits|arenas|sprites|skins|props|ui|anim)\/([a-z0-9_-]+)\.(glb|webp)$/);
   if (asset) return serve(req, res, path.join(root, asset[1], asset[2] + "." + asset[3]), asset[3] === "glb" ? "model/gltf-binary" : "image/webp", 86400);
   const font = url.match(/^\/fonts\/([a-z0-9_-]+)\.woff2$/);
   if (font) return serve(req, res, path.join(root, "fonts", font[1] + ".woff2"), "font/woff2", 604800);
