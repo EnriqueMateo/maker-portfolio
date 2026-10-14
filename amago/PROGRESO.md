@@ -2,6 +2,40 @@
 
 Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://claude.ai/artifact/MS8opPSQAqRnR4aCtnmPHk
 
+## Estado a 14 de octubre de 2026 (leer primero)
+
+**Dónde está todo**
+- Repo local: `~/Developer/AMAGO` (NO usar `~/Desktop/AMAGO`: es una copia vieja en iCloud que bloquea git/Xcode). Rama `claude/eager-gates-4i58a1`.
+- Servidor: Railway, proyecto `stunning-balance`, servicio `maker-portfolio`, https://maker-portfolio-production-7712.up.railway.app (Postgres + `STATS_KEY`; métricas en `/stats?k=…`). Cada push a la rama despliega.
+- App Store Connect: app 6821653359, bundle `com.enriquemateo.amago`, team 47TF333JU2. Versión 1.0 con **build 8** (si aún no, asignarlo). TestFlight: grupo interno «Equipo».
+- Builds desde terminal: `cd amago/app && AMAGO_SERVER=https://maker-portfolio-production-7712.up.railway.app npm run sync`, luego `xcodebuild archive` + `-exportArchive` con `destination=upload` (subida automática, número de build automático).
+- Vídeos y capturas: `~/Developer/amago-shorts` (Remotion + grabador del juego real con reloj virtual). `node scripts/store_shots.mjs` rehace las capturas de la App Store; `node scripts/scenes.mjs donde cerca` graba jugadas.
+
+**Hecho del 11 al 14 de octubre**
+- Cuentas: invitado automático + correo/contraseña + **Iniciar sesión con Apple** (plugin propio `AppleAuthPlugin.swift`, registrado en `MainViewController`, que crea `SceneDelegate`). Avisos al invitado. Borrar cuenta espera al servidor y revoca Apple (si están `APPLE_TEAM_ID/APPLE_KEY_ID/APPLE_PRIVATE_KEY`).
+- Entrenamiento guiado (`TUT`) contra el Entrenador Ojo, nombre, primer cofre y mano en JUGAR.
+- Auditoría (agentes) y arreglos: IP real para límites, `hello` único, trofeos y héroes desde la cuenta (el guardado no puede subir más de 20/partida), versión de guardado del servidor, día del servidor que no retrocede, ids opacos online, **el amago es indistinguible** (daño, huella, blur, impacto) y no sirve para espiar, salas privadas que caducan, presupuesto de desconexión, bot online indistinguible (tiempos, trofeos, sin cola en `/health`).
+- Motor: pasos al ritmo exacto, impactos antes de moverse, escudo no se gasta con invulnerabilidad, descripciones fieles.
+- Bot más humano (percepción con retraso, esquiva real, sospecha del amago, amaga antes, dispara a ciegas) y curva más suave.
+- Equilibrio: Rayo 8, Bum 6, Brasa 5, Truco 3 (huella en cualquier casilla salvo la suya).
+- **5 héroes nuevos ocultos** (`live:false`; probar con `window.AMAGO_DEV_HEROES`): Mina (topo, mina oculta), Salto (rana, salta sin pasos), Savia (hada, se cura tras 14 s), Mira (lince, 2 sin aviso, huella 4 s), Eco (murciélago, dos huellas). Ajustados por simulación al 43-56 %.
+- **Reglas de arena** (solo contra el bot): Volcán (lava que delata cada 15 s), Trono (estatua que para un golpe), Olimpo (viento que desplaza disparos).
+- Efectos: brillo aditivo, estelas, destello y quemadura en la casilla, temblor en «¡CERCA!», cámara lenta en el K.O., color y viñeta.
+- Privacidad/legal: política con Apple, base legal RGPD y proveedores; `PrivacyInfo.xcprivacy`; responsable Enrique Mateo Cobo; descripción de la tienda corregida; capturas rehechas con los costes nuevos (es/en).
+
+**Arte recibido el 14 oct (Gemini), aún sin meter en el juego**
+- `art/concepts/`: `flecha` (sustituye al render de Blender), `mina`, `salto`, `savia`, `eco`, y aspectos `brasa_glacial`, `muro_magma`, `sombra_carmesi`, `truco_artico`, `ojo_nevado`.
+- `art/props_src/`: Volcán (`roca_lava`, `geiser_lava`, `arbol_quemado`), Trono (`estatua`, `columna_rota`, `antorcha`), Olimpo (`nube_dorada`, `columna_dorada`, `veleta`) y cofres (`cofre_madera`, `cofre_oro_esmeraldas`, `cofre_epico`). Originales con varios objetos en `art/props_src/originales/`.
+- Cobertura de arte: antes 7 de 38 piezas necesarias (18 %); ahora 29 de 38 (76 %). Faltan: **Mira (lince)** y los iconos llave, gema, moneda, frasco de Poder, trofeo y corona (+ revisar el resto de `ui/`).
+
+**Siguiente**
+1. Meter el arte nuevo: recorte (`art/blender/cutout_ai.py`), contorno (`outline.py`), retratos y tiras de animación (`anim/<id>_f|b_<anim>.webp` + `ANIM3D`); aspectos como ilustración propia en vez del filtro `f` de `SKINS`; props en `PSET` para volcán/trono/olimpo; cofres en `ui/chest1-3.webp`.
+2. Cuando estén Mira y las animaciones: activar los héroes de uno en uno (`live:true`), con pack fijo (sin azar) y desbloqueo jugando.
+3. Reglas de arena online (los dos jugadores en la misma arena).
+4. Tras la aprobación de Apple: StoreKit con validación de recibos en el servidor (`/api/iap`), gemas de pago y pase en el servidor, aspectos de pago.
+5. Pendiente del usuario: correo de soporte (`[CORREO DE CONTACTO]` en privacidad/soporte), App Privacy «vinculado» y condición de comerciante (DSA) en App Store Connect, clave `.p8` de Sign in with Apple.
+6. Revisiones que los agentes no terminaron: economía a 90 días, tutorial, emparejamiento, rendimiento, traducciones, accesibilidad.
+
 ## Estado actual
 
 - **Juego** (`index.html`): duelo 1v1 en tiempo real sobre islas 5×5 (tuya verde abajo, rival roja arriba), elixir, huellas, objetos cebo, 3 rondas con héroe distinto, al mejor de 2. Rondas de 75 s; muerte súbita a los 45 s (ataques sin aviso, pings cada 5 s).
