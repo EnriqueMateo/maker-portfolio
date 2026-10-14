@@ -40,6 +40,8 @@ Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://
 - Props de Volcán/Trono/Olimpo en `PSET` (tipos nuevos `k` fuego y `b` flota). Trono y Olimpo: `bareMesh` quita al cargar los objetos 3D viejos del GLB (todo lo que sobresale del suelo, salvo tableros) y deja islas + ilustraciones; Volcán solo cambia el puente roto por el dibujado. Blender ya no está instalado: si se reinstala, mejor rehornear con `AMAGO_BARE=1`.
 - Recorte: entorno `~/Developer/AMAGO/.venv-art` (rembg). `AMAGO_CUT_MODEL=u2net` para imágenes con zonas claras (zorro ártico).
 
+**Mira lanzada (15 oct 2026)** — build 13: `live:true`, camino de trofeos a 320, pack fijo en la tienda (`NEWHERO`: Mira + 200 de Poder por 800 monedas u 80 gemas, banner `ft==="new"`), aviso único de novedad (modal `news`, `S.news`). Para el siguiente héroe: cambiar `NEWHERO.id` y `road`, quitar su `live:false` y añadirlo a `ROAD`. Orden: Salto → Mina → Savia → Eco, uno cada 2-3 semanas.
+
 **Siguiente**
 1. Arte que queda por meter: recorte (`art/blender/cutout_ai.py`), contorno (`outline.py`), retratos y tiras de animación (`anim/<id>_f|b_<anim>.webp` + `ANIM3D`); aspectos como ilustración propia en vez del filtro `f` de `SKINS`; props en `PSET` para volcán/trono/olimpo; cofres en `ui/chest1-3.webp`.
 2. Cuando estén Mira y las animaciones: activar los héroes de uno en uno (`live:true`), con pack fijo (sin azar) y desbloqueo jugando.
