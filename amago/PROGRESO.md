@@ -47,7 +47,7 @@ Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://
 2. Cuando estén Mira y las animaciones: activar los héroes de uno en uno (`live:true`), con pack fijo (sin azar) y desbloqueo jugando.
 3. Reglas de arena online (los dos jugadores en la misma arena).
 4. Tras la aprobación de Apple: StoreKit con validación de recibos en el servidor (`/api/iap`), gemas de pago y pase en el servidor, aspectos de pago.
-5. Pendiente del usuario: correo de soporte (`[CORREO DE CONTACTO]` en privacidad/soporte), App Privacy «vinculado» y condición de comerciante (DSA) en App Store Connect, clave `.p8` de Sign in with Apple.
+5. **Enviada a revisión el 15 oct 2026** (v1.0, build 14; se publica sola al aprobarse). Hecho: privacidad (todo vinculado, publicada), DSA, correo de contacto flashfit874@gmail.com en soporte/privacidad. Pendiente del usuario (opcional): clave `.p8` de Sign in with Apple para revocar tokens al borrar cuenta.
 6. Revisiones que los agentes no terminaron: economía a 90 días, tutorial, emparejamiento, rendimiento, traducciones, accesibilidad.
 
 ## Estado actual
