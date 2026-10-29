@@ -702,7 +702,7 @@ setInterval(() => {
 Store.open()
   .then((st) => {
     STORE = st;
-    API = makeApi(st, { statsPage });
+    API = makeApi(st, { statsPage, heroIds: E.IDS });
     // la política de privacidad promete borrar lo que lleve 24 meses sin uso
     const purge = () => st.purge(Date.now() - 730 * 864e5).catch((e) => console.error("Limpieza:", e.message));
     purge();

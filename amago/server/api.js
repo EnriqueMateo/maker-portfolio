@@ -71,6 +71,26 @@ async function auth(store, id, secret) {
 /* cuentas con correo y contraseña (scrypt con sal) */
 const MAX_SESSIONS = 6;
 const normEmail = (e) => String(e || "").trim().toLowerCase();
+// cuenta para la revisión de Apple: al entrar, tiene todo desbloqueado (es una cuenta normal; no hay códigos ni atajos en la app)
+const REVIEW_EMAILS = (process.env.REVIEW_EMAILS || "appreview@amago.game").split(",").map(normEmail).filter(Boolean);
+function reviewBoost(u, ids) {
+  if (!u || !u.email || !REVIEW_EMAILS.includes(u.email) || !ids || !ids.length) return false;
+  const s = u.save && typeof u.save === "object" ? u.save : {};
+  const lv = Object.assign({}, s.lv);
+  for (const id of ids) lv[id] = Math.max(lv[id] || 1, 6);
+  Object.assign(s, {
+    tutDone: 1, welcome: 1, seen: 99999,
+    games: Math.max(s.games || 0, 60), wins: Math.max(s.wins || 0, 40),
+    tro: Math.max(s.tro || 0, 960), troMax: Math.max(s.troMax || 0, 960),
+    unl: [...new Set([...(Array.isArray(s.unl) ? s.unl : []), ...ids])], lv,
+    coins: Math.max(s.coins || 0, 20000), pp: Math.max(s.pp || 0, 12000), gemsFree: Math.max(s.gemsFree || 0, 2000),
+    box: Array.isArray(s.box) && s.box.length ? s.box : [1, 2, 3],
+  });
+  u.save = s;
+  u.tro = Math.max(u.tro || 0, 960);
+  u.games = Math.max(u.games || 0, s.games);
+  return true;
+}
 const okEmail = (e) => e.length <= 120 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 const okPass = (p) => typeof p === "string" && p.length >= 6 && p.length <= 128;
 const scrypt = (pass, salt) => new Promise((res, rej) => crypto.scrypt(pass, salt, 32, { N: 16384, r: 8, p: 1 }, (e, k) => (e ? rej(e) : res(k))));
@@ -214,6 +234,7 @@ function makeApi(store, opts) {
           const u = await auth(store, b.id, b.secret);
           if (!u) return json(res, 401, { error: "cuenta" }), true;
           u.last = Date.now();
+          if (reviewBoost(u, opts.heroIds)) u.rev = (u.rev || 0) + 1;
           await store.put(u);
           return json(res, 200, { save: u.save, saveAt: u.saveAt, rev: u.rev || 0, tro: u.tro, email: u.email || null, via: u.apple ? "apple" : u.email ? "email" : null, now: Date.now() }), true;
         }
@@ -230,6 +251,7 @@ function makeApi(store, opts) {
           u.email = email;
           u.ph = await passHash(b.pass);
           u.regAt = Date.now();
+          if (reviewBoost(u, opts.heroIds)) u.rev = (u.rev || 0) + 1;
           await store.put(u);
           return json(res, 200, { ok: true, email }), true;
         }
@@ -250,6 +272,7 @@ function makeApi(store, opts) {
           const secret = newSecret();
           u.shs = [...(u.shs || []), hash(secret)].slice(-MAX_SESSIONS);
           u.last = Date.now();
+          if (reviewBoost(u, opts.heroIds)) u.rev = (u.rev || 0) + 1;
           await store.put(u);
           return json(res, 200, { id: u.id, secret, email: u.email, via: u.apple ? "apple" : "email", save: u.save, saveAt: u.saveAt, rev: u.rev || 0 }), true;
         }
