@@ -1418,8 +1418,8 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .boxov.pur .stage.open{display:none}
 .chopen{position:relative;display:block;width:min(56vw,220px);height:min(50vw,196px)}
 .chopen img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-.chopen .cbody{clip-path:inset(42% 0 0 0);filter:brightness(1.08) drop-shadow(0 10px 6px rgba(0,0,0,.4))}
-.chopen .clid{clip-path:inset(0 0 58% 0);transform:translate(-26px,-12px) rotate(-22deg);transform-origin:15% 42%;filter:brightness(1.1)}
+.chopen .cbody{filter:brightness(1.12) drop-shadow(0 10px 6px rgba(0,0,0,.4))}
+.chopen .clid{display:none}/* la tapa recortada dejaba un corte diagonal: el cofre entero con su haz de luz se ve mejor */
 .chopen .beam2{position:absolute;left:20%;right:20%;bottom:50%;height:60vh;background:linear-gradient(transparent,rgba(255,236,160,.9));filter:blur(8px);transform-origin:bottom;animation:lidg 1.6s ease-in-out infinite alternate;pointer-events:none}
 .rwd.fly{animation:outOfChest .45s var(--e-pop) both}
 @keyframes outOfChest{0%{transform:translateY(170px) scale(.2);opacity:0}60%{transform:translateY(-10px) scale(1.08);opacity:1}100%{transform:none}}
