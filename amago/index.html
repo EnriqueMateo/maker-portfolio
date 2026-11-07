@@ -2716,6 +2716,15 @@ const PSET={pradera:[
   ["arbol",-5.3,-8.0,2.2,"s"],["pino",-3.4,-8.4,2.4,"s"],["arbol",-1.3,-8.1,2.1,"s"],["pino",.9,-8.5,2.3,"s"],["arbol",3.0,-8.0,2.3,"s"],["pino",5.1,-8.3,2.2,"s"],
   ["pino",-4.6,8.3,1.9,"s"],["arbol",-2.0,8.4,1.9,"s"],["arbol",2.3,8.3,2.0,"s"],["pino",4.7,8.4,1.9,"s"],
 ],
+/* Bosque: más pinos y más juntos que en Pradera (antes no tenía decoración propia) */
+bosque:[
+  ["puente",0,0,2.25,"p"],
+  ["bandera_azul",-2.95,6.05,1.55,"f"],["bandera_azul",2.95,6.05,1.55,"f"],["bandera_roja",-2.95,-6.05,1.55,"f"],["bandera_roja",2.95,-6.05,1.55,"f"],
+  ["rocas",-3.2,3.4,.55],["rocas",3.25,-3.2,.55],["pino",-3.4,-6.9,1.2,"s"],["pino",3.5,-6.8,1.1,"s"],
+  ["pino",3.2,1.4,1.15,"s"],["pino",-3.15,-1.4,1.15,"s"],["pino",-3.2,-4.9,1.1,"s"],["pino",3.2,4.9,1.1,"s"],["arbol",-3.3,1.6,.95,"s"],["arbol",3.3,-1.6,.95,"s"],
+  ["pino",-5.3,-8.0,2.5,"s"],["pino",-3.4,-8.6,2.7,"s"],["arbol",-1.3,-8.1,2.2,"s"],["pino",.9,-8.7,2.7,"s"],["pino",3.0,-8.1,2.5,"s"],["pino",5.1,-8.4,2.4,"s"],["pino",-.2,-9.4,2.9,"s"],
+  ["pino",-4.6,8.3,2.1,"s"],["pino",-2.0,8.5,2.2,"s"],["arbol",2.3,8.3,2.0,"s"],["pino",4.7,8.4,2.1,"s"],
+],
 /* tipos extra: k=parpadea (fuego), b=flota */
 volcan:[
   ["puente",0,0,2.25,"p"],
@@ -2770,7 +2779,7 @@ function build(canvasEl,R,k){
   root=new T.Group();scene.add(root);
   const baked=GFX.ARENA[k];
   if(!baked)GFX.loadArena(k);
-  const wt=k==="pradera"&&GFX.PROPS.agua;if(wt)wt.repeat.set(16,16);
+  const wt=(k==="pradera"||k==="bosque")&&GFX.PROPS.agua;if(wt)wt.repeat.set(16,16);
   const water=new T.Mesh(new T.PlaneGeometry(80,80),new T.MeshBasicMaterial(wt?{map:wt}:{color:theme.water}));if(wt){water.userData.flow=wt;deco.push(water);}water.rotation.x=-Math.PI/2;water.position.y=-.9;root.add(water);
   if(wt){/* segunda capa de agua, más fina y en otra dirección: brillos que se cruzan */
     const w2t=wt.clone();w2t.needsUpdate=true;w2t.repeat.set(27,27);
@@ -2785,7 +2794,7 @@ function build(canvasEl,R,k){
     const ft=new T.CanvasTexture(c);const foam=new T.Mesh(new T.PlaneGeometry(W,W),new T.MeshBasicMaterial({map:ft,transparent:true,depthWrite:false,opacity:.8}));
     foam.rotation.x=-Math.PI/2;foam.position.y=-.87;foam.userData.foam=1;root.add(foam);deco.push(foam);
   }
-  if(baked){const a=baked.clone(true);const dm=detailMat(k==="pradera"&&GFX.PROPS.hierba);a.traverse(o=>{if(o.isMesh){if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();o.material=dm;}});root.add(a);if(PSET[k])addProps(PSET[k]);}
+  if(baked){const a=baked.clone(true);const dm=detailMat((k==="pradera"||k==="bosque")&&GFX.PROPS.hierba);a.traverse(o=>{if(o.isMesh){if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();o.material=dm;}});root.add(a);if(PSET[k])addProps(PSET[k]);}
   else{
     root.add(island(3.3,0x86d13f,0xe8cf9c));root.add(island(-3.3,0x86d13f,0xe8cf9c));
     for(const [x,z,s] of [[-3.6,2,1],[3.7,4.6,1.2],[-3.8,5.4,.9],[3.6,1.6,.8],[-3.6,-2,1],[3.7,-4.6,1.2],[-3.8,-5.2,.9],[3.6,-1.8,.8]])root.add(tree(x,z,s));
