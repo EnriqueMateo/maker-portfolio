@@ -1171,12 +1171,15 @@ let MID=0;
 const LV_MAX=9,lvBonus=lv=>{lv=Math.max(1,Math.min(LV_MAX,lv||1));return {hp:0,elx:.01*(lv-1)};};
 function newHero(type,x,y,lv){const H=HEROES[type],hp=H.hp+lvBonus(lv).hp;return {type,x,y,lv:lv||1,hp,max:hp,path:[],nextStep:0,cdUntil:0,shieldUntil:0,turboUntil:0,visionUntil:0,invulUntil:0,decoyUntil:0};}
 function mark(R,s,m){m.id=++MID;R.marks[s].push(m);return m;}
-function pathTo(h,x,y){
-  const p=[];let cx=h.x,cy=h.y;
-  const stepX=()=>{while(cx!==x){cx+=Math.sign(x-cx);p.push([cx,cy]);}};
-  const stepY=()=>{while(cy!==y){cy+=Math.sign(y-cy);p.push([cx,cy]);}};
-  if(Math.random()<.5){stepX();stepY();}else{stepY();stepX();}
-  return p;
+/* ruta en L determinista: elige el orden (primero X o primero Y) que pisa menos casillas en peligro;
+   si empatan, primero el eje más largo. Antes era al azar y una esquiva bien hecha podía fallar por suerte */
+function pathTo(h,x,y,danger){
+  const mk=xf=>{const p=[];let cx=h.x,cy=h.y;
+    const sx=()=>{while(cx!==x){cx+=Math.sign(x-cx);p.push([cx,cy]);}},sy=()=>{while(cy!==y){cy+=Math.sign(y-cy);p.push([cx,cy]);}};
+    if(xf){sx();sy();}else{sy();sx();}return p;};
+  const a=mk(true),b=mk(false);if(!danger||!danger.length)return Math.abs(x-h.x)>=Math.abs(y-h.y)?a:b;
+  const cost=p=>p.reduce((n,[px,py],i)=>n+(danger.some(([dx,dy])=>dx===px&&dy===py)?(p.length-i):0),0);
+  const ca=cost(a),cb=cost(b);return ca<cb?a:cb<ca?b:(Math.abs(x-h.x)>=Math.abs(y-h.y)?a:b);
 }
 function newRound(tp,tb,opts){
   opts=opts||{};
@@ -1197,7 +1200,7 @@ function newRound(tp,tb,opts){
 function moveTo(R,s,x,y){
   if(!inB(x,y)||R.over)return;
   const h=R.heroes[s];
-  h.path=(h.x===x&&h.y===y)?[]:HEROES[h.type].jump?[[x,y]]:pathTo(h,x,y);
+  h.path=(h.x===x&&h.y===y)?[]:HEROES[h.type].jump?[[x,y]]:pathTo(h,x,y,R.projs.filter(p=>p.d===s&&p.warn).flatMap(p=>p.cells));/* solo los avisos que ve el jugador (amagos incluidos: no se delatan) */
 }
 function stepHero(R,s,hk,dt){
   const h=R.heroes[s],H=HEROES[h.type];
@@ -1266,7 +1269,9 @@ function amago(R,s,x,y,hk){
   for(let i=0;i<30&&inArea(cells,def.x,def.y);i++)cells=areaOf(H.pat,rnd(N),rnd(N));
   /* "show": casillas al azar que ve quien lo lanza (las de verdad evitan al rival y le darían pistas) */
   const p={o:s,d:other(s),cells,show:areaOf(H.pat,rnd(N),rnd(N)),hitAt:R.now+H.travel*(R.sudden?.6:1),launched:R.now,dmg:0,dud:true,warn:H.warn,type:h.type,id:++MID,hx:x,hy:y};
-  mark(R,s,{t:"huella",x,y,until:R.now+HUELLA_T,fake:true,blur:!!H.stealth,decoy:true});
+  /* misma duración y número de huellas que un disparo real (antes Mira y Eco delataban el amago) */
+  mark(R,s,{t:"huella",x,y,until:R.now+HUELLA_T*(H.loud?2:1),fake:true,blur:!!H.stealth,decoy:true});
+  if(H.echo){const e=fakeSpot(h);mark(R,s,{t:"huella",x:e[0],y:e[1],until:R.now+HUELLA_T,fake:true,blur:false,decoy:true});}
   R.projs.push(p);call(hk,"fired",p);
   return "ok";
 }
@@ -1350,7 +1355,10 @@ function botUpdate(R,dt,hk){
     B.pend.push({m,at:R.now+B.perc*(.8+Math.random()*.7)});
   }
   const ready=B.pend.filter(q=>q.at<=R.now);B.pend=B.pend.filter(q=>q.at>R.now);
+  const foeFake=!!HEROES[R.heroes.p.type].fake;
   for(const {m} of ready){
+    if(m.dud&&m.t!=="huella")continue;/* el resultado de su propio amago no le da pistas (al humano tampoco) */
+    if(m.t==="huella"&&foeFake){B.belief[m.y][m.x]*=.05;B.belief=normalize(B.belief);continue;}/* Truco: su huella nunca está donde él */
     if(m.t==="huella"){
       /* dos huellas casi a la vez y lejos: una puede ser un amago, el peso se reparte */
       const lp=B.lastPrint,two=lp&&R.now-lp.t<2.5&&Math.abs(lp.x-m.x)+Math.abs(lp.y-m.y)>=2;
@@ -4392,7 +4400,7 @@ async function netResume(){
 }
 function netGiveUp(){stopLoop();R=null;UI.modal={k:"info",title:"Conexión perdida",text:"No se pudo volver a la partida. Si estaba a medias, cuenta como derrota."};renderModal();}
 function netLost(){
-  if(G&&G.online&&G.token&&UI.screen!=="home"&&UI.screen!=="end"){netResume();return;}
+  if(G&&G.online&&G.token&&UI.screen!=="home"&&UI.screen!=="end"){if(document.hidden){NET.needResume=true;return;}netResume();return;}
   if(G&&G.online&&UI.screen!=="home"){stopLoop();R=null;UI.modal={k:"info",title:"Conexión perdida",text:"Se ha cortado la conexión con el servidor."};renderModal();}
   else if(UI.modal&&UI.modal.k==="friends"){UI.modal={k:"friends",st:"menu",err:"No se pudo conectar con el servidor."};renderModal();}
 }
@@ -4537,7 +4545,7 @@ function renderStatus(){
   else if(myShot){t="🔥 ¡Disparo en camino! Ahora muévete";c="good";}
   else if(R.marks.b.some(m=>m.t==="hit"||m.t==="ping")||me.visionUntil>now){t="👀 ¡Rival a la vista! Dispara";c="good";}
   else if(R.marks.b.some(m=>m.t==="pick")){t="👀 ¡Cogió un objeto ahí!";c="good";}
-  else if(R.marks.b.some(m=>m.t==="huella")){t="👣 ¡Ha disparado desde ahí!";c="good";}
+  else if(R.marks.b.some(m=>m.t==="huella")){const fh=HEROES[R.heroes.b.type]||{};t=fh.fake?"👣 Huella falsa: allí NO está":fh.stealth?"👣 Huella borrosa: está por esa zona":"👣 ¡Ha disparado desde ahí!";c="good";}
   else if(R.marks.p.some(m=>(m.t==="huella"&&!m.fake)||m.t==="pick")){t="👣 ¡Te han visto! Cambia de sitio";c="bad";}
   else if(R.boosts.length)t="🎁 Objeto en el mapa: ¿cebo o premio?";
   else if(R.elx.p<HEROES[me.type].cost)t="💧 Cargando elixir…";
@@ -4563,7 +4571,7 @@ const ui={
       else toast("myblur","👣 <b>Tu huella sale borrosa:</b> el rival solo sabe la zona, no la casilla.");
     }else{
       if(p.warn){toast("incoming","⚠️ <b>¡Te van a dar!</b> Las casillas que parpadean en tu isla verde van a recibir el golpe. Toca otra casilla para esquivar.");buzz(25);}
-      if(p.hx!=null)toast("foeprint","👣 <b>¡El rival disparó desde ahí!</b> Contraataca rápido.");
+      if(p.hx!=null){const fh=HEROES[R.heroes.b.type]||{};toast("foeprint",fh.fake?"👣 <b>Truco deja huellas falsas:</b> allí NO está.":fh.stealth?"👣 <b>Sombra deja una huella borrosa:</b> está cerca, no justo ahí.":"👣 <b>¡El rival disparó desde ahí!</b> Contraataca rápido.");}
     }
   },
   impact(p){
@@ -4594,8 +4602,8 @@ const ui={
     else{const c=B3.screenPos("b",b.x,b.y,.8);floatText(c.x,c.y,"👀 ¡Lo cogió!","near");sfx("radar");toast("foepick","👀 <b>¡El rival cogió el objeto!</b> Sabes que está ahí. ¡Dispara!");}
   },
   boost(){if(UI.screen!=="game")return;sfx("tap");toast("boost","🎁 <b>¡Objeto!</b> Sale en el mismo sitio en las dos islas. Si lo coges, el rival sabrá dónde estás.");},
-  noElx(){const b=$("#ebar");if(b)shake(b);sfx("miss");toast("noelx","💧 <b>Sin elixir.</b> Espera un momento a que se recargue o coge un 💧.");},
-  sudden(){banner("¡MUERTE SÚBITA!","Ataques sin aviso · os veréis cada 5 s","red",1500);},
+  noElx(s){if(s&&s!=="p")return;const b=$("#ebar");if(b)shake(b);sfx("miss");toast("noelx","💧 <b>Sin elixir.</b> Espera un momento a que se recargue o coge un 💧.");},
+  sudden(){banner("¡MUERTE SÚBITA!","Golpes más rápidos · os veréis cada 5 s","red",1500);},
   erupt(){if(UI.screen!=="game")return;sfx("radar");B3.shake(.25);toast("lava","🌋 <b>¡Erupción!</b> Quien estaba en una casilla de lava ha quedado a la vista.");},
   wind(d){if(UI.screen!=="game")return;banner(d>0?"💨 ¡VIENTO →!":"💨 ¡← VIENTO!","Los disparos caen una casilla desplazados 6 s","blue",1300);},
   cover(s){if(UI.screen!=="game")return;sfx("near");toast("cover","🗿 <b>¡La estatua ha parado el golpe!</b> Se ha roto: solo protege una vez.");},
@@ -4722,6 +4730,7 @@ function onTile(b,x,y){
   if(!R||R.paused||R.over)return;
   const me=R.heroes.p,H=HEROES[me.type];
   if(b==="p"&&G.decoyArm){
+    if(x===me.x&&y===me.y){const c=B3.screenPos("p",x,y);floatText(c.x,c.y,"🎭 Lejos de ti","miss");return;}
     G.decoyArm=false;$("#amagob")&&$("#amagob").classList.remove("on");
     if(R.now<AMAGO.HIDE_T){const c=B3.screenPos("p",x,y);floatText(c.x,c.y,"🫣 Aún no","miss");return;}
     const cost=AMAGO.decoyCost(me);
@@ -4736,17 +4745,23 @@ function onTile(b,x,y){
     if(G.online){G.lastMove=R.now;netSend({t:"move",x,y});}
     renderLive();return;
   }
+  if(G.decoyArm){G.decoyArm=false;$("#amagob")&&$("#amagob").classList.remove("on");}/* disparar desarma el amago: el siguiente toque en tu isla vuelve a moverte */
   if(R.now<AMAGO.HIDE_T){const c=B3.screenPos("b",x,y);floatText(c.x,c.y,"🫣 ¡Escóndete primero!","miss");return;}
   if(G.online){
     if(R.elx.p<H.cost){ui.noElx();const c=B3.screenPos("b",x,y);floatText(c.x,c.y,`Faltan ${Math.ceil(H.cost-R.elx.p)} 💧`,"miss");return;}
-    if(R.now<me.cdUntil)return;
-    netSend({t:"fire",x,y});return;
+    if(R.now<me.cdUntil||(G.pendFire&&R.now-G.pendFire<.6)){sfx("nope");return;}
+    G.pendFire=R.now;sfx("shoot");netSend({t:"fire",x,y});return;
   }
   const r=AMAGO.fire(R,"p",x,y,ui);
+  if(r==="cd"){sfx("nope");return;}
   if(r==="elx"){ui.noElx();const c=B3.screenPos("b",x,y);floatText(c.x,c.y,`Faltan ${Math.ceil(H.cost-R.elx.p)} 💧`,"miss");}
   else if(r==="ok"){renderLive();if(!S.tips.fshot){S.tips.fshot=1;save();EV.add("first_shot",{t:Math.round(R.now*10)/10});}}
 }
-document.addEventListener("visibilitychange",()=>{lastT=performance.now();});
+document.addEventListener("visibilitychange",()=>{lastT=performance.now();
+  /* online: al salir de la app se corta el socket para que el servidor pause la ronda al momento (si no, tardaba hasta 40 s
+     y al volver la partida se daba por perdida). Al volver, netLost → netResume recupera la partida con su token */
+  if(document.hidden&&G&&G.online&&G.token&&NET.ws&&UI.screen!=="home"&&UI.screen!=="end"){try{NET.ws.close(4000,"bg");}catch(e){}}
+  if(!document.hidden&&NET.needResume){NET.needResume=false;if(G&&G.online&&G.token)netResume();}});
 
 fxInit();
 function bootGame(){

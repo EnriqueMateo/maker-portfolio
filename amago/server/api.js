@@ -23,7 +23,7 @@ function limited(ip, kind, perMin) {
 }
 setInterval(() => {
   const now = Date.now();
-  for (const [e, f] of failed) if (f.until < now - 15 * 60000) failed.delete(e);
+  for (const [e, f] of failed) if (f.until < now && now - (f.first || 0) > 15 * 60000) failed.delete(e);
   for (const [k, h] of hits) if (now - h.t > 60000) hits.delete(k);
   for (const [c, l] of links) if (l.until < now) links.delete(c);
 }, 60000).unref();
@@ -263,8 +263,11 @@ function makeApi(store, opts) {
           const uid = okEmail(email) && typeof b.pass === "string" ? await store.loginGet(email) : null;
           const u = uid ? await store.get(uid) : null;
           if (!u || !(await passCheck(b.pass, u.ph))) {
-            const n = (f && f.until > Date.now() - 15 * 60000 ? f.n : 0) + 1;
-            failed.set(email, { n, until: n >= 8 ? Date.now() + 15 * 60000 : 0 });
+            // fallos dentro de una ventana de 15 min; al 8.º se bloquea ese correo 15 min
+            const now2 = Date.now();
+            const fresh = f && now2 - (f.first || 0) < 15 * 60000;
+            const n = (fresh ? f.n : 0) + 1;
+            failed.set(email, { n, first: fresh ? f.first : now2, until: n >= 8 ? now2 + 15 * 60000 : 0 });
             return json(res, 401, { error: "Correo o contraseña incorrectos." }), true;
           }
           failed.delete(email);
@@ -339,7 +342,8 @@ function makeApi(store, opts) {
           // las partidas jugadas desde el último guardado (y como mucho una partida cada ~45 s). Los online los pone el servidor.
           const games = Math.max(0, Math.min(1e6, Math.floor(Number(b.save.games) || 0)));
           const prevG = u.games || 0;
-          const dG = Math.max(0, Math.min(games - prevG, Math.floor((now - (u.saveAt || u.created || now)) / 45000) + 2));
+          // como mucho 3 partidas por guardado y una cada ~45 s desde el último (el tiempo sin guardar no se acumula)
+          const dG = Math.max(0, Math.min(games - prevG, 3, Math.floor((now - (u.saveAt || u.created || now)) / 45000) + 1));
           if (typeof b.save.tro === "number" && Number.isFinite(b.save.tro)) {
             const cur = u.tro || 0;
             u.tro = Math.max(0, Math.max(cur - dG * 6, Math.min(cur + dG * 20, Math.round(b.save.tro))));

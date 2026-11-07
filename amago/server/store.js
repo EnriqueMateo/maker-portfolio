@@ -84,6 +84,8 @@ function fileStore(dir) {
 async function pgStore(url) {
   const { Pool } = require("pg");
   const pool = new Pool({ connectionString: url, ssl: /localhost|127\.0\.0\.1/.test(url) ? false : { rejectUnauthorized: false }, max: 5 });
+  // sin este oyente, una conexión inactiva que se cae (mantenimiento de Railway) cerraba el proceso
+  pool.on("error", (e) => console.error("Postgres (conexión inactiva):", e.message));
   await pool.query(`create table if not exists users (id text primary key, data jsonb not null, updated timestamptz default now());
     create table if not exists events (id bigserial primary key, uid text, k text, t bigint, d jsonb);
     create index if not exists events_t on events (t);
@@ -143,6 +145,11 @@ async function open() {
       console.log("Almacenamiento: Postgres");
       return s;
     } catch (e) {
+      // en producción, nunca guardar en el disco efímero: mejor salir y que Railway reintente
+      if (process.env.RAILWAY_ENVIRONMENT) {
+        console.error("No se pudo abrir Postgres; salgo para que Railway reintente:", e.message);
+        process.exit(1);
+      }
       console.error("No se pudo abrir Postgres, uso archivos:", e.message);
     }
   }

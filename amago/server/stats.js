@@ -55,11 +55,11 @@ async function statsPage(store) {
   const quits = ev.filter((e) => e.k === "quit_mid").length;
   const firstWin = uids.map((u) => by[u].find((e) => e.k === "match_end")).filter(Boolean);
   const fw = firstWin.filter((e) => e.d && e.d.win).length;
-  const modes = {};
+  const modes = Object.create(null);
   for (const m of matches) modes[m.d.mode || "bot"] = (modes[m.d.mode || "bot"] || 0) + 1;
 
   // héroes: veces elegido y rondas ganadas
-  const H = {};
+  const H = Object.create(null);
   for (const r of rounds) {
     const h = r.d.hero;
     if (!h) continue;

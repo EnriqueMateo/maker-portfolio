@@ -283,7 +283,15 @@ function startRound(room) {
     let n = 0;
     room.loop = setInterval(() => {
       const now = Date.now();
-      E.tick(R, Math.min(0.1, (now - last) / 1000), room.hooks);
+      try {
+        E.tick(R, Math.min(0.1, (now - last) / 1000), room.hooks);
+      } catch (e) {
+        // un fallo del motor cierra solo esta sala (antes tumbaba el servidor entero)
+        console.error("Fallo en la partida", room.code || "", e && e.stack);
+        clearInterval(room.loop);
+        broadcast(room, () => ({ t: "error", msg: "La partida se ha cortado por un error. No cuenta como derrota." }));
+        return;
+      }
       last = now;
       if (!R.paused) {
         const tr = (room.track = room.track || { p: [], b: [] });
@@ -436,6 +444,8 @@ function matchmake() {
     const a = queue[i];
     const b = queue[i + 1];
     const gap = Math.abs(a.player.tro - b.player.tro);
+    // nunca contra uno mismo (misma cuenta en dos conexiones)
+    if (a.uid && a.uid === b.uid) { i++; continue; }
     if (gap <= Math.min(range(a, now), range(b, now))) {
       queue.splice(i, 2);
       const r = makeRoom(a, b, true);
@@ -610,8 +620,14 @@ function handle(ws, m) {
     case "resume": {
       const r = rooms.get(String(m.code || ""));
       const s = r && r.tokens && ["p", "b"].find((k) => r.tokens[k] && r.tokens[k] === m.token);
-      if (!r || !s || !r.away || !r.away[s]) return send(ws, { t: "resumeFail" });
-      clearTimeout(r.away[s]);
+      if (!r || !s) return send(ws, { t: "resumeFail" });
+      if (!r.away || !r.away[s]) {
+        // la conexión vieja aún no se ha dado por muerta (el móvil pasó a segundo plano y volvió): se sustituye
+        const o0 = r.players[s];
+        if (!o0 || o0 === ws || !["pick", "count", "play", "roundEnd"].includes(r.state)) return send(ws, { t: "resumeFail" });
+        r.away = r.away || {};
+        r.awaySince[s] = r.awaySince[s] || Date.now();
+      } else clearTimeout(r.away[s]);
       delete r.away[s];
       r.awayUsed[s] = (r.awayUsed[s] || 0) + (Date.now() - (r.awaySince[s] || Date.now()));
       leave(ws, false); // por si estaba en otra cola o sala (con su propia cuenta, antes de tomar la de esta partida)
@@ -621,6 +637,7 @@ function handle(ws, m) {
       ws.alias = old.alias;
       ws.helloed = true;
       old.room = null;
+      if (old !== ws && old.readyState === 1) try { old.terminate(); } catch (e) {}
       r.players[s] = ws;
       ws.room = r.code;
       if (r.R && !r.R.over && r.state === "play" && !Object.keys(r.away).length) r.R.paused = false;
@@ -710,3 +727,7 @@ Store.open()
   })
   .catch((e) => console.error("Sin almacenamiento:", e.message))
   .finally(() => server.listen(PORT, () => console.log("AMAGO online en http://localhost:" + PORT)));
+
+// red de seguridad: un error suelto se registra en vez de cerrar el proceso con todas las partidas
+process.on("uncaughtException", (e) => console.error("uncaughtException", e && e.stack));
+process.on("unhandledRejection", (e) => console.error("unhandledRejection", e && (e.stack || e)));
