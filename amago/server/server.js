@@ -126,10 +126,16 @@ function newCode() {
 // nombres: filtro de insultos (con acentos y "leet" normalizados); si no pasa, apodo automático
 const BAD = ["puta", "puto", "mierda", "polla", "cono", "joder", "cabron", "maricon", "gilipollas", "zorra", "subnormal", "follar", "pene", "verga", "pendejo", "culero", "chinga", "nazi", "hitler", "fuck", "shit", "bitch", "nigg", "cunt", "dick", "pussy", "retard", "porn", "sexo", "sex", "kkk", "faggot", "whore", "slut", "rape", "viola"];
 const norm = (t) =>
-  t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  // NFKC: letras de ancho completo y variantes → normales; cirílicas y griegas que se parecen a latinas → latinas
+  t.normalize("NFKC").toLowerCase()
+    .replace(/[аеорсухкмтвніїјѕԁ]/g, (c) => ({ а: "a", е: "e", о: "o", р: "p", с: "c", у: "y", х: "x", к: "k", м: "m", т: "t", в: "b", н: "h", і: "i", ї: "i", ј: "j", ѕ: "s", ԁ: "d" })[c])
+    .replace(/[αεοιυκνρτχ]/g, (c) => ({ α: "a", ε: "e", ο: "o", ι: "i", υ: "u", κ: "k", ν: "v", ρ: "p", τ: "t", χ: "x" })[c])
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/0/g, "o").replace(/1/g, "i").replace(/3/g, "e").replace(/4/g, "a").replace(/5/g, "s").replace(/7/g, "t").replace(/@/g, "a").replace(/\$/g, "s")
     .replace(/[^a-z]/g, "");
-const isClean = (name) => { const n = norm(name); return !BAD.some((w) => n.includes(w)); };
+// nombres normales que contienen una palabra de la lista (Penélope, Viola, Violeta, Dickens…) no se bloquean
+const ALLOW = /penelope|violeta|violet|viola|dickens|essex|sussex|middlesex|scunthorpe|shitake/g;
+const isClean = (name) => { const n = norm(name).replace(ALLOW, ""); return !BAD.some((w) => n.includes(w)); };
 const ANIMALS = ["Lince", "Zorro", "Búho", "Halcón", "Tejón", "Lobo", "Nutria", "Puma", "Erizo", "Cuervo", "Gecko", "Panda", "Koala", "Tigre", "Delfín", "Cobra"];
 const ADJ = ["Veloz", "Astuto", "Sigiloso", "Bravo", "Rojo", "Azul", "Dorado", "Feroz", "Listo", "Loco"];
 const alias = () => `${ANIMALS[Math.floor(Math.random() * ANIMALS.length)]} ${ADJ[Math.floor(Math.random() * ADJ.length)]} ${10 + Math.floor(Math.random() * 90)}`;
