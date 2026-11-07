@@ -58,11 +58,16 @@ function serve(req, res, file, type, maxAge) {
       return res.end("No encontrado");
     }
     const body = fs.readFileSync(file);
-    c = { body, gz: /text|javascript/.test(type) ? zlib.gzipSync(body) : null };
+    // los GLB de las arenas (5 MB) se quedan en la mitad con gzip; ETag para no volver a bajar lo que ya está
+    c = { body, gz: /text|javascript|json|gltf/.test(type) ? zlib.gzipSync(body) : null, etag: '"' + require("crypto").createHash("sha1").update(body).digest("base64url").slice(0, 16) + '"' };
     if (process.env.NODE_ENV === "production" || process.env.RAILWAY_ENVIRONMENT) cache.set(file, c);
   }
   const gz = c.gz && /\bgzip\b/.test(req.headers["accept-encoding"] || "");
-  const h = { "content-type": type, "cache-control": maxAge ? "public, max-age=" + maxAge : "no-cache" };
+  if (req.headers["if-none-match"] === c.etag) {
+    res.writeHead(304, { etag: c.etag });
+    return res.end();
+  }
+  const h = { "content-type": type, "cache-control": maxAge ? "public, max-age=" + maxAge : "no-cache", etag: c.etag };
   if (gz) h["content-encoding"] = "gzip";
   res.writeHead(200, h);
   res.end(gz ? c.gz : c.body);
