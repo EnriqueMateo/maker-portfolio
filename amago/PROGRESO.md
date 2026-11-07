@@ -5,6 +5,7 @@ Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://
 ## 7 nov 2026: auditoría completa y versión 1.1 (leer primero)
 - Auditoría con 6 agentes (176 hallazgos): informes en `docs/auditoria_2026-11/`. Arreglados la mayoría de los graves y lo visual más importante (arena, efectos, HUD, menús, apuntar al soltar, pausa, reconexión online, servidor, rendimiento).
 - Sombra reequilibrada: `hp:3`, `cost:4` (simulación: media 32 % → 52 %). Siguen flojos para Sombra Brasa (27 %) y Muro (18 %); Mira pierde casi siempre contra Sombra (revisar Mira).
+- **1.0 publicada en la App Store.** **1.1 (build 1) enviada a revisión el 7 nov 2026** (novedades en es/en, publicación automática al aprobarse, cuenta de revisión copiada de la 1.0).
 - `MARKETING_VERSION = 1.1`. Subir desde el Mac: `cd amago/app && bash scripts/subir-ios.sh`, luego en App Store Connect crear la versión 1.1, asignarle el build y enviar a revisión.
 - Pendiente: economía en el servidor antes de compras, recuperar contraseña (correo), clave .p8 de Apple en Railway, tiras de animación en KTX2.
 
