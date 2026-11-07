@@ -1126,6 +1126,344 @@ img[src$="key.webp"]{object-fit:contain}
 .hchip.on{transform:translateY(-6px);outline:3px solid var(--tx-hl);box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 3px 0 var(--ink),0 0 16px rgba(255,224,92,.7)!important}
 
 @media (prefers-reduced-motion:reduce){.godrays,.mbg::before,.sbtn.chest .sq img,.badge.bob,.ptile.p::after,.shine::after,.gbtn.premium::after{animation:none!important}}
+/* ===== mejoras de menús (auditoría nov 2026) ===== */
+:root{--tx-3:#A9B6EC}
+/* materiales compartidos: isla de césped, insignia de rareza, ✓ dibujado */
+.isle{position:absolute;left:50%;bottom:30px;width:230px;height:54px;margin-left:-115px;border-radius:50%;background:radial-gradient(60% 70% at 50% 30%,#A8F07E,#5FD35A 55%,#2F9A3A);border:3px solid var(--ink);box-shadow:0 9px 0 #8a5a2b,0 9px 0 3px var(--ink),0 22px 22px rgba(0,0,30,.4);pointer-events:none}
+.rartag{display:inline-block;padding:3px 8px 3px;border-radius:7px;border:2px solid var(--ink);font:11px/1 var(--f-game);letter-spacing:.05em;color:#fff;text-transform:uppercase;text-shadow:0 1px 0 var(--ink);background:linear-gradient(#A8C8F0,#4D6FB0);box-shadow:0 2px 0 var(--ink);white-space:nowrap}
+.rartag.r1{background:linear-gradient(#8CF5AE,#1E9A55)}.rartag.r2{background:linear-gradient(#DDA8FF,#7A2FD6)}.rartag.r3{background:linear-gradient(#FFE88A,#E08A00)}
+.okc{position:absolute;top:-8px;right:-8px;z-index:3;width:28px;height:28px;box-sizing:border-box;border-radius:50%;background:linear-gradient(var(--g-1),var(--g-2));border:3px solid var(--ink);box-shadow:0 2px 0 var(--ink);font-style:normal}
+.okc::after{content:"";position:absolute;left:7px;top:2px;width:6px;height:12px;border:solid #fff;border-width:0 4px 4px 0;transform:rotate(45deg)}
+.okc.big{top:50%;left:50%;right:auto;width:38px;height:38px;margin:-16px 0 0 -19px}
+.okc.big::after{left:10px;top:3px;width:9px;height:17px}
+
+/* ventanas: velo con desenfoque y entrada con rebote; un único título: la cinta */
+.modal{background:rgba(4,6,28,.7)!important;-webkit-backdrop-filter:blur(6px) saturate(.8);backdrop-filter:blur(6px) saturate(.8)}
+.modal .sheet>h2.out{position:relative;display:block;width:max-content;max-width:calc(100% - 110px);margin:2px auto 12px;padding:7px 22px 8px;box-sizing:border-box;background:linear-gradient(#3A4BC4,#1A2278);border:3px solid var(--ink);border-radius:6px;box-shadow:0 3px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.25);font-size:22px;line-height:1.1;text-align:center;z-index:1}
+.modal .sheet>h2.out::before,.modal .sheet>h2.out::after{content:"";position:absolute;top:7px;width:20px;height:100%;z-index:-1;background:#121957;border:3px solid var(--ink)}
+.modal .sheet>h2.out::before{left:-16px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}
+.modal .sheet>h2.out::after{right:-16px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
+.modal .sheet{max-height:calc(100% - 16px)}
+
+/* ajustes: filas con el material del panel, interruptores dibujados y grupos */
+.modal .toggle{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;min-height:50px;padding:8px 12px;background:linear-gradient(180deg,var(--pnl-hi),var(--pnl-1) 40%,var(--pnl-2));border:3px solid var(--ink);border-radius:14px;box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 3px 0 var(--ink);color:#fff;font:inherit;font-size:15px;font-weight:900;text-align:left;cursor:pointer}
+.modal .toggle>span{flex:1;min-width:0}
+.modal .toggle>span.tav{flex:none;width:34px;height:34px;border-radius:10px;overflow:hidden;background:linear-gradient(#ffe066,#f09a00);border:2px solid var(--ink);display:grid;place-items:center}
+.toggle .tav img{width:118%;height:118%;object-fit:cover;object-position:50% 12%}
+.toggle i.pill{flex:none;font-style:normal;padding:6px 12px 7px;border-radius:999px;background:linear-gradient(var(--b-1),var(--b-2));border:2px solid var(--ink);box-shadow:inset 0 -3px 0 var(--b-lip),inset 0 2px 0 rgba(255,255,255,.5);font:14px/1 var(--f-game);color:#fff;text-shadow:0 1px 0 var(--ink),1px 0 0 var(--ink),-1px 0 0 var(--ink);white-space:nowrap}
+.toggle i.pill.go{background:linear-gradient(var(--g-1),var(--g-2));box-shadow:inset 0 -3px 0 var(--g-lip),inset 0 2px 0 rgba(255,255,255,.5)}
+.toggle i.chev{flex:none;font:26px/1 var(--f-game);font-style:normal;color:var(--tx-hl);background:none;padding:0 2px;text-shadow:0 2px 0 var(--ink)}
+.toggle i.sw{flex:none;position:relative;width:54px;height:30px;box-sizing:border-box;padding:0;border-radius:999px;background:var(--d-2);border:3px solid var(--ink);box-shadow:inset 0 3px 0 rgba(0,0,0,.3);transition:background .15s}
+.toggle i.sw::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:linear-gradient(#fff,#dfe6ff);box-shadow:0 2px 0 rgba(0,0,0,.35);transition:transform .2s var(--e-pop)}
+.toggle i.sw.on{background:linear-gradient(var(--g-1),var(--g-2))}
+.toggle i.sw.on::after{transform:translateX(24px)}
+.tgroup{display:flex;flex-direction:column;border:3px solid var(--ink);border-radius:16px;overflow:hidden;box-shadow:0 3px 0 var(--ink);flex:none}
+.modal .tgroup .toggle{border:0;border-radius:0;box-shadow:inset 0 2px 0 rgba(255,255,255,.12);border-bottom:2px solid rgba(8,6,32,.7)}
+.modal .tgroup .toggle:last-child{border-bottom:0}
+
+/* elegir modo y dificultad */
+.modal .modecard{background:linear-gradient(180deg,var(--pnl-hi),var(--pnl-1) 40%,var(--pnl-2));color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 4px 0 var(--ink)}
+.modal .modecard.on{border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--gold-2),inset 0 2px 0 rgba(255,255,255,.18),0 4px 0 var(--ink),0 0 16px rgba(255,210,74,.55)}
+.modal .modecard small{color:var(--tx-2)}
+.modal .diffchip{background:linear-gradient(180deg,var(--pnl-hi),var(--pnl-1) 40%,var(--pnl-2));color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 4px 0 var(--ink)}
+.modal .diffchip.on{background:linear-gradient(180deg,#ffe56b,#ffc21a);color:var(--ink);box-shadow:inset 0 -4px 0 var(--y-lip),inset 0 2px 0 rgba(255,255,255,.6),0 4px 0 var(--ink),0 0 14px rgba(255,210,74,.5)}
+.diffchip .dpt{display:block;width:54px;height:54px;border-radius:14px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#fff8,transparent 65%),linear-gradient(#7FA8D9,#3E5C97);border:2px solid var(--ink);box-shadow:0 2px 0 var(--ink)}
+.diffchip .dpt img{width:124%;height:124%;margin:-4% 0 0 -12%;object-fit:cover;object-position:50% 10%}
+.diffchip.on .dpt{background:radial-gradient(circle at 50% 35%,#fff8,transparent 65%),linear-gradient(#FFF3B0,#F3A01B)}
+.diffchip .dst{display:flex;gap:1px;margin:2px 0}
+.diffchip .dst img{width:15px;height:15px;object-fit:contain}
+.diffchip .dst img.off{filter:brightness(0) opacity(.3)}
+
+/* cómo se juega, sin conexión */
+.howc .big.hwimg{display:grid;place-items:center;height:110px}
+.howc .hwimg>img{width:100px;height:100px;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,0,0,.3))}
+.howc .hwimg .ico.l{width:96px;height:96px}
+.hwpair{display:flex;align-items:center;gap:6px}
+.hwpair img{width:96px;height:100px;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,0,0,.3))}
+.hwpair img.sil{filter:brightness(0) opacity(.7) drop-shadow(0 0 8px rgba(255,255,255,.4))}
+.hwpair b{font:30px/1 var(--f-game);font-weight:400;color:var(--tx-hl)}
+.hwfoot{display:flex;gap:6px}.hwfoot svg{width:60px;height:60px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.3))}.hwfoot svg+svg{transform:translateY(-18px) rotate(14deg);opacity:.7}
+.gtag{display:inline-flex;align-items:center;gap:2px;font-size:17px;padding:1px 6px 2px;border-radius:8px;background:rgba(0,0,0,.18)}
+
+/* buscando rival: radar en lugar del anillo discontinuo */
+.qradar{position:relative;width:184px;height:184px;margin:4px auto;border-radius:50%;background:radial-gradient(closest-side,rgba(62,230,255,.16),rgba(62,230,255,.04) 75%,transparent),repeating-radial-gradient(circle,transparent 0 29px,rgba(62,230,255,.3) 30px 31px);border:3px solid rgba(62,230,255,.6);box-shadow:0 0 18px rgba(62,230,255,.35),inset 0 0 18px rgba(62,230,255,.25);display:grid;place-items:center;overflow:hidden}
+.qradar .sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(62,230,255,.6),transparent 28%);animation:spin 1.6s linear infinite}
+.qradar .av{position:relative;width:118px;height:118px;animation:bob 1.6s ease-in-out infinite}
+.qradar .av img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 3px rgba(0,0,0,.35))}
+.waitdots.qline{display:flex;align-items:center;justify-content:center;gap:4px;font:22px/1 var(--f-game);color:#fff}
+.qline b{font-weight:400}.qline .qsep{width:10px}
+
+/* barra superior: aviso de invitado como insignia sobre el avatar */
+.mprof{position:relative;overflow:visible!important}
+.badge.gnag{top:-8px;left:-6px;right:auto;animation:bbob 4s ease-out infinite}
+
+/* inicio: escenario con viñeta, columna central despejada */
+body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,rgba(6,10,46,.5)),linear-gradient(180deg,rgba(14,31,114,.78),rgba(14,31,114,0) 21%,rgba(8,14,48,0) 66%,rgba(8,14,48,.62))}
+.hplate{max-width:66%;margin-bottom:12px}
+.playrow2{margin-top:14px}
+.playw{position:relative;flex:1;display:flex;min-width:0}
+.playw>.play2{flex:1;width:100%}
+.fwtag{position:absolute;top:-17px;right:8px;z-index:4;display:flex;align-items:center;gap:2px;padding:2px 9px 3px 4px;border-radius:999px;background:linear-gradient(#3A4BC4,#1A2278);border:3px solid var(--ink);box-shadow:0 2px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.2);font:14px/1 var(--f-game);color:#fff;white-space:nowrap;pointer-events:none}
+.fwtag .ico{width:24px;height:24px;margin:-5px 0}.fwtag .ico.s{width:17px;height:17px;margin:-3px 3px -3px 0}
+.fwtag b{font-weight:400;color:var(--tx-hl);margin-right:5px}
+.fwtag.streak span{color:#FFB84D}
+.sbtn .sq>.lockc{position:absolute;right:-7px;bottom:-8px;width:22px;height:29px;object-fit:contain;filter:drop-shadow(0 2px 0 var(--ink))}
+.sbtn.lk .sq{filter:none}
+.sbtn.lk .sq::after{content:none}
+.sbtn.lk .sq>img:first-child{filter:grayscale(.4) brightness(.85)}
+.sbtn.chest .sq img{width:76px;height:76px}
+.sbtn.chest .lb{margin-top:-4px;position:relative;z-index:2}
+.keymod .slots i{background:var(--well);border:2px solid var(--ink);box-shadow:inset 0 2px 0 rgba(0,0,0,.45)}
+.keymod .slots img.off{opacity:.35;filter:brightness(0) invert(.55)}
+
+/* barra de pestañas: activa elevada, con labio, y etiqueta amarilla */
+#app.home{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+.tabs button{filter:none;opacity:.86}
+.tabs button img{width:42px;height:42px}
+.tabs button span{color:var(--tx-2);opacity:1}
+.tabs button.on{opacity:1}
+.tabs button.on::before{inset:-12px 2px -2px;border-radius:16px 16px 0 0;background:linear-gradient(var(--b-1),var(--b-2));box-shadow:inset 0 -5px 0 var(--b-lip),inset 0 3px 0 rgba(255,255,255,.55)}
+.tabs button.on span{color:var(--tx-hl)}
+.tabs button.on img{transform:translateY(-12px) scale(1.25)}
+.tabs .badge{top:-5px;right:8%}
+
+/* entrada escalonada de tarjetas */
+.offers>*,.rail>.rnode,.tracks>.ptile{animation:appear .22s var(--e-out) both}
+
+/* colección: rareza que se lee, barra de Poder siempre y mejora como insignia */
+.card{box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 var(--ink),0 10px 16px -6px rgba(0,0,30,.5)}
+.card.r1{box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 var(--ink),0 0 12px rgba(65,217,122,.5)}
+.card.r2{box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 var(--ink),0 0 14px rgba(181,102,255,.65)}
+.card.r3{box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 var(--ink),0 0 18px rgba(255,194,26,.75)}
+.card .art .rartag{position:absolute;left:50%;bottom:3px;transform:translateX(-50%);z-index:2;font-size:9px;padding:2px 6px}
+.hgrid4 .card .plate{gap:4px}
+.hgrid4 .card .plate .row{gap:3px}
+.hgrid4 .card .plate .bar{flex:1;height:16px;min-width:0}
+.hgrid4 .card .plate .bar>span{font-size:10px}
+.hgrid4 .card .plate .bar.full>u{--c1:#B6FF8C;--c2:#2FCB45}
+.upb{flex:none;width:22px;height:22px;box-sizing:border-box;border-radius:7px;display:grid;place-items:center;font:11px/1 var(--f-game);font-style:normal;color:#fff;background:linear-gradient(var(--g-1),var(--g-2));border:2px solid var(--ink);box-shadow:inset 0 -3px 0 var(--g-lip),0 2px 0 var(--ink);text-shadow:0 1px 0 var(--ink);animation:bbob 3s ease-out infinite}
+.hgrid4 .card .plate .upt.max{color:var(--tx-hl)}
+/* bloqueados a color, con su rareza y un candado */
+.card.lock.r0{--rc:#7FA8D9;--rd:#3E5C97}.card.lock.r1{--rc:#41D97A;--rd:#167A45}.card.lock.r2{--rc:#B566FF;--rd:#5C1FB0}.card.lock.r3{--rc:#FFC21A;--rd:#C46A00}
+.card.lock .art img.h3,.card.lock .art svg{filter:saturate(.3) brightness(.62) drop-shadow(0 6px 0 rgba(0,0,0,.22))!important}
+.card .art img.lockc{left:auto;right:5px;top:5px;bottom:auto;width:22px;height:29px;transform:none;z-index:3;filter:drop-shadow(0 2px 0 var(--ink))}
+.hgrid4 .card .lk{align-self:center;display:flex;align-items:center;gap:2px;padding:2px 9px 2px 3px;border-radius:999px;background:linear-gradient(var(--gold-2),var(--gold-3));border:2px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.5);font-size:13px}
+
+/* ficha de héroe: estadísticas en panel oscuro, héroe sobre su isla, nivel continuo, mejorar fijo abajo */
+.page .stile.ice{background:linear-gradient(180deg,var(--pnl-hi),var(--pnl-1) 40%,var(--pnl-2));color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 3px 0 var(--ink)}
+.page .stile .ico{width:42px;height:42px}
+.page .stile .tv{color:#fff;font-size:22px;text-shadow:0 2px 0 var(--ink),1.5px 0 0 var(--ink),-1.5px 0 0 var(--ink),0 -1.5px 0 var(--ink)}
+.page .stile .tv .ico{width:20px;height:20px;margin:-4px 0}
+.page .stile .tk{color:var(--tx-3)}
+.page .stile.wide .tk{color:var(--tx-2);font-weight:800}
+.hero-stage .isle{bottom:10px;width:250px;margin-left:-125px}
+.hero-stage .godrays{width:440px;height:440px;margin:-220px 0 0 -220px;top:52%;-webkit-mask:radial-gradient(closest-side,#000 20%,transparent 100%);mask:radial-gradient(closest-side,#000 20%,transparent 100%)}
+.hero-stage>img,.hero-stage>svg{z-index:1}
+.lvseg{gap:0;width:min(300px,82%);margin:0 auto;border:3px solid var(--ink);border-radius:9px;overflow:hidden;background:var(--well);box-shadow:inset 0 3px 0 rgba(0,0,0,.45),0 2px 0 var(--ink)}
+.lvseg i{flex:1;height:14px;border:0;border-radius:0;border-right:2px solid var(--ink);background:transparent}
+.lvseg i:last-child{border-right:0}
+.lvseg i.on{background:linear-gradient(#F0CCFF 0 35%,#B566FF 36%,#7A2FD6)}
+.page [data-a=upgrade]{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:6}
+/* pase premium: rayos que se difuminan, margen lateral y los tres aspectos en abanico */
+.page .in{padding-inline:16px}
+.hero-stage.fan>img{position:absolute;bottom:0;left:50%;margin:0 0 26px;height:200px}
+.hero-stage.fan>img:last-of-type{position:relative;left:auto;height:230px;z-index:2}
+.hero-stage.fan>img.fl{left:4%;transform:rotate(-8deg);height:170px;z-index:1;filter:brightness(.85) drop-shadow(0 8px 5px rgba(0,0,0,.35))}
+.hero-stage.fan>img.fr{left:auto;right:4%;transform:rotate(8deg);height:170px;z-index:1;filter:brightness(.85) drop-shadow(0 8px 5px rgba(0,0,0,.35))}
+
+/* elegir héroe: héroe grande sobre su isla, estadísticas en pozo, A LUCHAR en amarillo */
+#app.pick{gap:8px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.pickhead h2{font-size:30px}
+.pickstage{position:relative;flex:none;height:clamp(180px,31vh,270px);display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.pickstage .godrays{top:42%;width:520px;height:520px;margin:-260px 0 0 -260px}
+.pickstage .floorglow{bottom:40px}
+.pickstage .isle{bottom:44px;width:210px;height:50px;margin-left:-105px}
+.pkart{position:absolute;left:0;right:0;top:0;bottom:66px;display:flex;justify-content:center;align-items:flex-end;pointer-events:none;z-index:1}
+.pkart img,.pkart svg{max-height:100%;max-width:78%;object-fit:contain;filter:drop-shadow(0 8px 4px rgba(0,0,0,.35));animation:appear .3s var(--e-pop) both}
+.pkname{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px}
+.pkname h3{margin:0;font:40px/1 var(--f-game);font-weight:400}
+.pkname small{color:var(--tx-2);font-size:13px;align-self:flex-end;margin-bottom:6px}
+#app.pick .pickcard{padding:8px;display:flex;flex-direction:column;gap:6px}
+.pstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;border-radius:14px;border-width:3px}
+.pst{position:relative;display:flex;align-items:center;gap:8px;min-width:0;padding:6px 26px 6px 8px;border-radius:10px;background:linear-gradient(rgba(255,255,255,.09),rgba(255,255,255,.02));color:#fff}
+.pst>.ico{width:32px;height:32px;flex:none}
+.pst>span:not(.pt2){display:flex;flex-direction:column;gap:2px;min-width:0}
+.pst b{font:18px/1 var(--f-game);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pst small{font-size:11px;color:var(--tx-3);font-weight:900;white-space:nowrap}
+.pst .pt2{flex:none;display:grid;place-items:center}
+.pst .cost{position:absolute;top:4px;right:5px;display:flex;align-items:center;gap:1px;font:13px/1 var(--f-game);font-style:normal;color:#fff}
+.pst .cost .ico{width:15px;height:15px}
+.pst .cost.up{color:var(--tx-up)}
+.pst .dmg{position:absolute;bottom:4px;right:5px;display:flex;align-items:center;gap:1px;font:14px/1 var(--f-game);font-style:normal;color:#FF8A95}
+.pst .dmg .ico{width:15px;height:15px}
+.pst.wide{grid-column:span 2;padding:5px 8px}
+.pst .pt2+span b{font-size:15px}
+.pst.wide>.ico{width:24px;height:24px}
+.pst.wide b{font:900 13px/1.2 var(--f-body);white-space:normal}
+.pst.nowarn b{color:var(--tx-hl)}
+#app.pick .special{font-size:13px;color:var(--tx-2);margin:0 4px}
+.gbtn.fightbtn{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5;width:100%;font-size:36px;flex:none;margin-top:4px}
+/* pantalla VS a pantalla completa: rival arriba, tú abajo, en diagonal */
+.modal:has(.vssheet){padding:0;background:#05061f!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+.modal .sheet.vssheet{position:fixed;inset:0;width:auto;max-width:none;max-height:none;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;padding:0;animation:none;overflow:hidden}
+.modal .sheet.vssheet>h2.out{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);margin:0;z-index:6;background:linear-gradient(var(--gold-2),var(--gold-3))}
+.vssheet .vs{position:absolute;inset:0;display:block}
+.vssheet .vs .p{position:absolute;left:0;right:0;height:56%;display:flex;flex-direction:column;align-items:center;gap:0}
+.vssheet .vs .p:first-child{bottom:0;justify-content:flex-end;padding-bottom:calc(6% + env(safe-area-inset-bottom,0px));clip-path:polygon(0 20%,100% 0,100% 100%,0 100%);background:radial-gradient(80% 70% at 50% 60%,#6FB5FF,var(--sky-2) 60%,var(--sky-3));animation:vsinL .45s var(--e-pop) both}
+.vssheet .vs .p:last-child{top:0;justify-content:flex-start;padding-top:calc(68px + env(safe-area-inset-top,0px));clip-path:polygon(0 0,100% 0,100% 80%,0 100%);background:radial-gradient(80% 70% at 50% 40%,#FF8A7A,var(--r-2) 60%,#5A0F1C);animation:vsinR .45s var(--e-pop) both}
+.vssheet .vs .p:last-child .av{order:0}
+.vssheet .av.big{width:min(62vw,250px);height:min(28vh,240px);animation:none}
+.vssheet .av img,.vssheet .av svg{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 4px rgba(0,0,0,.4))}
+.vssheet .vs .p b{font-size:34px;color:#fff!important}
+.vssheet .vs .p small{color:#fff;font-weight:900;font-size:14px;text-shadow:0 2px 0 var(--ink)}
+.vssheet .vs .mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:96px;line-height:1;color:var(--tx-hl);z-index:5;animation:vsx .5s .12s var(--e-pop) both}
+@keyframes vsx{from{transform:translate(-50%,-50%) scale(3);opacity:0}}
+@keyframes vsinL{from{transform:translateX(-110%)}}
+@keyframes vsinR{from{transform:translateX(110%)}}
+
+/* tienda: descuentos legibles, precio que no parece desactivado */
+.ocard .stamp{top:13px;right:-31px;width:112px;transform:rotate(38deg);font:12px/1.35 var(--f-game);text-align:center}
+.ocard.wide .stamp{top:14px;right:-30px}
+.gbtn.need .short{color:#FF4757}
+.gbtn.need{filter:saturate(.85)}
+.ocard .lkn{display:flex;align-items:center;gap:3px;margin-top:auto;padding:4px 0;font-weight:900}
+.lockd .ocard,.lockd .feat,.lockd .card{filter:grayscale(.35) brightness(.92)}
+.lockban img.lk{width:28px;height:36px;object-fit:contain;flex:none}
+.sect .t-h1,.roadhead .t-h1{text-shadow:0 3px 0 var(--ink),2.5px 0 0 var(--ink),-2.5px 0 0 var(--ink),0 -2.5px 0 var(--ink)}
+
+/* camino de trofeos: tarjetas compactas, lo que se puede reclamar con borde dorado */
+.rnode{min-height:96px}
+.rtile{min-height:86px}
+.rtile img,.rtile svg{max-height:62px}
+.rtile.claim{cursor:pointer;color:#fff;background:linear-gradient(180deg,var(--pnl-hi),var(--pnl-1) 30%,var(--pnl-2));border-color:var(--gold-2);box-shadow:0 0 0 3px var(--ink),0 5px 0 2px var(--ink),0 0 18px rgba(255,200,60,.75),inset 0 0 20px rgba(255,210,74,.4)}
+.rtile.claim img,.rtile.claim svg{max-height:72px}
+.rtile.next{animation:nbob 1.6s ease-in-out infinite}
+@keyframes nbob{50%{transform:translateY(-5px)}}
+.cribn{position:absolute;top:-13px;left:50%;transform:translateX(-50%);z-index:3;padding:3px 8px 4px;border-radius:7px;background:linear-gradient(var(--g-1),var(--g-2));border:2px solid var(--ink);box-shadow:0 2px 0 var(--ink);font:12px/1 var(--f-game);white-space:nowrap}
+.rtile.got{opacity:.72}
+.rtile.got::after{content:none}
+.rnode .tro{display:flex!important;align-items:center;gap:1px;padding:2px 8px 2px 3px;background:var(--well)!important;border:2px solid var(--ink);box-shadow:inset 0 2px 0 rgba(0,0,0,.45),0 2px 0 var(--ink)!important;font-size:13px}
+.rnode .tro .ico{width:18px;height:18px}
+.rnode.reach .tro{background:linear-gradient(var(--gold-2),var(--gold-3))!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 2px 0 var(--ink)!important}
+.rnode.arena-n .arenarow{overflow:hidden;min-height:150px;justify-content:flex-end;padding:8px 10px 10px}
+.arenarow .ap{position:absolute;bottom:52px;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,0,0,.3));pointer-events:none}
+.arenarow .ap.c{left:0;right:0;margin:0 auto;height:92px}
+.arenarow .ap.l{left:14%;height:58px}.arenarow .ap.r{right:14%;height:64px}
+.arenarow .atx{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px}
+.arenarow .atx .sub{display:flex;align-items:center;gap:3px;color:#fff;font-weight:900}
+.arenarow .lockc{position:absolute;top:8px;right:10px;width:24px;height:31px;filter:drop-shadow(0 2px 0 var(--ink))}
+.rnode.arena-n:not(.reach) .arenarow .ap{filter:saturate(.4) brightness(.75) drop-shadow(0 4px 0 rgba(0,0,0,.3))}
+
+/* pase: filas compactas, raíl central que se llena, «estás aquí» y Premium a todo color */
+.tracks{gap:8px 6px}
+.ptile{min-height:82px}.ptile.big{min-height:96px}
+.ptile img,.ptile svg{max-height:48px}
+.ptile.p:has(.lockc){filter:none;box-shadow:inset 0 0 0 999px rgba(30,12,60,.16),inset 0 2px 0 #fff,0 3px 0 var(--ink)}
+.ptile .lockc{width:22px;height:29px;top:4px;right:4px;filter:drop-shadow(0 2px 0 var(--ink))}
+.ptile.got{filter:none;opacity:.62}
+.ptile.got::before{content:none}
+.ptile .okc{top:3px;right:3px}
+.tnum{position:relative}
+.tnum::before{content:"";position:absolute;left:50%;top:-8px;bottom:-8px;width:10px;margin-left:-7px;background:var(--well);border-left:2px solid var(--ink);border-right:2px solid var(--ink)}
+.tnum.reach::before{background:linear-gradient(90deg,#FFE066,#FF9A00)}
+.tnum.last::before{bottom:50%}
+.tnum i{position:relative;z-index:1}
+.tnum.reach i{background:linear-gradient(var(--gold-1),var(--gold-2) 50%,var(--gold-3))}
+.tnum.cur i{width:42px;height:42px;background:linear-gradient(#9DF4FF,#2FB8FF);border-color:var(--ink);animation:tpulse 1.4s ease-in-out infinite}
+@keyframes tpulse{50%{box-shadow:0 0 0 8px rgba(157,244,255,.35),0 0 16px rgba(157,244,255,.6)}}
+.vault{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-top:8px;color:#fff}
+.vault .vim{position:relative;width:96px;height:86px;flex:none;display:grid;place-items:center;overflow:hidden;border-radius:12px;background:radial-gradient(circle,rgba(255,236,170,.35),transparent 70%)}
+.vault .vim .godrays{width:240px;height:240px;margin:-120px 0 0 -120px;top:50%}
+.vault .vim img{position:relative;width:88px;height:80px;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+.vault .vtx{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.vault b{font:24px/1 var(--f-game);font-weight:400}
+.vault .sub{text-align:left}
+
+/* misiones: retrato del héroe, fichas con su disco y ✓ dibujado */
+.mis2 .mi.hp{border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 35%,#fff8,transparent 65%),linear-gradient(#7FA8D9,#3E5C97);border:3px solid var(--ink);box-sizing:border-box}
+.mis2 .mi.hp img{width:124%;height:124%;object-fit:cover;object-position:50% 10%}
+.mis2 .rw{gap:3px}
+.mis2 .rw .tkn{width:28px;height:28px;border-radius:50%;background:linear-gradient(#9DF4FF,#2FB8FF);border:2px solid var(--ink);display:grid;place-items:center;box-shadow:0 2px 0 var(--ink)}
+.mis2 .rw .tkn .ico{width:20px;height:20px}
+.mis2 .okc{position:relative;top:auto;right:auto;flex:none}
+.mis2.done{opacity:.65}
+.bsheet{max-height:calc(100% - 24px)}
+/* premio diario: héroe raro sorpresa y días cobrados con sello */
+.cday.got{opacity:1}
+.cday.got>*:not(.okc){opacity:.5}
+.cday.got::after{content:none}
+.calhero{position:relative;display:grid;place-items:center;width:100%;height:68px;overflow:hidden;border-radius:10px}
+.calhero .godrays{width:220px;height:220px;margin:-110px 0 0 -110px;top:50%}
+.cday .calhero img{position:relative;height:66px;filter:brightness(0) drop-shadow(0 0 6px #41E08A)}
+.calhero i{position:absolute;font:36px/1 var(--f-game);font-style:normal;color:#7CFF8A}
+/* regreso: regalo grande con rayos */
+.cbgift{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:10px;height:150px;overflow:hidden;margin:0 -16px}
+.cbgift .godrays{width:420px;height:420px;margin:-210px 0 0 -210px;top:55%}
+.cbgift .cbimg{position:relative;width:130px;height:130px;object-fit:contain;animation:hop 3s ease-in-out infinite;filter:drop-shadow(0 8px 4px rgba(0,0,0,.35))}
+.cbgift .cbimg+.cbimg{width:100px;height:100px}
+/* héroe nuevo: fondo con brillo y héroe grande */
+.modal .sheet:has(.newsart){background:radial-gradient(90% 55% at 50% 30%,#B566FF,#5C1FB0 55%,var(--pnl-2))!important}
+.sheet .newsart{position:relative;height:230px}
+.sheet .newsart img{animation:slam .5s var(--e-out) both;filter:drop-shadow(0 10px 6px rgba(0,0,0,.4))}
+
+/* apertura de cofre: centrado, título grande, el premio sale del cofre abierto */
+.boxov .bt{margin-top:max(30px,7vh);font-size:28px;padding:8px 32px}
+.boxov .godrays{top:54%}
+.boxov .stage{position:relative;left:auto;right:auto;bottom:auto;height:auto;margin:auto 0;padding-bottom:4vh}
+.boxov .chimg{width:min(74vw,300px);height:min(66vw,270px)}
+.boxov .glow{bottom:90px}
+.boxov:has(.stage.open){justify-content:center}
+.boxov .rwd,.boxov .herorev{margin-top:0;z-index:2}
+.boxov .stage.open{margin:-18px 0 0;padding:0;z-index:1}
+.boxov.pur .stage.open{display:none}
+.chopen{position:relative;display:block;width:min(56vw,220px);height:min(50vw,196px)}
+.chopen img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.chopen .cbody{clip-path:inset(42% 0 0 0);filter:brightness(1.08) drop-shadow(0 10px 6px rgba(0,0,0,.4))}
+.chopen .clid{clip-path:inset(0 0 58% 0);transform:translate(-26px,-12px) rotate(-22deg);transform-origin:15% 42%;filter:brightness(1.1)}
+.chopen .beam2{position:absolute;left:20%;right:20%;bottom:50%;height:60vh;background:linear-gradient(transparent,rgba(255,236,160,.9));filter:blur(8px);transform-origin:bottom;animation:lidg 1.6s ease-in-out infinite alternate;pointer-events:none}
+.rwd.fly{animation:outOfChest .45s var(--e-pop) both}
+@keyframes outOfChest{0%{transform:translateY(170px) scale(.2);opacity:0}60%{transform:translateY(-10px) scale(1.08);opacity:1}100%{transform:none}}
+.boxov .left{position:relative;bottom:auto;right:auto;margin-top:6px}
+/* arena nueva: una escena con isla y tres props */
+.arenaup .ascene{position:relative;width:min(92vw,380px);height:min(36vh,260px);flex:none}
+.arenaup .aisle{position:absolute;left:6%;right:6%;bottom:8px;height:74px;border-radius:50%/40%;background:radial-gradient(60% 70% at 50% 30%,rgba(255,255,255,.45),transparent 60%),linear-gradient(var(--a1),var(--a2));border:3px solid var(--ink);box-shadow:0 12px 0 rgba(0,0,0,.35),0 12px 0 3px var(--ink)}
+.arenaup .ap{position:absolute;bottom:40px;object-fit:contain;filter:drop-shadow(0 6px 0 rgba(0,0,0,.3));animation:appear .5s var(--e-pop) both}
+.arenaup .ap.c.hi{left:0;right:0;margin:0 auto;height:78%;z-index:2;animation-delay:.1s}
+.arenaup .ap.l{left:4%;height:38%;animation-delay:.25s}
+.arenaup .ap.r{right:4%;height:42%;animation-delay:.35s}
+.agift{position:relative;display:flex;align-items:center;gap:6px;padding:6px 14px 6px 8px;border-radius:999px;font-size:13px;font-weight:900;color:#fff}
+.agift>.out{font:22px/1 var(--f-game)}
+.agift .sep{width:2px;height:24px;background:rgba(255,255,255,.25);margin:0 4px}
+/* bienvenida: enlaces como botones, no como texto de web */
+.tutw{justify-content:space-evenly}
+.tutw .sub{font-size:16px;max-width:320px}
+.tutw .linkbtn{text-decoration:none;opacity:1;background:linear-gradient(#3343B8,#1B2477);border:3px solid var(--ink);border-radius:999px;padding:9px 18px;box-shadow:0 3px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.2);font-weight:900;font-size:14px;margin-top:-4px}
+.tutw .tutbig{position:relative}
+.tutw .tutbig::after{content:"";position:absolute;left:10%;right:10%;bottom:-6px;height:30px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,30,.35),transparent);z-index:-1}
+/* fin de partida: el cofre ganado arriba, a la vista */
+.endchest.top{margin:4px 0 2px}
+.endchest.top .gbtn{margin-left:auto;flex:none}
+/* pantallas bajas (375×667) */
+@media (max-height:700px){
+  .podium{display:none}
+  .hstage{min-height:250px}
+  .sidecol{gap:8px}
+  .sbtn .sq{width:52px;height:52px}
+  .sbtn .sq img{width:40px;height:40px}
+  .sbtn>span.lb{font-size:12px;margin-top:3px}
+  .sbtn.chest .sq{width:70px;height:58px}.sbtn.chest .sq img{width:64px;height:64px}
+  .keymod img.c{width:44px;height:38px}
+  .hplate{margin-bottom:6px;padding:3px 12px 3px 6px}
+  .hplate b{font-size:20px}
+  .gbtn.xl.play2{font-size:32px;padding:10px 16px 15px}
+  .modebtn2{padding:4px 8px 8px}
+  .playrow2{margin-top:12px}
+  .tabs button img{width:36px;height:36px}
+  .pickstage{height:170px}
+  .pkname h3{font-size:32px}
+  .boxov .chimg{width:min(64vw,250px);height:min(56vw,224px)}
+  .herorev .hi{height:min(44vh,260px)}
+}
 </style>
 </head>
 <body>
@@ -1553,6 +1891,8 @@ const LANG=(()=>{try{const l=localStorage.getItem("amago-lang");if(l==="es"||l==
 const I18N_EN={"☁️ Pasar mi partida a otro móvil":"☁️ Move my game to another phone"," · todo desbloqueado":" · everything unlocked","Introducir código":"Enter code","Canjear":"Redeem","CANJEAR":"REDEEM","Código no válido":"Invalid code","Modo demostración":"Demo mode","Todo desbloqueado · no se guarda en tu cuenta":"Everything unlocked · not saved to your account","SALIR DEL MODO DEMOSTRACIÓN":"EXIT DEMO MODE","Modo demostración: todo desbloqueado":"Demo mode: everything unlocked","🎟️ Introducir código":"🎟️ Enter code","Se desbloquea al jugar # partida más":"Unlocks after # more game","Se desbloquea al jugar # partidas más":"Unlocks after # more games","🔒 Se desbloquea al jugar # partida más":"🔒 Unlocks after # more game","🔒 Se desbloquea al jugar # partidas más":"🔒 Unlocks after # more games","Puedes mirar, pero aún no usarlo":"You can look, but not use it yet","¡NOVEDAD!":"NEW!","¡HÉROE NUEVO!":"NEW HERO!","NUEVO":"NEW","#, el #":"#, the #","# + # de Poder":"# + # Power","Contenido fijo · gratis a los # trofeos":"Fixed contents · free at # trophies","Consíguelo en la tienda (contenido fijo, sin azar) o gratis en el camino de trofeos a los # trofeos.":"Get it in the shop (fixed contents, no luck involved) or free on the Trophy Road at # trophies.","VER EN LA TIENDA":"SEE IN SHOP","Luego":"Later","Pack #":"# Pack","# Aviso":"# Warning","# de Poder":"# Power","# escalones de premios gratis. El Pase Premium añade un premio dorado en cada escalón y 3 aspectos.":"# tiers of free rewards. Premium Pass adds a golden reward on every tier and 3 skins.","# escalón# del pase":"# pass tier#","# fichas":"# tokens","# gemas":"# gems","# h # min":"# h # min","# ha salido de la sala.":"# left the room.","# monedas":"# coins","# premios":"# rewards","# premios dorados":"# golden rewards","# quita # · 💧#":"# deals # · 💧#","# victorias seguidas#":"# wins in a row#","# ¡Premios en el camino de trofeos!":"# Rewards on the Trophy Road!","# · Poder #":"# · Power #","# · te quedarán # gemas":"# · you'll have # gems left","# · ¡NUEVO HÉROE!":"# · NEW HERO!","# · 💧#/casilla":"# · 💧#/tile","#1.ª victoria del día: llave doble, +30 # y +20 #":"#First win of the day: double key, +30 # and +20 #","#: monedas # · Poder # · héroe # %":"#: coins # · Power # · hero # %","#Elige héroe. No se puede repetir.":"#Pick a hero. No repeats.","+# cofre# para abrir":"+# chest# to open","+10 escalones al momento y marco dorado":"+10 tiers instantly and a golden frame","+25 gemas · nuevos premios en el camino de trofeos":"+25 gems · new rewards on the Trophy Road","+6 de elixir":"+6 elixir","1.000 gemas":"1,000 gems","1.200 # · 600 # · 100 # · una vez por semana":"1,200 # · 600 # · 100 # · once a week","2.200 gemas":"2,200 gems","200 # · 600 # · 300 # · Cofre grande · aspecto Truco Ártico":"200 # · 600 # · 300 # · Big Chest · Arctic Truco skin","200 gemas, 600 monedas, 300 de Poder, un Cofre grande y el aspecto Truco Ártico. Disponible hasta que llegues al Volcán.":"200 gems, 600 coins, 300 Power, a Big Chest and the Arctic Truco skin. Available until you reach the Volcano.","3 llaves":"3 keys","3 rondas, 3 héroes":"3 rounds, 3 heroes","450 gemas":"450 gems","6.000 gemas":"6,000 gems","80 gemas":"80 gems",": ¡adivina dónde y dispárale!":": guess where and shoot!","AGUA":"MISS","Abre el juego desde la dirección del servidor para jugar contra rivales reales.":"Open the game from the server address to play against real rivals.","Abre el juego desde la dirección del servidor y aquí podrás crear o unirte a una sala.":"Open the game from the server address to create or join a room here.","Ahora mismo hay pocos jugadores conectados.":"Few players are online right now.","Ahora no":"Not now","Ajustes":"Settings","Al coger el objeto, el rival ha visto dónde estás.":"By grabbing the item, the rival saw where you are.","Amago armado:":"Feint ready:","Amigos":"Friends","Antes de cada ronda eliges héroe. No puedes repetir. Gana quien se lleve 2 rondas.":"Before each round you pick a hero. No repeats. First to win 2 rounds wins.","Aplicarlo a la temporada siguiente":"Apply it to next season","Arquera":"Archer","Aspecto":"Skin","Aspectos":"Skins","Aspectos Brasa Glacial, Sombra Carmesí y Muro Magma":"Glacial Brasa, Crimson Sombra and Magma Muro skins","Ataques sin aviso · os veréis cada 5 s":"Attacks without warning · you'll see each other every 5 s","Barril de Poder":"Power Barrel","Bola de fuego":"Fireball","Bola de fuego 2×2 que quita 2. Lento y duro.":"2×2 fireball that deals 2. Slow and tough.","Bolsa de monedas":"Coin Pouch","Bomba":"Bomb","Bomba en cruz de 5 casillas. Quita 2.":"Cross-shaped bomb over 5 tiles. Deals 2.","Bonus de 40 gemas al completar el pase":"40-gem bonus for completing the pass","Borrar progreso":"Delete progress","Bosque Cazador":"Hunter Forest","Bot":"Bot","Brasa Glacial":"Glacial Brasa","Bronce":"Bronze","Buscando rival…":"Finding a rival…","Bóveda":"Vault","Bóveda #/#":"Vault #/#","Búho":"Owl","COBRAR":"CLAIM","COMPRA DE PRUEBA · no se cobra nada":"TEST PURCHASE · nothing is charged","CONFIRMAR":"CONFIRM","CONTINUAR":"CONTINUE","CREAR SALA":"CREATE ROOM","Cada escalón te da también el premio dorado":"Every tier also gives you the golden reward","Cada escalón te dará también el premio dorado.":"Every tier will also give you the golden reward.","Cada victoria te da una llave (la primera del día, dos). Con":"Every win gives you a key (two for the first of the day). With","Caduca en 15 minutos. Después, este móvil dejará de guardar en esa cuenta.":"Expires in 15 minutes. After that, this phone will stop saving to that account.","Cambia en #":"Changes in #","Cambiar":"Change","Cancelar":"Cancel","Clásico":"Classic","Cofre":"Chest","Cofre grande":"Big Chest","Cofres a la vista":"Chests ahead","Compra pendiente de aprobación.":"Purchase waiting for approval.","Comprado":"Bought","Compras":"Purchases","Compras encontradas: #. Ya están aplicadas.":"Purchases found: #. Already applied.","Compras y probabilidades":"Purchases and odds","Común":"Common","Con amigos":"With friends","Conexión perdida":"Connection lost","Contenido fijo: ves exactamente lo que te llevas":"Fixed contents: you see exactly what you get","Contra":"Against","Contra bot":"Vs bot","Contraataca rápido.":"Counterattack fast.","Cuando disparas, el rival ve desde dónde. ¡Después escapa!":"When you shoot, the rival sees where from. Then run!","Cuando lo compres, el Premium se aplicará a la temporada siguiente.":"When you buy it, Premium will apply to next season.","Código":"Code","Código no válido.":"Invalid code.","DAR UN CÓDIGO":"GET A CODE","DERROTA":"DEFEAT","DESBLOQUEAR · #":"UNLOCK · #","Daño · coste":"Damage · cost","Deja una huella falsa en tu isla para que el rival dispare donde no estás.":"Leave a fake footprint on your island so the rival shoots where you aren't.","Diarias · nuevas en #":"Daily · new in #","Diario":"Daily","Difícil":"Hard","Disparar te delata":"Shooting gives you away","Disponible al abrir el juego desde su servidor":"Available when you open the game from its server","Dragón":"Dragon","Día #":"Day #","EMPATE":"DRAW","ENTENDIDO":"GOT IT","El código tiene 4 letras.":"The code has 4 letters.","El código tiene 6 caracteres.":"The code has 6 characters.","El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.":"Online mode needs the AMAGO server. This preview can't connect to the internet.","El rival estaba justo al lado. ¡Remata!":"The rival was right next to it. Finish them!","El rival lo ve venir":"The rival sees it coming","El rival ve desde dónde. ¡Muévete!":"The rival sees where from. Move!","El rival ve una huella y un disparo, pero son de pega. Que dispare ahí mientras tú te mueves.":"The rival sees a footprint and a shot, but they're fake. Let them shoot there while you move.","Elige":"Pick","Elige modo":"Choose mode","Elixir":"Elixir","Elixir al doble 6 s":"Double elixir for 6 s","En Fácil ya no se suben trofeos: prueba Normal para seguir subiendo.":"Easy no longer gives trophies: try Normal to keep climbing.","En el otro móvil, abre AMAGO → Ajustes →":"On the other phone, open AMAGO → Settings →","Engaño":"Trick","Es el que verán tus amigos.":"This is what your friends will see.","Escribe el código que te ha dado el otro móvil:":"Type the code the other phone gave you:","Escudo":"Shield","Espera un momento a que se recargue o coge un 💧.":"Wait for it to recharge or grab a 💧.","Esperando a":"Waiting for","Esperando a que tu rival acepte…":"Waiting for your rival to accept…","Esperando a tu amigo":"Waiting for your friend","Experto":"Expert","Faltan # 💧":"Need # 💧","Faltan gemas":"Not enough gems","Familias: activa «Pedir la compra» (Apple) o Family Link (Google) para aprobar cada compra.":"Families: turn on Ask to Buy (Apple) or Family Link (Google) to approve every purchase.","Fichas":"Tokens","Fichas del pase":"Pass tokens","Fichas del pase#":"Pass tokens#","Fin de la Temporada #":"End of Season #","Flecha en línea de 3. Ágil y equilibrada.":"Arrow over a line of 3. Agile and balanced.","Flechazo":"Arrow Shot","Frasco de Poder":"Power Flask","Fácil":"Easy","GENIAL":"GREAT","GRATIS":"FREE","GUARDAR":"SAVE","Gana 12 partidas":"Win 12 matches","Gana 15 rondas":"Win 15 rounds","Gana 2 partidas":"Win 2 matches","Gana 2 rondas con":"Win 2 rounds with","Gana 4 rondas":"Win 4 rounds","Gemas":"Gems","Golpe rápido en 1 casilla. Su huella sale borrosa.":"Fast hit on 1 tile. Its footprint is blurred.","Gólem":"Golem","Has llegado al límite mensual de compras (30 €). Vuelve a estar disponible el día 1.":"You've reached the monthly purchase limit (€30). It resets on the 1st.","Hecho":"Done","Héroe":"Hero","Héroe garantizado como mucho en # cofres normales.":"Hero guaranteed within # regular chests.","Héroe nuevo":"New hero","Héroe raro":"Rare hero","Héroes":"Heroes","IVA incluido. En la app de verdad aquí aparece la ventana de pago de Apple o Google.":"VAT included. In the real app, the Apple or Google payment sheet appears here.","Información de compras y probabilidades":"Purchase and odds information","Inicio":"Home","Ir":"Go","JUGAR":"PLAY","JUGAR CONTRA BOT":"PLAY VS BOT","JUGAR OTRA":"PLAY AGAIN","Juega 1 partida con amigos":"Play 1 match with friends","Juega 3 partidas":"Play 3 matches","Juega 5 partidas":"Play 5 matches","Jugador":"Player","Junta 3 llaves y abres un cofre":"Collect 3 keys to open a chest","Justo para el Pase":"Just right for the Pass","LISTO":"DONE","La partida estaba en pausa mientras volvías.":"The match was paused while you came back.","Las casillas que parpadean en tu isla verde van a recibir el golpe. Toca otra casilla para esquivar.":"The blinking tiles on your green island are about to be hit. Tap another tile to dodge.","Las compras con dinero no están disponibles en esta versión.":"Real-money purchases aren't available in this version.","Las compras con dinero no están disponibles para tu edad.":"Real-money purchases aren't available for your age.","Legendario":"Legendary","Lento":"Slow","Leyenda":"Legend","Llaves":"Keys","Los cofres que se ganan jugando (llaves, regalo diario, camino, pase gratis y calendario) son aleatorios. Sus probabilidades:":"Chests earned by playing (keys, daily gift, road, free pass and calendar) are random. Their odds:","Lote de Poder":"Power Bundle","MEJORAR":"UPGRADE","MEJORAR A PLUS · #":"UPGRADE TO PLUS · #","MEJORAR ▲":"UPGRADE ▲","MODO":"MODE","Maestro":"Master","Maestría#":"Mastery#","Mago":"Wizard","Marco":"Frame","Marco Oro":"Gold Frame","Marco Pase":"Pass Frame","Marco Plata":"Silver Frame","Marco de avatar del pase":"Pass avatar frame","Mañana más":"More tomorrow","Mañana te espera:":"Tomorrow you get:","Mañana, otro":"Tomorrow, another","Mañana:":"Tomorrow:","Megacofre":"Mega Chest","Megacofre a la vista":"Mega Chest ahead","Mejora a Pase Plus":"Upgrade to Pass Plus","Misiones":"Quests","Monedas":"Coins","Moverte y disparar gasta elixir. Se recarga solo. Toca tu tablero para moverte y el rojo para disparar.":"Moving and shooting cost elixir. It recharges by itself. Tap your board to move and the red one to shoot.","Muchísima vida. Pisotón en toda una columna.":"Tons of health. Stomps a whole column.","Muro Magma":"Magma Muro","Muy rápido":"Very fast","MÁX":"MAX","Más de 6.000 monedas y 4.000 de Poder en total":"Over 6,000 coins and 4,000 Power in total","Nada aleatorio se vende: los cofres de la tienda y de la pista Premium tienen contenido fijo y visible. Precios con IVA incluido. Las gemas no caducan.":"Nothing random is sold: shop and Premium track chests have fixed, visible contents. Prices include VAT. Gems never expire.","Nadie suma estrella":"Nobody gets a star","Necesitas # # y tienes #.":"You need # # and you have #.","Nivel # · en esta arena juegas a nivel #":"Level # · in this arena you play at level #","Nivel ##":"Level ##","Nivel máximo.":"Max level.","No hay compras que restaurar en este dispositivo.":"There are no purchases to restore on this device.","No se pudo conectar con el servidor.":"Couldn't connect to the server.","No se pudo crear el código.":"Couldn't create the code.","No se pudo volver a la partida. Si estaba a medias, cuenta como derrota.":"Couldn't get back to the match. If it was in progress, it counts as a loss.","O CON # 450 GEMAS":"OR WITH # 450 GEMS","Oferta del día":"Deal of the day","Esa cuenta ya tiene una partida. Si sigues, la partida de invitado de este móvil se sustituye por la de tu cuenta.":"That account already has a saved game. If you continue, this phone's guest game is replaced by your account's.","Con la huella en tu misma columna no se la ha creído: ponla lejos de ti. ¡A ganar!":"With the footprint in your own column he didn't buy it: put it far from you. Go win!","Pausa":"Pause","SEGUIR":"RESUME","Salir de la partida":"Leave the match","La partida online sigue en marcha. Si sales, cuenta como derrota.":"The online match keeps running. If you leave, it counts as a loss.","La partida está parada. Si sales, no ganas premios de esta partida.":"The match is paused. If you leave, you get no rewards from this match.","contra #":"vs #","🔥 ¡Disparo en camino! Ahora muévete":"🔥 Shot incoming! Now move","🎭 Toca una casilla de tu isla para la huella falsa":"🎭 Tap a tile on your island for the fake footprint","¡Premios en el camino de trofeos!":"Rewards on the Trophy Road!","☁️ Pasar a otro móvil":"☁️ Move to another phone","Pasar a otro móvil":"Move to another phone","DESBLOQUEAR CON # 450 GEMAS":"UNLOCK WITH # 450 GEMS","Objetos cebo":"Bait items","Ojo Nevado":"Snowy Ojo","Ojo: el progreso de este móvil se sustituye por el del código.":"Heads up: this phone's progress will be replaced by the code's.","Olimpo del Amago":"Feint Olympus","Oro":"Gold","Oye los pasos del rival (más o menos). Picotazo en 1 casilla.":"Hears the rival's steps (roughly). Pecks 1 tile.","PASE PLUS · #":"PASS PLUS · #","PASE PREMIUM":"PREMIUM PASS","PONER EN PORTADA":"SET AS FAVORITE","Pack de Inicio":"Starter Pack","Pack de Inicio · solo una vez":"Starter Pack · one time only","Para el próximo golpe":"Blocks the next hit","Para quien ya sabe jugar":"For those who already know how to play","Partida amistosa contra":"Friendly match against","Pasar mi progreso":"Move my progress","Pase":"Pass","Pase # activo":"Pass # active","Pase Plus":"Pass Plus","Pase Premium":"Premium Pass","Pase Premium de la temporada":"Season Premium Pass","Pase Premium#":"Premium Pass#","Picotazo":"Peck","Pisotón":"Stomp","Plata":"Silver","Plus: Premium + 10 escalones al momento + marco dorado":"Plus: Premium + 10 tiers instantly + golden frame","Poder":"Power","Popular":"Popular","Pradera Aprendiz":"Apprentice Meadow","Precio con IVA incluido. Es un pago único por temporada, no una suscripción.":"Price includes VAT. It's a one-time payment per season, not a subscription.","Precios con IVA incluido ·":"Prices include VAT ·","Premio diario":"Daily reward","Premio diario esperándote en Inicio:":"Daily reward waiting on Home:","Premium":"Premium","Preparando la arena…":"Preparing the arena…","Puntos de Poder":"Power Points","Pásale este código a tu amigo:":"Give this code to your friend:","Quedan # días#":"# days left#","Quedan # hoy · #":"# left today · #","Quedan pocos días: si lo compras ahora puedes aplicarlo a la temporada siguiente.":"Only a few days left: if you buy it now you can apply it to next season.","Quita 15 vidas":"Deal 15 damage","Quita 8 vidas a tus rivales":"Deal 8 damage to your rivals","RECLAMAR (#)":"CLAIM (#)","RECOGER":"COLLECT","RECOGER TODO":"COLLECT ALL","RECOGER TODO (#)":"COLLECT ALL (#)","RECUPERAR":"RECOVER","REVANCHA":"REMATCH","ROJO":"RED","RONDA #":"ROUND #","RONDA PARA":"ROUND TO","Raro":"Rare","Rayo en diagonal, sin aviso. Quita 2.":"Diagonal lightning, no warning. Deals 2.","Recarga de elixir":"Elixir refill","Recursos":"Resources","Regalo de bienvenida: 60 monedas y 40 de Poder. ¡Mejora a tu héroe!":"Welcome gift: 60 coins and 40 Power. Upgrade your hero!","Regalo diario":"Daily gift","Relámpago":"Lightning","Restaurar compras":"Restore purchases","Rival real con tus trofeos · mismas recompensas que Normal":"Real rival at your trophies · same rewards as Normal","Rápido":"Fast","Rápido y certero":"Fast and precise","SALTAR":"SKIP","SIGUIENTE":"NEXT","SIMULAR PAGO":"SIMULATE PAYMENT","Sabes que está ahí. ¡Dispara!":"You know it's there. Shoot!","Saco de monedas":"Coin Sack","Sala creada":"Room created","Sala privada con código · cuenta para misiones y pase":"Private room with a code · counts for quests and pass","Sale en el mismo sitio en las dos islas. Si lo coges, el rival sabrá dónde estás.":"It appears in the same spot on both islands. If you grab it, the rival will know where you are.","Salen en el mismo sitio para los dos. Si lo coges, el rival sabrá dónde estás.":"They appear in the same spot for both. If you grab one, the rival will know where you are.","Salir de la sala":"Leave room","Saltar escalones":"Skip tiers","Se acabó el tiempo: vida # % contra # %":"Time's up: health # % vs # %","Se consigue en cofres, en la tienda#.":"Found in chests, in the shop#.","Se consiguen en el pase, en las arenas nuevas y en la tienda.":"Earned in the pass, in new arenas and in the shop.","Se desbloquea con # trofeos":"Unlocks at # trophies","Se ha cortado la conexión con el servidor.":"The connection to the server was lost.","Se ha cortado la conexión. Volviendo a tu partida.":"Connection lost. Getting back to your match.","Semanales":"Weekly","Shuriken":"Shuriken","Si sale un héroe, el peso por rareza es 6/3/2/1 (común/raro/épico/legendario) entre los que no tienes. Garantía: héroe seguro cada # puntos de cofre sin héroe.":"If a hero drops, rarity weights are 6/3/2/1 (common/rare/epic/legendary) among those you don't own. Guarantee: a hero every # chest points without one.","Sin aviso: casi imposible de esquivar":"No warning: almost impossible to dodge","Sin conexión con el servidor. Prueba en un rato.":"No connection to the server. Try again later.","Sin conexión.":"No connection.","Sin elixir.":"Out of elixir.","Solo con Premium. Elige cuántos:":"Premium only. Choose how many:","Solo una vez · disponible hasta el Volcán":"One time only · available until the Volcano","Sombra Carmesí":"Crimson Sombra","Su huella sale en una casilla falsa.":"Its footprint shows on a fake tile.","SÍ, BORRAR TODO":"YES, DELETE EVERYTHING","Sí":"Yes","TENGO UN CÓDIGO":"I HAVE A CODE","Te faltan ###. Se consiguen jugando, en cofres y en el pase.":"You need ###. Earn them by playing, from chests and the pass.","Te guardamos lo que alcanzaste y no cobraste#":"We kept what you reached but didn't claim#","Te hemos guardado un regalo por volver#.":"We saved you a welcome-back gift#.","Temporada # · #":"Season # · #","Temporada # · escalón #/#":"Season # · tier #/#","Temporada # · quedan # días#":"Season # · # days left#","Tengo un código":"I have a code","Tienda":"Shop","Tienes":"You have","Toca para abrir":"Tap to open","Toca para abrirlo":"Tap to open it","Toca para saltar":"Tap to skip","Toca para seguir":"Tap to continue","Todo cuesta elixir":"Everything costs elixir","Tranquilo, falla bastante":"Relaxed, misses a lot","Tras el escalón #: un premio cada # fichas (#/#)":"After tier #: a reward every # tokens (#/#)","Trofeos":"Trophies","Trofeos · #":"Trophies · #","Trofeos, monedas, llaves y fichas del pase":"Trophies, coins, keys and pass tokens","Trono de Leyendas":"Throne of Legends","Truco Ártico":"Arctic Truco","Tu disparo te ha delatado.":"Your shot gave you away.","Tu huella sale borrosa:":"Your footprint is blurred:","Tu héroe está abajo. El del rival, arriba y escondido. Sin turnos: todo pasa en tiempo real.":"Your hero is at the bottom. The rival's is at the top, hidden. No turns: everything happens in real time.","Tu navegador no puede mostrar gráficos 3D (WebGL). Prueba con Chrome, Safari o Edge actualizados.":"Your browser can't show 3D graphics (WebGL). Try an up-to-date Chrome, Safari or Edge.","Tu nombre":"Your name","Tu progreso":"Your progress","Tu progreso se guarda solo en la nube#. Para llevarlo a otro móvil:":"Your progress is saved to the cloud automatically#. To move it to another phone:","Tu rival":"Your rival","Tu rival se ha ido":"Your rival left","Turbo":"Turbo","UNIRSE":"JOIN","Un premio cada día que entras. Si faltas un día, no pierdes nada.":"A reward every day you log in. Miss a day and you lose nothing.","Un premio dorado extra en cada escalón y 3 aspectos":"An extra golden reward on every tier and 3 skins","Un premio dorado extra en cada uno de los 40 escalones":"An extra golden reward on each of the 40 tiers","Una pregunta":"Quick question","Uno contra uno, a ciegas":"One on one, blind","VER":"VIEW","VER EL PASE":"SEE THE PASS","VER GEMAS":"SEE GEMS","VER PACK · #":"SEE PACK · #","VOLVER AL INICIO":"BACK TO HOME","Velocidad":"Speed","Ver":"View","Ves al rival 2,5 s":"See the rival for 2.5 s","Vida":"Health","Visión":"Vision","Volcán Estratega":"Strategist Volcano","Volver":"Back","Ya lo tienes#.":"You already have it#.","Ya tienes aquí tus héroes, trofeos y recompensas.":"Your heroes, trophies and rewards are here now.","Zorro":"Fox","conexión":"connection","de Poder":"Power","el rival solo sabe la zona, no la casilla.":"the rival only knows the area, not the tile.","esperándote":"waiting for you","listos para recoger.":"ready to collect.","o en el camino de trofeos (# #)":"or on the Trophy Road (# #)","para dejar una huella falsa allí.":"to leave a fake footprint there.","para disparar. Todo cuesta 💧 elixir.":"to shoot. Everything costs 💧 elixir.","para moverte · 👆 toca el":"to move · 👆 tap the","toca una casilla de":"tap a tile on","un premio extra en cada escalón":"an extra reward on every tier","y escribe:":"and type:","y fichas dobles en tus próximas partidas":"and double tokens in your next matches","y si su ataque":"and if its attack","ya alcanzados esperándote":"already reached, waiting for you","ya alcanzados se desbloquean al momento":"already reached unlock instantly","¡# activado!":"# activated!","¡3 llaves: cofre!":"3 keys: chest!","¡A LUCHAR!":"FIGHT!","¡Amago!":"Feint!","¡Aspecto nuevo!":"New skin!","¡Bienvenido de vuelta!":"Welcome back!","¡Bum!":"Boom!","¡CERCA!":"CLOSE!","¡CERCA! 🔥":"CLOSE! 🔥","¡Casi! La próxima es tuya.":"So close! The next one's yours.","¡Copiado!":"Copied!","¡De vuelta!":"Back in!","¡Desbloqueada!":"Unlocked!","¡EMPATE!":"DRAW!","¡ENTENDIDO!":"GOT IT!","¡El rival cogió el objeto!":"The rival grabbed the item!","¡El rival disparó desde ahí!":"The rival shot from there!","¡Estaba aquí!":"It was here!","¡GRAN BOTÍN!":"BIG LOOT!","¡Has conseguido!":"You got:","¡Igualadísimo!":"Neck and neck!","¡LISTO!":"DONE!","¡MUERTE SÚBITA!":"SUDDEN DEATH!","¡Marco nuevo!":"New frame!","¡NIVEL SUPERADO!":"LEVEL UP!","¡NUEVA ARENA!":"NEW ARENA!","¡Nivel #! +10 gemas":"Level #! +10 gems","¡Nivel de jugador #!":"Player level #!","¡Nuevo héroe!":"New hero!","¡Nuevo: AMAGO!":"New: FEINT!","¡Objeto!":"Item!","¡Ojo!":"Watch out!","¡Primera victoria del día! Llave doble, +30 monedas y +20 de Poder":"First win of the day! Double key, +30 coins and +20 Power","¡Progreso recuperado!":"Progress recovered!","¡REVANCHA!":"REMATCH!","¡RONDA PARA TI!":"ROUND TO YOU!","¡Rival encontrado!":"Rival found!","¡TOCADO! −":"HIT! −","¡Te van a dar!":"Incoming!","¡Temporada #!":"Season #!","¡Uf! Por poco":"Phew! Close one","¡VICTORIA!":"VICTORY!","¡YA!":"GO!","¡un héroe raro!":"a rare hero!","¡Ábrelo!":"Open it!","· +# trofeos extra":"· +# bonus trophies","· elixir +# %":"· elixir +# %","· faltan # para #":"· # to go for #","· fichas ×2 por ir con retraso":"· tokens ×2 to help you catch up","· tope de hoy":"· today's cap","¿DÓNDE ESTABA?":"WHERE WAS IT?","¿Dónde estaba? 👀 #AMAGO":"Where was it? 👀 #AMAGO","¿En qué año naciste?":"What year were you born?","¿Usar gemas?":"Use gems?","Épico":"Epic","−30 % HOY":"−30 % TODAY","⏪ REPETICIÓN":"⏪ REPLAY","⏳ Tu rival se ha desconectado. Esperándolo…":"⏳ Your rival disconnected. Waiting…","⏳ ¡Prepárate!":"⏳ Get ready!","☁️ Pasar mi progreso a otro móvil":"☁️ Move my progress to another phone","♻️ Restaurar compras":"♻️ Restore purchases","⚠️ ¡Te van a dar! Toca otra casilla verde":"⚠️ Incoming! Tap another green tile","⚡ Poder":"⚡ Power","✅ # ya ha elegido":"✅ # has picked","✅ ¡Los dos listos!":"✅ Both ready!","✅ ¡Misión completada! Cóbrala":"✅ Quest complete! Claim it","✏️ Nombre: #":"✏️ Name: #","❓ Cómo se juega":"❓ How to play","❤️ Vida":"❤️ Health","⭐ +15 XP":"⭐ +15 XP","🎁 Objeto en el mapa: ¿cebo o premio?":"🎁 Item on the map: bait or prize?","🎭 Recargando…":"🎭 Recharging…","🎯 Busca al rival":"🎯 Find the rival","🏳️ Tu rival abandonó la partida: la victoria es tuya.":"🏳️ Your rival quit: the win is yours.","👀 ¡Cogió un objeto ahí!":"👀 They grabbed an item there!","👀 ¡Lo cogió!":"👀 Got it!","👀 ¡Rival a la vista! Dispara":"👀 Rival spotted! Shoot","👇 Toca":"👇 Tap","👟 Velocidad":"👟 Speed","👣 ¡Ha disparado desde ahí!":"👣 They shot from there!","👣 ¡Te han visto! Cambia de sitio":"👣 You've been spotted! Move","💧 Cargando elixir…":"💧 Charging elixir…","📋 Copiar código":"📋 Copy code","📤 Compartir la repetición":"📤 Share the replay","📳 Vibración":"📳 Vibration","🔁 ¡# quiere la revancha!":"🔁 # wants a rematch!","🔊 Sonido":"🔊 Sound","🔌 Tu rival ha vuelto. ¡Seguid!":"🔌 Your rival is back. Carry on!","🔒 Juega # partida# más":"🔒 Play # more match#","🔒 Política de privacidad":"🔒 Privacy policy","🛡️ Escudo: tras dos derrotas seguidas, esta no te quita trofeos.":"🛡️ Shield: after two losses in a row, this one doesn't cost trophies.","🛡️ Protección de novato: no pierdes trofeos.":"🛡️ Rookie protection: you don't lose trophies.","🛡️ ¡Bloqueado!":"🛡️ Blocked!","🛡️ ¡Parado!":"🛡️ Saved!","🦸 Cada héroe es distinto: mira su":"🦸 Every hero is different: check their","🧾 Compras y probabilidades":"🧾 Purchases and odds","🫣 Aún no":"🫣 Not yet","🫣 Tu héroe está escondido en tu isla":"🫣 Your hero is hiding on your","🫣 ¡Escóndete primero!":"🫣 Hide first!","🫣 ¡Escóndete! Disparos en #":"🫣 Hide! Shooting in #","RONDA PARA #":"ROUND TO #","Gana 2 rondas con #":"Win 2 rounds with #","Mañana te espera: #":"Tomorrow you get: #","Premio diario esperándote en Inicio: #":"Daily reward waiting on Home: #","un cofre":"a chest","un premio":"a reward","verde":"green","roja":"red","tu isla":"your island","Bot fácil":"Easy bot","Bot normal":"Normal bot","Bot difícil":"Hard bot","Ronda #":"Round #","amago":"feint","moverse":"move","flechazo":"arrow shot","bola de fuego":"fireball","shuriken":"shuriken","pisotón":"stomp","picotazo":"peck","engaño":"trick","relámpago":"lightning","¡bum!":"boom!","Nivel #":"Level #","Lento · 💧#/casilla":"Slow · 💧#/tile","Rápido · 💧#/casilla":"Fast · 💧#/tile","Muy rápido · 💧#/casilla":"Very fast · 💧#/tile","Normal · 💧#/casilla":"Normal · 💧#/tile","quita # · 💧#":"deals # · 💧#","COMÚN":"COMMON","RARO":"RARE","ÉPICO":"EPIC","LEGENDARIO":"LEGENDARY","Elige héroe. No se puede repetir.":"Pick a hero. No repeats.","Misiones diarias":"Daily quests","Calendario":"Calendar","Camino de trofeos":"Trophy Road","Tus héroes":"Your heroes","Partidas":"Matches","Victorias":"Wins","Online":"Online","Normal":"Normal","1.ª victoria del día: llave doble, +30":"First win of the day: double key, +30","y +20":"and +20","trofeos · faltan # para #":"trophies · # to go for #","Para quien ya sabe jugar · #":"For those who already know how to play · #","Rápido y certero · #":"Fast and precise · #","Tranquilo, falla bastante · #":"Relaxed, misses a lot · #","💥 #":"💥 #","🔔 #":"🔔 #","⚡ #":"⚡ #","❤️ #":"❤️ #","👟 #":"👟 #","🎁 #":"🎁 #","🛡️ #":"🛡️ #","# · #":"# · #",", su":", their","ganas un":"you get a","tu tablero":"your board","victorias seguidas":"wins in a row","vida, su velocidad":"health, their speed","avisa":"warns","isla verde":"green island","Idioma":"Language","Entrenador Ojo":"Coach Ojo","Esta es tu isla verde. Tu héroe está escondido aquí: el rival no puede verte.":"This is your green island. Your hero is hiding here: the rival can't see you.","¡VALE!":"OK!","Toca una casilla de tu isla para moverte. ¡Prueba aquí!":"Tap a tile on your island to move. Try here!","El rival se esconde en la isla roja. Hoy te chivo dónde está: ¡tócalo para disparar!":"The rival hides on the red island. Just this once I'll show you where: tap it to shoot!","¡Tocado! Pero al disparar dejas una huella 👣 y el rival ve desde dónde. ¡Escapa!":"Hit! But shooting leaves a footprint 👣 and the rival sees where from. Run!","¿Ves? Disparó donde estabas. Pero su disparo también deja huella en su isla.":"See? They shot where you were. But their shot leaves a footprint on their island too.","¡A POR ÉL!":"GET THEM!","Contraataca justo ahí, donde salió su huella roja.":"Strike back right there, where their red footprint appeared.","¡Genial! Ahora remátalo tú solo. Moverte y disparar gasta elixir 💧, que se recarga solo.":"Great! Now finish them off yourself. Moving and shooting cost elixir 💧, which recharges by itself.","Truco secreto: el AMAGO 🎭. Deja una huella falsa en tu isla para que el rival dispare donde no estás.":"Secret trick: the FEINT 🎭. Leave a fake footprint on your island so the rival shoots where you aren't.","¡A VER!":"SHOW ME!","Pulsa el botón AMAGO.":"Tap the FEINT button.","Ahora toca una casilla de tu isla, lejos de ti.":"Now tap a tile on your island, far from you.","¡Ha picado! Disparó a tu huella falsa. Úsalo cuando te tengan localizado. ¡A ganar!":"They fell for it! They shot your fake footprint. Use it when they've found you. Go win!","¡Bienvenido a AMAGO!":"Welcome to AMAGO!","Soy Ojo, tu entrenador. En un minuto te enseño a jugar.":"I'm Ojo, your coach. I'll teach you to play in a minute.","¡VAMOS!":"LET'S GO!","Ya sé jugar":"I already know how to play","¡Premio del entrenamiento: tu primer cofre!":"Training reward: your first chest!","¿Cómo te llamas?":"What's your name?","Así te verán tus rivales. Puedes cambiarlo luego en Ajustes.":"That's how your rivals will see you. You can change it later in Settings.","¡Tu primer cofre! Tócalo para abrirlo.":"Your first chest! Tap it to open it.","¡Listo! Pulsa JUGAR para tu primera partida.":"All set! Tap PLAY for your first match.","RONDA PARA ENTRENADOR OJO":"ROUND TO COACH OJO","Escribe tu correo y tu contraseña.":"Enter your email and password.","Sin conexión con el servidor. Prueba en un rato.":"No connection to the server. Try again later.","No se pudo crear la cuenta.":"Couldn't create the account.","¡Cuenta creada!":"Account created!","Tu progreso ya está a salvo. Entra con # en cualquier móvil.#":"Your progress is safe now. Sign in with # on any phone.#"," +20 gemas de regalo.":" +20 free gems.","No se pudo entrar.":"Couldn't sign in.","¡Hola de nuevo!":"Welcome back!","Correo":"Email","Contraseña (6 o más)":"Password (6 or more)","Contraseña":"Password","Tu cuenta":"Your account","Conectado como":"Signed in as","Tu progreso está a salvo: entra con este correo en cualquier móvil.":"Your progress is safe: sign in with this email on any phone.","En este móvil empezarás de nuevo como invitado. Tu cuenta no se borra.":"This phone will start over as a guest. Your account isn't deleted.","CERRAR SESIÓN":"SIGN OUT","Cerrar sesión":"Sign out","Iniciar sesión":"Sign in","Entra con tu cuenta de AMAGO.":"Sign in with your AMAGO account.","ENTRAR":"SIGN IN","Ojo: la partida de invitado de este móvil se sustituye por la de tu cuenta.":"Heads up: this phone's guest progress will be replaced by your account's.","No tengo cuenta: crear una":"I don't have an account: create one","Crea tu cuenta":"Create your account","Ahora juegas como":"You're playing as a","invitado":"guest",": si borras la app o cambias de móvil, pierdes tu progreso. Con una cuenta lo guardas y juegas en cualquier móvil.":": if you delete the app or switch phones, you lose your progress. With an account you keep it and play on any phone.","🎁 +20 gemas al crearla":"🎁 +20 gems for creating it","CREAR CUENTA":"CREATE ACCOUNT","CREAR CUENTA · +20 💎":"CREATE ACCOUNT · +20 💎","Ya tengo cuenta: iniciar sesión":"I have an account: sign in","¡No pierdas tu progreso!":"Don't lose your progress!","Juegas como invitado. Si borras la app o cambias de móvil, perderás tus héroes, trofeos y cofres.":"You're playing as a guest. If you delete the app or switch phones, you'll lose your heroes, trophies and chests.","Invitado":"Guest","Crear cuenta":"Create account","Cuenta":"Account","Borrar cuenta y progreso":"Delete account and progress","Tu sesión ha caducado. Vuelve a entrar con #.":"Your session expired. Sign in again with #.","Juegas como invitado:":"Playing as a guest:","crea tu cuenta":"create your account","para guardar tu progreso":"to save your progress","Ese correo no parece válido.":"That email doesn't look valid.","La contraseña necesita al menos 6 caracteres.":"The password needs at least 6 characters.","Ya hay una cuenta con ese correo. Inicia sesión.":"There's already an account with that email. Sign in.","Correo o contraseña incorrectos.":"Wrong email or password.","Demasiados intentos. Espera un minuto.":"Too many attempts. Wait a minute.","Demasiados intentos con ese correo. Espera 15 minutos.":"Too many attempts with that email. Wait 15 minutes.","Esta partida ya tiene cuenta.":"This game already has an account.","Continuar con Apple":"Continue with Apple","o con tu correo":"or with your email","No se pudo iniciar sesión con Apple.":"Couldn't sign in with Apple.","Tu progreso ya está a salvo con tu Apple ID.#":"Your progress is now safe with your Apple ID.#","Apple no ha confirmado tu identidad.":"Apple couldn't confirm your identity.","No se pudo comprobar con Apple. Prueba en un rato.":"Couldn't check with Apple. Try again later.","Prueba otra vez.":"Try again.","¡Erupción!":"Eruption!","Quien estaba en una casilla de lava ha quedado a la vista.":"Whoever was on a lava tile has been revealed.","💨 ¡VIENTO →!":"💨 WIND →!","💨 ¡← VIENTO!":"💨 ← WIND!","Los disparos caen una casilla desplazados 6 s":"Shots land one tile off for 6 s","¡La estatua ha parado el golpe!":"The statue blocked the hit!","Se ha roto: solo protege una vez.":"It broke: it only protects once.","Mina":"Mina","Topo":"Mole","Si falla, deja una mina escondida 12 s: quien la pise recibe 1 y se descubre.":"If it misses, it leaves a hidden mine for 12 s: whoever steps on it takes 1 and is revealed.","Salto":"Salto","Rana":"Frog","Lengüetazo":"Tongue Lash","No anda: salta a cualquier casilla de su isla sin dejar pasos.":"It doesn't walk: it jumps to any tile on its island without leaving steps.","Savia":"Savia","Hada":"Fairy","Espina":"Thorn","Si pasa 14 s sin recibir golpes, recupera 1 vida.":"If it goes 14 s without being hit, it recovers 1 health.","Mira":"Mira","Lince":"Lynx","Tiro certero":"Sure Shot","Disparo de 2 en 1 casilla, sin aviso. Su huella se queda 4 s.":"Deals 2 on 1 tile, no warning. Its footprint stays for 4 s.","Eco":"Eco","Murciélago":"Bat","Chillido":"Screech","Cada disparo deja dos huellas: una de verdad y otra falsa.":"Every shot leaves two footprints: one real and one fake.","Golpe rápido en 1 casilla, sin aviso. Su huella sale borrosa.":"Fast hit on 1 tile, no warning. Its footprint is blurred.","Su huella sale en una casilla falsa. Su amago cuesta 1.":"Its footprint shows on a fake tile. Its feint costs 1.","Bomba en cruz (hasta 5 casillas). Quita 2.":"Cross-shaped bomb (up to 5 tiles). Deals 2.","Para un golpe (12 s)":"Blocks one hit (12 s)","No se pudo borrar":"Couldn't delete","No hemos podido conectar con el servidor. Tu cuenta sigue igual: comprueba la conexión y vuelve a intentarlo.":"We couldn't reach the server. Your account is unchanged: check your connection and try again.","Borrado":"Deleted","Tu cuenta y tu progreso se han borrado de este móvil y de nuestro servidor.":"Your account and progress have been deleted from this phone and from our server.","¿Usar la partida de tu cuenta?":"Use your account's game?","Ese Apple ID ya tiene una partida. Si sigues, la partida de invitado de este móvil se sustituye por la de tu cuenta.":"That Apple ID already has a game. If you continue, this phone's guest game will be replaced by your account's.","USAR MI CUENTA":"USE MY ACCOUNT","Conectado con":"Signed in with","Tu progreso está a salvo: entra con «Continuar con Apple» en cualquier iPhone.":"Your progress is safe: use «Continue with Apple» on any iPhone.","Cuenta de Apple":"Apple account","Si tu Apple ID ya tiene una cuenta de AMAGO, te preguntaremos antes de cambiar de partida.":"If your Apple ID already has an AMAGO account, we'll ask before switching games.","📊 Enviar estadísticas de uso":"📊 Send usage statistics","Se desbloquea con gemas ganadas jugando.":"Unlocks with gems earned by playing.","No se pudo comprobar tu cuenta. Revisa la conexión y vuelve a intentarlo.":"Couldn't verify your account. Check your connection and try again.","Espera un momento antes de crear otra sala.":"Wait a moment before creating another room.","Demasiados códigos erróneos. Espera unos minutos.":"Too many wrong codes. Wait a few minutes.","Inicia sesión con tu Apple ID en Ajustes del iPhone y vuelve a probar.":"Sign in with your Apple ID in iPhone Settings and try again.","👤 Invitado":"👤 Guest","Te hemos guardado un regalo por volver.":"We saved you a gift for coming back.","(sin conexión ahora mismo)":"(offline right now)","Tu progreso ya está a salvo con tu Apple ID.":"Your progress is now safe with your Apple ID.","+20 gemas de regalo.":"+20 gems as a gift.","Cuenta no encontrada.":"Account not found.","Ese código no existe o ha caducado.":"That code doesn't exist or has expired.","Golpes más rápidos · os veréis cada 5 s":"Faster hits · you'll see each other every 5 s","🎭 Lejos de ti":"🎭 Away from you","👣 Huella falsa: allí NO está":"👣 Fake footprint: they're NOT there","👣 Huella borrosa: está por esa zona":"👣 Blurry footprint: they're around there","Truco deja huellas falsas:":"Truco leaves fake footprints:","allí NO está.":"they're NOT there.","Sombra deja una huella borrosa:":"Sombra leaves a blurry footprint:","está cerca, no justo ahí.":"close by, not right there.","¡TOCADO! −#":"HIT! −#","¡K.O.!":"K.O.!","vida":"health","velocidad":"speed","cofre":"chest","Quedan # días":"# days left","Sin conexión. Comprueba internet y vuelve a probar.":"No connection. Check your internet and try again.","La partida se ha cortado por un error. No cuenta como derrota.":"The match was cut by an error. It doesn't count as a loss."};
 const TR=(()=>{
   if(LANG==="es")return null;
+  /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
+  Object.assign(I18N_EN,{"Nombre: #": "Name: #", "Sonido": "Sound", "Vibración": "Vibration", "Enviar estadísticas de uso": "Send usage statistics", "Cómo se juega": "How to play", "Pasar mi partida a otro móvil": "Move my game to another phone", "Política de privacidad": "Privacy policy", "Copiar código": "Copy code", "Aviso": "Warning", "Racha ×#": "Streak ×#", "Nuevos premios en el camino": "New rewards on the road", "Tras el escalón #: un premio cada # fichas": "After tier #: a reward every # tokens", "¡RECLAMAR!": "CLAIM!", "CÓDIGO": "CODE", "ABRIR": "OPEN", "Muy pronto": "Soon", "DESBLOQUEAR CON": "UNLOCK WITH", "O CON": "OR WITH", "# GEMAS": "# GEMS", "Temporada # · quedan # días": "Season # · # days left", "Temporada # · quedan # días · ": "Season # · # days left · ", "premios": "rewards", "ya alcanzados se desbloquean al momento": "already reached unlock instantly", "1.ª victoria del día: llave doble, +30 monedas y +20 de Poder": "First win of the day: double key, +30 coins and +20 Power", "+20 gemas al crearla": "+20 gems when you create it"});
   const exact=new Map(),pats=[],rx=t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
   for(const [k,v] of Object.entries(I18N_EN)){if(k.includes("#"))pats.push({re:new RegExp("^"+k.split("#").map(rx).join("(.+?)")+"$"),v,n:k.replace(/#/g,"").length});else exact.set(k,v);}
   pats.sort((a,b)=>b.n-a.n);
@@ -3223,14 +3563,17 @@ function mount(stageEl,id){
 }
 /* aspecto con ilustración propia: la figura 2D animada en lugar del modelo 3D */
 function skinHero(id,k){
-  const s=GFX.makeHero(id,k);s.scale.setScalar(HH/s.userData.h);s.userData.t0=0;
+  const s=GFX.makeHero(id,k),u=s.userData;s.scale.setScalar(HH*.86/(u.a3?u.h*u.m.ih:u.h));u.t0=0;
+  if(u.mat){u.mat.alphaTest=.5;u.mat.needsUpdate=true;}/* sin halo oscuro en los bordes a este tamaño */
   const g=new T.Group(),body=new T.Group();body.add(s);g.add(body);g.userData={B:{},body,spr:s};return Promise.resolve(g);
 }
 let heroKey=null;
 function set(id){
   const k=window.AMAGO_SKINK&&window.AMAGO_SKINK(id),key=id+(k||"");
   if(!sc||key===heroKey&&hero)return;heroId=id;heroKey=key;const tok=++loadTok;
-  (k&&GFX.SPRITES[k]?skinHero(id,k):loadHero(id)).then(g=>{if(tok!==loadTok||!g)return;if(hero)sc.remove(hero);hero=g;sc.add(hero);pop=.6;act=null;play("jump");});
+  /* siempre la ilustración 2D animada (la misma que en la arena y en las fichas); el modelo 3D antiguo solo si aún no ha cargado */
+  const ok=GFX.SPRITES[k||id];if(!ok)heroKey=null;
+  (ok?skinHero(id,k):loadHero(id)).then(g=>{if(tok!==loadTok||!g)return;if(hero)sc.remove(hero);hero=g;sc.add(hero);pop=.6;act=null;play("jump");});
 }
 function unmount(){on=false;cancelAnimationFrame(raf);document.body.classList.remove("h3d");
   if(stage){stage.removeEventListener("pointerdown",onDown);stage.removeEventListener("pointermove",onMove);stage.removeEventListener("pointerup",onUp);stage.removeEventListener("pointercancel",onUp);}stage=null;}
@@ -3244,15 +3587,20 @@ function arenaOf(t){let a=ARENAS[0],n=null;for(let i=0;i<ARENAS.length;i++){if(t
 function hearts(hp,max){return Array.from({length:max},(_,i)=>`<i class="${i<hp?"":"off"}">♥</i>`).join("");}
 function statsHTML(id){
   const H=HEROES[id],lv=S.unl.includes(id)?lvOf(id):1,bo=lvBonus(lv);
-  return `<div class="stats">
-    <div><span>⚡ Poder</span><b>Nivel ${lv}${bo.elx?` · elixir +${Math.round(bo.elx*100)} %`:""}</b></div>
-    <div><span>❤️ Vida</span><b class="hbar">${hearts(H.hp+bo.hp,H.hp+bo.hp)}</b></div>
-    <div><span>👟 Velocidad</span><b>${speedLabel(H.step)} · 💧${H.mc}/casilla</b></div>
-    <div><span>💥 ${H.a}</span><b>${patIcon(H.pat)} quita ${H.dmg} · 💧${H.cost}</b></div>
-    <div><span>${H.warn?"🔔":"⚡"} Aviso</span><b>${H.warn?"El rival lo ve venir":"Sin aviso: casi imposible de esquivar"}</b></div>
+  /* fichas de estadística con iconos de la interfaz (sin emojis), sobre un pozo oscuro */
+  const cost=n=>`<i class="cost">${ico("drop","s")}<span class="out">${n}</span></i>`;
+  return `<div class="pstats well">
+    <div class="pst">${ico("heart")}<span><b class="out">${H.hp+bo.hp}</b><small>Vida</small></span></div>
+    <div class="pst">${ico("power")}<span><b class="out">${lv}</b><small>Poder</small></span>${bo.elx?`<i class="cost up"><span class="out">+${Math.round(bo.elx*100)} %</span></i>`:""}</div>
+    <div class="pst">${ico("star")}<span><b class="out">${speedLabel(H.step)}</b><small>Velocidad</small></span>${cost(H.mc)}</div>
+    <div class="pst"><span class="pt2">${patIcon(H.pat)}</span><span><b class="out">${H.a}</b><small>Daño · coste</small></span>${cost(H.cost)}<i class="dmg"><span class="out">−${H.dmg}</span>${ico("heart","s")}</i></div>
+    <div class="pst wide ${H.warn?"":"nowarn"}">${ico(H.warn?"swords":"power")}<span><b>${H.warn?"El rival lo ve venir":"Sin aviso: casi imposible de esquivar"}</b></span></div>
   </div><p class="special">${H.d}</p>`;
 }
-const ARENA_PROP={pradera:"arbol",bosque:"pino",volcan:"rocas",trono:"bandera_roja",olimpo:"bandera_azul"};
+const ARENA_PROP={pradera:"arbol",bosque:"pino",volcan:"geiser_lava",trono:"estatua",olimpo:"columna_dorada"};
+/* decorado lateral de cada arena (pantalla de arena nueva y separadores del camino de trofeos) */
+const ARENA_SIDE={pradera:["rocas","bandera_azul"],bosque:["arbol","rocas"],volcan:["roca_lava","arbol_quemado"],trono:["antorcha","columna_rota"],olimpo:["nube_dorada","veleta"]};
+const propImg=(k,cls="")=>`<img class="${cls}" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" draggable="false">`;
 const ARENA_BG={pradera:["#2a8cf0","#1450b8"],bosque:["#23a86e","#11613f"],volcan:["#e0562a","#7a1f2a"],trono:["#7a52f0","#3a1f9a"],olimpo:["#f0b02a","#b0681a"]};
 function setBg(){document.body.scrollTop=0;const {a}=arenaOf(S.tro),c=ARENA_BG[a.k]||ARENA_BG.pradera;const st=document.body.style;st.setProperty("--arena",a.bg);st.setProperty("--arena2",c[0]);st.setProperty("--arena3",c[1]);}
 /* ---- utilidades de progresión ---- */
@@ -3318,7 +3666,7 @@ const UNLOCK={cal:1,mis:2,pass:3,shop:3,mastery:10},unlocked=k=>S.games>=(UNLOCK
 /* menús aún bloqueados: se pueden abrir y mirar, pero no usar hasta jugar unas partidas */
 const lockLeft=k=>Math.max(0,(UNLOCK[k]||0)-S.games);
 const lockTxt=k=>{const n=lockLeft(k);return `Se desbloquea al jugar ${n} partida${n>1?"s":""} más`;};
-const lockBan=k=>unlocked(k)?"":`<div class="lockban pnl"><span class="lk">🔒</span><span><b>${lockTxt(k)}</b><small>Puedes mirar, pero aún no usarlo</small></span></div>`;
+const lockBan=k=>unlocked(k)?"":`<div class="lockban pnl"><img class="lk" src="${UIA}lock.webp" alt=""><span><b>${lockTxt(k)}</b><small>Puedes mirar, pero aún no usarlo</small></span></div>`;
 function lockNow(){
   if(UI.modal&&UI.modal.k==="missions")return unlocked("mis")?null:"mis";
   if(UI.modal)return null;
@@ -3455,7 +3803,7 @@ function nav(active){
 function topbar(){
   ensureDay();
   return `<div class="mbg"></div><div class="mtop">
-    <button class="mprof pnl" data-a="settings" aria-label="Perfil y ajustes"><span class="mav ${S.equip.frame}">${heroArt(S.fav)}</span><span class="mpi"><b class="out">${esc(S.name)}</b><span class="mlv"><i class="out">${level()}</i><span class="bar"><u style="width:${xpPct()}%"></u></span></span></span></button>
+    <button class="mprof pnl" data-a="settings" aria-label="Perfil y ajustes">${ONLINE_OK&&isGuest()&&S.games>=1?`<i class="badge gnag">!</i>`:""}<span class="mav ${S.equip.frame}">${heroArt(S.fav)}</span><span class="mpi"><b class="out">${esc(S.name)}</b><span class="mlv"><i class="out">${level()}</i><span class="bar"><u style="width:${xpPct()}%"></u></span></span></span></button>
     <button class="rpill" data-a="tab" data-t="shop" aria-label="Monedas">${ico("coin")}<span class="out" id="coinsn">${fmt(S.coins-PEND.coins)}</span></button>
     <button class="rpill" data-a="tab" data-t="heroes" aria-label="Puntos de poder">${ico("power")}<span class="out" id="ppn">${fmt(S.pp-PEND.pp)}</span></button>
     <button class="rpill" data-a="gemshop" aria-label="Gemas">${ico("gem")}<span class="out" id="gemsn">${fmt(gems()-PEND.gems)}</span><i class="plus">+</i></button>
@@ -3485,21 +3833,19 @@ function showHome(){
   <div class="hstage">
     ${SHOW?`<span class="stagehint" aria-hidden="true"></span>`:`<span class="godrays"></span><span class="godrays b"></span><span class="spot"></span><span class="floorglow"></span><span class="bigmodel bob">${heroArt(S.fav)}</span>`}
     <div class="sidecol l">
-      ${`<button class="sbtn ${unlocked("mis")?"":"lk"}" data-a="missions">${unlocked("mis")&&mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt=""><span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>`}
-      ${`<button class="sbtn ${unlocked("pass")?"":"lk"}" data-a="tab" data-t="pass">${unlocked("pass")&&passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt=""><span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>`}
+      ${`<button class="sbtn ${unlocked("mis")?"":"lk"}" data-a="missions">${unlocked("mis")&&mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt="">${unlocked("mis")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>`}
+      ${`<button class="sbtn ${unlocked("pass")?"":"lk"}" data-a="tab" data-t="pass">${unlocked("pass")&&passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt="">${unlocked("pass")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>`}
       ${calReady()?`<button class="sbtn" data-a="calendar"><i class="badge ${at==="cal"?"bob":""}">!</i><span class="sq pnl"><img src="${UIA}chest1.webp" alt=""></span><span class="lb out">Diario</span></button>`:""}
     </div>
     <div class="sidecol r">
       ${box?`<button class="sbtn chest ${at==="box"?"hop":""}" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="lb out">¡Ábrelo!</span></button>`:""}
       <button class="keymod pnl" data-a="keysinfo"><img class="c" src="${UIA}chest1.webp" alt=""><span class="slots">${[0,1,2].map(i=>`<i class="well ${i===S.keys&&S.keys===2?"glow":""}"><img class="${i<S.keys?"":"off"}" src="${UIA}key.webp" alt=""></i>`).join("")}</span></button>
     </div>
-    ${fwOn?`<span class="firstwin pnl">${ico("key")}1.ª victoria del día: llave doble, +30 ${ico("coin","s")} y +20 ${ico("power","s")}</span>`:S.ws>=2?`<span class="firstwin pnl"><span class="streak">🔥 ${S.ws}</span> victorias seguidas</span>`:""}
     <button class="hplate pnl" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>${ico("trophy")} ${S.hw[S.fav]||0}${mastery(S.fav).t>=0?" · "+MASTERY[mastery(S.fav).t].t:""}</small></span><span class="chev">›</span></button>
   </div>
-  ${ONLINE_OK&&isGuest()&&S.games>=1?`<button class="guestbar pnl" data-a="acc" data-m="reg">⚠️ <span>Juegas como invitado: <b>crea tu cuenta</b> para guardar tu progreso</span></button>`:""}
   <div class="playrow2">
     <button class="modebtn2 pnl" data-a="mode"><small>MODO</small><b class="out">${S.mode==="bot"?ico("swords")+" Bot "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase():S.mode==="online"?ico("trophy")+" Online":ico("crown")+" Amigos"}</b><em>Cambiar</em></button>
-    <button class="gbtn xl play2 shine" data-a="play">JUGAR</button>
+    <span class="playw">${fwOn?`<span class="fwtag" title="1.ª victoria del día: llave doble, +30 monedas y +20 de Poder">${ico("key")}<b class="out">×2</b><span class="out">+30</span>${ico("coin","s")}<span class="out">+20</span>${ico("power","s")}</span>`:S.ws>=2?`<span class="fwtag streak">${ico("swords","s")}<span class="out">Racha ×${S.ws}</span></span>`:""}<button class="gbtn xl play2 shine" data-a="play">JUGAR</button></span>
   </div>
   ${nav("home")}`;
   renderModal();
@@ -3529,14 +3875,15 @@ function gameFxOff(){document.body.classList.remove("sudden","replaying");const 
 function showHeroes(){
   leaveHome();
   UI.screen="heroes";stopLoop();app.className="home";setBg();
-  const order=[...IDS].sort((a,b)=>(S.unl.includes(b)-S.unl.includes(a))||(canUp(b)-canUp(a))||HEROES[a].rar-HEROES[b].rar);
+  const order=[...IDS].sort((a,b)=>(S.unl.includes(b)-S.unl.includes(a))||HEROES[a].rar-HEROES[b].rar||IDS.indexOf(a)-IDS.indexOf(b));/* por rareza, como Brawl Stars */
   let cheapest=null;S.unl.filter(canUp).forEach(id=>{if(!cheapest||upCost(id).c<upCost(cheapest).c)cheapest=id;});
   app.innerHTML=`${topbar()}<div class="sect"><h2 class="t-h1 out">Héroes</h2><span class="sub"><b>${S.unl.length}</b>/${IDS.length}</span></div>
   <div class="hgrid4 stagger">${order.map((id,i)=>{const H=HEROES[id],lock=!S.unl.includes(id),lv=lvOf(id),c=upCost(id),road=ROAD.find(r=>r.id===id),up=canUp(id);
-    const plate=lock?`<b class="out">${H.n}</b><span class="lk">${road?`${ico("trophy")}${road.t}`:`${ico("lock")}Tienda`}</span>`
-      :`<b class="out">${H.n}</b><span class="row">${pwrHTML(lv,"s")}${c?up?`<span class="upt" style="flex:1">MEJORAR</span>`:`<span class="bar pow"><u style="width:${Math.min(100,S.pp/c.pp*100)}%"></u></span>`:`<span class="upt" style="flex:1">MÁX</span>`}</span>`;
-    return `<button class="card r${H.rar} ${lock?"lock":""}" style="--i:${i}" data-a="hero" data-id="${id}">${S.fav===id?`<img class="crown" src="${UIA}crown.webp" alt="">`:""}${masteryReady(id)?`<i class="badge">!</i>`:""}
-      <span class="art">${heroArt(id)}</span><span class="plate ${up?"up":""}">${plate}</span></button>`;}).join("")}</div>
+    /* placa: nombre + barra de Poder siempre; mejorar es una insignia verde, no toda la placa */
+    const plate=lock?`<b class="out">${H.n}</b><span class="lk">${road?`${ico("trophy")}<span class="out">${road.t}</span>`:`${ico("lock")}<span class="out">Tienda</span>`}</span>`
+      :`<b class="out">${H.n}</b><span class="row">${pwrHTML(lv,"s")}${c?`<span class="bar pow ${up?"full":""}"><u style="width:${Math.min(100,S.pp/c.pp*100)}%"></u>${S.pp<c.pp?`<span>${S.pp}/${c.pp}</span>`:""}</span>${up?`<i class="upb" aria-label="Mejorar">▲</i>`:""}`:`<span class="upt max" style="flex:1">MÁX</span>`}</span>`;
+    return `<button class="card r${H.rar} ${lock?"lock":""} ${up?"canup":""}" style="--i:${i}" data-a="hero" data-id="${id}">${S.fav===id?`<img class="crown" src="${UIA}crown.webp" alt="">`:""}${masteryReady(id)?`<i class="badge">!</i>`:""}
+      <span class="art"><span class="rartag r${H.rar}">${RAR[H.rar].n}</span>${heroArt(id)}${lock?`<img class="lockc" src="${UIA}lock.webp" alt="">`:""}</span><span class="plate">${plate}</span></button>`;}).join("")}</div>
   ${nav("heroes")}`;
   renderModal();
 }
@@ -3547,7 +3894,7 @@ function heroPage(id){
   const short=c?{pp:Math.max(0,c.pp-S.pp),c:Math.max(0,c.c-S.coins)}:null;
   return `<div class="page" style="background:radial-gradient(80% 50% at 50% 22%,${rc},${rd} 60%,#0E1450)"><div class="in">
     <button class="back pnl" data-a="close" aria-label="Volver">‹</button>
-    <div class="hero-stage"><span class="godrays"></span><span class="floorglow"></span>${heroArt(id)}</div>
+    <div class="hero-stage"><span class="godrays"></span><span class="floorglow"></span><span class="isle"></span>${heroArt(id)}</div>
     <div class="hname">${lock?"":pwrHTML(lv)}<div><h3 class="t-h1 out">${H.n}</h3><small>${RR.n} · ${H.r}</small></div></div>
     ${lock?"":`<div class="lvseg">${Array.from({length:LV_MAX},(_,i)=>`<i class="${i<lv?"on":i===lv?"nx":""}"></i>`).join("")}</div>`}
     ${!lock&&lv>cap?`<p class="capnote">Nivel ${lv} · en esta arena juegas a nivel ${cap}</p>`:""}
@@ -3555,7 +3902,7 @@ function heroPage(id){
       <div class="stile ice">${ico("heart")}<span><span class="tv">${H.hp+lvBonus(Math.min(lv,cap)).hp}</span><br><span class="tk">Vida</span></span>${nb&&nb.hp>b.hp&&!lock?`<span class="delta">+1</span>`:""}</div>
       <div class="stile ice">${ico("drop")}<span><span class="tv">+${Math.round(b.elx*100)} %</span><br><span class="tk">Recarga de elixir</span></span>${nb&&!lock?`<span class="delta">▲ ${Math.round(nb.elx*100)} %</span>`:""}</div>
       <div class="stile ice">${ico("star")}<span><span class="tv">${speedLabel(H.step)}</span><br><span class="tk">Velocidad</span></span></div>
-      <div class="stile ice">${ico("swords")}<span><span class="tv">${H.dmg} · ${H.cost}💧</span><br><span class="tk">Daño · coste</span></span></div>
+      <div class="stile ice">${ico("swords")}<span><span class="tv">${H.dmg} · ${H.cost}${ico("drop","s")}</span><br><span class="tk">Daño · coste</span></span></div>
       <div class="stile ice wide"><span style="display:grid;place-items:center">${patIcon(H.pat)}</span><span><span class="tv" style="font-size:16px">${H.a}</span><br><span class="tk">${H.d}</span></span></div>
     </div>
     ${lock?"":`<div class="mast pnl">${ico("trophy")}<span style="flex:1"><b class="out">Maestría${ms.t>=0?" · "+MASTERY[ms.t].t:""}</b><span class="bar gold"><u style="width:${ms.next?Math.min(100,ms.w/ms.next.n*100):100}%"></u><span>${ms.w}${ms.next?"/"+ms.next.n:""}</span></span></span>${masteryReady(id)?`<button class="gbtn green sm" data-a="mclaimh" data-id="${id}">COBRAR</button>`:ms.next?`<span class="out">${rewardImg(ms.next.r,"ico m")}</span>`:""}</div>`}
@@ -3581,7 +3928,7 @@ function heroPrice(id){const p=PRICE[HEROES[id].rar];return id===dayOffer()?Math
 function offers(){
   const d=today(),off=dayOffer(),o=[];
   o.push({id:"pp",r:T_("pp",[100,120,150][d%3]),price:[130,150,190][d%3],cls:"r2"});
-  if(off)o.push({id:"h",r:{r:"hero",id:off},price:heroPrice(off),was:PRICE[HEROES[off].rar],cls:"r"+HEROES[off].rar,stamp:"−30 % HOY"});
+  if(off)o.push({id:"h",r:{r:"hero",id:off},price:heroPrice(off),was:PRICE[HEROES[off].rar],cls:"r"+HEROES[off].rar,stamp:"−30 %"});
   else o.push({id:"c3",r:CF(3),price:360,cls:"r3"});
   return o;
 }
@@ -3606,20 +3953,21 @@ function showShop(scrollTo){
   leaveHome();
   UI.screen="shop";stopLoop();app.className="home"+(unlocked("shop")?"":" lockd");setBg();ensureDay();
   const coins=S.coins,locked=IDS.filter(id=>!S.unl.includes(id)),gift=giftReady(),ft=featured();
-  const priceBtn=(act,id,cur,price,can,extra="")=>`<button class="gbtn sm" data-a="${act}" data-id="${id}" ${can?"":"disabled"}>${cur==="eur"?fmtEur(price):`<span class="row">${ico(cur==="gems"?"gem":"coin")}<span class="${can?"":"short"}">${price}</span></span>`}${extra}</button>`;
+  /* precio siempre a color (gemas en verde, monedas en amarillo); si no alcanza, el número en rojo y al tocar se avisa */
+  const priceBtn=(act,id,cur,price,can,extra="")=>`<button class="gbtn sm ${cur==="gems"?"green":""} ${can?"":"need"}" data-a="${act}" data-id="${id}" data-t="${id}">${cur==="eur"?fmtEur(price):`<span class="row">${ico(cur==="gems"?"gem":"coin")}<span class="${can?"":"short"}">${price}</span></span>`}${extra}</button>`;
   const oc=o=>{const done=S.offers.got.includes(o.id),can=coins>=o.price&&!done;
     return `<div class="ocard pnl ${done?"done":""}">${o.stamp?`<i class="stamp">${o.stamp}</i>`:""}<span class="im">${rewardImg(o.r)}</span><b class="out">${o.r.r==="pp"?`${o.r.n} de Poder`:rewardName(o.r)}</b>${done?`<small>Comprado</small>`:priceBtn("offer",o.id,"coins",o.price,can)}</div>`;};
   const gd=gemDeal(),gdDone=(S.gemDeals.got[gd.id]||0)>=1;
   const NH=HEROES[NEWHERO.id];
-  const feat=ft==="new"?`<div class="feat gold"><span class="seal">NUEVO</span><span class="art">${heroArt(NEWHERO.id)}</span><span class="txt"><b class="out">${NH.n}, el ${NH.r}</b><small>${NH.n} + ${NEWHERO.pp} de Poder</small><small>Contenido fijo · gratis a los ${NEWHERO.road} trofeos</small><span class="row">${priceBtn("newpack","","coins",NEWHERO.coins,coins>=NEWHERO.coins)}<button class="gbtn blue sm" data-a="newpackg">${ico("gem","s")} ${NEWHERO.gems}</button></span></span></div>`
-    :ft==="starter"?`<div class="feat gold"><span class="seal">×4</span><span class="art"><img src="${UIA}chest2.webp" alt=""></span><span class="txt"><b class="out">Pack de Inicio</b><small>200 ${ico("gem","s")} · 600 ${ico("coin","s")} · 300 ${ico("power","s")} · Cofre grande · aspecto Truco Ártico</small><small>Solo una vez · disponible hasta el Volcán</small>${priceBtn("iap","amago.starter","eur",1.99,true)}</span></div>`
-    :ft==="pass"?`<div class="feat gold"><span class="art"><img src="${UIA}crown.webp" alt="" style="max-height:110px"></span><span class="txt"><b class="out">Pase Premium</b><small>Temporada ${S.pass.season+1} · ${premWaiting()?`<b>${premWaiting()} premios</b> esperándote`:"un premio extra en cada escalón"}</small><button class="gbtn premium sm" data-a="premium">VER EL PASE</button></span></div>`
-    :ft==="bundle"?`<div class="feat gold"><span class="art"><img src="${UIA}power.webp" alt="" style="max-height:110px"></span><span class="txt"><b class="out">Lote de Poder</b><small>1.200 ${ico("coin","s")} · 600 ${ico("power","s")} · 100 ${ico("gem","s")} · una vez por semana</small>${priceBtn("iap","amago.bundle_power","eur",4.99,true)}</span></div>`:"";
+  const feat=ft==="new"?`<div class="feat gold shine"><span class="seal">NUEVO</span><span class="art">${heroArt(NEWHERO.id)}</span><span class="txt"><b class="out">${NH.n}, el ${NH.r}</b><small>${NH.n} + ${NEWHERO.pp} de Poder</small><small>Contenido fijo · gratis a los ${NEWHERO.road} trofeos</small><span class="row">${priceBtn("newpack","","coins",NEWHERO.coins,coins>=NEWHERO.coins)}<button class="gbtn green sm" data-a="newpackg">${ico("gem","s")} ${NEWHERO.gems}</button></span></span></div>`
+    :ft==="starter"?`<div class="feat gold shine"><span class="seal">×4</span><span class="art"><img src="${UIA}chest2.webp" alt=""></span><span class="txt"><b class="out">Pack de Inicio</b><small>200 ${ico("gem","s")} · 600 ${ico("coin","s")} · 300 ${ico("power","s")} · Cofre grande · aspecto Truco Ártico</small><small>Solo una vez · disponible hasta el Volcán</small>${priceBtn("iap","amago.starter","eur",1.99,true)}</span></div>`
+    :ft==="pass"?`<div class="feat gold shine"><span class="art"><img src="${UIA}crown.webp" alt="" style="max-height:110px"></span><span class="txt"><b class="out">Pase Premium</b><small>Temporada ${S.pass.season+1} · ${premWaiting()?`<b>${premWaiting()} premios</b> esperándote`:"un premio extra en cada escalón"}</small><button class="gbtn premium sm" data-a="premium">VER EL PASE</button></span></div>`
+    :ft==="bundle"?`<div class="feat gold shine"><span class="art"><img src="${UIA}power.webp" alt="" style="max-height:110px"></span><span class="txt"><b class="out">Lote de Poder</b><small>1.200 ${ico("coin","s")} · 600 ${ico("power","s")} · 100 ${ico("gem","s")} · una vez por semana</small>${priceBtn("iap","amago.bundle_power","eur",4.99,true)}</span></div>`:"";
   app.innerHTML=`${topbar()}<div class="sect"><h2 class="t-h1 out">Tienda</h2></div>${lockBan("shop")}
     ${feat}
     <span class="ribn">Diario</span><p class="sub">Cambia en ${msToMidnight()}</p>
     <div class="offers">
-      <div class="ocard pnl" style="background:linear-gradient(var(--g-1),var(--g-2) 60%,var(--g-lip))"><i class="stamp g">GRATIS</i><span class="im"><img src="${UIA}chest1.webp" alt="" ${gift?'style="animation:hop 4s infinite"':""}></span><b class="out">${gift?"Regalo diario":"Mañana, otro"}</b>${gift?`<button class="gbtn green sm" data-a="gift">GRATIS</button>`:`<small>${msToMidnight()}</small>`}</div>
+      <div class="ocard pnl" style="background:linear-gradient(var(--g-1),var(--g-2) 60%,var(--g-lip))"><i class="stamp g">GRATIS</i><span class="im"><img src="${UIA}chest1.webp" alt="" ${gift?'style="animation:hop 4s infinite"':""}></span><b class="out">${gift?"Regalo diario":"Mañana, otro"}</b>${gift&&!unlocked("shop")?`<small class="lkn">${ico("lock","s")} Muy pronto</small>`:gift?`<button class="gbtn green sm" data-a="gift">GRATIS</button>`:`<small>${msToMidnight()}</small>`}</div>
       ${offers().map(oc).join("")}
     </div>
     <div class="offers" style="margin-top:8px"><div class="ocard pnl wide ${gdDone?"done":""}"><i class="stamp">${gd.stamp}</i><span class="im">${rewardImg(gd.r)}</span><span class="wt"><b class="out">${gd.n}</b><small>Oferta del día</small></span><span class="wb">${gdDone?"<small>Comprado</small>":priceBtn("gemitem",gd.id,"gems",gd.gems,gems()>=gd.gems)}<span class="eur">${eur(gd.gems)}</span></span></div></div>
@@ -3628,7 +3976,7 @@ function showShop(scrollTo){
     <span class="ribn">Cofres a la vista</span><p class="sub">Contenido fijo: ves exactamente lo que te llevas</p>
     <div class="offers">${[1,2,3].map(t=>{const it=shopChest(t),pr=SHOP_CHEST[t];return `<div class="ocard pnl"><span class="im"><img src="${UIA}chest${t}.webp" alt=""></span><b class="out">${CHESTS[t].n}</b><small>${it.map(x=>x.k==="hero"?`<b>${HEROES[x.id].n}</b>`:`${x.n} ${ico(x.k==="coins"?"coin":"power","s")}`).join(" · ")}</small>${priceBtn("buybox",t,"coins",pr,coins>=pr)}</div>`;}).join("")}</div>
     ${locked.length?`<span class="ribn">Héroes</span><div class="offers">${locked.map(id=>{const H=HEROES[id],pr=heroPrice(id);
-      return `<div class="card r${H.rar}" style="cursor:default"><span class="art">${heroArt(id)}</span><span class="plate"><b class="out">${H.n}</b>${priceBtn("buy",id,"coins",pr,coins>=pr)}<button class="gbtn blue sm" data-a="buyhg" data-id="${id}">${ico("gem","s")} ${GEM_HERO[H.rar]}</button></span></div>`;}).join("")}</div>`:""}
+      return `<div class="card r${H.rar}" style="cursor:default"><span class="art">${heroArt(id)}</span><span class="plate"><b class="out">${H.n}</b>${priceBtn("buy",id,"coins",pr,coins>=pr)}<button class="gbtn green sm" data-a="buyhg" data-id="${id}">${ico("gem","s")} ${GEM_HERO[H.rar]}</button></span></div>`;}).join("")}</div>`:""}
     ${Object.keys(SKINS).some(k=>!S.own.skin.includes(k)&&S.unl.includes(SKINS[k].hero))?`<span class="ribn">Aspectos</span><div class="offers">${Object.entries(SKINS).filter(([k,v])=>!S.own.skin.includes(k)&&S.unl.includes(v.hero)).map(([k,v])=>`<div class="ocard pnl"><span class="im">${heroArt(v.hero,k)}</span><b class="out">${v.n}</b>${priceBtn("buyskin",k,"gems",v.gems,gems()>=v.gems)}<span class="eur">${eur(v.gems)}</span></div>`).join("")}</div>`:""}
     ${payOn()||PAY.test?`<span class="ribn" id="gems">Gemas</span><div class="gemgrid">${Object.entries(SKUS).filter(([k,v])=>v.gems).map(([k,v],i)=>`<div class="ocard pnl">${v.tag?`<i class="stamp g">${v.tag.toUpperCase()}</i>`:""}<span class="im"><img src="${UIA}gem.webp" alt="" style="height:${40+i*7}px"></span><b class="out">${v.n}</b>${priceBtn("iap",k,"eur",v.eur,true)}</div>`).join("")}</div>`:""}
     <p class="legal">${payOn()?`Precios con IVA incluido · `:""}<button data-a="purchinfo">Información de compras y probabilidades</button>${payOn()?` · <button data-a="restore">Restaurar compras</button>`:""}</p>
@@ -3662,11 +4010,11 @@ function showRoad(){
   UI.screen="road";stopLoop();app.className="home";setBg();
   const next=ROAD.find(m=>m.t>S.tro&&m.r!=="arena"),cl=claimable().length;
   const shown=ROAD.filter(m=>m.t<=Math.max(1000,S.tro+300));
-  let side=0;
+  let side=0,firstSet=false;
   const nodes=shown.map(m=>{const reach=S.tro>=m.t,got=S.claimed.includes(m.t);
-    if(m.r==="arena"){const A=ARENAS.find(a=>a.k===m.k);return `<div class="rnode arena-n" data-t="${m.t}"><div class="arenarow pnl" style="flex:1;background:linear-gradient(${(ARENA_BG[m.k]||ARENA_BG.pradera).join(",")})"><b class="out">${A.n}</b><span class="sub">${reach?"¡Desbloqueada!":`Se desbloquea con ${m.t} trofeos`}</span></div></div>`;}
-    side^=1;const can=reach&&!got;
-    return `<div class="rnode ${side?"l":"r"} ${reach?"reach":""}" data-t="${m.t}"><span class="tro">${m.t}</span><div class="rtile ${can?"claim":got?"got pnl":"pnl"}" ${can?`data-a="claim" data-t="${m.t}"`:""}>${rewardImg(m)}<b class="out">${rewardName(m)}</b>${!reach?`<img class="lockc" src="${UIA}lock.webp" alt="">`:""}</div></div>`;}).reverse().join("");
+    if(m.r==="arena"){const A=ARENAS.find(a=>a.k===m.k),sd=ARENA_SIDE[m.k]||ARENA_SIDE.pradera;return `<div class="rnode arena-n ${reach?"reach":""}" data-t="${m.t}"><div class="arenarow pnl" style="flex:1;background:radial-gradient(90% 120% at 50% 100%,rgba(255,255,255,.28),transparent 60%),linear-gradient(${(ARENA_BG[m.k]||ARENA_BG.pradera).join(",")})">${propImg(sd[0],"ap l")}${propImg(ARENA_PROP[m.k]||"arbol","ap c")}${propImg(sd[1],"ap r")}<span class="atx"><b class="out">${A.n}</b><span class="sub">${reach?"¡Desbloqueada!":`${ico("trophy","s")} ${m.t}`}</span></span>${reach?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}</div></div>`;}
+    side^=1;const can=reach&&!got,first=can&&!firstSet;if(first)firstSet=true;
+    return `<div class="rnode ${side?"l":"r"} ${reach?"reach":""}" data-t="${m.t}"><span class="tro">${ico("trophy","s")}${m.t}</span><div class="rtile pnl ${can?"claim":got?"got":""} ${first?"next":""}" ${can?`data-a="claim" data-t="${m.t}"`:""}>${can?`<span class="cribn out">¡RECLAMAR!</span>`:""}${rewardImg(m)}<b class="out">${rewardName(m)}</b>${!reach?`<img class="lockc" src="${UIA}lock.webp" alt="">`:""}${got?`<i class="okc"></i>`:""}</div></div>`;}).reverse().join("");
   const top=shown[shown.length-1].t,frac=Math.max(0,Math.min(1,S.tro/top));
   app.innerHTML=`${topbar()}
     <div class="roadhead pnl">${ico("trophy")}<span style="flex:1"><span class="t-h1 out">${S.tro}</span><span class="t-small"> trofeos${next?` · faltan ${next.t-S.tro} para ${rewardName(next)}`:""}</span></span>${cl?`<button class="gbtn green sm shine" data-a="claimall">RECLAMAR (${cl})</button>`:""}</div>
@@ -3697,8 +4045,9 @@ function showPass(){
   UI.screen="pass";stopLoop();app.className="home"+(unlocked("pass")?"":" lockd");setBg();ensureDay();
   const tier=passTier(),into=S.pass.tk%PASS_STEP,P=S.pass.prem,ready=passReady(),vt=vaultTier();
   const tile=(r,i,tr)=>{const n=i+1,reach=tier>=n,got=(tr==="p"?S.pass.gotP:S.pass.got).includes(n),can=reach&&!got&&(tr==="f"||P);
-    return `<div class="ptile ${tr} ${can?"can":""} ${got?"got":""} ${n%5===0?"big":""}" style="--i:${i}" ${can?`data-a="pclaim" data-i="${n}" data-tr="${tr}"`:""}>${tr==="p"&&!P?`<img class="lockc" src="${UIA}lock.webp" alt="">`:""}${rewardImg(r)}<b class="out">${r.r==="hero"&&!r.id?"Héroe":rewardName(r)}</b></div>`;};
-  const rows=PASS_F.map((r,i)=>`${tile(r,i,"f")}<span class="tnum ${tier>=i+1?"reach":""}" data-n="${i+1}"><i class="out">${i+1}</i></span>${tile(PASS_P[i],i,"p")}`).join("");
+    return `<div class="ptile ${tr} ${can?"can":""} ${got?"got":""} ${n%5===0?"big":""}" style="--i:${i}" ${can?`data-a="pclaim" data-i="${n}" data-tr="${tr}"`:""}>${tr==="p"&&!P?`<img class="lockc" src="${UIA}lock.webp" alt="">`:""}${rewardImg(r)}<b class="out">${r.r==="hero"&&!r.id?"Héroe":rewardName(r)}</b>${got?`<i class="okc"></i>`:""}</div>`;};
+  /* raíl central que se llena hasta el escalón actual; el siguiente escalón, marcado como «estás aquí» */
+  const rows=PASS_F.map((r,i)=>`${tile(r,i,"f")}<span class="tnum ${tier>=i+1?"reach":""} ${i===tier?"cur":""} ${i===tier-1?"last":""}" data-n="${i+1}"><i class="out">${i+1}</i></span>${tile(PASS_P[i],i,"p")}`).join("");
   app.innerHTML=`${topbar()}${lockBan("pass")}
     <div class="passhead pnl">${ico("crown","l")}<span style="flex:1"><span class="t-h2 out">Temporada ${S.pass.season+1} · escalón ${tier}/${PASS_N}</span>
       <span class="bar"><u style="width:${tier>=PASS_N?Math.min(100,(S.pass.tk-PASS_N*PASS_STEP)%VAULT_STEP/VAULT_STEP*100):into/PASS_STEP*100}%"></u><span>${tier>=PASS_N?`Bóveda ${vt}/${VAULT_MAX}`:`${into}/${PASS_STEP}`}</span></span>
@@ -3708,7 +4057,7 @@ function showPass(){
       :`<button class="premcta feat gold" data-a="premium" style="min-height:0;text-align:left;cursor:pointer">${ico("crown","l")}<span style="flex:1"><b class="out">Pase Premium${payOn()||PAY.test?" · "+fmtEur(4.99):""}</b><small>${premWaiting()?`<b>${premWaiting()} premios dorados</b> ya alcanzados esperándote`:"Un premio dorado extra en cada escalón y 3 aspectos"}</small></span><span class="gbtn premium sm">VER</span></button>`}
     ${ready?`<button class="gbtn green shine" data-a="pclaimall">RECOGER TODO (${ready})</button>`:""}
     <div class="tracks"><span class="hd f out">GRATIS</span><span></span><span class="hd p out">PREMIUM</span>${rows}</div>
-    <div class="arenarow pnl" style="margin-top:8px"><b class="out">Bóveda</b><span class="sub">Tras el escalón ${PASS_N}: un premio cada ${VAULT_STEP} fichas (${vt}/${VAULT_MAX})</span></div>
+    <div class="vault pnl"><span class="vim"><span class="godrays"></span><img src="${UIA}chest3.webp" alt=""></span><span class="vtx"><b class="out">Bóveda</b><span class="sub">Tras el escalón ${PASS_N}: un premio cada ${VAULT_STEP} fichas</span><span class="bar gold"><u style="width:${vt/VAULT_MAX*100}%"></u><span>${vt}/${VAULT_MAX}</span></span></span></div>
     ${nav("pass")}`;
   renderModal();
   {const t=document.querySelector(`.tnum[data-n="${Math.max(1,Math.min(PASS_N,tier+1))}"]`);if(t)t.scrollIntoView({block:"center"});}
@@ -3737,8 +4086,8 @@ function skipTiers(n){
 }
 function missionsHTML(){
   ensureDay();
-  const row=(m,i,w)=>`<div class="mis2 pnl ${m.got?"done":m.v>=m.n?"ready":""}"><span class="mi"><img src="${UIA}${misIco(m)}.webp" alt=""></span><span class="mt"><b>${misText(m)}</b><span class="bar"><u style="width:${m.v/m.n*100}%"></u><span>${m.v}/${m.n}</span></span></span>
-      <span class="rw">${ico("star")}${m.tk}</span>${m.got?'<span class="ok">✓</span>':m.v>=m.n?`<button class="gbtn green sm" data-a="mclaim" data-i="${i}" data-w="${w?1:0}">COBRAR</button>`:!w&&S.mis.rr<1?`<button class="reroll pnl" data-a="reroll" data-i="${i}" aria-label="Cambiar misión">↻</button>`:""}</div>`;
+  const row=(m,i,w)=>`<div class="mis2 pnl ${m.got?"done":m.v>=m.n?"ready":""}"><span class="mi ${m.hero&&HEROES[m.hero]?"hp":""}">${m.hero&&HEROES[m.hero]?heroArt(m.hero):`<img src="${UIA}${misIco(m)}.webp" alt="">`}</span><span class="mt"><b>${misText(m)}</b><span class="bar"><u style="width:${m.v/m.n*100}%"></u><span>${m.v}/${m.n}</span></span></span>
+      <span class="rw"><i class="tkn">${ico("star")}</i><span class="out">${m.tk}</span></span>${m.got?'<i class="okc"></i>':m.v>=m.n?`<button class="gbtn green sm" data-a="mclaim" data-i="${i}" data-w="${w?1:0}">COBRAR</button>`:!w&&S.mis.rr<1?`<button class="reroll pnl" data-a="reroll" data-i="${i}" aria-label="Cambiar misión">↻</button>`:""}</div>`;
   return `<div class="bsheet pnl ${unlocked("mis")?"":"lockd"}"><button class="x" data-a="close" aria-label="Cerrar">✕</button><span class="ribn">Misiones</span>${lockBan("mis")}
     <p class="sub">Diarias · nuevas en ${msToMidnight()}</p>${S.mis.list.map((m,i)=>row(m,i,false)).join("")}
     <p class="sub" style="margin-top:6px">Semanales</p>${S.wk.list.map((m,i)=>row(m,i,true)).join("")}</div>`;
@@ -3754,7 +4103,11 @@ function calHTML(){
   const cyc=S.cal.cyc>0?CAL2:CAL1,today_=calReady();
   return `<div class="bsheet pnl"><button class="x" data-a="close" aria-label="Cerrar">✕</button><span class="ribn gold">Premio diario</span>
     <p class="sub">Un premio cada día que entras. Si faltas un día, no pierdes nada.</p>
-    <div class="cal">${cyc.map((r,i)=>{const got=i<S.cal.i,now=i===S.cal.i&&today_;return `<div class="cday ${now?"today":got?"got pnl":"pnl"} ${i===6?"big":""}"><span class="d">Día ${i+1}</span>${rewardImg(r)}<b class="out">${r.pickRare?"Héroe raro":rewardName(r)}</b></div>`;}).join("")}</div>
+    <div class="cal">${cyc.map((r,i)=>{const got=i<S.cal.i,now=i===S.cal.i&&today_;
+      /* héroe raro sorpresa: silueta de un héroe raro con «?», no la corona del pase */
+      const rare=r.pickRare&&(IDS.find(id=>HEROES[id].rar===1&&!S.unl.includes(id))||IDS.find(id=>HEROES[id].rar===1));
+      const img=rare?`<span class="calhero"><span class="godrays"></span>${heroArt(rare,null,"h3 sil")}<i class="out">?</i></span>`:rewardImg(r);
+      return `<div class="cday ${now?"today":got?"got pnl":"pnl"} ${i===6?"big":""}"><span class="d">Día ${i+1}</span>${img}<b class="out">${r.pickRare?"Héroe raro":rewardName(r)}</b>${got?`<i class="okc big"></i>`:""}</div>`;}).join("")}</div>
     ${today_?`<button class="gbtn green xl shine" data-a="calclaim">COBRAR</button>`:`<p class="sub">Mañana: <b>${rewardName((S.cal.i<7?cyc:CAL2)[S.cal.i%7])}</b></p>`}</div>`;
 }
 function calClaim(){
@@ -3837,13 +4190,13 @@ function boxHTML(M){
   const tierImg=M.tier?`${UIA}chest${M.tier}`:"";
   if(M.phase==="drop"||M.phase==="ready"||M.phase==="opening"){
     const need=CHESTS[M.tier].taps;
-    return `<div class="boxov" data-a="boxtap"><span class="godrays"></span><span class="godrays b"></span><span class="ribn bt">${CHESTS[M.tier].n}</span>
+    return `<div class="boxov" data-a="boxtap"><span class="godrays"></span><span class="godrays b"></span><span class="ribn gold bt">${CHESTS[M.tier].n}</span>
       <div class="stage"><span class="floorglow"></span><span class="glow"></span><img class="chimg ${M.phase==="drop"?"drop":""}" src="${tierImg}.webp" alt="">
       <span class="pips">${Array.from({length:need},(_,i)=>`<i class="${i<M.taps?"on":""}"></i>`).join("")}</span><span class="hint out" style="opacity:0">Toca para abrir</span></div><span class="flash"></span></div>`;
   }
   if(M.phase==="sum"){
     const sum=M.items.map(it=>`<div class="pnl" data-k="${it.k}" data-n="${it.n||0}">${it.k==="hero"?heroArt(it.id):it.k==="skin"?heroArt(SKINS[it.id].hero,it.id):`<img src="${UIA}${({coins:"coin",pp:"power",gems:"gem",tk:"star",frame:"crown"})[it.k]}.webp" alt="">`}<b class="out">${it.k==="hero"?HEROES[it.id].n:it.k==="skin"?"Aspecto":it.k==="frame"?"Marco":"+"+it.n}</b><small>${({coins:"Monedas",pp:"Poder",gems:"Gemas",tk:"Fichas",hero:"¡Nuevo héroe!",skin:SKINS[it.id]?SKINS[it.id].n:"",frame:FRAMES[it.id]?FRAMES[it.id].n:""})[it.k]}</small></div>`).join("");
-    return `<div class="boxov" data-a="boxtap"><span class="godrays"></span><span class="ribn bt">¡Has conseguido!</span><div class="boxsum2 stagger">${sum}</div>
+    return `<div class="boxov" data-a="boxtap"><span class="godrays"></span><span class="ribn gold bt">¡Has conseguido!</span><div class="boxsum2 stagger">${sum}</div>
       <button class="gbtn" data-a="boxtap" style="position:relative;margin-top:20px">CONTINUAR</button>${M.boxesAfter?`<p class="sub" style="position:relative;margin-top:8px">+${M.boxesAfter} cofre${M.boxesAfter>1?"s":""} para abrir</p>`:""}</div>`;
   }
   const it=M.items[M.step],left=M.items.length-M.step-1,heroLeft=M.items.slice(M.step+1).some(x=>x.k==="hero");
@@ -3855,7 +4208,7 @@ function boxHTML(M){
     const C=CHESTS[M.tier],big=C&&((it.k==="coins"&&it.n>=C.coins[0]+.8*(C.coins[1]-C.coins[0]))||(it.k==="pp"&&it.n>=C.pp[0]+.8*(C.pp[1]-C.pp[0])));
     body=`<div class="rwd fly ${it.k}">${big?`<span class="bigloot out">¡GRAN BOTÍN!</span>`:""}<img class="im" src="${UIA}${ic}.webp" alt=""><span class="amt out">+0</span><span class="lab out">${lb}</span></div>`;}
   return `<div class="boxov ${it.k==="hero"?"pur":""}" data-a="boxtap"><span class="godrays" ${it.k==="hero"?`style="background:repeating-conic-gradient(${RARC[HEROES[it.id].rar]}44 0 6deg,transparent 6deg 15deg)"`:""}></span>
-    ${body}${M.tier?`<div class="stage" style="height:200px"><span class="floorglow"></span><span class="lidglow"></span><img class="chimg opened" src="${tierImg}.webp" alt="" style="width:min(48vw,190px);height:auto"></div>${left>0?`<span class="left ${heroLeft?"hero":""}">×${left}</span>`:""}`:""}
+    ${body}${M.tier?`<div class="stage open"><span class="floorglow"></span><span class="chopen"><span class="beam2"></span><img class="cbody" src="${tierImg}.webp" alt=""><img class="clid" src="${tierImg}.webp" alt=""></span></div>${left>0?`<span class="left ${heroLeft?"hero":""}">×${left}</span>`:""}`:""}
     <span class="hint out" style="position:absolute;bottom:2vh">Toca para seguir</span></div>`;
 }
 function keysInfo(){UI.modal={k:"info2",title:"Llaves",html:`<div class="keyrow" style="justify-content:center">${[0,1,2].map(i=>`<img class="${i<S.keys?"":"off"}" src="${UIA}key.webp" alt="">`).join("")}</div><p>Cada victoria te da una llave (la primera del día, dos). Con <b>3 llaves</b> ganas un <b>cofre</b>.</p><p class="sub">Héroe garantizado como mucho en ${Math.max(1,Math.ceil((PITY_MAX-(S.pity||0))/1))} cofres normales.</p>`};renderModal();}
@@ -3870,6 +4223,13 @@ function purchInfoHTML(){
     <button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
 }
 
+/* imágenes de la interfaz en lugar de emojis: dificultad (el bot de cada nivel) y pasos de «Cómo se juega» */
+const DIFF_BOT={facil:"ojo",normal:"truco",dificil:"sombra"};
+function HOW_IMG(i){
+  if(i===0)return `<span class="hwpair">${heroArt(S.fav)}<b class="out">VS</b>${heroArt("ojo",null,"h3 sil")}</span>`;
+  if(i===2)return `<span class="hwfoot">${FOOT}${FOOT}</span>`;
+  return `<img src="${UIA}${["","drop","","chest1","trophy"][i]||"star"}.webp" alt="">`;
+}
 function renderModal(){
   const old=$(".modal");if(old)old.remove();
   const ob=document.querySelectorAll(".boxov,.lvup,.page");ob.forEach(e=>e.remove());
@@ -3899,7 +4259,7 @@ function renderModal(){
   else if(M.k==="premok"){m.innerHTML=`<div class="sheet paysheet"><span class="ribn gold">¡${S.pass.plus?"Plus":"Premium"} activado!</span>${ico("crown","l")}<p>${M.n?`Tienes <b>${M.n} premios dorados</b> listos para recoger.`:"Cada escalón te dará también el premio dorado."}</p>${M.n?`<button class="gbtn premium" data-a="pclaimall">RECOGER TODO</button>`:`<button class="gbtn" data-a="close">GENIAL</button>`}</div>`;}
   else if(M.k==="seasonnew"){m.innerHTML=`<div class="sheet paysheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><span class="ribn gold">¡Temporada ${S.pass.season+1}!</span>${ico("crown","l")}<p>${PASS_N} escalones de premios gratis. El Pase Premium añade un premio dorado en cada escalón y 3 aspectos.</p><button class="gbtn premium" data-a="premium">VER EL PASE</button><button class="pillbtn" data-a="close">Ahora no</button></div>`;}
   else if(M.k==="starter"){m.innerHTML=`<div class="sheet paysheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><span class="ribn gold">Pack de Inicio · solo una vez</span><img src="${UIA}chest2.webp" alt="" style="width:120px;align-self:center"><p>200 gemas, 600 monedas, 300 de Poder, un Cofre grande y el aspecto Truco Ártico. Disponible hasta que llegues al Volcán.</p><button class="gbtn premium" data-a="iap" data-id="amago.starter">VER PACK · ${fmtEur(1.99)}</button><button class="pillbtn" data-a="close">Ahora no</button></div>`;}
-  else if(M.k==="comeback"){const r=M.gap>=30?[C_(3),{r:"hero"}]:M.gap>=10?[C_(3)]:[C_(2)];m.innerHTML=`<div class="sheet paysheet"><span class="ribn gold">¡Bienvenido de vuelta!</span><p>Te hemos guardado un regalo por volver${M.gap>=10?" y fichas dobles en tus próximas partidas":""}.</p><div style="display:flex;justify-content:center;gap:10px">${r.map(x=>rewardImg(x,"ico l")).join("")}</div><button class="gbtn green" data-a="comebackok" data-g="${M.gap}">RECOGER</button></div>`;}
+  else if(M.k==="comeback"){const r=M.gap>=30?[C_(3),{r:"hero"}]:M.gap>=10?[C_(3)]:[C_(2)];m.innerHTML=`<div class="sheet paysheet"><span class="ribn gold">¡Bienvenido de vuelta!</span><p>Te hemos guardado un regalo por volver${M.gap>=10?" y fichas dobles en tus próximas partidas":""}.</p><div class="cbgift"><span class="godrays"></span>${r.map(x=>rewardImg(x,"cbimg")).join("")}</div><button class="gbtn green" data-a="comebackok" data-g="${M.gap}">RECOGER</button></div>`;}
   else if(M.k==="seasonsum"){m.innerHTML=`<div class="sheet paysheet"><span class="ribn gold">Fin de la Temporada ${M.season+1}</span><p>Te guardamos lo que alcanzaste y no cobraste${M.items.length?":":". ¡No te falta nada!"}</p>${M.items.length?`<div class="boxsum2" style="position:static;margin:0 auto">${M.items.slice(0,6).map(it=>`<div class="pnl">${it.k==="hero"?heroArt(it.id):`<img src="${UIA}${({coins:"coin",pp:"power",gems:"gem",tk:"star",skin:"crown",frame:"crown"})[it.k]}.webp" alt="">`}<b class="out">${it.n?"+"+it.n:""}</b></div>`).join("")}</div>`:""}<button class="gbtn" data-a="close">GENIAL</button></div>`;}
   else if(M.k==="cloud"){
     m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Tu progreso</h2>
@@ -3918,7 +4278,7 @@ function renderModal(){
         ${M.confirm?`<p>En este móvil empezarás de nuevo como invitado. Tu cuenta no se borra.</p><button class="gbtn red" data-a="acclogout2">CERRAR SESIÓN</button><button class="pillbtn" data-a="acc">Cancelar</button>`:`<button class="pillbtn" data-a="acclogout">Cerrar sesión</button>`}`
       :M.m==="login"?`<h2 class="out">Iniciar sesión</h2><p>Entra con tu cuenta de AMAGO.</p>${ap}${f("ENTRAR","acclogin")}
         ${S.games>0&&isGuest()?`<p class="sub">Ojo: la partida de invitado de este móvil se sustituye por la de tu cuenta.</p>`:""}<button class="linkbtn dk" data-a="accmode" data-m="reg">No tengo cuenta: crear una</button>`
-      :`<h2 class="out">Crea tu cuenta</h2><p>Ahora juegas como <b>invitado</b>: si borras la app o cambias de móvil, pierdes tu progreso. Con una cuenta lo guardas y juegas en cualquier móvil.</p>${!S.gemOnce.acc?`<p class="sub">🎁 +20 gemas al crearla</p>`:""}${ap}${f("CREAR CUENTA","accreg")}${S.games>0?`<p class="sub">Si tu Apple ID ya tiene una cuenta de AMAGO, te preguntaremos antes de cambiar de partida.</p>`:""}
+      :`<h2 class="out">Crea tu cuenta</h2><p>Ahora juegas como <b>invitado</b>: si borras la app o cambias de móvil, pierdes tu progreso. Con una cuenta lo guardas y juegas en cualquier móvil.</p>${!S.gemOnce.acc?`<p class="sub">${ico("gem","s")} +20 gemas al crearla</p>`:""}${ap}${f("CREAR CUENTA","accreg")}${S.games>0?`<p class="sub">Si tu Apple ID ya tiene una cuenta de AMAGO, te preguntaremos antes de cambiar de partida.</p>`:""}
         <button class="linkbtn dk" data-a="accmode" data-m="login">Ya tengo cuenta: iniciar sesión</button>`)+`</div>`;
   }
   else if(M.k==="ask"){
@@ -3932,21 +4292,25 @@ function renderModal(){
   else if(M.k==="guestnag"){
     m.innerHTML=`<div class="sheet"><span class="tutface">${heroSVG("ojo")}</span><h2 class="out">¡No pierdas tu progreso!</h2>
       <p>Juegas como invitado. Si borras la app o cambias de móvil, perderás tus héroes, trofeos y cofres.</p>
-      <button class="gbtn" data-a="acc" data-m="reg">CREAR CUENTA${!S.gemOnce.acc?" · +20 💎":""}</button><button class="pillbtn" data-a="close">Ahora no</button></div>`;
+      <button class="gbtn" data-a="acc" data-m="reg"><span class="row">CREAR CUENTA${!S.gemOnce.acc?` <span class="gtag">+20 ${ico("gem","s")}</span>`:""}</span></button><button class="pillbtn" data-a="close">Ahora no</button></div>`;
   }
   else if(M.k==="settings"){
     m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Ajustes</h2>
-      ${ONLINE_OK?`<button class="toggle" data-a="acc"><span>👤 ${isGuest()?"Invitado":ACC.via==="apple"?"Cuenta de Apple":esc(ACC.email)}</span><i>${isGuest()?"Crear cuenta":"Cuenta"}</i></button>`:""}
-      <button class="toggle" data-a="name"><span>✏️ Nombre: ${esc(S.name)}</span><i>Cambiar</i></button>
-      <button class="toggle" data-a="tsnd"><span>🔊 Sonido</span><i class="${S.snd?"on":""}">${S.snd?"Sí":"No"}</i></button>
-      <button class="toggle" data-a="tvib"><span>📳 Vibración</span><i class="${S.vib?"on":""}">${S.vib?"Sí":"No"}</i></button>
-      ${ONLINE_OK?`<button class="toggle" data-a="tstats"><span>📊 Enviar estadísticas de uso</span><i class="${S.noStats?"":"on"}">${S.noStats?"No":"Sí"}</i></button>`:""}
-      <button class="toggle" data-a="how"><span>❓ Cómo se juega</span><i>Ver</i></button>
-      <button class="toggle" data-a="purchinfo"><span>🧾 Compras y probabilidades</span><i>Ver</i></button>
-      ${ONLINE_OK?`<button class="toggle" data-a="cloud"><span>☁️ Pasar mi partida a otro móvil</span><i>Ver</i></button>`:""}
-      <button class="toggle" data-a="lang"><span>🌐 ${LANG==="es"?"Idioma":"Language"}</span><i>${LANG==="es"?"Español":"English"}</i></button>
-      <button class="toggle" data-a="privacy"><span>🔒 Política de privacidad</span><i>Ver</i></button>
-      <button class="toggle" data-a="restore"><span>♻️ Restaurar compras</span><i>Ir</i></button>
+      ${ONLINE_OK?`<button class="toggle acc" data-a="acc"><span class="tav">${heroArt(S.fav)}</span><span>${isGuest()?"Invitado":ACC.via==="apple"?"Cuenta de Apple":esc(ACC.email)}</span><i class="pill ${isGuest()?"go":""}">${isGuest()?"Crear cuenta":"Cuenta"}</i></button>`:""}
+      <button class="toggle" data-a="name"><span>Nombre: ${esc(S.name)}</span><i class="pill">Cambiar</i></button>
+      <div class="tgroup">
+      <button class="toggle" data-a="tsnd" aria-pressed="${S.snd?"true":"false"}"><span>Sonido</span><i class="sw ${S.snd?"on":""}" aria-hidden="true"></i></button>
+      <button class="toggle" data-a="tvib" aria-pressed="${S.vib?"true":"false"}"><span>Vibración</span><i class="sw ${S.vib?"on":""}" aria-hidden="true"></i></button>
+      ${ONLINE_OK?`<button class="toggle" data-a="tstats" aria-pressed="${S.noStats?"false":"true"}"><span>Enviar estadísticas de uso</span><i class="sw ${S.noStats?"":"on"}" aria-hidden="true"></i></button>`:""}
+      </div>
+      <button class="toggle" data-a="lang"><span>${LANG==="es"?"Idioma":"Language"}</span><i class="pill">${LANG==="es"?"Español":"English"}</i></button>
+      <div class="tgroup">
+      <button class="toggle" data-a="how"><span>Cómo se juega</span><i class="chev">›</i></button>
+      <button class="toggle" data-a="purchinfo"><span>Compras y probabilidades</span><i class="chev">›</i></button>
+      ${ONLINE_OK?`<button class="toggle" data-a="cloud"><span>Pasar mi partida a otro móvil</span><i class="chev">›</i></button>`:""}
+      <button class="toggle" data-a="privacy"><span>Política de privacidad</span><i class="chev">›</i></button>
+      <button class="toggle" data-a="restore"><span>Restaurar compras</span><i class="chev">›</i></button>
+      </div>
       ${M.confirm?`<button class="gbtn red" data-a="reset2">SÍ, BORRAR TODO</button><button class="pillbtn" data-a="reset0">Cancelar</button>`:`<button class="pillbtn dangerlink" data-a="reset1">${isGuest()?"Borrar progreso":"Borrar cuenta y progreso"}</button>`}</div>`;
   }else if(M.k==="name"){
     m.innerHTML=`<div class="sheet"><h2 class="out">Tu nombre</h2><p>Es el que verán tus amigos.</p>
@@ -3958,19 +4322,19 @@ function renderModal(){
       <button class="gbtn" data-a="tutnamesave">¡LISTO!</button></div>`;
   }else if(M.k==="how"){
     const c=HOW[M.i],last=M.i===HOW.length-1;
-    m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><div class="dots">${HOW.map((_,i)=>`<i class="${i===M.i?"on":""}"></i>`).join("")}</div><div class="howc"><div class="big">${c.i}</div><h3 class="out">${c.h}</h3><p>${c.p}</p></div><button class="gbtn" data-a="hownext">${last?"¡ENTENDIDO!":"SIGUIENTE"}</button></div>`;
+    m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><div class="dots">${HOW.map((_,i)=>`<i class="${i===M.i?"on":""}"></i>`).join("")}</div><div class="howc"><div class="big hwimg">${HOW_IMG(M.i)}</div><h3 class="out">${c.h}</h3><p>${c.p}</p></div><button class="gbtn" data-a="hownext">${last?"¡ENTENDIDO!":"SIGUIENTE"}</button></div>`;
   }else if(M.k==="mode"){
     m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Elige modo</h2>
       <button class="modecard ${S.mode==="bot"?"on":""}" data-a="setmode" data-m="bot"><span class="mi">${ico("swords","m")}</span><span><b>Contra bot</b><small>Trofeos, monedas, llaves y fichas del pase</small></span></button>
-      <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${(S.diff||"facil")===k?"on":""}" data-a="setdiff" data-d="${k}"><span>${d.i}</span><b>${d.n}</b><small>${d.d}</small><small class="nw">+${WIN_COINS[k]} ${ico("coin","s")}</small></button>`).join("")}</div>
+      <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${(S.diff||"facil")===k?"on":""}" data-a="setdiff" data-d="${k}"><span class="dpt">${heroSVG(DIFF_BOT[k]||"ojo")}</span><span class="dst">${[0,1,2].map(j=>`<img class="${j<Object.keys(DIFFS).indexOf(k)+1?"":"off"}" src="${UIA}star.webp" alt="">`).join("")}</span><b>${d.n}</b><small>${d.d}</small><small class="nw">+${WIN_COINS[k]} ${ico("coin","s")}</small></button>`).join("")}</div>
       <button class="modecard ${S.mode==="online"?"on":""}" data-a="setmode" data-m="online"><span class="mi">${ico("trophy","m")}</span><span><b>Online</b><small>${ONLINE_OK?"Rival real con tus trofeos · mismas recompensas que Normal":"Disponible al abrir el juego desde su servidor"}</small></span></button>
       <button class="modecard ${S.mode==="friends"?"on":""}" data-a="setmode" data-m="friends"><span class="mi">${ico("crown","m")}</span><span><b>Con amigos</b><small>Sala privada con código · cuenta para misiones y pase</small></span></button><button class="gbtn" data-a="close">LISTO</button></div>`;
   }else if(M.k==="friends"){
     if(!ONLINE_OK){
-      m.innerHTML=`<div class="sheet"><h2 class="out">Con amigos</h2><div class="howc"><div class="big">🌐</div><p>El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.</p><p>Abre el juego desde la dirección del servidor y aquí podrás crear o unirte a una sala.</p></div><button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
+      m.innerHTML=`<div class="sheet"><h2 class="out">Con amigos</h2><div class="howc"><div class="big hwimg">${ico("swords","l")}</div><p>El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.</p><p>Abre el juego desde la dirección del servidor y aquí podrás crear o unirte a una sala.</p></div><button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
     }else if(M.st==="wait"){
       m.innerHTML=`<div class="sheet"><h2 class="out">Sala creada</h2><p>Pásale este código a tu amigo:</p><div class="codebig out">${M.code}</div>
-        <button class="pillbtn" data-a="copycode">📋 Copiar código</button><p class="waitdots">Esperando a tu amigo<span>.</span><span>.</span><span>.</span></p>
+        <button class="pillbtn" data-a="copycode">Copiar código</button><p class="waitdots">Esperando a tu amigo<span>.</span><span>.</span><span>.</span></p>
         <button class="pillbtn" data-a="netcancel">Cancelar</button></div>`;
     }else if(M.st==="busy"){
       m.innerHTML=`<div class="sheet"><h2 class="out">Conectando…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroArt(S.fav)}</div></div></div>`;
@@ -3981,15 +4345,15 @@ function renderModal(){
         <div class="joinrow"><input id="codeinp" class="inp code" maxlength="4" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" aria-label="Código de sala"><button class="gbtn blue" data-a="netjoin">UNIRSE</button></div></div>`;
     }
   }else if(M.k==="queue"){
-    if(!ONLINE_OK)m.innerHTML=`<div class="sheet"><h2 class="out">Online</h2><div class="howc"><div class="big">🌐</div><p>El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.</p><p>Abre el juego desde la dirección del servidor para jugar contra rivales reales.</p></div><button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
+    if(!ONLINE_OK)m.innerHTML=`<div class="sheet"><h2 class="out">Online</h2><div class="howc"><div class="big hwimg">${ico("swords","l")}</div><p>El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.</p><p>Abre el juego desde la dirección del servidor para jugar contra rivales reales.</p></div><button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
     else if(M.err)m.innerHTML=`<div class="sheet"><h2 class="out">Online</h2><p class="errp">${esc(M.err)}</p><button class="gbtn" data-a="qbot">JUGAR CONTRA BOT</button><button class="pillbtn" data-a="qcancel" style="align-self:center">Volver</button></div>`;
     else{const sec=Math.floor((Date.now()-M.t0)/1000),slow=sec>=QUEUE_SLOW;
-      m.innerHTML=`<div class="sheet"><h2 class="out">Buscando rival…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroArt(S.fav)}</div></div>
-        <p class="waitdots">🏆 ${S.tro} · <b id="qsec">${sec}</b> s<span>.</span><span>.</span><span>.</span></p>
+      m.innerHTML=`<div class="sheet"><h2 class="out">Buscando rival…</h2><div class="qradar"><span class="sweep"></span><div class="av">${heroArt(S.fav)}</div></div>
+        <p class="waitdots qline">${ico("trophy","s")}<b class="out">${S.tro}</b><i class="qsep"></i><b class="out" id="qsec">${sec}</b><b class="out">s</b><span>.</span><span>.</span><span>.</span></p>
         ${slow?`<p>Ahora mismo hay pocos jugadores conectados.</p><button class="gbtn" data-a="qbot">JUGAR CONTRA BOT</button>`:""}
         <button class="pillbtn" data-a="qcancel" style="align-self:center">Cancelar</button></div>`;}
   }else if(M.k==="search"){
-    m.innerHTML=M.found?`<div class="sheet"><h2 class="out">¡Rival encontrado!</h2><div class="vs"><div class="p"><div class="av">${heroArt(S.fav)}</div><b class="out" style="color:var(--me)">${esc(S.name)}</b><small>🏆 ${S.tro}</small></div><div class="mid out">VS</div><div class="p"><div class="av">${heroSVG(M.oppHero||"truco")}</div><b class="out" style="color:var(--foe)">${esc(G.opp.name)}</b><small>🏆 ${G.opp.tro}</small></div></div></div>`
+    m.innerHTML=M.found?`<div class="sheet"><h2 class="out">¡Rival encontrado!</h2><div class="vs"><div class="p"><div class="av">${heroArt(S.fav)}</div><b class="out" style="color:var(--me)">${esc(S.name)}</b><small>${ico("trophy","s")} ${S.tro}</small></div><div class="mid out">VS</div><div class="p"><div class="av">${heroSVG(M.oppHero||"truco")}</div><b class="out" style="color:var(--foe)">${esc(G.opp.name)}</b><small>${ico("trophy","s")} ${G.opp.tro}</small></div></div></div>`
       :`<div class="sheet"><h2 class="out">Buscando rival…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroSVG(pick(IDS))}</div></div></div>`;
   }else if(M.k==="vs"){
     const lp=G.lv?G.lv.p:1,lb=G.lv?G.lv.b:1;
@@ -4008,7 +4372,7 @@ function premiumHTML(){
   const perks=["Un premio dorado extra en cada uno de los 40 escalones","Aspectos Brasa Glacial, Sombra Carmesí y Muro Magma","Marco de avatar del pase","Más de 6.000 monedas y 4.000 de Poder en total","Bonus de 40 gemas al completar el pase"];
   return `<div class="page" style="background:radial-gradient(120% 70% at 50% 20%,#6a2fb0,var(--velvet-1) 45%,var(--velvet-2))"><div class="in" style="align-items:center;text-align:center">
     <button class="back pnl" data-a="close" aria-label="Volver">‹</button>
-    <div class="hero-stage" style="height:240px;width:100%"><span class="godrays"></span><span class="floorglow"></span>${heroArt("brasa","brasa_glacial")}</div>
+    <div class="hero-stage fan" style="height:240px;width:100%"><span class="godrays"></span><span class="floorglow"></span>${heroArt("sombra","sombra_carmesi","h3 fl")}${heroArt("muro","muro_magma","h3 fr")}${heroArt("brasa","brasa_glacial")}</div>
     <h2 class="t-h1" style="filter:drop-shadow(0 4px 0 var(--ink));font-size:40px;background:linear-gradient(#FFF7B0,#FFD84A 45%,#FF9E1A);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:2px var(--ink)">PASE PREMIUM</h2>
     <p class="sub">Temporada ${S.pass.season+1} · quedan ${daysLeft()} días${n?` · <b>${n} premios</b> ya alcanzados se desbloquean al momento`:""}</p>
     <div class="pnl" style="width:100%;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:6px">${perks.map(p=>`<div style="display:flex;gap:8px;align-items:center;font-weight:900">${ico("crown","s")}<span>${p}</span></div>`).join("")}</div>
@@ -4114,10 +4478,12 @@ function showPick(){if(GFX)GFX.loadArena(arenaOf(S.tro).a.k);
   const wait=G.online&&G.picked;
   app.innerHTML=`<div class="mbg"></div><div class="pickhead"><span class="stars big">${starsHTML("p")}</span><h2 class="out">RONDA ${G.round}</h2><span class="stars big">${starsHTML("b")}</span></div>
     <p class="slogan">${G.online?`Contra <b>${esc(G.opp.name)}</b> · `:""}Elige héroe. No se puede repetir.</p>
+    <div class="pickstage r${H.rar}"><span class="godrays"></span><span class="floorglow"></span><span class="isle"></span><span class="pkart">${heroArt(id)}</span>
+      <div class="pkname"><span class="rartag r${H.rar}">${RR.n}</span><h3 class="out">${H.n}</h3><small>${H.r}</small></div></div>
     <div class="hrow pk" style="--c:${S.unl.length<=6?S.unl.length:Math.ceil(S.unl.length/2)}">${S.unl.map(h=>{const used=!av.includes(h);return `<button class="hchip ${h===id?"on":""} ${used?"used":""}" data-a="psel" data-id="${h}" ${used||wait?"disabled":""} aria-label="${HEROES[h].n}">${heroSVG(h)}${used?"<i>✓</i>":""}</button>`;}).join("")}</div>
-    <div class="pickcard"><div class="hdetail big" style="background:${RR.bg}"><span class="pt bob">${heroSVG(id)}</span><div><span class="rar">${RR.n}</span><h3 class="out">${H.n}</h3><small>${H.r}</small></div></div>${statsHTML(id)}</div>
+    <div class="pickcard">${statsHTML(id)}</div>
     ${wait?`<div class="waitbox">${G.oppReady?"✅ ¡Los dos listos!":`Esperando a <b>${esc(G.opp.name)}</b><span class="waitdots"><span>.</span><span>.</span><span>.</span></span>`}</div>`
-      :`<button class="gbtn red play pulse" data-a="fight">${G.online?"¡LISTO!":"¡A LUCHAR!"}</button>`}
+      :`<button class="gbtn xl shine play fightbtn" data-a="fight">${G.online?"¡LISTO!":"¡A LUCHAR!"}</button>`}
     ${G.online&&G.oppReady&&!wait?`<p class="slogan">✅ ${esc(G.opp.name)} ya ha elegido</p>`:""}`;
   if(G.round===1)toast("pick","🦸 Cada héroe es distinto: mira su <b>vida</b>, su <b>velocidad</b> y si su ataque <b>avisa</b>.");
 }
@@ -4460,6 +4826,7 @@ async function endMatch(){
   save();
   const kNow=gotChest?KEYS_PER_CHEST:S.keys;
   endScreen(win,draw,`
+    ${gotChest?`<button class="endchest feat gold shine top" data-a="openbox"><img src="${UIA}chest1.webp" alt=""><span><b class="out">¡3 llaves: cofre!</b><small>Toca para abrirlo</small></span><span class="gbtn green sm">ABRIR</span></button>`:""}
     <div class="chips">
       <div class="chip pnl" data-d="0">${ico("trophy")}<b class="out ${delta>0?"up":delta<0?"dn":""}" id="tro">${delta>0?"+":""}${delta}</b><small>Trofeos · ${before}</small></div>
       <div class="chip pnl" data-d="1">${ico("coin")}<b class="out up" data-cu="${coins}">+0</b><small>Monedas${S.wc.n>=WIN_COINS_CAP&&win?" · tope de hoy":""}</small></div>
@@ -4467,15 +4834,14 @@ async function endMatch(){
     </div>
     <div class="endrows">
       ${firstWin?`<div class="erow pnl">${ico("key")}<span>¡Primera victoria del día! Llave doble, +30 monedas y +20 de Poder</span><b class="out" style="color:var(--tx-up)">×2</b></div>`:""}
-      ${win&&S.ws>=2?`<div class="erow pnl"><span style="font-size:22px;width:30px;text-align:center">🔥</span><span>${S.ws} victorias seguidas${Math.min(4,S.ws-1)?` · +${Math.min(4,S.ws-1)} trofeos extra`:""}</span></div>`:""}
+      ${win&&S.ws>=2?`<div class="erow pnl">${ico("swords")}<span>${S.ws} victorias seguidas${Math.min(4,S.ws-1)?` · +${Math.min(4,S.ws-1)} trofeos extra`:""}</span></div>`:""}
       ${keysGot&&!gotChest&&S.box.length<BOX_MAX?`<div class="erow pnl">${ico("chest1")}<span>Junta 3 llaves y abres un cofre</span><span class="keyrow">${[0,1,2].map(i=>`<img class="${i<kNow?"":"off"} ${i>=keysBefore&&i<kNow?"new":""}" src="${UIA}key.webp" alt="">`).join("")}</span></div>`:""}
       ${welcome?`<div class="erow pnl">${ico("power")}<span>Regalo de bienvenida: 60 monedas y 40 de Poder. ¡Mejora a tu héroe!</span></div>`:""}
-      ${lvGems?`<div class="erow pnl">${ico("gem")}<span>¡Nivel ${level()}! +10 gemas</span></div>`:level()>lvlBefore?`<div class="erow pnl"><span style="font-size:22px;width:30px;text-align:center">⭐</span><span>¡Nivel de jugador ${level()}!</span></div>`:""}
+      ${lvGems?`<div class="erow pnl">${ico("gem")}<span>¡Nivel ${level()}! +10 gemas</span></div>`:level()>lvlBefore?`<div class="erow pnl">${ico("star")}<span>¡Nivel de jugador ${level()}!</span></div>`:""}
       ${G.tut?`<div class="erow pnl">${ico("chest1")}<span>¡Premio del entrenamiento: tu primer cofre!</span></div>`:""}
       ${note?`<div class="erow pnl"><span>${note}</span></div>`:""}
-      ${S.games<=3?`<div class="erow pnl"><span style="font-size:22px;width:30px;text-align:center">📅</span><span>${calReady()?`Premio diario esperándote en Inicio: <b>${calNext()}</b>`:`Mañana te espera: <b>${calNext()}</b>`}</span></div>`:""}
+      ${S.games<=3?`<div class="erow pnl">${ico("chest1")}<span>${calReady()?`Premio diario esperándote en Inicio: <b>${calNext()}</b>`:`Mañana te espera: <b>${calNext()}</b>`}</span></div>`:""}
       ${!win&&!note?`<p class="sub">${draw?"¡Igualadísimo!":"¡Casi! La próxima es tuya."}</p>`:""}
-      ${gotChest?`<button class="endchest feat gold shine" data-a="openbox"><img src="${UIA}chest1.webp" alt=""><span><b class="out">¡3 llaves: cofre!</b><small>Toca para abrirlo</small></span></button>`:""}
       ${misReady()?`<button class="pillbtn" data-a="missions" style="align-self:center">✅ ¡Misión completada! Cóbrala</button>`:claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">${ico("trophy","s")} ¡Premios en el camino de trofeos!</button>`:""}
     </div>
     ${REC.clip?`<button class="pillbtn" data-a="shareclip" style="align-self:center">📤 Compartir la repetición</button>`:""}
@@ -4497,8 +4863,14 @@ function endScreen(win,draw,body){
   if(win){confetti();sfx("win");}else if(!draw)sfx("lose");
 }
 function arenaUp(A){
-  const w=document.createElement("div");w.className="lvup";w.dataset.a="arenaclose";w.style.background=`radial-gradient(70% 50% at 50% 45%,${(ARENA_BG[A.k]||ARENA_BG.pradera)[0]},${(ARENA_BG[A.k]||ARENA_BG.pradera)[1]} 60%,#05061f)`;
-  w.innerHTML=`<span class="godrays"></span><span class="ribn gold slam">¡NUEVA ARENA!</span><img class="hi" src="${(window.AMAGO_ASSETS||"")}props/${ARENA_PROP[A.k]||"arbol"}.webp" alt="" style="height:170px;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))"><h2 class="t-h1 out slam" style="animation-delay:.5s">${A.n}</h2><p class="sub" style="position:relative">+25 gemas · nuevos premios en el camino de trofeos</p><span class="hint out" style="color:var(--tx-hl);margin-top:14px">Toca para seguir</span>`;
+  const w=document.createElement("div");w.className="lvup arenaup";w.dataset.a="arenaclose";const c=ARENA_BG[A.k]||ARENA_BG.pradera,sd=ARENA_SIDE[A.k]||ARENA_SIDE.pradera;
+  w.style.background=`radial-gradient(70% 50% at 50% 45%,${c[0]},${c[1]} 60%,#05061f)`;w.style.setProperty("--a1",c[0]);w.style.setProperty("--a2",c[1]);
+  /* una escena, no un objeto suelto: isla con el prop principal y dos laterales */
+  w.innerHTML=`<span class="godrays"></span><span class="godrays b"></span><span class="ribn gold slam">¡NUEVA ARENA!</span>
+    <div class="ascene"><span class="aisle"></span>${propImg(sd[0],"ap l")}${propImg(ARENA_PROP[A.k]||"arbol","ap c hi")}${propImg(sd[1],"ap r")}</div>
+    <h2 class="t-h1 out slam" style="animation-delay:.5s">${A.n}</h2>
+    <div class="agift pnl">${ico("gem")}<span class="out">+25</span><span class="sep"></span>${ico("trophy")}<span>Nuevos premios en el camino</span></div>
+    <span class="hint out" style="color:var(--tx-hl);margin-top:14px">Toca para seguir</span>`;
   document.body.appendChild(w);sfx("arena");screenFlash("#fff",400,.6);confetti();hap([30,30,60]);
 }
 
