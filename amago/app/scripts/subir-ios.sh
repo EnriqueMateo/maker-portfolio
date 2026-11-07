@@ -11,7 +11,7 @@ ARCH="$PWD/build/AMAGO.xcarchive"
 rm -rf build && mkdir -p build
 echo "→ Compilando (archive)"
 xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
-  -destination "generic/platform=iOS" -archivePath "$ARCH" -allowProvisioningUpdates archive | tail -5
+  -destination "generic/platform=iOS" -archivePath "$ARCH" -allowProvisioningUpdates DEVELOPMENT_TEAM=47TF333JU2 archive | tail -5
 echo "→ Subiendo a App Store Connect"
 xcodebuild -exportArchive -archivePath "$ARCH" -exportOptionsPlist scripts/upload.plist \
   -exportPath build/export -allowProvisioningUpdates | tail -5
