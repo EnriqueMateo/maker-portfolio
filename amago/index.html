@@ -2854,7 +2854,6 @@ function animate3d(u,tt,st,act,at_){
 const KK={rayo:{atk:"Ranged_Magic_Shoot",item:1,k:.86},flecha:{atk:"Ranged_Bow_Release",item:1,k:1},sombra:{atk:"Throw",item:1,k:1},muro:{atk:"Melee_2H_Attack_Chop",k:1.12}};
 const KKON=(()=>{try{const q=new URLSearchParams(location.search).get("kk");if(q!=null)localStorage.setItem("amago-kk",q);return localStorage.getItem("amago-kk")!=="0";}catch(e){return true;}})();
 const KKM={},KKI={};let KKCLIPS=null,kkP=null;
-const KKGRAD=(()=>{const d=new Uint8Array([165,165,165,255,220,220,220,255,255,255,255,255]);const t=new T.DataTexture(d,3,1);t.minFilter=t.magFilter=T.NearestFilter;t.needsUpdate=true;return t;})();
 const KKRES=new T.Vector2(1,1),KKW={value:1.6};
 function kkSmooth(g){/* normales medias por posición: el contorno no se abre en las aristas duras */
   if(g.attributes.sn)return;const P=g.attributes.position,N=g.attributes.normal,map=new Map(),sn=new Float32Array(P.count*3);
@@ -2872,17 +2871,38 @@ vec3 snS=sn;
  snS=(bindMatrixInverse*(skinWeight.x*boneMatX+skinWeight.y*boneMatY+skinWeight.z*boneMatZ+skinWeight.w*boneMatW)*bindMatrix*vec4(sn,0.)).xyz;
 #endif
 vec3 nV=normalize(normalMatrix*snS);vec2 odir=(projectionMatrix*vec4(nV,0.)).xy;float odl=length(odir);if(odl>1e-5)odir/=odl;
-gl_Position.xy+=odir*uW*2.0*gl_Position.w/uRes;gl_Position.z+=.0006*gl_Position.w;`);};
+gl_Position.xy+=odir*uW*2.0*gl_Position.w/uRes;`);};
+  return m;
+}
+/* sombreado propio estilo Supercell (no depende de las luces de la escena): color saturado, sombra azulada en vez de gris,
+   luz cálida desde arriba-delante, un poco de cielo por encima y borde luminoso que separa al héroe del suelo */
+const KKL={value:new T.Vector3(-.35,.85,.55).normalize()};
+function kkMat(map){
+  const m=new T.MeshBasicMaterial({map,toneMapped:false});m.userData.flash={value:0};
+  m.onBeforeCompile=s=>{s.uniforms.uL=KKL;s.uniforms.uFlash=m.userData.flash;
+    s.vertexShader="varying vec3 vKN;varying vec3 vKV;\n"+s.vertexShader.replace("#include <fog_vertex>",
+`#include <fog_vertex>
+#ifdef USE_SKINNING
+ vec3 kn0=objectNormal;
+#else
+ vec3 kn0=normal;
+#endif
+vKN=normalize(mat3(modelMatrix)*kn0);vKV=normalize(cameraPosition-(modelMatrix*vec4(transformed,1.)).xyz);`);
+    s.fragmentShader="varying vec3 vKN;varying vec3 vKV;uniform vec3 uL;uniform float uFlash;\n"+s.fragmentShader.replace("#include <map_fragment>",
+`#include <map_fragment>
+{vec3 N=normalize(vKN);if(!gl_FrontFacing)N=-N;vec3 V=normalize(vKV);
+ vec3 base=diffuseColor.rgb;float lg=dot(base,vec3(.299,.587,.114));base=max(mix(vec3(lg),base,1.32),0.);
+ float nd=dot(N,uL),lit=smoothstep(-.12,.22,nd);
+ vec3 shade=base*vec3(.58,.62,.95)+vec3(.015,.02,.06);
+ vec3 c=mix(shade,base*1.1+vec3(.025,.02,0.),lit);
+ c+=base*.12*clamp(N.y,0.,1.);
+ float rim=pow(1.-clamp(dot(N,V),0.,1.),3.);c+=vec3(1.,.95,.82)*rim*.55*smoothstep(-.2,.5,N.y);
+ c=mix(c,vec3(1.),uFlash);diffuseColor.rgb=c;}`);};
   return m;
 }
 function kkToon(root){
   const list=[];root.traverse(o=>{if(o.isMesh&&!o.userData.ol)list.push(o);});
-  for(const o of list){
-    const old=o.material,m=new T.MeshToonMaterial({map:old.map,color:0xffffff,gradientMap:KKGRAD});
-    m.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace("#include <opaque_fragment>",
-      "float rimF=pow(1.0-clamp(dot(normalize(normal),normalize(vViewPosition)),0.0,1.0),2.5);outgoingLight+=vec3(1.0,.97,.9)*smoothstep(.35,.7,rimF)*.35;\n#include <opaque_fragment>");};
-    o.material=m;o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;kkSmooth(o.geometry);
-  }
+  for(const o of list){o.material=kkMat(o.material.map);o.castShadow=false;o.receiveShadow=false;o.frustumCulled=false;kkSmooth(o.geometry);}
 }
 /* el contorno se añade al clonar (cada copia necesita el suyo, atado a su esqueleto) */
 function kkAddOutline(root){
@@ -2890,7 +2910,7 @@ function kkAddOutline(root){
   for(const o of list){
     const c=o.isSkinnedMesh?new T.SkinnedMesh(o.geometry,kkOutlineMat()):new T.Mesh(o.geometry,kkOutlineMat());
     c.userData.ol=1;c.frustumCulled=false;c.castShadow=false;
-    c.onBeforeRender=r=>{r.getDrawingBufferSize(KKRES);KKW.value=1.5*r.getPixelRatio();};
+    c.onBeforeRender=r=>{r.getDrawingBufferSize(KKRES);KKW.value=1.6*r.getPixelRatio();};
     if(o.isSkinnedMesh){c.bind(o.skeleton,o.bindMatrix);o.parent.add(c);c.position.copy(o.position);c.quaternion.copy(o.quaternion);c.scale.copy(o.scale);}
     else o.add(c);
   }
@@ -2912,7 +2932,7 @@ function kkHero(id){
   const mixer=new T.AnimationMixer(m),acts={};for(const c of KKCLIPS)acts[c.name]=mixer.clipAction(c);
   const d=()=>new T.Object3D(),arms=[d(),d()];arms.forEach(a=>a.userData.base=0);
   root.userData={body,head:d(),arms,legs:[d(),d()],eyes:null,t0:Math.random()*10,kk:true,id,m,item,h,hand:m.getObjectByName("handslotr"),mixer,acts,cur:null,n:"",lt:null,mats:[]};
-  m.traverse(o=>{if(o.isMesh&&!o.userData.ol)root.userData.mats.push(o.material=o.material.clone());});
+  m.traverse(o=>{if(o.isMesh&&!o.userData.ol){const c=kkMat(o.material.map);o.material=c;root.userData.mats.push(c);}});
   return root;
 }
 const _kp=new T.Vector3(),_kq1=new T.Quaternion(),_kq2=new T.Quaternion(),_kq3=new T.Quaternion(),_kX=new T.Vector3(1,0,0),_kY=new T.Vector3(0,1,0);
@@ -2933,7 +2953,7 @@ function animateKK(u,t,st,act,at_){
     if(u.id==="rayo"){u.item.position.y-=.22*u.h;u.item.rotation.set(act==="attack"?.5:-.15,0,-.38);}
     else if(u.id==="flecha"){u.item.rotation.set(0,act==="attack"?-1.3:-.3,0);}
     else{u.item.rotation.set(-.6,0,0);}}
-  const f=act==="hit"&&at_<.1?1:0;for(const mt of u.mats)mt.emissive.setRGB(f,f,f);
+  const f=act==="hit"&&at_<.12?.85:0;for(const mt of u.mats)mt.userData.flash.value=f;
 }
 function makeHero(id,skin){if(!skin&&KKM[id]&&KKCLIPS){const g=kkHero(id);g.userData.id=id;return g;}if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
 
