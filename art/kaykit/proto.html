@@ -1,0 +1,110 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rayo 3D prueba</title>
+<style>html,body{margin:0;height:100%;background:#1b2440;overflow:hidden}canvas{display:block}#t{position:fixed;left:8px;top:8px;color:#fff;font:600 13px system-ui;text-shadow:0 1px 2px #000}</style></head><body>
+<div id="t"></div>
+<script src="../../amago/vendor/three.min.js"></script>
+<script>
+const T=THREE,KK="../vendor/kaykit/",ADV=KK+"adv/KayKit_Adventurers_2.0_FREE/",ANI=KK+"anim/KayKit_Character_Animations_1.1/Animations/gltf/Rig_Medium/";
+const Q=new URLSearchParams(location.search),CLOSE=Q.get("c")==="1",ARENA=Q.get("a")||"pradera";
+const R=new T.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,3));R.setSize(innerWidth,innerHeight);
+R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;
+R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;document.body.appendChild(R.domElement);
+const sc=new T.Scene();sc.background=new T.Color(0x8fd0ff);
+const cam=new T.PerspectiveCamera(36,innerWidth/innerHeight,.1,120);
+const RES=new T.Vector2();const updRes=()=>{R.getDrawingBufferSize(RES);};updRes();
+/* luz: sol cálido desde arriba-delante + cielo azul de relleno */
+const sun=new T.DirectionalLight(0xfff0d8,2.4);sun.position.set(3,8,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-7,right:7,top:7,bottom:-7,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.normalBias=.02;sc.add(sun);sc.add(sun.target);
+sc.add(new T.HemisphereLight(0xe8f2ff,0x9a8a7a,1.6));
+/* rampa cartoon: 3 tonos con la sombra no muy oscura (estilo Brawl) */
+const grad=(()=>{const d=new Uint8Array([165,165,165,255,220,220,220,255,255,255,255,255]);const t=new T.DataTexture(d,3,1);t.minFilter=t.magFilter=T.NearestFilter;t.needsUpdate=true;return t;})();
+/* normales suavizadas (media por posición) para que el contorno no se abra en las aristas duras */
+function smoothNormals(g){
+  const P=g.attributes.position,N=g.attributes.normal,map=new Map(),sn=new Float32Array(P.count*3);
+  for(let i=0;i<P.count;i++){const k=P.getX(i).toFixed(4)+","+P.getY(i).toFixed(4)+","+P.getZ(i).toFixed(4);let a=map.get(k);if(!a){a=[0,0,0,[]];map.set(k,a);}a[0]+=N.getX(i);a[1]+=N.getY(i);a[2]+=N.getZ(i);a[3].push(i);}
+  for(const a of map.values()){const l=Math.hypot(a[0],a[1],a[2])||1;for(const i of a[3]){sn[i*3]=a[0]/l;sn[i*3+1]=a[1]/l;sn[i*3+2]=a[2]/l;}}
+  g.setAttribute("sn",new T.BufferAttribute(sn,3));
+}
+const OUT_PX={value:(CLOSE?2.6:1.6)*R.getPixelRatio()};/* grosor del contorno en píxeles de pantalla (fijo, no depende de la distancia) */
+function outlineMat(){
+  const m=new T.MeshBasicMaterial({color:0x1a1226,side:T.BackSide});
+  m.onBeforeCompile=s=>{s.uniforms.uRes={value:RES};s.uniforms.uW=OUT_PX;
+    s.vertexShader="attribute vec3 sn;uniform vec2 uRes;uniform float uW;\n"+s.vertexShader.replace("#include <project_vertex>",
+`#include <project_vertex>
+vec3 snS=sn;
+#ifdef USE_SKINNING
+ snS=(bindMatrixInverse*(skinWeight.x*boneMatX+skinWeight.y*boneMatY+skinWeight.z*boneMatZ+skinWeight.w*boneMatW)*bindMatrix*vec4(sn,0.)).xyz;
+#endif
+vec3 nV=normalize(normalMatrix*snS);vec2 dir=(projectionMatrix*vec4(nV,0.)).xy;float dl=length(dir);if(dl>1e-5)dir/=dl;
+gl_Position.xy+=dir*uW*2.0*gl_Position.w/uRes;gl_Position.z+=.0006*gl_Position.w;`);};
+  return m;
+}
+function toonify(root,{rim=.35}={}){
+  const list=[];root.traverse(o=>{if(o.isMesh)list.push(o);});
+  for(const o of list){
+    const old=o.material;const m=new T.MeshToonMaterial({map:old.map,color:old.color,gradientMap:grad});
+    m.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace("#include <opaque_fragment>",
+      `float rimF=pow(1.0-clamp(dot(normalize(normal),normalize(vViewPosition)),0.0,1.0),2.5);outgoingLight+=vec3(1.0,.97,.9)*smoothstep(.35,.7,rimF)*${rim.toFixed(2)};\n#include <opaque_fragment>`);};
+    o.material=m;o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;
+    smoothNormals(o.geometry);
+    const c=o.isSkinnedMesh?new T.SkinnedMesh(o.geometry,outlineMat()):new T.Mesh(o.geometry,outlineMat());
+    c.frustumCulled=false;c.castShadow=false;
+    if(o.isSkinnedMesh){c.bind(o.skeleton,o.bindMatrix);o.parent.add(c);c.position.copy(o.position);c.quaternion.copy(o.quaternion);c.scale.copy(o.scale);}
+    else o.add(c);
+  }
+}
+const L=new T.GLTFLoader(),load=u=>new Promise((ok,ko)=>L.load(u,ok,undefined,ko));
+const texL=u=>new Promise(r=>new T.TextureLoader().load(u,t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;r(t);}));
+const H=1.25;/* alto del héroe en la arena */
+const units=[];
+async function makeUnit(charUrl,texUrl,itemUrl,clips){
+  const [g,it]=await Promise.all([load(charUrl),itemUrl?load(itemUrl):null]);
+  const root=new T.Group(),m=T.SkeletonUtils.clone(g.scene);root.add(m);
+  const tx=texUrl?await texL(texUrl):null;if(tx)m.traverse(o=>{if(o.isMesh)o.material.map=tx;});
+  const bb=new T.Box3().setFromObject(m);m.scale.setScalar(H/(bb.max.y-bb.min.y));
+  toonify(m);
+  let item=null;if(it){item=it.scene;if(tx)item.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.map=tx;}});item.scale.setScalar(m.scale.x);toonify(item);root.add(item);}
+  /* sombra de contacto suave bajo los pies */
+  const cv=document.createElement("canvas");cv.width=cv.height=64;const cx=cv.getContext("2d"),gr=cx.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,"rgba(0,0,0,.55)");gr.addColorStop(1,"rgba(0,0,0,0)");cx.fillStyle=gr;cx.fillRect(0,0,64,64);
+  const blob=new T.Mesh(new T.PlaneGeometry(.9,.9),new T.MeshBasicMaterial({map:new T.CanvasTexture(cv),transparent:true,depthWrite:false}));blob.rotation.x=-Math.PI/2;blob.position.y=.015;root.add(blob);
+  const mixer=new T.AnimationMixer(m),acts={};for(const c of clips)acts[c.name]=mixer.clipAction(c);
+  const u={root,m,item,hand:m.getObjectByName("handslotr"),mixer,acts,cur:null,si:0,st:0};units.push(u);sc.add(root);return u;
+}
+function play(u,n,once){const a=u.acts[n];if(!a)return;a.reset();a.setLoop(once?T.LoopOnce:T.LoopRepeat);a.clampWhenFinished=!!once;a.fadeIn(.15).play();if(u.cur&&u.cur!==a)u.cur.fadeOut(.15);u.cur=a;}
+const SEQ=[["Idle_A",2.0],["Ranged_Magic_Shoot",0],["Idle_B",1.2],["Jump_Full_Short",0],["Running_A",1.6],["Hit_A",0],["Ranged_Magic_Spellcasting",0],["Cheering",0]];
+const _p=new T.Vector3();
+(async()=>{
+  const an=await Promise.all(["General","MovementBasic","CombatRanged","Simulation"].map(n=>load(ANI+"Rig_Medium_"+n+".glb")));
+  const clips=an.flatMap(a=>a.animations);
+  if(!CLOSE){
+    const ar=await load("../../amago/arenas/"+ARENA+".glb");
+    ar.scene.traverse(o=>{if(o.isMesh){o.material=new T.MeshBasicMaterial({vertexColors:true});}});sc.add(ar.scene);
+  }else{
+    const tile=new T.Mesh(new T.BoxGeometry(1.6,.18,1.6),new T.MeshToonMaterial({color:0x8fd06f,gradientMap:grad}));tile.position.y=-.09;tile.receiveShadow=true;sc.add(tile);
+  }
+  const a=await makeUnit(ADV+"Characters/gltf/Mage.glb","rayo_texture.png",ADV+"Assets/gltf/staff.gltf",clips);
+  if(!CLOSE){a.root.position.set(0,0,3.0);a.root.rotation.y=Math.PI;
+    const b=await makeUnit(ADV+"Characters/gltf/Rogue_Hooded.glb",null,ADV+"Assets/gltf/dagger.gltf",clips);b.root.position.set(-1.1,0,-3.2);b.si=3;}
+  for(const u of units){play(u,SEQ[u.si][0],!SEQ[u.si][1]);u.mixer.addEventListener("finished",()=>next(u));}
+  fit();
+})().catch(e=>{document.getElementById("t").textContent="ERROR "+e.message;console.error(e);});
+function next(u){u.si=(u.si+1)%SEQ.length;u.st=0;play(u,SEQ[u.si][0],!SEQ[u.si][1]);}
+function fit(){
+  cam.aspect=innerWidth/innerHeight;
+  if(CLOSE){cam.fov=32;cam.position.set(0,1.25,3.4);cam.lookAt(0,.62,0);cam.updateProjectionMatrix();return;}
+  /* misma cámara que el combate: encuadra los dos tableros */
+  const dir=new T.Vector3(0,1,.64).normalize(),tgt=new T.Vector3(0,0,-.3);
+  const corners=[[-2.68,0,-5.6],[2.68,0,-5.6],[-2.68,0,5.6],[2.68,0,5.6],[-2.68,.9,-5.6],[2.68,.9,-5.6]].map(c=>new T.Vector3(...c));
+  for(let d=8;d<60;d+=.25){cam.position.copy(tgt).addScaledVector(dir,d);cam.lookAt(tgt);cam.updateMatrixWorld();cam.updateProjectionMatrix();
+    if(corners.every(c=>{const p=c.clone().project(cam);return Math.abs(p.x)<.985&&p.y<.79&&p.y>-.6;}))break;}
+}
+const clk=new T.Clock();
+R.setAnimationLoop(()=>{const dt=Math.min(clk.getDelta(),.05);
+  for(const u of units){u.mixer.update(dt);u.st+=dt;const d=SEQ[u.si][1];if(d&&u.st>d)next(u);
+    /* el objeto va en la mano pero siempre de pie (no gira con la muñeca: así nunca se ve roto) */
+    if(u.item&&u.hand){u.m.updateMatrixWorld(true);u.hand.getWorldPosition(_p);u.root.worldToLocal(_p);u.item.position.copy(_p);u.item.position.y-=.33*H;
+      const atk=/Shoot|Spell|Magic/.test(u.cur&&u.cur.getClip().name||"");u.item.rotation.set(atk?.55:.12,0,-.12);}}
+  if(CLOSE&&units[0])units[0].root.rotation.y=Math.sin(performance.now()/2500)*.5;
+  R.render(sc,cam);});
+addEventListener("resize",()=>{R.setSize(innerWidth,innerHeight);updRes();fit();});
+</script></body></html>

@@ -2850,7 +2850,92 @@ function animate3d(u,tt,st,act,at_){
   u.mat.color.setRGB(1,1-tint*.55,1-tint*.55);
   if(act==="hit"&&at_<.08)u.mat.color.setRGB(3,3,3);
 }
-function makeHero(id,skin){if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
+/* ---- héroes 3D con esqueleto (KayKit, CC0 de Kay Lousberg): animaciones de verdad, sombreado cartoon y contorno ---- */
+const KK={rayo:{atk:"Ranged_Magic_Shoot",item:1,k:.86},flecha:{atk:"Ranged_Bow_Release",item:1,k:1},sombra:{atk:"Throw",item:1,k:1},muro:{atk:"Melee_2H_Attack_Chop",k:1.12}};
+const KKON=(()=>{try{const q=new URLSearchParams(location.search).get("kk");if(q!=null)localStorage.setItem("amago-kk",q);return localStorage.getItem("amago-kk")!=="0";}catch(e){return true;}})();
+const KKM={},KKI={};let KKCLIPS=null,kkP=null;
+const KKGRAD=(()=>{const d=new Uint8Array([165,165,165,255,220,220,220,255,255,255,255,255]);const t=new T.DataTexture(d,3,1);t.minFilter=t.magFilter=T.NearestFilter;t.needsUpdate=true;return t;})();
+const KKRES=new T.Vector2(1,1),KKW={value:1.6};
+function kkSmooth(g){/* normales medias por posición: el contorno no se abre en las aristas duras */
+  if(g.attributes.sn)return;const P=g.attributes.position,N=g.attributes.normal,map=new Map(),sn=new Float32Array(P.count*3);
+  for(let i=0;i<P.count;i++){const k=P.getX(i).toFixed(4)+","+P.getY(i).toFixed(4)+","+P.getZ(i).toFixed(4);let a=map.get(k);if(!a){a=[0,0,0,[]];map.set(k,a);}a[0]+=N.getX(i);a[1]+=N.getY(i);a[2]+=N.getZ(i);a[3].push(i);}
+  for(const a of map.values()){const l=Math.hypot(a[0],a[1],a[2])||1;for(const i of a[3]){sn[i*3]=a[0]/l;sn[i*3+1]=a[1]/l;sn[i*3+2]=a[2]/l;}}
+  g.setAttribute("sn",new T.BufferAttribute(sn,3));
+}
+function kkOutlineMat(){
+  const m=new T.MeshBasicMaterial({color:0x1a1226,side:T.BackSide,toneMapped:false});
+  m.onBeforeCompile=s=>{s.uniforms.uRes={value:KKRES};s.uniforms.uW=KKW;
+    s.vertexShader="attribute vec3 sn;uniform vec2 uRes;uniform float uW;\n"+s.vertexShader.replace("#include <project_vertex>",
+`#include <project_vertex>
+vec3 snS=sn;
+#ifdef USE_SKINNING
+ snS=(bindMatrixInverse*(skinWeight.x*boneMatX+skinWeight.y*boneMatY+skinWeight.z*boneMatZ+skinWeight.w*boneMatW)*bindMatrix*vec4(sn,0.)).xyz;
+#endif
+vec3 nV=normalize(normalMatrix*snS);vec2 odir=(projectionMatrix*vec4(nV,0.)).xy;float odl=length(odir);if(odl>1e-5)odir/=odl;
+gl_Position.xy+=odir*uW*2.0*gl_Position.w/uRes;gl_Position.z+=.0006*gl_Position.w;`);};
+  return m;
+}
+function kkToon(root){
+  const list=[];root.traverse(o=>{if(o.isMesh&&!o.userData.ol)list.push(o);});
+  for(const o of list){
+    const old=o.material,m=new T.MeshToonMaterial({map:old.map,color:0xffffff,gradientMap:KKGRAD});
+    m.onBeforeCompile=s=>{s.fragmentShader=s.fragmentShader.replace("#include <opaque_fragment>",
+      "float rimF=pow(1.0-clamp(dot(normalize(normal),normalize(vViewPosition)),0.0,1.0),2.5);outgoingLight+=vec3(1.0,.97,.9)*smoothstep(.35,.7,rimF)*.35;\n#include <opaque_fragment>");};
+    o.material=m;o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;kkSmooth(o.geometry);
+  }
+}
+/* el contorno se añade al clonar (cada copia necesita el suyo, atado a su esqueleto) */
+function kkAddOutline(root){
+  const list=[];root.traverse(o=>{if(o.isMesh&&!o.userData.ol)list.push(o);});
+  for(const o of list){
+    const c=o.isSkinnedMesh?new T.SkinnedMesh(o.geometry,kkOutlineMat()):new T.Mesh(o.geometry,kkOutlineMat());
+    c.userData.ol=1;c.frustumCulled=false;c.castShadow=false;
+    c.onBeforeRender=r=>{r.getDrawingBufferSize(KKRES);KKW.value=1.5*r.getPixelRatio();};
+    if(o.isSkinnedMesh){c.bind(o.skeleton,o.bindMatrix);o.parent.add(c);c.position.copy(o.position);c.quaternion.copy(o.quaternion);c.scale.copy(o.scale);}
+    else o.add(c);
+  }
+}
+function loadKK(){
+  if(!KKON||!T.GLTFLoader)return Promise.resolve();
+  if(kkP)return kkP;
+  const one=u=>new Promise(res=>loadGLB(u,res,e=>{console.warn("Sin modelo",u,e);res(null);}));
+  return kkP=Promise.all([one(BASE+"kk/anims"+EXT)].concat(Object.keys(KK).flatMap(id=>[one(BASE+"kk/"+id+EXT),KK[id].item?one(BASE+"kk/"+id+"_item"+EXT):null]))).then(r=>{
+    if(!r[0])return;KKCLIPS=r[0].animations;let i=1;
+    for(const id of Object.keys(KK)){const g=r[i++],it=KK[id].item?r[i++]:null;if(!g)continue;kkToon(g.scene);KKM[id]=g.scene;if(it){kkToon(it.scene);KKI[id]=it.scene;}}
+  });
+}
+function kkHero(id){
+  const m=T.SkeletonUtils.clone(KKM[id]);kkAddOutline(m);
+  const bb=new T.Box3().setFromObject(m),h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K*1.3*(KK[id].k||1);m.scale.setScalar(h/(bb.max.y-bb.min.y));
+  const root=new T.Group(),body=new T.Group();body.name="body";root.add(body);body.add(m);
+  let item=null;if(KKI[id]){item=KKI[id].clone(true);kkAddOutline(item);item.scale.setScalar(m.scale.x);body.add(item);}
+  const mixer=new T.AnimationMixer(m),acts={};for(const c of KKCLIPS)acts[c.name]=mixer.clipAction(c);
+  const d=()=>new T.Object3D(),arms=[d(),d()];arms.forEach(a=>a.userData.base=0);
+  root.userData={body,head:d(),arms,legs:[d(),d()],eyes:null,t0:Math.random()*10,kk:true,id,m,item,h,hand:m.getObjectByName("handslotr"),mixer,acts,cur:null,n:"",lt:null,mats:[]};
+  m.traverse(o=>{if(o.isMesh&&!o.userData.ol)root.userData.mats.push(o.material=o.material.clone());});
+  return root;
+}
+const _kp=new T.Vector3(),_kq1=new T.Quaternion(),_kq2=new T.Quaternion(),_kq3=new T.Quaternion(),_kX=new T.Vector3(1,0,0),_kY=new T.Vector3(0,1,0);
+function animateKK(u,t,st,act,at_){
+  const dt=u.lt==null?0:Math.max(0,Math.min(.1,t-u.lt));u.lt=t;
+  let n="Idle_A",once=false;
+  if(act==="ko"){n="Death_A";once=true;}else if(act==="hit"){n="Hit_A";once=true;}else if(act==="attack"){n=KK[u.id].atk;once=true;}
+  else if(act==="win"){n="Cheering";}else if(st.walk){n="Running_A";}
+  const restart=once&&(u.pa!==act||at_<(u.pat||0));u.pa=act;u.pat=at_;
+  if(n!==u.n||restart){const a=u.acts[n];if(a){a.reset();a.setLoop(once?T.LoopOnce:T.LoopRepeat);a.clampWhenFinished=once;a.timeScale=n==="Running_A"?1.25:1;a.fadeIn(.12).play();if(u.cur&&u.cur!==a)u.cur.fadeOut(.12);u.cur=a;}u.n=n;}
+  /* cámara cenital: quieto mira hacia ti (3/4) y todo el cuerpo se inclina un poco hacia la cámara, así se le ve la cara y no solo el sombrero */
+  const ry=u.body.parent?u.body.parent.rotation.y:0,face=st.walk||act==="attack";
+  let want=face?ry:.4;const dy=Math.atan2(Math.sin(want-(u.yaw??want)),Math.cos(want-(u.yaw??want)));u.yaw=(u.yaw??want)+dy*Math.min(1,dt*10);
+  _kq1.setFromAxisAngle(_kY,-ry);_kq2.setFromAxisAngle(_kX,-.55);_kq3.setFromAxisAngle(_kY,u.yaw);u.body.quaternion.copy(_kq1).multiply(_kq2).multiply(_kq3);
+  u.mixer.update(dt);
+  /* el arma va en la mano pero siempre de pie: no gira con la muñeca, así nunca se ve rota */
+  if(u.item&&u.hand){u.m.updateMatrixWorld(true);u.hand.getWorldPosition(_kp);u.body.worldToLocal(_kp);u.item.position.copy(_kp);
+    if(u.id==="rayo"){u.item.position.y-=.22*u.h;u.item.rotation.set(act==="attack"?.5:-.15,0,-.38);}
+    else if(u.id==="flecha"){u.item.rotation.set(0,act==="attack"?-1.3:-.3,0);}
+    else{u.item.rotation.set(-.6,0,0);}}
+  const f=act==="hit"&&at_<.1?1:0;for(const mt of u.mats)mt.emissive.setRGB(f,f,f);
+}
+function makeHero(id,skin){if(!skin&&KKM[id]&&KKCLIPS){const g=kkHero(id);g.userData.id=id;return g;}if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
 
 /* ---- animación procedural ---- */
 function setFlash(g,on){
@@ -2879,6 +2964,7 @@ function animateRig(rig,tt,st,act,at_){
 }
 function animate(g,t,st){
   const u=g.userData,{body,head,arms,legs,eyes}=u;if(!body)return;
+  if(u.kk){st=st||{};animateKK(u,t,st,st.act||null,st.actT||0);return;}
   if(u.a3){st=st||{};animate3d(u,t+u.t0,st,st.act||null,st.actT||0);return;}
   if(u.sprite){st=st||{};animateSprite(u,t+u.t0,st,st.act||null,st.actT||0);return;}
   if(u.rig){const tt2=t+u.t0;st=st||{};animateRig(u.rig,tt2,st,st.act||null,st.actT||0);}
@@ -2948,7 +3034,7 @@ function bakePortraits(size=320){
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,loadGLB,BASE,EXT,makeHero,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,loadGLB,BASE,EXT,makeHero,loadKK,KKM,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -5278,7 +5364,7 @@ function bootGame(){
   else if(!S.tutDone&&!S.games)TUT.welcome();
   else showHome();
 }
-if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadAnim3d([S.fav]),SHOW?SHOW.preload(S.fav):0,GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
+if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadKK(),GFX.loadAnim3d([S.fav]),SHOW?SHOW.preload(S.fav):0,GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
   Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
   /* si la conexión es lenta y los modelos llegan después, se cambian al momento */
   all.then(()=>setTimeout(()=>GFX.loadAnim3d(S.unl),1200));/* tus héroes, en segundo plano */
