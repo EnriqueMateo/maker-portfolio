@@ -2854,25 +2854,11 @@ function animate3d(u,tt,st,act,at_){
 const KK={rayo:{atk:"Ranged_Magic_Shoot",item:1,k:.86},flecha:{atk:"Ranged_Bow_Release",item:1,k:1},sombra:{atk:"Throw",item:1,k:1},muro:{atk:"Melee_2H_Attack_Chop",k:1.12}};
 const KKON=(()=>{try{const q=new URLSearchParams(location.search).get("kk");if(q!=null)localStorage.setItem("amago-kk",q);return localStorage.getItem("amago-kk")!=="0";}catch(e){return true;}})();
 const KKM={},KKI={};let KKCLIPS=null,kkP=null;
-const KKRES=new T.Vector2(1,1),KKW={value:1.6};
 function kkSmooth(g){/* normales medias por posición: el contorno no se abre en las aristas duras */
   if(g.attributes.sn)return;const P=g.attributes.position,N=g.attributes.normal,map=new Map(),sn=new Float32Array(P.count*3);
   for(let i=0;i<P.count;i++){const k=P.getX(i).toFixed(4)+","+P.getY(i).toFixed(4)+","+P.getZ(i).toFixed(4);let a=map.get(k);if(!a){a=[0,0,0,[]];map.set(k,a);}a[0]+=N.getX(i);a[1]+=N.getY(i);a[2]+=N.getZ(i);a[3].push(i);}
   for(const a of map.values()){const l=Math.hypot(a[0],a[1],a[2])||1;for(const i of a[3]){sn[i*3]=a[0]/l;sn[i*3+1]=a[1]/l;sn[i*3+2]=a[2]/l;}}
   g.setAttribute("sn",new T.BufferAttribute(sn,3));
-}
-function kkOutlineMat(){
-  const m=new T.MeshBasicMaterial({color:0x1a1226,side:T.BackSide,toneMapped:false});
-  m.onBeforeCompile=s=>{s.uniforms.uRes={value:KKRES};s.uniforms.uW=KKW;
-    s.vertexShader="attribute vec3 sn;uniform vec2 uRes;uniform float uW;\n"+s.vertexShader.replace("#include <project_vertex>",
-`#include <project_vertex>
-vec3 snS=sn;
-#ifdef USE_SKINNING
- snS=(bindMatrixInverse*(skinWeight.x*boneMatX+skinWeight.y*boneMatY+skinWeight.z*boneMatZ+skinWeight.w*boneMatW)*bindMatrix*vec4(sn,0.)).xyz;
-#endif
-vec3 nV=normalize(normalMatrix*snS);vec2 odir=(projectionMatrix*vec4(nV,0.)).xy;float odl=length(odir);if(odl>1e-5)odir/=odl;
-gl_Position.xy+=odir*uW*2.0*gl_Position.w/uRes;`);};
-  return m;
 }
 /* sombreado propio estilo Supercell (no depende de las luces de la escena): color saturado, sombra azulada en vez de gris,
    luz cálida desde arriba-delante, un poco de cielo por encima y borde luminoso que separa al héroe del suelo */
@@ -2904,16 +2890,29 @@ function kkToon(root){
   const list=[];root.traverse(o=>{if(o.isMesh&&!o.userData.ol)list.push(o);});
   for(const o of list){o.material=kkMat(o.material.map);o.castShadow=false;o.receiveShadow=false;o.frustumCulled=false;kkSmooth(o.geometry);}
 }
-/* el contorno se añade al clonar (cada copia necesita el suyo, atado a su esqueleto) */
-function kkAddOutline(root){
-  const list=[];root.traverse(o=>{if(o.isMesh&&!o.userData.ol)list.push(o);});
-  for(const o of list){
-    const c=o.isSkinnedMesh?new T.SkinnedMesh(o.geometry,kkOutlineMat()):new T.Mesh(o.geometry,kkOutlineMat());
-    c.userData.ol=1;c.frustumCulled=false;c.castShadow=false;
-    c.onBeforeRender=r=>{r.getDrawingBufferSize(KKRES);KKW.value=1.6*r.getPixelRatio();};
-    if(o.isSkinnedMesh){c.bind(o.skeleton,o.bindMatrix);o.parent.add(c);c.position.copy(o.position);c.quaternion.copy(o.quaternion);c.scale.copy(o.scale);}
-    else o.add(c);
-  }
+/* contorno de silueta (como Brawl Stars): una sola línea continua alrededor de todo el héroe, sin líneas por dentro.
+   1) los héroes 3D se pintan en blanco en una máscara  2) un pase a pantalla completa dibuja el borde de esa máscara */
+const KKLAYER=5,KKSET=new Set(),_kv=new T.Vector2(),_kc=new T.Color();let kkRT=null,kkQS=null,kkOC=null;
+const kkMaskMat=new T.MeshBasicMaterial({color:0xffffff});
+function kkOutline(r,sc,cam){
+  let live=false;for(const g of KKSET){if(!g.parent){KKSET.delete(g);continue;}if(g.visible)live=true;}
+  if(!live)return;
+  r.getDrawingBufferSize(_kv);const w=_kv.x|0,h=_kv.y|0;
+  if(!kkRT||kkRT.width!==w||kkRT.height!==h){if(kkRT)kkRT.dispose();kkRT=new T.WebGLRenderTarget(w,h,{samples:4});}
+  if(!kkQS){kkQS=new T.Scene();kkOC=new T.OrthographicCamera(-1,1,1,-1,0,1);
+    kkQS.add(new T.Mesh(new T.PlaneGeometry(2,2),new T.ShaderMaterial({transparent:true,depthTest:false,depthWrite:false,
+      uniforms:{tM:{value:null},px:{value:new T.Vector2()},rad:{value:4},col:{value:new T.Color(0x1a1030)}},
+      vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}",
+      fragmentShader:`uniform sampler2D tM;uniform vec2 px;uniform float rad;uniform vec3 col;varying vec2 vUv;
+void main(){float c=texture2D(tM,vUv).r;if(c>.99)discard;float m=0.;
+ for(int i=0;i<16;i++){float a=float(i)*.392699;vec2 o=vec2(cos(a),sin(a))*px*rad;m=max(m,texture2D(tM,vUv+o).r);m=max(m,texture2D(tM,vUv+o*.55).r);}
+ float al=clamp(m-c,0.,1.);if(al<.02)discard;gl_FragColor=vec4(col,al);}`})));}
+  const bg=sc.background,fog=sc.fog,om=sc.overrideMaterial,ml=cam.layers.mask,ac=r.autoClear,ca=r.getClearAlpha();r.getClearColor(_kc);
+  sc.background=null;sc.fog=null;sc.overrideMaterial=kkMaskMat;cam.layers.set(KKLAYER);
+  r.setRenderTarget(kkRT);r.setClearColor(0x000000,1);r.clear();r.render(sc,cam);r.setRenderTarget(null);
+  sc.background=bg;sc.fog=fog;sc.overrideMaterial=om;cam.layers.mask=ml;r.setClearColor(_kc,ca);
+  const u=kkQS.children[0].material.uniforms;u.tM.value=kkRT.texture;u.px.value.set(1/w,1/h);u.rad.value=2.1*r.getPixelRatio();
+  r.autoClear=false;r.render(kkQS,kkOC);r.autoClear=ac;
 }
 function loadKK(){
   if(!KKON||!T.GLTFLoader)return Promise.resolve();
@@ -2925,10 +2924,11 @@ function loadKK(){
   });
 }
 function kkHero(id){
-  const m=T.SkeletonUtils.clone(KKM[id]);kkAddOutline(m);
-  const bb=new T.Box3().setFromObject(m),h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K*1.3*(KK[id].k||1);m.scale.setScalar(h/(bb.max.y-bb.min.y));
+  const m=T.SkeletonUtils.clone(KKM[id]);
+  const bb=new T.Box3().setFromObject(m),h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K*.74*(KK[id].k||1);m.scale.setScalar(h/(bb.max.y-bb.min.y));
   const root=new T.Group(),body=new T.Group();body.name="body";root.add(body);body.add(m);
-  let item=null;if(KKI[id]){item=KKI[id].clone(true);kkAddOutline(item);item.scale.setScalar(m.scale.x);body.add(item);}
+  let item=null;if(KKI[id]){item=KKI[id].clone(true);item.scale.setScalar(m.scale.x*(id==="rayo"?1.25:1));body.add(item);}
+  root.traverse(o=>o.layers.enable(KKLAYER));KKSET.add(root);
   const mixer=new T.AnimationMixer(m),acts={};for(const c of KKCLIPS)acts[c.name]=mixer.clipAction(c);
   const d=()=>new T.Object3D(),arms=[d(),d()];arms.forEach(a=>a.userData.base=0);
   root.userData={body,head:d(),arms,legs:[d(),d()],eyes:null,t0:Math.random()*10,kk:true,id,m,item,h,hand:m.getObjectByName("handslotr"),mixer,acts,cur:null,n:"",lt:null,mats:[]};
@@ -2950,7 +2950,7 @@ function animateKK(u,t,st,act,at_){
   u.mixer.update(dt);
   /* el arma va en la mano pero siempre de pie: no gira con la muñeca, así nunca se ve rota */
   if(u.item&&u.hand){u.m.updateMatrixWorld(true);u.hand.getWorldPosition(_kp);u.body.worldToLocal(_kp);u.item.position.copy(_kp);
-    if(u.id==="rayo"){u.item.position.y-=.22*u.h;u.item.rotation.set(act==="attack"?.5:-.15,0,-.38);}
+    if(u.id==="rayo"){u.item.rotation.set(act==="attack"?-1.2:-.35,0,-.25);}
     else if(u.id==="flecha"){u.item.rotation.set(0,act==="attack"?-1.3:-.3,0);}
     else{u.item.rotation.set(-.6,0,0);}}
   const f=act==="hit"&&at_<.12?.85:0;for(const mt of u.mats)mt.userData.flash.value=f;
@@ -3054,7 +3054,7 @@ function bakePortraits(size=320){
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,loadGLB,BASE,EXT,makeHero,loadKK,KKM,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,loadGLB,BASE,EXT,makeHero,loadKK,KKM,kkOutline,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -3535,7 +3535,7 @@ function update(R,dt){
   if(R.sudden&&!suddenOn){suddenOn=true;scene.background=skyTex(["#5a1030","#ff7a4a"]);if(scene.fog)scene.fog.color.set("#ff9a6a");}
   /* motas en el aire: el escenario respira */
   if(amb){const P=amb.geometry.attributes.position;for(let i=0;i<P.count;i++){let y=P.array[i*3+1]+dt*amb.userData.vy[i];if(y>3.2)y=.1;P.array[i*3+1]=y;P.array[i*3]+=Math.sin(t*.7+i)*dt*.12;}P.needsUpdate=true;}
-  prWatch();rnd3.render(scene,cam);
+  prWatch();rnd3.render(scene,cam);GFX.kkOutline(rnd3,scene,cam);
 }
 return {get rnd(){return rnd3;},get scn(){return scene;},build,update,dispose,resize,fireFx,impactFx,screenPos,areaScreen,shake,finalReveal,reveal,burst,tileWorld,onTile:null,heroScreen(){if(!hero||!cam)return {x:innerWidth/2,y:innerHeight/2};const p=hero.position.clone();p.y=.8;p.project(cam);const r=canvas.getBoundingClientRect();return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height};}};
 })();
