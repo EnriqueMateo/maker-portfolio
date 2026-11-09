@@ -2854,9 +2854,8 @@ function animate3d(u,tt,st,act,at_){
 /* héroes 3D: los humanos usan el esqueleto KayKit y sus animaciones compartidas; los animales traen las suyas (Quaternius, CC0) */
 const KQ_BIG={idle:"Idle",walk:"Run",attack:"Punch",hit:"HitReact",ko:"Death",win:"Yes"},KQ_CUTE={idle:"Idle",walk:"Walk",attack:"Bite_Front",hit:"HitRecieve",ko:"Death",win:"Dance"},
   KQ_FLY={idle:"Flying_Idle",walk:"Fast_Flying",attack:"Headbutt",hit:"HitReact",ko:"Death",win:"Yes"},KQ_ANI={idle:"Idle",walk:"Gallop",attack:"Attack",hit:"Idle_HitReact1",ko:"Death",win:"Idle_2"};
-const KK={rayo:{atk:"Ranged_Magic_Shoot",item:1,k:.86},flecha:{atk:"Ranged_Bow_Release",item:1,k:1},sombra:{atk:"Throw",item:1,k:1},savia:{atk:"Ranged_Magic_Shoot",item:1,k:.95,wings:1},
-  muro:{own:KQ_BIG,k:1.3},brasa:{own:KQ_BIG,k:1.02},ojo:{own:KQ_BIG,k:1},mina:{own:KQ_BIG,k:1},salto:{own:{...KQ_BIG,attack:"Weapon"},k:.95},
-  bum:{own:KQ_CUTE,k:1,tilt:-.4,hk:.72},mira:{own:KQ_CUTE,k:.95,tilt:-.4,hk:.72},eco:{own:KQ_FLY,k:.85,tilt:-.4},truco:{own:KQ_ANI,k:1,tilt:-.25,ws:1,hk:.9}};
+/* animales: siguen con sus ilustraciones 2D (los modelos gratuitos no llegaban a su nivel) */
+const KK={rayo:{atk:"Ranged_Magic_Shoot",item:1,k:.86},flecha:{atk:"Ranged_Bow_Release",item:1,k:1},sombra:{atk:"Throw",item:1,k:1},muro:{atk:"Melee_2H_Attack_Chop",k:1.12}};
 const KKON=(()=>{try{const q=new URLSearchParams(location.search).get("kk");if(q!=null)localStorage.setItem("amago-kk",q);return localStorage.getItem("amago-kk")!=="0";}catch(e){return true;}})();
 const KKM={},KKI={},KKA={};let KKCLIPS=null,kkP=null;
 function kkSmooth(g){/* normales medias por posición: el contorno no se abre en las aristas duras */
@@ -3072,7 +3071,6 @@ function bakePortraits(size=320){
   const cam=new T.PerspectiveCamera(28,1,.1,20);cam.position.set(0,.8,3.4);cam.lookAt(0,.56,0);
   for(const id of IDS){
     /* retratos renderizados desde los mismos modelos 3D que la partida y el inicio: el mismo personaje en todas partes */
-    if(KKON&&KK[id]&&T.GLTFLoader){PORTRAIT[id]=BASE+"kk/p_"+id+".webp";continue;}
     if(ANIM3D[id]){PORTRAIT[id]=BASE+"portraits/"+id+".webp";continue;}
     if(SPRITES[id]){PORTRAIT[id]=BASE+"sprites/"+id+".webp";continue;}
     if(MODELS[id]){PORTRAIT[id]=BASE+"portraits/"+id+".webp";continue;}
