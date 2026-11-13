@@ -1484,6 +1484,20 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .gbottom .ebar .elxn{width:46px!important;height:46px;margin:-10px 0 -10px -12px;flex:none;display:grid;place-items:center;border-radius:50% 50% 50% 50%/62% 62% 42% 42%;background:radial-gradient(circle at 34% 30%,#d9f5ff 0,#57bdff 28%,#1f7fe8 68%,#1650b8 100%);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink),inset 0 -4px 0 rgba(0,0,40,.18);color:#fff!important;font-size:26px!important;text-shadow:0 2px 0 var(--ink),1px 0 0 var(--ink),-1px 0 0 var(--ink),0 -1px 0 var(--ink)}
 .acts.v2 .asub{font:700 10.5px/1.1 system-ui,sans-serif;color:#fff;opacity:.92;white-space:nowrap;letter-spacing:.1px;text-shadow:0 1px 0 rgba(10,8,40,.7)}
 .gbottom .ebar{position:relative}.gbottom .ebar .elbl{position:absolute;right:12px;top:-15px;font:700 11px/1 system-ui,sans-serif;color:#dff3ff;text-shadow:0 1px 0 var(--ink),1px 0 0 var(--ink),-1px 0 0 var(--ink),0 -1px 0 var(--ink);letter-spacing:.2px}
+/* ULTI: botón redondo dorado sobre la barra de energía (se carga en 15 s, una vez por ronda) */
+.ultib{position:absolute;left:10px;bottom:calc(100% + 10px);width:74px;height:74px;border-radius:50%;border:3px solid var(--ink);background:radial-gradient(circle at 35% 28%,#fff6b0,#ffc21a 45%,#f08a00);box-shadow:0 5px 0 var(--ink),0 0 0 0 #ffe06600,inset 0 -6px 0 #0002,inset 0 3px 0 #fff8;cursor:pointer;display:grid;place-items:center;padding:0;font:inherit;color:#fff;z-index:6;-webkit-tap-highlight-color:transparent}
+.ultib .uic{font-size:32px;line-height:1;margin-top:-8px;filter:drop-shadow(0 2px 0 #0005)}
+.ultib .ulb{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:13px;font-weight:900;letter-spacing:.5px}
+.ultib .unm{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);white-space:nowrap;font-size:14px;font-weight:900;color:#ffe066;opacity:0;transition:opacity .2s;pointer-events:none}
+.ultib.ready .unm,.ultib.armed .unm{opacity:1}
+.ultib.armed{outline:4px solid #fff;animation:ultip .35s infinite alternate;pointer-events:none}
+.ultib .uring{position:absolute;inset:-3px;border-radius:50%;display:none;background:conic-gradient(#0000 var(--k,0deg),#0a0e2ecc 0);pointer-events:none}
+.ultib.off{filter:saturate(.35) brightness(.8)}.ultib.off .uring{display:block}
+.ultib.ready{animation:ultip .7s infinite alternate}
+.ultib.used{filter:grayscale(1) brightness(.55);opacity:.55;pointer-events:none}.ultib.used .ulb{text-decoration:line-through}
+.ultib:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+@keyframes ultip{from{box-shadow:0 5px 0 var(--ink),0 0 0 0 #ffe066aa,inset 0 -6px 0 #0002,inset 0 3px 0 #fff8;transform:scale(1)}to{box-shadow:0 5px 0 var(--ink),0 0 0 12px #ffe06600,inset 0 -6px 0 #0002,inset 0 3px 0 #fff8;transform:scale(1.07)}}
+.ultiinfo{margin-top:6px;background:linear-gradient(#ffd84a22,#ff9a0022);border:2px solid #ffc21a88;border-radius:12px;padding:8px 10px}
 </style>
 </head>
 <body>
@@ -1525,6 +1539,24 @@ const BOOSTS={
   turbo:{i:"⚡",n:"Turbo",d:"Elixir al doble 6 s",w:2},
   vision:{i:"👁",n:"Visión",d:"Ves al rival 2,5 s",w:2},
   shield:{i:"🛡️",n:"Escudo",d:"Para un golpe (12 s)",w:2},
+};
+/* ULTI: un poder único por héroe, una vez por ronda, gratis, disponible a partir de ULTI_T segundos.
+   n nombre · d qué hace · i icono · w aviso que ve el rival ("" = no se le avisa: el engaño es la gracia) */
+const ULTI_T=15;
+const ULTIS={
+  flecha:{n:"Lluvia de flechas",i:"🏹",d:"Flechas en 3 filas a la vez.",w:"¡Flechas en 3 filas! Muévete a una fila libre"},
+  brasa:{n:"Suelo ardiente",i:"🔥",d:"Tu siguiente bola deja el suelo en llamas 5 s.",w:"Su siguiente bola dejará fuego 5 s"},
+  sombra:{n:"Humo",i:"💨",d:"4 s sin dejar huellas ni pasos.",w:""},
+  muro:{n:"Fortaleza",i:"🏰",d:"5 s inmune, pero sin poder moverte.",w:"Es inmune 5 s: no gastes energía"},
+  ojo:{n:"Vista de búho",i:"👁",d:"Ves al rival 1,5 s.",w:"¡Te está viendo! Muévete ya"},
+  truco:{n:"Doble o nada",i:"🃏",d:"Apareces al instante en tu huella falsa.",w:""},
+  rayo:{n:"Tormenta",i:"⚡",d:"Tu siguiente rayo cae en las dos diagonales.",w:"Su siguiente rayo caerá en X"},
+  bum:{n:"Mecha corta",i:"💣",d:"Tu siguiente bomba cae sin aviso y el doble de rápido.",w:""},
+  mina:{n:"Campo minado",i:"🕳️",d:"3 minas ocultas en la isla rival.",w:"¡Hay 3 minas ocultas en tu isla!"},
+  salto:{n:"Gran salto",i:"🦘",d:"2,5 s en el aire: nada te alcanza.",w:"Está en el aire 2,5 s: nada le alcanza"},
+  savia:{n:"Florecer",i:"🌸",d:"Recuperas 1 vida.",w:"Ha recuperado 1 vida"},
+  mira:{n:"Mira láser",i:"🎯",d:"Tu siguiente disparo llega al instante.",w:""},
+  eco:{n:"Coro",i:"🦇",d:"5 huellas falsas en tu isla durante 3 s.",w:""},
 };
 const rnd=n=>Math.floor(Math.random()*n);
 const pick=a=>a[rnd(a.length)];
@@ -1576,7 +1608,7 @@ function newRound(tp,tb,opts){
   const R={now:0,heroes:{p:newHero(tp,sp[0],sp[1],lv.p),b:newHero(tb,sb[0],sb[1],lv.b)},elx:{p:ELX_START,b:ELX_START},
     boosts:[],projs:[],mines:[],marks:{p:[],b:[]},nextBoost:3,sudden:false,nextPing:SUDDEN_T,over:false,dmg:{p:0,b:0},paused:true};
   /* reglas propias de las arenas avanzadas (mismas casillas en las dos islas: es justo para los dos) */
-  R.arena=opts.arena||null;
+  R.arena=opts.arena||null;R.ultiOn=!!opts.ulti;/* las ULTIs solo en partidas locales por ahora: online el cliente aún no tiene botón */
   if(R.arena==="volcan")R.lava={next:15,warnAt:12,tiles:shuffle(allCells()).slice(0,2)};
   if(R.arena==="trono"){const c=pick(allCells().filter(([x,y])=>Math.abs(x-2)+Math.abs(y-2)<=2));R.cover={x:c[0],y:c[1],used:{p:false,b:false}};}
   if(R.arena==="olimpo")R.wind={next:20,until:0,dir:0};
@@ -1585,17 +1617,18 @@ function newRound(tp,tb,opts){
 }
 function moveTo(R,s,x,y){
   if(!inB(x,y)||R.over)return;
-  const h=R.heroes[s];
+  const h=R.heroes[s];if(h.fortUntil>R.now)return;/* Fortaleza: no se mueve */
   h.path=(h.x===x&&h.y===y)?[]:HEROES[h.type].jump?[[x,y]]:pathTo(h,x,y,R.projs.filter(p=>p.d===s&&p.warn).flatMap(p=>p.cells));/* solo los avisos que ve el jugador (amagos incluidos: no se delatan) */
 }
 function stepHero(R,s,hk,dt){
   const h=R.heroes[s],H=HEROES[h.type];
+  if(h.fortUntil>R.now)h.path=[];
   if(!h.path.length||R.now<h.nextStep)return;
   const due=Math.max(h.nextStep,R.now-(dt||0));/* el paso tocaba en "due", no en este tick: así cada casilla dura exactamente H.step */
   if(R.elx[s]<H.mc){h.path=[];call(hk,"noElx",s);return;}
   const [x,y]=h.path.shift();
   R.elx[s]-=H.mc;h.x=x;h.y=y;h.nextStep=due+H.step;
-  if(!H.jump&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
+  if(!H.jump&&!(h.smokeUntil>R.now)&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
   const mi=R.mines.findIndex(m=>m.d===s&&m.x===x&&m.y===y);
   if(mi>=0){const m=R.mines.splice(mi,1)[0];
     if(h.shieldUntil>R.now||h.invulUntil>R.now){if(h.invulUntil<=R.now)h.shieldUntil=0;mark(R,s,{t:"bloq",x,y,until:R.now+MARK_T});}
@@ -1635,11 +1668,40 @@ function fire(R,s,tx,ty,hk){
   /* Olimpo: con viento, el disparo cae una casilla desplazado */
   if(R.wind&&R.wind.until>R.now){const k=new Set();cells=cells.map(([x,y])=>[clampN(x+R.wind.dir),y]).filter(([x,y])=>!k.has(x+","+y)&&k.add(x+","+y));}
   const p={o:s,d:other(s),cells,hitAt:R.now+H.travel*(R.sudden?.6:1),launched:R.now,dmg:H.dmg,warn:H.warn,type:h.type,id:++MID};
+  if(h.ultiNext){h.ultiNext=false;p.ulti=true;/* ULTIs que potencian el siguiente disparo */
+    if(h.type==="brasa")p.burn=true;
+    if(h.type==="rayo")p.cells=[[tx,ty],[tx-1,ty-1],[tx+1,ty+1],[tx-1,ty+1],[tx+1,ty-1]].filter(([x,y])=>inB(x,y));
+    if(h.type==="bum"){p.warn=false;p.hitAt=R.now+H.travel*.5*(R.sudden?.6:1);}
+    if(h.type==="mira")p.hitAt=R.now+.08;}
   const c=H.stealth?blurSpot(h):H.fake?fakeSpot(h):[h.x,h.y];
-  p.hx=c[0];p.hy=c[1];mark(R,s,{t:"huella",x:c[0],y:c[1],until:R.now+HUELLA_T*(H.loud?2:1),fake:!!H.fake,blur:!!H.stealth});
-  if(H.echo){const e=fakeSpot(h);mark(R,s,{t:"huella",x:e[0],y:e[1],until:R.now+HUELLA_T,fake:false,blur:false});}
+  p.hx=c[0];p.hy=c[1];if(!(h.smokeUntil>R.now))mark(R,s,{t:"huella",x:c[0],y:c[1],until:R.now+HUELLA_T*(H.loud?2:1),fake:!!H.fake,blur:!!H.stealth});
+  if(H.echo&&!(h.smokeUntil>R.now)){const e=fakeSpot(h);mark(R,s,{t:"huella",x:e[0],y:e[1],until:R.now+HUELLA_T,fake:false,blur:false});}
   R.projs.push(p);call(hk,"fired",p);
   return "ok";
+}
+function ulti(R,s,hk){
+  if(R.paused||R.over)return "no";
+  const h=R.heroes[s],H=HEROES[h.type],o=other(s),v=R.heroes[o];
+  if(!R.ultiOn||!ULTIS[h.type])return "no";
+  if(h.ultiUsed)return "used";
+  if(R.now<ULTI_T)return "wait";
+  if(h.type==="savia"&&h.hp>=h.max)return "full";
+  h.ultiUsed=true;
+  switch(h.type){
+    case "flecha":{for(const y of [0,2,4]){const p={o:s,d:o,cells:[0,1,2,3,4].map(x=>[x,y]),hitAt:R.now+H.travel*1.6*(R.sudden?.6:1),launched:R.now,dmg:H.dmg,warn:true,type:h.type,id:++MID,ulti:true,hx:h.x,hy:h.y};R.projs.push(p);call(hk,"fired",p);}
+      mark(R,s,{t:"huella",x:h.x,y:h.y,until:R.now+HUELLA_T,fake:false,blur:false});break;}
+    case "brasa":case "rayo":case "bum":case "mira":h.ultiNext=true;break;
+    case "sombra":h.smokeUntil=R.now+4;break;
+    case "muro":h.fortUntil=R.now+5;h.invulUntil=Math.max(h.invulUntil,R.now+5);h.path=[];break;
+    case "ojo":h.visionUntil=Math.max(h.visionUntil,R.now+1.5);break;
+    case "truco":{const f=R.marks[s].filter(m=>m.t==="huella"&&m.fake&&(m.x!==h.x||m.y!==h.y)).pop();
+      const c=f?[f.x,f.y]:pick(allCells().filter(([x,y])=>Math.abs(x-h.x)+Math.abs(y-h.y)>=2));h.x=c[0];h.y=c[1];h.path=[];h.nextStep=R.now;break;}
+    case "mina":{for(const [x,y] of shuffle(allCells().filter(([x,y])=>(x!==v.x||y!==v.y)&&!R.mines.some(m=>m.d===o&&m.x===x&&m.y===y))).slice(0,3))R.mines.push({o:s,d:o,x,y,until:R.now+15});break;}
+    case "salto":h.airUntil=R.now+2.5;h.invulUntil=Math.max(h.invulUntil,R.now+2.5);break;
+    case "savia":h.hp=Math.min(h.max,h.hp+1);break;
+    case "eco":{for(const [x,y] of shuffle(allCells().filter(([x,y])=>x!==h.x||y!==h.y)).slice(0,5))mark(R,s,{t:"huella",x,y,until:R.now+3,fake:false,blur:false});break;}
+  }
+  call(hk,"ulti",s,h.type);return "ok";
 }
 /* AMAGO: huella falsa en tu propia isla + un disparo de pega que el rival no distingue de uno real */
 const decoyCost=h=>HEROES[h.type].fake?1:DECOY_COST;
@@ -1682,6 +1744,7 @@ function impact(R,p,hk){
     for(const [x,y] of p.cells)mark(R,p.d,{t:near?"cerca":"agua",x,y,until:R.now+MARK_T});
     if(HEROES[p.type].mine){const [x,y]=p.cells[0];R.mines=R.mines.filter(m=>!(m.o===p.o&&m.x===x&&m.y===y));R.mines.push({o:p.o,d:p.d,x,y,until:R.now+12});}
   }
+  if(p.burn){(R.fires=R.fires||[]).push({o:p.o,d:p.d,cells:p.cells,from:R.now+.9,until:R.now+5,hit:false});}/* Suelo ardiente */
   p.vhp=v.hp;
   call(hk,"impact",p);
 }
@@ -1702,6 +1765,11 @@ function tick(R,dt,hk){
   for(const s of SIDES)stepHero(R,s,hk,dt);
   R.boosts=R.boosts.filter(b=>b.until>R.now);
   R.mines=R.mines.filter(m=>m.until>R.now);
+  if(R.fires&&R.fires.length){R.fires=R.fires.filter(f=>f.until>R.now);
+    for(const f of R.fires){const v=R.heroes[f.d];if(f.hit||R.now<f.from||v.hp<=0||!inArea(f.cells,v.x,v.y))continue;
+      if(v.invulUntil>R.now)continue;
+      if(v.shieldUntil>R.now){v.shieldUntil=0;f.hit=true;mark(R,f.d,{t:"bloq",x:v.x,y:v.y,until:R.now+MARK_T});continue;}
+      f.hit=true;v.hp=Math.max(0,v.hp-1);R.dmg[f.o]+=1;v.lastHit=R.now;v.invulUntil=R.now+INVUL_T;mark(R,f.d,{t:"hit",x:v.x,y:v.y,type:v.type,until:R.now+MARK_T});call(hk,"burn",f.d);}}
   if(R.lava&&R.now>=R.lava.next){/* Volcán: erupción; quien esté en lava queda a la vista */
     for(const s of SIDES){const h=R.heroes[s];if(R.lava.tiles.some(([x,y])=>x===h.x&&y===h.y))mark(R,s,{t:"ping",x:h.x,y:h.y,type:h.type,until:R.now+1.6});}
     call(hk,"erupt");R.lava={next:R.now+15,warnAt:R.now+12,tiles:shuffle(allCells()).slice(0,2)};}
@@ -1763,9 +1831,19 @@ function botUpdate(R,dt,hk){
   /* react = tiempo de reacción al aviso; la decisión de esquivar se tira UNA vez por disparo */
   const danger=R.projs.filter(p=>p.d==="b"&&p.warn&&R.now-p.launched>=B.react);
   const unsafe=(x,y)=>danger.some(p=>inArea(p.cells,x,y));
-  const adj=()=>D4.map(([dx,dy])=>[me.x+dx,me.y+dy]).filter(([x,y])=>inB(x,y)&&!unsafe(x,y));
-  const threat=danger.filter(p=>inArea(p.cells,me.x,me.y)).some(p=>(B.dr[p.id]??=Math.random()<B.dodge));
-  if(threat){const o=adj();if(o.length&&R.elx.b>=H.mc){me.path=[pick(o)];return;}}
+  const adj=()=>D4.map(([dx,dy])=>[me.x+dx,me.y+dy]).filter(([x,y])=>inB(x,y)&&!unsafe(x,y)&&!(R.fires||[]).some(f=>f.d==="b"&&!f.hit&&inArea(f.cells,x,y)));
+  const fz=(R.fires||[]).filter(f=>f.d==="b"&&!f.hit);
+  const unsafe0=unsafe;
+  const threat0=danger.filter(p=>inArea(p.cells,me.x,me.y)).some(p=>(B.dr[p.id]??=Math.random()<B.dodge));
+  const inFire=fz.some(f=>inArea(f.cells,me.x,me.y))&&!me.path.length;
+  const threat=threat0||inFire;
+  /* ULTI del bot: las defensivas cuando le va a caer un golpe; el resto, en un momento al azar de la ronda */
+  if(R.ultiOn&&!me.ultiUsed&&ULTIS[me.type]&&R.now>=ULTI_T&&R.now>=B.passiveUntil&&R.now>=(B.ultiAt??=ULTI_T+1+Math.random()*22)){
+    const t=me.type,def=t==="muro"||t==="salto"||t==="truco";
+    const go=def?threat0:t==="savia"?me.hp<me.max:true;
+    if(go&&ulti(R,"b",hk)==="ok"&&def)return;
+  }
+  if(threat&&!(me.fortUntil>R.now)){const o=adj();if(o.length&&R.elx.b>=H.mc){me.path=[pick(o)];return;}}
   if(B.relocateAt&&R.now>=B.relocateAt&&!me.path.length){
     B.relocateAt=0;
     const far=Math.random()<.3?3:2;
@@ -1831,7 +1909,7 @@ function persp(p,s){
   return q;
 }
 return {LV_MAX,lvBonus,N,D4,SIDES,ELX_MAX,ELX_START,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,HIDE_T,INVUL_T,HEROES,IDS,STARTERS,BOOSTS,
-  rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf,newRound,moveTo,fire,amago,decoyCost,DECOY_COST,DECOY_CD,tick,viewFor,persp};
+  ULTIS,ULTI_T,ulti,rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf,newRound,moveTo,fire,amago,decoyCost,DECOY_COST,DECOY_CD,tick,viewFor,persp};
 })();
 /* ENGINE-END */
 
@@ -3615,6 +3693,7 @@ function update(R,dt){
       else if(G&&G.decoyArm&&!(me.x===x&&me.y===y)){dc=0xd49bff;dop=.16+.1*Math.sin(t*6+x+y);ring=1;rc=0xd49bff;}
       else{const seen=R.marks.p.find(m=>m.x===x&&m.y===y&&(m.t==="huella"||m.t==="pick"));if(seen&&!(me.x===x&&me.y===y)){icon=seen.fake?"foot2":"foot";iop=.55;isc=.6;}}
     }
+    if(R.fires&&R.fires.some(f=>f.d===b&&f.until>R.now&&inArea(f.cells,x,y))){if(!icon){icon="🔥";isc=.6+.08*Math.sin(t*9+x);iop=.95;}dc=0xff4a10;dop=Math.max(dop,.42+.2*Math.sin(t*11+y));}
     if(!icon&&R.lava&&R.now>=R.lava.warnAt&&R.lava.tiles.some(([lx,ly])=>lx===x&&ly===y)){icon="🌋";isc=.7;dc=0xff4a10;dop=.35+.25*Math.sin(t*12);}
     if(!icon&&R.cover&&!R.cover.used[b]&&R.cover.x===x&&R.cover.y===y){icon="🗿";isc=.62;iop=.9;}
     if(bo&&!icon){icon=BOOSTS[bo.k].i;isc=.7;ring=(bo.until-R.now)/BOOST_LIFE;rc=0xffe25a;}
@@ -3843,7 +3922,7 @@ function statsHTML(id){
     <div class="pst">${ico("star")}<span><b class="out">${speedLabel(H.step)}</b><small>Velocidad</small></span>${cost(H.mc)}</div>
     <div class="pst"><span class="pt2">${patIcon(H.pat)}</span><span><b class="out">${H.a}</b><small>Daño · coste</small></span>${cost(H.cost)}<i class="dmg"><span class="out">−${H.dmg}</span>${ico("heart","s")}</i></div>
     <div class="pst wide ${H.warn?"":"nowarn"}">${ico(H.warn?"swords":"power")}<span><b>${H.warn?"El rival lo ve venir":"Sin aviso: casi imposible de esquivar"}</b></span></div>
-  </div><p class="special">${H.d}</p>`;
+  </div><p class="special">${H.d}</p>${AMAGO.ULTIS[id]?`<p class="special ultiinfo"><b>${AMAGO.ULTIS[id].i} ULTI · ${AMAGO.ULTIS[id].n}:</b> ${AMAGO.ULTIS[id].d} <i>Una vez por ronda.</i></p>`:""}`;
 }
 const ARENA_PROP={pradera:"arbol",bosque:"pino",volcan:"geiser_lava",trono:"estatua",olimpo:"columna_dorada"};
 /* decorado lateral de cada arena (pantalla de arena nueva y separadores del camino de trofeos) */
@@ -4741,7 +4820,7 @@ async function startRound(){
   /* tu nivel en partida está limitado por la arena; el bot sube con los trofeos (nunca más de 1 por encima de ti) */
   const lp=effLv(tp),base=1+Math.floor(S.tro/110)+(S.diff==="dificil"?1:S.diff==="facil"?-1:0),lb=G.tutorial?1:Math.max(1,Math.min(LV_MAX,LV_CAP[arenaIdx()],base,lp+1));
   G.lv={p:lp,b:lb};
-  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:arenaOf(S.tro).a.k});recReset();
+  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:arenaOf(S.tro).a.k,ulti:!G.tutorial});recReset();
   if(G.tut)TUT.setup(R);
   await vsAndCountdown(tp,tb);
   R.paused=false;
@@ -5257,7 +5336,7 @@ function buildArena(){
   </div>
   <div class="status" id="status"></div>
   <div class="gbottom">
-    <div class="ebar" id="ebar"><span class="elbl">energía · se recarga sola</span><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},(_,i)=>`<i class="${i===H.cost-1?"cost":""}"><b></b></i>`).join("")}</div></div>
+    ${!G.tutorial&&!G.online&&AMAGO.ULTIS[hp.type]?`<button class="ultib off" id="ultib" data-a="ulti" aria-label="ULTI: ${AMAGO.ULTIS[hp.type].n}. ${AMAGO.ULTIS[hp.type].d}"><span class="uring" id="uring"></span><span class="uic">${AMAGO.ULTIS[hp.type].i}</span><span class="ulb out">ULTI</span><span class="unm out" id="unm">${AMAGO.ULTIS[hp.type].n}</span></button>`:""}<div class="ebar" id="ebar"><span class="elbl">energía · se recarga sola</span><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},(_,i)=>`<i class="${i===H.cost-1?"cost":""}"><b></b></i>`).join("")}</div></div>
     <div class="acts v2"><span class="act ab mv" title="Moverte una casilla"><span class="aic">👟</span><span class="alb">moverse</span><small class="asub">toca tu isla</small><b class="acost">💧${H.mc}</b></span><span class="act ab at" title="${H.a}"><span class="aic">${patIcon(H.pat)}</span><span class="alb">${H.a.toLowerCase()}</span><small class="asub">toca la isla roja</small><b class="acost">💧${H.cost}</b></span>${G.tutorial&&!(G.tut&&G.round>=2)?"":`<button class="act amagob ab" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla"><span class="aic">🎭</span><span class="alb">amago</span><small class="asub">huella falsa</small><b class="acost">💧${AMAGO.decoyCost({type:hp.type})}</b></button>`}<span class="act bst" id="bst"></span></div>
   </div></div>`;
   B3.build($("#gl"),R,arenaOf(S.tro).a.k);B3.onTile=onTile;B3.onRestore=()=>{if(R&&UI.screen==="game")B3.build($("#gl"),R,arenaOf(S.tro).a.k);};
@@ -5274,6 +5353,12 @@ function renderLive(){
   $("#esegs").classList.toggle("turbo",me.turboUntil>now);
   const bst=[];if(me.turboUntil>now)bst.push("⚡"+Math.ceil(me.turboUntil-now)+"s");if(me.shieldUntil>now)bst.push("🛡️");if(me.visionUntil>now)bst.push("👁");
   $("#bst").textContent=bst.join(" ");
+  if(me.smokeUntil>now)bst.push("💨"+Math.ceil(me.smokeUntil-now)+"s");if(me.fortUntil>now)bst.push("🏰"+Math.ceil(me.fortUntil-now)+"s");if(me.airUntil>now)bst.push("🦘"+Math.ceil(me.airUntil-now)+"s");
+  $("#bst").textContent=bst.join(" ");
+  {const ub=$("#ultib");if(ub){const k=Math.min(1,now/AMAGO.ULTI_T),st=me.ultiNext?"armed":me.ultiUsed?"used":k<1?"off":"ready";
+    if(ub.dataset.st!==st){ub.dataset.st=st;ub.classList.toggle("off",st==="off");ub.classList.toggle("ready",st==="ready");ub.classList.toggle("used",st==="used");ub.classList.toggle("armed",st==="armed");$("#unm").textContent=st==="armed"?"¡Dispara!":AMAGO.ULTIS[me.type].n;
+      if(st==="ready"&&!R.over){sfx("near");toast("ultiready","⭐ <b>¡ULTI lista!</b> "+AMAGO.ULTIS[me.type].n+": "+AMAGO.ULTIS[me.type].d+" Solo una vez por ronda.");}}
+    if(st==="off")$("#uring").style.setProperty("--k",(k*360).toFixed(0)+"deg");}}
   const ab=$("#amagob");if(ab){const ready=now>=AMAGO.HIDE_T&&now>=(me.decoyUntil||0)&&e>=AMAGO.decoyCost(me);ab.classList.toggle("off",!ready);}
   renderStatus();
 }
@@ -5362,6 +5447,10 @@ const ui={
   wind(d){if(UI.screen!=="game")return;banner(d>0?"💨 ¡VIENTO →!":"💨 ¡← VIENTO!","Los disparos caen una casilla desplazados 6 s","blue",1300);},
   cover(s){if(UI.screen!=="game")return;sfx("near");toast("cover","🗿 <b>¡La estatua ha parado el golpe!</b> Se ha roto: solo protege una vez.");},
   mine(s){if(UI.screen!=="game")return;sfx(s==="p"?"hurt":"hit");},
+  burn(s){if(UI.screen!=="game")return;const c=s==="p"?B3.heroScreen():B3.screenPos("b",R.heroes.b.x,R.heroes.b.y,1);floatText(c.x,c.y,s==="p"?"🔥 −1":"🔥 ¡QUEMADO! −1",s==="p"?"bad":"big");sfx(s==="p"?"hurt":"hit");if(s==="p"){vignette();buzz(60);}},
+  ulti(s,type){if(UI.screen!=="game")return;const U=AMAGO.ULTIS[type];
+    if(s==="p"){banner(U.i+" "+U.n.toUpperCase()+"!",U.d,"gold",1100);sfx("burst");buzz([30,20,50]);B3.shake(.3);B3.burst(B3.tileWorld("p",R.heroes.p.x,R.heroes.p.y).setY(.6),[0xffe25a,0xffffff,0xffa81f],46,2.6,3,.14);}
+    else if(U.w){banner("⚠️ ULTI RIVAL: "+U.n,U.w,"red",1500);sfx("radar");buzz(40);}},
   ping(){sfx("radar");},
   roundOver(w){endRound(w);},
 };
@@ -5447,6 +5536,10 @@ document.addEventListener("click",e=>{
     case "skipreplay":G.skipReplay=true;break;
     case "shareclip":sfx("tap");shareClip();break;
     case "gpause":if(R&&UI.screen==="game"&&!G.tutorial){sfx("tap");UI.modal={k:"gpause"};renderModal();}break;
+    case "ulti":if(R&&UI.screen==="game"&&!G.online){const r=AMAGO.ulti(R,"p",ui),c=B3.heroScreen();
+        if(r==="wait"){floatText(c.x,c.y,"⭐ Lista en "+Math.ceil(AMAGO.ULTI_T-R.now)+" s","miss");sfx("miss");}
+        else if(r==="full"){floatText(c.x,c.y,"🌸 Ya tienes toda la vida","miss");sfx("miss");}
+        else if(r==="ok"){EV.add("ulti",{h:R.heroes.p.type,t:Math.round(R.now)});renderLive();}}break;
     case "amago":if(R&&UI.screen==="game"){G.decoyArm=!G.decoyArm;el.classList.toggle("on",G.decoyArm);sfx("sel");if(G.decoyArm)toast("amagohow","🎭 <b>Amago armado:</b> toca una casilla de <b>tu isla</b> para dejar una huella falsa allí.");}break;
     case "setmode":S.mode=el.dataset.m;save();sfx("sel");UI.modal=null;renderModal();showHome();break;
     case "hero":sfx("tap");UI.modal={k:"heropage",id:el.dataset.id};renderModal();break;
