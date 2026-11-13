@@ -1501,6 +1501,42 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .gbottom .acts.v2 .bst{position:absolute;right:12px;bottom:calc(100% + 8px);background:rgba(8,12,40,.72);border-radius:999px;padding:3px 10px;font-size:14px;min-height:0}
 .gbottom .acts.v2 .bst:empty{display:none}
 .ultiinfo{margin-top:6px;background:linear-gradient(#ffd84a22,#ff9a0022);border:2px solid #ffc21a88;border-radius:12px;padding:8px 10px}
+/* ---- campaña ---- */
+#app.camp{display:flex;flex-direction:column;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));height:100%;position:relative}
+.cmbg{position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 60% at 50% 0%,#bff59a 0%,transparent 60%),linear-gradient(#6fd16a,#2f9a57 55%,#1d6f4a)}
+.cmbg::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 30%,#fff3 0 3px,transparent 4px),radial-gradient(circle at 78% 58%,#fff3 0 3px,transparent 4px),radial-gradient(circle at 40% 80%,#0001 0 26px,transparent 27px),radial-gradient(circle at 86% 22%,#0001 0 34px,transparent 35px);}
+.cmhead{display:flex;align-items:center;gap:10px}
+.cmback{width:52px;height:48px;padding:0;flex:none}.cmback img{width:28px;height:28px}
+.cmtt{flex:1;min-width:0}.cmtt small{font-family:var(--f-game);font-size:11px;letter-spacing:.08em;color:#fff;opacity:.9}
+.cmtt h2{margin:0;font-size:18px;line-height:1.05;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmst{padding:8px 12px;border-radius:14px;font-family:var(--f-game);font-size:17px;color:#ffe25a;flex:none}
+.cmmap{position:relative;flex:1;min-height:340px}
+.cmmap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cmmap polyline{fill:none;stroke:#fff;stroke-opacity:.75;stroke-width:5;stroke-dasharray:1 12;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.cmn{position:absolute;transform:translate(-50%,-50%);background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;cursor:pointer;width:130px}
+.cmc{position:relative;width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(#ffd84a,#ff9a1f);border:4px solid var(--ink,#1a1036);box-shadow:0 6px 0 var(--ink,#1a1036),inset 0 3px 0 #fff8;transition:transform .1s}
+.cmc b{font-family:var(--f-game);font-size:30px;color:#fff}
+.cmn:active .cmc{transform:translateY(4px)}
+.cmn.done .cmc{background:linear-gradient(#7be07a,#2aa84f)}
+.cmn.lk .cmc{background:linear-gradient(#aab1c8,#6b7392)}.cmn.lk .cmc b,.cmn.lk .cmc>.h3{opacity:.45;filter:grayscale(1)}
+.cmlock{position:absolute;right:-8px;bottom:-8px;width:24px;height:31px;object-fit:contain}
+.cmn.cur .cmc{animation:cmpulse 1.3s ease-in-out infinite}
+@keyframes cmpulse{50%{transform:scale(1.09);box-shadow:0 6px 0 var(--ink,#1a1036),0 0 0 8px #fff5,inset 0 3px 0 #fff8}}
+.cmn.boss .cmc{width:104px;height:104px;background:linear-gradient(#b48cff,#5a2fc0);overflow:visible}
+.cmn.boss .cmc>.h3{width:112px;height:126px;object-fit:contain;margin-top:-30px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+.cms{display:flex;gap:1px;margin-top:6px}.cms i{font-style:normal;font-size:17px;color:#0005;text-shadow:0 1px 0 #fff3}.cms i.on{color:#ffe25a;text-shadow:0 2px 0 var(--ink,#1a1036)}
+.cml{font-family:var(--f-game);font-size:13px;line-height:1.05;text-align:center}
+.cmnext{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;opacity:.92}
+.cmnext img{width:26px;height:34px;object-fit:contain}.cmnext b{display:block;font-family:var(--f-game);font-size:15px;color:#fff}.cmnext small{opacity:.8;color:#fff}
+.sbtn .cmico{font-size:36px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3))}
+.sheet.camplv{text-align:center}.cmk{font-family:var(--f-game);letter-spacing:.1em;color:#ffb21f}
+.cmfoe{width:120px;height:120px;margin:4px auto 6px}.cmfoe.boss{width:150px;height:170px}.cmfoe .h3,.cmfoe svg{width:100%;height:100%;object-fit:contain}
+.cmstars{display:flex;justify-content:center;gap:6px;font-size:34px;line-height:1}.cmstars span{color:#0003}.cmstars span.on{color:#ffcc1f;text-shadow:0 3px 0 var(--ink,#1a1036)}
+.cmstars.big{font-size:64px;margin:2px 0 10px}.cmstars.big span.on{animation:cmpop .5s cubic-bezier(.3,1.7,.5,1) both}
+@keyframes cmpop{from{transform:scale(0) rotate(-40deg);opacity:0}}
+.cmrule{font-size:12.5px;opacity:.8;margin:4px 0}.cmrw{margin:6px 0 12px}.cmrw img{width:20px;height:20px;vertical-align:-4px}
+.cmend{font-family:var(--f-game);font-size:22px;color:#fff;margin:0;text-align:center;width:100%}
+.camptag{font-family:var(--f-game);font-size:13px;color:#ffe25a;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -1534,8 +1570,12 @@ Object.assign(HEROES,{
   mira:{n:"Mira",r:"Lince",rar:2,hp:3,step:.3,mc:1,pat:"one",cost:5,dmg:2,travel:1.1,warn:false,loud:true,a:"Tiro certero",d:"Disparo de 2 en 1 casilla, sin aviso. Su huella se queda 4 s.",c:"#f0c030",l:"#ffe58a",dk:"#9a6a0a",proj:"arrow"},
   eco:{n:"Eco",r:"Murciélago",rar:3,hp:3,step:.28,mc:1,pat:"row3",cost:6,dmg:1,travel:.6,warn:true,echo:true,live:false,a:"Chillido",d:"Cada disparo deja dos huellas: una de verdad y otra falsa.",c:"#5a4ad8",l:"#b8acff",dk:"#2a1a8a",proj:"bolt"},
 });
+/* jefes de la campaña: no se pueden elegir ni desbloquear. burrow = segundos que asoma tras atacar (el resto del tiempo es inmune) */
+Object.assign(HEROES,{
+  topo:{n:"Rey Topo",r:"Jefe",rar:3,hp:8,step:.3,mc:0,pat:"cross5",cost:3,dmg:1,travel:1.15,warn:true,boss:true,burrow:3,a:"Terremoto",d:"Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.",c:"#7a4fd0",l:"#c9b0ff",dk:"#3d2480",proj:"rock"},
+});
 const DEV_HEROES=typeof window!=="undefined"&&!!window.AMAGO_DEV_HEROES;
-const IDS=Object.keys(HEROES).filter(id=>HEROES[id].live!==false||DEV_HEROES);
+const IDS=Object.keys(HEROES).filter(id=>!HEROES[id].boss&&(HEROES[id].live!==false||DEV_HEROES));
 const STARTERS=["flecha","brasa","sombra","muro"];
 const BOOSTS={
   elx:{i:"💧",n:"Elixir",d:"+6 de elixir",w:4},
@@ -1611,11 +1651,13 @@ function newRound(tp,tb,opts){
   const R={now:0,heroes:{p:newHero(tp,sp[0],sp[1],lv.p),b:newHero(tb,sb[0],sb[1],lv.b)},elx:{p:ELX_START,b:ELX_START},
     boosts:[],projs:[],mines:[],marks:{p:[],b:[]},nextBoost:3,sudden:false,nextPing:SUDDEN_T,over:false,dmg:{p:0,b:0},paused:true};
   /* reglas propias de las arenas avanzadas (mismas casillas en las dos islas: es justo para los dos) */
+  /* reglas de nivel de la campaña: elx (recarga ×), hpB (vida del rival ×), huB (duración de las huellas del rival ×), noAmago */
+  R.mod=opts.mod||{};if(R.mod.hpB){const b=R.heroes.b;b.hp=b.max=Math.round(b.max*R.mod.hpB);}
   R.arena=opts.arena||null;R.ultiOn=!!opts.ulti;/* las ULTIs solo en partidas locales por ahora: online el cliente aún no tiene botón */
   if(R.arena==="volcan")R.lava={next:15,warnAt:12,tiles:shuffle(allCells()).slice(0,2)};
   if(R.arena==="trono"){const c=pick(allCells().filter(([x,y])=>Math.abs(x-2)+Math.abs(y-2)<=2));R.cover={x:c[0],y:c[1],used:{p:false,b:false}};}
   if(R.arena==="olimpo")R.wind={next:20,until:0,dir:0};
-  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,perc:opts.bot.perc??.35,pend:[],dr:{},lastPrint:null,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1};
+  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,perc:opts.bot.perc??.35,pend:[],dr:{},lastPrint:null,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1,blind:!!opts.bot.blind};
   return R;
 }
 function moveTo(R,s,x,y){
@@ -1625,20 +1667,20 @@ function moveTo(R,s,x,y){
 }
 function stepHero(R,s,hk,dt){
   const h=R.heroes[s],H=HEROES[h.type];
-  if(h.fortUntil>R.now)h.path=[];
+  if(h.fortUntil>R.now||h.outUntil>R.now)h.path=[];
   if(!h.path.length||R.now<h.nextStep)return;
   const due=Math.max(h.nextStep,R.now-(dt||0));/* el paso tocaba en "due", no en este tick: así cada casilla dura exactamente H.step */
   if(R.elx[s]<H.mc){h.path=[];call(hk,"noElx",s);return;}
   const [x,y]=h.path.shift();
   R.elx[s]-=H.mc;h.x=x;h.y=y;h.nextStep=due+H.step;
-  if(!H.jump&&!(h.smokeUntil>R.now)&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
+  if(!H.jump&&!H.burrow&&!(h.smokeUntil>R.now)&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
   const mi=R.mines.findIndex(m=>m.d===s&&m.x===x&&m.y===y);
   if(mi>=0){const m=R.mines.splice(mi,1)[0];
     if(h.shieldUntil>R.now||h.invulUntil>R.now){if(h.invulUntil<=R.now)h.shieldUntil=0;mark(R,s,{t:"bloq",x,y,until:R.now+MARK_T});}
     else{h.hp=Math.max(0,h.hp-1);R.dmg[m.o]+=1;h.lastHit=R.now;h.invulUntil=R.now+INVUL_T;mark(R,s,{t:"hit",x,y,type:h.type,until:R.now+MARK_T});}
     call(hk,"mine",s,x,y);}
   const bi=R.boosts.findIndex(b=>b.x===x&&b.y===y);
-  if(bi>=0){const b=R.boosts.splice(bi,1)[0];applyBoost(R,s,b);mark(R,s,{t:"pick",x,y,k:b.k,until:R.now+2.4});call(hk,"pickup",s,b);}
+  if(bi>=0&&!H.burrow){const b=R.boosts.splice(bi,1)[0];applyBoost(R,s,b);mark(R,s,{t:"pick",x,y,k:b.k,until:R.now+2.4});call(hk,"pickup",s,b);}
 }
 function applyBoost(R,s,b){
   const h=R.heroes[s];
@@ -1677,9 +1719,12 @@ function fire(R,s,tx,ty,hk){
     if(h.type==="bum"){p.warn=false;p.hitAt=R.now+H.travel*.5*(R.sudden?.6:1);}
     if(h.type==="mira")p.hitAt=R.now+.08;}
   const c=H.stealth?blurSpot(h):H.fake?fakeSpot(h):[h.x,h.y];
-  p.hx=c[0];p.hy=c[1];if(!(h.smokeUntil>R.now))mark(R,s,{t:"huella",x:c[0],y:c[1],until:R.now+HUELLA_T*(H.loud?2:1),fake:!!H.fake,blur:!!H.stealth});
+  p.hx=c[0];p.hy=c[1];if(!(h.smokeUntil>R.now))mark(R,s,{t:"huella",x:c[0],y:c[1],until:R.now+HUELLA_T*(H.loud?2:1)*(s==="b"&&R.mod.huB||1),fake:!!H.fake,blur:!!H.stealth});
   if(H.echo&&!(h.smokeUntil>R.now)){const e=fakeSpot(h);mark(R,s,{t:"huella",x:e[0],y:e[1],until:R.now+HUELLA_T,fake:false,blur:false});}
   R.projs.push(p);call(hk,"fired",p);
+  if(H.burrow){/* jefe bajo tierra: al atacar asoma, se queda quieto y a la vista; furioso lanza un segundo golpe y asoma menos */
+    if(h.rage){const o=pick(allCells().filter(([x,y])=>Math.abs(x-tx)+Math.abs(y-ty)>=3)),q={o:s,d:other(s),cells:areaOf(H.pat,o[0],o[1]),hitAt:p.hitAt+.25,launched:R.now,dmg:H.dmg,warn:H.warn,type:h.type,id:++MID,hx:p.hx,hy:p.hy};R.projs.push(q);call(hk,"fired",q);}
+    h.outUntil=R.now+H.burrow*(h.rage?.75:1);h.invulUntil=R.now;h.path=[];mark(R,s,{t:"ping",x:h.x,y:h.y,type:h.type,until:h.outUntil});call(hk,"surface",s);}
   return "ok";
 }
 function ulti(R,s,hk){
@@ -1712,6 +1757,7 @@ function amago(R,s,x,y,hk){
   if(R.paused||R.over||!inB(x,y))return "no";
   if(R.now<HIDE_T)return "hide";
   const h=R.heroes[s],H=HEROES[h.type];
+  if(R.mod.noAmago||H.burrow)return "no";
   if(R.now<h.decoyUntil)return "cd";
   if(R.elx[s]<decoyCost(h))return "elx";
   R.elx[s]-=decoyCost(h);h.decoyUntil=R.now+DECOY_CD;
@@ -1737,7 +1783,7 @@ function impact(R,p,hk){
   if(inArea(p.cells,v.x,v.y)){
     const cov=R.cover&&!R.cover.used[p.d]&&v.x===R.cover.x&&v.y===R.cover.y;
     if(cov&&v.invulUntil<=R.now&&v.shieldUntil<=R.now){R.cover.used[p.d]=true;p.res="block";mark(R,p.d,{t:"bloq",x:v.x,y:v.y,until:R.now+MARK_T});call(hk,"cover",p.d);}/* Trono: la estatua para un golpe y se rompe */
-    else if(v.shieldUntil>R.now||v.invulUntil>R.now){if(v.invulUntil<=R.now)v.shieldUntil=0;p.res="block";mark(R,p.d,{t:"bloq",x:v.x,y:v.y,until:R.now+MARK_T});}
+    else if(v.shieldUntil>R.now||v.invulUntil>R.now){if(v.invulUntil<=R.now)v.shieldUntil=0;p.res="block";if(HEROES[v.type].burrow&&!(v.outUntil>R.now))p.under=true;mark(R,p.d,{t:"bloq",x:v.x,y:v.y,until:R.now+MARK_T});}
     else{v.hp=Math.max(0,v.hp-p.dmg);R.dmg[p.o]+=p.dmg;p.res="hit";v.lastHit=R.now;mark(R,p.d,{t:"hit",x:v.x,y:v.y,type:v.type,until:R.now+MARK_T});
       v.invulUntil=R.now+INVUL_T;R.elx[p.d]=Math.min(ELX_MAX,R.elx[p.d]+2);}
     p.vx=v.x;p.vy=v.y;
@@ -1761,7 +1807,10 @@ function tick(R,dt,hk){
   dt=Math.max(0,dt||0);/* el reloj del sistema puede ir hacia atrás */
   R.now+=dt;
   if(R.tutFreeze&&R.now>SUDDEN_T-8)R.now=SUDDEN_T-8;/* entrenamiento: el reloj no llega a la muerte súbita mientras el entrenador explica */
-  for(const s of SIDES){const h=R.heroes[s],rate=ELX_RATE*(h.turboUntil>R.now?2:1)*(R.sudden?1.5:1)*(1+lvBonus(h.lv).elx);R.elx[s]=Math.min(ELX_MAX,R.elx[s]+rate*dt);}
+  for(const s of SIDES){const h=R.heroes[s],rate=ELX_RATE*(h.turboUntil>R.now?2:1)*(R.sudden?1.5:1)*(1+lvBonus(h.lv).elx)*(R.mod.elx||1);R.elx[s]=Math.min(ELX_MAX,R.elx[s]+rate*dt);}
+  for(const s of SIDES){const h=R.heroes[s];if(!HEROES[h.type].burrow)continue;
+    if(!(h.outUntil>R.now)&&h.invulUntil<R.now+.3)h.invulUntil=R.now+.3;/* bajo tierra nada le alcanza */
+    if(!h.rage&&h.hp>0&&h.hp<=h.max/2){h.rage=true;call(hk,"enrage",s);}}
   /* primero caen los disparos que ya tocaba resolver y después se mueve: no se esquiva un golpe que ya había llegado */
   const due=R.projs.filter(p=>p.hitAt<=R.now);R.projs=R.projs.filter(p=>p.hitAt>R.now);
   for(const p of due)impact(R,p,hk);
@@ -1781,7 +1830,7 @@ function tick(R,dt,hk){
   if(R.now>=R.nextBoost){if(R.boosts.length<2)spawnBoost(R,hk);R.nextBoost=R.now+5+Math.random()*3;}
   for(const s of SIDES)R.marks[s]=R.marks[s].filter(m=>m.until>R.now);
   if(!R.sudden&&R.now>=SUDDEN_T){R.sudden=true;call(hk,"sudden");}
-  if(R.sudden&&R.now>=R.nextPing){R.nextPing=R.now+5;for(const s of SIDES){const h=R.heroes[s];mark(R,s,{t:"ping",x:h.x,y:h.y,type:h.type,until:R.now+1.2});}call(hk,"ping");}
+  if(R.sudden&&R.now>=R.nextPing){R.nextPing=R.now+5;for(const s of SIDES){const h=R.heroes[s];if(HEROES[h.type].burrow)continue;mark(R,s,{t:"ping",x:h.x,y:h.y,type:h.type,until:R.now+1.2});}call(hk,"ping");}
   if(R.bot)botUpdate(R,dt,hk);
   const pd=R.heroes.p.hp<=0,bd=R.heroes.b.hp<=0;
   if(pd||bd||R.now>=ROUND_T){R.over=true;call(hk,"roundOver",pd&&bd?null:bd?"p":pd?"b":timeWinner(R));}
@@ -1847,16 +1896,16 @@ function botUpdate(R,dt,hk){
     if(go&&ulti(R,"b",hk)==="ok"&&def)return;
   }
   if(threat&&!(me.fortUntil>R.now)){const o=adj();if(o.length&&R.elx.b>=H.mc){me.path=[pick(o)];return;}}
-  if(B.relocateAt&&R.now>=B.relocateAt&&!me.path.length){
+  if(B.relocateAt&&R.now>=B.relocateAt&&!me.path.length&&!(me.outUntil>R.now)){
     B.relocateAt=0;
-    const far=Math.random()<.3?3:2;
+    const far=H.burrow?4:Math.random()<.3?3:2;
     const o=allCells().filter(([x,y])=>{const d=Math.abs(x-me.x)+Math.abs(y-me.y);return d>=1&&d<=far&&!unsafe(x,y);});
     if(o.length&&R.elx.b>=H.mc*2){const c=pick(o);me.path=pathTo(me,c[0],c[1]);return;}
   }
   if(R.now<B.passiveUntil)return;
   if(B.decoyAt&&R.now>=B.decoyAt){B.decoyAt=0;const o=allCells().filter(([x,y])=>Math.abs(x-me.x)+Math.abs(y-me.y)>=2);if(o.length){const c=pick(o);amago(R,"b",c[0],c[1],hk);return;}}
   if(R.elx.b>=ELX_MAX-.5&&Math.random()<.12){const o=allCells().filter(([x,y])=>Math.abs(x-me.x)+Math.abs(y-me.y)>=2);const c=pick(o);if(amago(R,"b",c[0],c[1],hk)==="ok")return;}
-  if(R.now>=me.cdUntil&&R.now-B.lastShot>=B.gap&&R.elx.b>=H.cost&&!me.path.length){
+  if(R.now>=me.cdUntil&&R.now-B.lastShot>=B.gap*(me.rage?.7:1)&&R.elx.b>=H.cost&&(!me.path.length||B.blind)){
     let bel=B.belief.map(r=>r.slice());
     for(const bo of R.boosts)bel[bo.y][bo.x]+=.06;
     if(H.travel>.6)bel=diffuseB(bel,Math.min(.9,H.travel/HF.step*.35));
@@ -1869,6 +1918,7 @@ function botUpdate(R,dt,hk){
     }
     /* sin pistas durante mucho rato, a veces dispara a ciegas como haría una persona */
     if(best.v<thr&&R.now-B.lastShot>6&&R.elx.b>=H.cost+2&&Math.random()<.15)best.v=thr,best.t=[rnd(N),rnd(N)];
+    if(B.blind&&best.v<thr)best.v=thr;/* jefes: atacan a su ritmo aunque no tengan pistas */
     if(best.v>=thr){
       let t=best.t;
       if(Math.random()<eps)t=[clampN(t[0]+rnd(3)-1),clampN(t[1]+rnd(3)-1)];
@@ -1994,6 +2044,7 @@ const I18N_EN={"☁️ Pasar mi partida a otro móvil":"☁️ Move my game to a
 const TR=(()=>{
   if(LANG==="es")return null;
   /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
+  Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
   Object.assign(I18N_EN,{"Lluvia de flechas": "Arrow rain", "Flechas en 3 filas a la vez.": "Arrows on 3 rows at once.", "¡Flechas en 3 filas! Muévete a una fila libre": "Arrows on 3 rows! Move to a free row", "Suelo ardiente": "Burning ground", "Tu siguiente bola deja el suelo en llamas 5 s.": "Your next fireball leaves the ground burning for 5 s.", "Su siguiente bola dejará fuego 5 s": "Their next fireball will leave fire for 5 s", "Humo": "Smoke", "4 s sin dejar huellas ni pasos.": "4 s without leaving footprints or steps.", "Fortaleza": "Fortress", "5 s inmune, pero sin poder moverte.": "Immune for 5 s, but you can't move.", "Es inmune 5 s: no gastes energía": "Immune for 5 s: save your energy", "Vista de búho": "Owl sight", "Ves al rival 1,5 s.": "You see your rival for 1.5 s.", "¡Te está viendo! Muévete ya": "They can see you! Move now", "Doble o nada": "Double or nothing", "Apareces al instante en tu huella falsa.": "You instantly appear on your fake footprint.", "Tormenta": "Storm", "Tu siguiente rayo cae en las dos diagonales.": "Your next bolt strikes both diagonals.", "Su siguiente rayo caerá en X": "Their next bolt will strike in an X", "Mecha corta": "Short fuse", "Tu siguiente bomba cae sin aviso y el doble de rápido.": "Your next bomb lands with no warning, twice as fast.", "Campo minado": "Minefield", "3 minas ocultas en la isla rival.": "3 hidden mines on the rival island.", "¡Hay 3 minas ocultas en tu isla!": "There are 3 hidden mines on your island!", "Gran salto": "Big leap", "2,5 s en el aire: nada te alcanza.": "2.5 s in the air: nothing can hit you.", "Está en el aire 2,5 s: nada le alcanza": "In the air for 2.5 s: nothing can hit them", "Florecer": "Bloom", "Recuperas 1 vida.": "You recover 1 life.", "Ha recuperado 1 vida": "They recovered 1 life", "Mira láser": "Laser sight", "Tu siguiente disparo llega al instante.": "Your next shot lands instantly.", "Coro": "Chorus", "5 huellas falsas en tu isla durante 3 s.": "5 fake footprints on your island for 3 s.", "¡Dispara!": "Fire!", "¡ULTI lista!": "ULTI ready!", "Solo una vez por ronda.": "Only once per round.", "Una vez por ronda.": "Once per round.", "Lista en": "Ready in", "Ya tienes toda la vida": "You already have full health", "¡QUEMADO!": "BURNED!", "ULTI RIVAL": "RIVAL ULTI", "¡Tu ULTI está lista! Es el botón dorado: un poder único de cada héroe, una vez por ronda. ¡Tócalo!": "Your ULTI is ready! It's the golden button: a unique power for each hero, once per round. Tap it!", "¡Eso es! Cada héroe tiene una ULTI distinta. Mírala en su ficha.": "That's it! Every hero has a different ULTI. Check it on their card."});
   Object.assign(I18N_EN,{"Nombre: #": "Name: #", "Sonido": "Sound", "Vibración": "Vibration", "Enviar estadísticas de uso": "Send usage statistics", "Cómo se juega": "How to play", "Pasar mi partida a otro móvil": "Move my game to another phone", "Política de privacidad": "Privacy policy", "Copiar código": "Copy code", "Aviso": "Warning", "Racha ×#": "Streak ×#", "Nuevos premios en el camino": "New rewards on the road", "Tras el escalón #: un premio cada # fichas": "After tier #: a reward every # tokens", "¡RECLAMAR!": "CLAIM!", "CÓDIGO": "CODE", "ABRIR": "OPEN", "Muy pronto": "Soon", "DESBLOQUEAR CON": "UNLOCK WITH", "O CON": "OR WITH", "# GEMAS": "# GEMS", "Temporada # · quedan # días": "Season # · # days left", "Temporada # · quedan # días · ": "Season # · # days left · ", "premios": "rewards", "ya alcanzados se desbloquean al momento": "already reached unlock instantly", "1.ª victoria del día: llave doble, +30 monedas y +20 de Poder": "First win of the day: double key, +30 coins and +20 Power", "+20 gemas al crearla": "+20 gems when you create it"});
   const exact=new Map(),pats=[],rx=t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
@@ -2030,7 +2081,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* ================= guardado ================= */
 const SAVE_KEY="amago-v3";
-const DEF={tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
+const DEF={camp:{},tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
   gemsFree:0,gemsPaid:0,own:{skin:[],frame:[]},equip:{skin:{},frame:""},purch:{starter:false,tx:{},pending:[],month:{m:"",cents:0},log:[],bundleWk:-1},gemDeals:{day:-1,got:{}},
   wk:{wk:-1,list:[]},cal:{day:-1,i:0,cyc:0},fw:-1,wc:{day:-1,n:0},ws:0,ls:0,troMax:0,mgot:{},seen:-1,back:0,pity:0,age:{band:""},offerSeen:{day:-1,keys:{}},gemOnce:{},offers:{day:-1,got:[]},lastLoss:false,vib:1,welcome:0};
 /* restos del modo demostración (quitado: Apple no permite códigos que desbloqueen contenido) */
@@ -2376,7 +2427,7 @@ function patIcon(pat){
 }
 
 /* retrato 3D (si hay WebGL) o el dibujo 2D de reserva */
-function heroSVG(id){return GFX&&GFX.PORTRAIT[id]?`<img class="h3" src="${GFX.PORTRAIT[id]}" alt="" draggable="false">`:heroSVG2D(id);}
+function heroSVG(id){const src=GFX&&(GFX.PORTRAIT[id]||(HEROES[id].boss?GFX.BASE+"sprites/"+id+".webp":null));return src?`<img class="h3" src="${src}" alt="" draggable="false">`:heroSVG2D(id);}
 
 /* ================= gráficos 3D: héroes de vinilo brillante (estilo juguete) ================= */
 const GFX=(function(){
@@ -2713,7 +2764,7 @@ function glbHero(id){
   return root;
 }
 /* ---- héroes 2D: la ilustración como una figura de cartón que siempre mira a la cámara ---- */
-const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira"],SPRITES={},SPRITE_H={flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
+const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo"],SPRITES={},SPRITE_H={topo:1.3,flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
 const SKIN_LIST=["brasa_glacial","muro_magma","sombra_carmesi","truco_artico","ojo_nevado"];
 function loadSprites(){
   const L=new T.TextureLoader();
@@ -2741,6 +2792,7 @@ const RIG2D={
   muro:{h:[.45,.62],n:[.45,.34],c:[.43,.18],sL:[.22,.3],hL:[.12,.72],sR:[.76,.3],hR:[.86,.74],pL:[.37,.72],fL:[.35,.96],pR:[.56,.72],fR:[.58,.96],atk:"slam",m:"R"},
   rayo:{h:[.56,.76],n:[.56,.5],c:[.56,.36],sL:[.42,.55],hL:[.16,.62],sR:[.7,.55],hR:[.86,.68],pL:[.48,.82],fL:[.45,.97],pR:[.63,.82],fR:[.66,.97],x:[["gorro","head",[.6,.2],[.62,.04]]],atk:"shoot",m:"L"},
   bum:{h:[.5,.78],n:[.5,.6],c:[.5,.42],sL:[.25,.62],hL:[.1,.73],sR:[.78,.62],hR:[.91,.76],pL:[.42,.84],fL:[.4,.97],pR:[.6,.84],fR:[.62,.97],x:[["mecha","head",[.55,.15],[.62,.04]]],atk:"throw",m:"R"},
+  topo:{h:[.48,.72],n:[.47,.49],c:[.47,.34],sL:[.22,.54],hL:[.2,.82],sR:[.7,.52],hR:[.85,.56],pL:[.38,.79],fL:[.33,.965],pR:[.6,.79],fR:[.62,.965],atk:"throw",m:"R"},
   mina:{h:[.48,.68],n:[.47,.42],c:[.47,.25],sL:[.22,.48],hL:[.2,.8],sR:[.7,.46],hR:[.85,.5],pL:[.38,.76],fL:[.33,.96],pR:[.6,.76],fR:[.62,.96],atk:"throw",m:"R"},
   salto:{h:[.5,.68],n:[.5,.45],c:[.5,.25],sL:[.32,.5],hL:[.2,.9],sR:[.68,.48],hR:[.88,.6],pL:[.4,.74],fL:[.45,.95],pR:[.62,.74],fR:[.74,.92],x:[["cinta","head",[.22,.18],[.02,.32]]],atk:"throw",m:"R"},
   savia:{h:[.42,.65],n:[.4,.45],c:[.38,.28],sL:[.33,.5],hL:[.2,.6],sR:[.5,.5],hR:[.64,.62],pL:[.4,.75],fL:[.42,.96],pR:[.47,.75],fR:[.5,.92],x:[["alaL","spine",[.32,.45],[.12,.3]],["alaR","spine",[.52,.42],[.8,.25]]],atk:"shoot",m:"L"},
@@ -4167,6 +4219,7 @@ function showHome(){
     <div class="sidecol l">
       ${`<button class="sbtn ${unlocked("mis")?"":"lk"}" data-a="missions">${unlocked("mis")&&mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt="">${unlocked("mis")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>`}
       ${`<button class="sbtn ${unlocked("pass")?"":"lk"}" data-a="tab" data-t="pass">${unlocked("pass")&&passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt="">${unlocked("pass")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>`}
+      ${S.tutDone&&S.games>=1?`<button class="sbtn" data-a="camp">${campStars(0)?"":`<i class="badge bob">!</i>`}<span class="sq pnl"><span class="cmico">🗺️</span><span class="bar mini"><u style="width:${campStars(0)/(CAMP[0].lv.length*3)*100}%"></u></span></span><span class="lb out">Campaña</span></button>`:""}
       ${calReady()?`<button class="sbtn" data-a="calendar"><i class="badge ${at==="cal"?"bob":""}">!</i><span class="sq pnl"><img src="${UIA}chest1.webp" alt=""></span><span class="lb out">Diario</span></button>`:""}
     </div>
     <div class="sidecol r">
@@ -4690,6 +4743,11 @@ function renderModal(){
   }else if(M.k==="vs"){
     const lp=G.lv?G.lv.p:1,lb=G.lv?G.lv.b:1;
     m.innerHTML=`<div class="sheet vssheet"><h2 class="out">RONDA ${G.round}</h2><div class="vs"><div class="p"><div class="av big">${heroArt(M.p)}</div><b class="out" style="color:var(--me)">${HEROES[M.p].n}</b><small>${esc(S.name)} · Poder ${lp}</small></div><div class="mid out">VS</div><div class="p"><div class="av big">${heroSVG(M.b)}</div><b class="out" style="color:var(--foe)">${HEROES[M.b].n}</b><small>${esc(G.opp.name)} · Poder ${lb}</small></div></div></div>`;
+  }else if(M.k==="camplv"){const L=CAMP[M.w].lv[M.l],st=S.camp[M.w+"."+M.l]||0;
+    m.innerHTML=`<div class="sheet camplv"><small class="cmk">${L.boss?"JEFE":"NIVEL "+(M.l+1)}</small><h2 class="out">${L.n}</h2><div class="cmfoe ${L.boss?"boss":""}">${heroSVG(L.foe)}</div><p>${L.d}</p>
+      <div class="cmstars">${[1,2,3].map(i=>`<span class="${i<=st?"on":""}">★</span>`).join("")}</div><p class="cmrule">★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida</p>
+      <p class="cmrw">${st?"Premio ya cobrado. Cada estrella nueva da monedas.":`Premio: <b>${L.coins}</b> ${ico("coin","s")}${L.gems?` · <b>${L.gems}</b> ${ico("gem","s")}`:""}${L.chest?` · ${ico("chest1","s")}`:""}`}</p>
+      <button class="gbtn xl shine" data-a="campgo" data-w="${M.w}" data-l="${M.l}">JUGAR</button><button class="pillbtn" data-a="close" style="margin-top:10px">Volver</button></div>`;
   }else if(M.k==="gpause"){/* pausa en partida: contra el bot el tiempo se para mientras está abierta */
     m.innerHTML=`<div class="sheet"><h2 class="out">Pausa</h2><p>${G&&G.online?"La partida online sigue en marcha. Si sales, cuenta como derrota.":"La partida está parada. Si sales, no ganas premios de esta partida."}</p><button class="gbtn" data-a="close">SEGUIR</button><button class="pillbtn dangerlink" data-a="home" style="margin-top:10px">Salir de la partida</button></div>`;
   }else if(M.k==="info"){
@@ -4777,6 +4835,7 @@ const DIFFS={
   dificil:{n:"Difícil",i:"😈",d:"Rápido y certero",think:.2,react:.32,perc:.28,dodge:.85,eps:.08,passive:1.5,gap:0,thr:1,moveP:1},
 };
 function botParams(){
+  if(G.camp)return Object.assign({},CAMP_BOT[campLv().bot]);
   const P=Object.assign({},DIFFS[S.diff]||DIFFS.facil);
   /* curva suave: antes de Fácil a Normal se pasaba de ganar ~45 % a ~11 % de las rondas. Fácil se endurece poco a poco
      hasta 300 trofeos y Normal empieza a medio camino y llega a su valor a los 400 */
@@ -4788,6 +4847,65 @@ function botParams(){
   if(G.score.b>G.score.p){P.react+=.2;P.eps+=.15;}
   if((S.ls||0)>=2){P.react+=.1;}/* tras dos derrotas seguidas, el bot afloja un poco */
   return P;
+}
+/* ================= campaña: niveles de una ronda contra el bot con reglas propias y un jefe por mundo =================
+   Sin energía ni esperas. Estrellas: 1 ganar, 2 perdiendo como mucho 1 vida, 3 sin perder vida. Premios una sola vez. */
+const CAMP=[{k:"pradera",n:"Pradera del Rey Topo",lv:[
+  {n:"El espantapájaros",foe:"flecha",bot:"a",coins:20,d:"Un duelo a una sola ronda para calentar."},
+  {n:"Lluvia de energía",foe:"brasa",bot:"b",coins:25,mod:{elx:2},d:"La energía se recarga al doble para los dos. ¡No pares de disparar!"},
+  {n:"Sin trucos",foe:"ojo",bot:"c",coins:30,mod:{noAmago:1},d:"Aquí nadie puede usar el amago. Y Ojo oye tus pasos."},
+  {n:"El guardián",foe:"muro",bot:"d",coins:35,mod:{hpB:1.5,huB:.5},d:"Muro tiene 9 vidas y sus huellas duran la mitad."},
+  {n:"Rey Topo",foe:"topo",bot:"topo",boss:1,coins:100,gems:10,chest:2,d:"Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto."},
+]}];
+const CAMP_POS=[[30,86],[68,68],[32,50],[66,33],[50,13]];
+const CAMP_BOT={
+  a:{think:1.15,react:.5,perc:.45,dodge:.25,eps:.6,passive:7,gap:5,thr:1.6,moveP:.35},
+  b:{think:.95,react:.48,perc:.42,dodge:.35,eps:.5,passive:5,gap:3.2,thr:1.5,moveP:.45},
+  c:{think:.8,react:.45,perc:.4,dodge:.45,eps:.4,passive:4,gap:3.2,thr:1.35,moveP:.55},
+  d:{think:.6,react:.42,perc:.36,dodge:.6,eps:.28,passive:3,gap:2.2,thr:1.15,moveP:.7},
+  topo:{think:.3,react:.3,perc:.3,dodge:0,eps:.3,passive:4,gap:5,thr:1,moveP:1,blind:true},
+};
+const campLv=()=>CAMP[G.camp.w].lv[G.camp.l];
+const curArena=()=>G&&G.camp?CAMP[G.camp.w].k:arenaOf(S.tro).a.k;
+const campStars=w=>CAMP[w].lv.reduce((a,_,l)=>a+(S.camp[w+"."+l]||0),0);
+const campOpen=(w,l)=>l===0||(S.camp[w+"."+(l-1)]||0)>0;
+function showCamp(){
+  leaveHome();G=null;R=null;UI.screen="camp";stopLoop();app.className="camp";setBg();
+  const w=0,W=CAMP[w],cur=W.lv.findIndex((_,l)=>!(S.camp[w+"."+l]>0));
+  app.innerHTML=`<div class="cmbg"></div><div class="cmhead"><button class="gbtn blue sm cmback" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt=""></button><div class="cmtt"><small>CAMPAÑA · MUNDO 1</small><h2 class="out">${W.n}</h2></div><span class="cmst pnl out">★ ${campStars(w)}/${W.lv.length*3}</span></div>
+  <div class="cmmap"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/></svg>
+  ${W.lv.map((L,l)=>{const st=S.camp[w+"."+l]||0,open=campOpen(w,l);
+    return `<button class="cmn ${open?"":"lk"} ${st?"done":""} ${L.boss?"boss":""} ${l===cur?"cur":""}" data-a="camplv" data-w="${w}" data-l="${l}" style="left:${CAMP_POS[l][0]}%;top:${CAMP_POS[l][1]}%" aria-label="${L.n}">
+      <span class="cmc">${L.boss?heroSVG(L.foe):`<b class="out">${l+1}</b>`}${open?"":`<img class="cmlock" src="${UIA}lock.webp" alt="">`}</span>
+      <span class="cms">${[1,2,3].map(i=>`<i class="${i<=st?"on":""}">★</i>`).join("")}</span><span class="cml out">${L.n}</span></button>`;}).join("")}</div>
+  <div class="cmnext pnl"><img src="${UIA}lock.webp" alt=""><span><b class="out">Mundo 2 · Bosque de la Araña Madre</b><small>Muy pronto</small></span></div>`;
+}
+function campStart(w,l){
+  const L=CAMP[w].lv[l];
+  G={online:false,camp:{w,l},score:{p:0,b:0},round:1,used:{p:[],b:[]},tutorial:false,opp:{name:TT(HEROES[L.foe].n),tro:0},oppPool:[L.foe]};
+  EV.add("camp_start",{w,l});showPick();
+}
+async function endCamp(w){
+  const {w:wi,l}=G.camp,L=campLv(),k=wi+"."+l,me=R.heroes.p,win=w==="p",lost=me.max-me.hp,stars=win?(lost<=0?3:lost<=1?2:1):0,prev=S.camp[k]||0;
+  let coins=0,gems=0,chest=false;
+  if(win){
+    if(!prev){coins+=L.coins;if(L.gems){gems=L.gems;addGems(gems,false);}
+      if(L.chest){if(S.box.length<BOX_MAX){S.box.push(L.chest);chest=true;}else coins+=50;}}
+    if(stars>prev){coins+=(stars-prev)*5;S.camp[k]=stars;}
+    S.coins+=coins;S.hw[me.type]=(S.hw[me.type]||0)+1;
+  }
+  EV.add("camp_end",{w:wi,l,win,stars,hero:me.type,dur:Math.round(R.now)});
+  G.used.p=[me.type];G.score=null;R=null;save();
+  const next=win&&CAMP[wi].lv[l+1]?l+1:null;
+  endScreen(win,!w,`<p class="cmend out">${L.n}</p>
+    <div class="cmstars big">${[1,2,3].map(i=>`<span class="${i<=stars?"on":""}" style="animation-delay:${i*.18}s">★</span>`).join("")}</div>
+    <div class="chips">${coins?`<div class="chip pnl in">${ico("coin")}<b class="out up">+${coins}</b><small>Monedas</small></div>`:""}${gems?`<div class="chip pnl in">${ico("gem")}<b class="out up">+${gems}</b><small>Gemas</small></div>`:""}</div>
+    <div class="endrows">${chest?`<button class="endchest feat gold shine top in" data-a="openbox"><img src="${UIA}chest${L.chest}.webp" alt=""><span><b class="out">¡Cofre del jefe!</b><small>Toca para abrirlo</small></span><span class="gbtn green sm">ABRIR</span></button>`:""}
+      ${win&&L.boss&&!prev?`<div class="erow pnl in"><span>👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.</span></div>`:""}
+      ${win&&!coins&&!gems?`<p class="sub in">Ya tenías los premios de este nivel.</p>`:""}
+      ${win&&stars<3?`<p class="sub in">Consigue las 3 estrellas ganando sin perder vida.</p>`:""}
+      ${!win?`<p class="sub in">${L.boss?"Guarda energía y dispárale justo cuando asoma tras su terremoto.":"¡Casi! Prueba con otro héroe."}</p>`:""}</div>
+    <div class="endbtns"><button class="gbtn blue" data-a="camp">MAPA</button><button class="gbtn xl shine" data-a="campgo" data-w="${wi}" data-l="${next??l}">${next!=null?"SIGUIENTE":win?"REPETIR":"REINTENTAR"}</button></div>`);
 }
 function startMatch(){
   sfx("go");actx();
@@ -4801,15 +4919,15 @@ function startMatch(){
 }
 function availP(){const a=S.unl.filter(i=>!G.used.p.includes(i));return a.length?a:S.unl.slice();}
 function starsHTML(s){return [0,1].map(i=>`<span class="${i<G.score[s]?"on":"off"}">★</span>`).join("");}
-function showPick(){if(GFX)GFX.loadArena(arenaOf(S.tro).a.k);
+function showPick(){if(GFX)GFX.loadArena(curArena());
   leaveHome();
   UI.screen="pick";app.className="center pick";stopLoop();FX.ps.length=0;
   const av=availP();
   if(!G.pickSel||!av.includes(G.pickSel))G.pickSel=av.includes(S.fav)?S.fav:av[0];
   const id=G.pickSel,H=HEROES[id],RR=RAR[H.rar];
   const wait=G.online&&G.picked;
-  app.innerHTML=`<div class="mbg"></div><div class="pickhead"><span class="stars big">${starsHTML("p")}</span><h2 class="out">RONDA ${G.round}</h2><span class="stars big">${starsHTML("b")}</span></div>
-    <p class="slogan">${G.online?`Contra <b>${esc(G.opp.name)}</b> · `:""}Elige héroe. No se puede repetir.</p>
+  app.innerHTML=`<div class="mbg"></div><div class="pickhead"><span class="stars big">${starsHTML("p")}</span><h2 class="out">${G.camp?(campLv().boss?"JEFE":"NIVEL "+(G.camp.l+1)):"RONDA "+G.round}</h2><span class="stars big">${starsHTML("b")}</span></div>
+    <p class="slogan">${G.online?`Contra <b>${esc(G.opp.name)}</b> · `:""}${G.camp?esc(TT(campLv().n))+" · Elige héroe.":"Elige héroe. No se puede repetir."}</p>
     <div class="pickstage r${H.rar}"><span class="godrays"></span><span class="floorglow"></span><span class="isle"></span><span class="pkart">${heroArt(id)}</span>
       <div class="pkname"><span class="rartag r${H.rar}">${RR.n}</span><h3 class="out">${H.n}</h3><small>${H.r}</small></div></div>
     <div class="hrow pk" style="--c:${S.unl.length<=6?S.unl.length:Math.ceil(S.unl.length/2)}">${S.unl.map(h=>{const used=!av.includes(h);return `<button class="hchip ${h===id?"on":""} ${used?"used":""}" data-a="psel" data-id="${h}" ${used||wait?"disabled":""} aria-label="${HEROES[h].n}">${heroSVG(h)}${used?"<i>✓</i>":""}</button>`;}).join("")}</div>
@@ -4823,14 +4941,15 @@ async function startRound(){
   const tp=G.pickSel;
   const tb=G.oppPool.find(i=>!G.used.b.includes(i))||pick(IDS);
   /* tu nivel en partida está limitado por la arena; el bot sube con los trofeos (nunca más de 1 por encima de ti) */
-  const lp=effLv(tp),base=1+Math.floor(S.tro/110)+(S.diff==="dificil"?1:S.diff==="facil"?-1:0),lb=G.tutorial?1:Math.max(1,Math.min(LV_MAX,LV_CAP[arenaIdx()],base,lp+1));
+  const lp=effLv(tp),base=1+Math.floor(S.tro/110)+(S.diff==="dificil"?1:S.diff==="facil"?-1:0),lb=G.tutorial||G.camp?1:Math.max(1,Math.min(LV_MAX,LV_CAP[arenaIdx()],base,lp+1));
   G.lv={p:lp,b:lb};
-  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:arenaOf(S.tro).a.k,ulti:!G.tutorial||G.round>=3});recReset();
+  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:curArena(),ulti:!G.tutorial||G.round>=3,mod:G.camp?campLv().mod:null});recReset();
   if(G.tut)TUT.setup(R);
   await vsAndCountdown(tp,tb);
   R.paused=false;
   EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
   if(!G.tutorial&&S.games<=3&&$("#amagob"))toast("amagonew","🎭 <b>¡Nuevo: AMAGO!</b> Deja una huella falsa en tu isla para que el rival dispare donde no estás.");
+  if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over)banner("👑 "+TT("REY TOPO"),TT("Solo puedes darle cuando asoma, justo después de atacar"),"red",2200);}return;}
   if(G.tut)TUT.go();
   else if(G.tutorial&&G.round===1){toast("tut1","🫣 Tu héroe está escondido en tu isla <b>verde</b>. El rival, en la <b>roja</b>: ¡adivina dónde y dispárale!");tutHand();}
   else toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
@@ -5108,6 +5227,7 @@ async function endRound(w){
   if(G.tut)TUT.halt();
   renderLive();EV.add("round_end",{win:w==="p",draw:!w,dur:Math.round(R.now*10)/10,hero:R.heroes.p.type,opp:R.heroes.b.type,n:G.round,mode:"bot",tut:!!G.tutorial});
   const b=R.heroes.b;await revealFoe(b.x,b.y,b.type,w);
+  if(G.camp)return endCamp(w);
   const ko=R.heroes.p.hp<=0||R.heroes.b.hp<=0,decisive=w&&(G.score[w]+1>=2||G.round>=5);
   if(ko&&decisive&&!G.tutorial){REC.clip=null;await playReplay(w);}
   if(w)G.score[w]++;
@@ -5349,15 +5469,15 @@ function buildArena(){
   <canvas id="gl" aria-label="Arena. Toca tu isla para moverte y la isla roja para atacar"></canvas><div class="vign"></div>
   <div class="ghud g3hud">
     <div class="side2"><span class="mini">${heroSVG(hp.type)}</span><div class="sinfo"><span class="nm out" style="color:var(--me)">${esc(S.name)}</span><span class="hearts" id="hp-p"></span></div></div>
-    <div class="tbox"><button class="gpause" data-a="gpause" aria-label="Pausa">II</button><span class="t out" id="clock">1:15</span><span class="stars"><span>${starsHTML("p")}</span>&nbsp;<span>${starsHTML("b")}</span></span></div>
+    <div class="tbox"><button class="gpause" data-a="gpause" aria-label="Pausa">II</button><span class="t out" id="clock">1:15</span>${G.camp?`<span class="stars camptag out">${campLv().boss?"JEFE":"NIVEL "+(G.camp.l+1)}</span>`:`<span class="stars"><span>${starsHTML("p")}</span>&nbsp;<span>${starsHTML("b")}</span></span>`}</div>
     <div class="side2 foe"><div class="sinfo"><span class="nm out" style="color:var(--foe)">${esc(G.opp.name)}</span><span class="hearts" id="hp-b"></span></div><span class="mini">${heroSVG(hb.type)}</span></div>
   </div>
   <div class="status" id="status"></div>
   <div class="gbottom">
     ${R.ultiOn&&AMAGO.ULTIS[hp.type]?`<button class="ultib off" id="ultib" data-a="ulti" aria-label="ULTI"><span class="uring" id="uring"></span><span class="uic">${AMAGO.ULTIS[hp.type].i}</span><span class="ulb out">ULTI</span><span class="unm out" id="unm">${TT(AMAGO.ULTIS[hp.type].n)}</span></button>`:""}<div class="ebar" id="ebar"><span class="elbl">energía · se recarga sola</span><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},(_,i)=>`<i class="${i===H.cost-1?"cost":""}"><b></b></i>`).join("")}</div></div>
-    <div class="acts v2"><span class="act ab mv" title="Moverte una casilla"><span class="aic">👟</span><span class="alb">moverse</span><small class="asub">toca tu isla</small><b class="acost">💧${H.mc}</b></span><span class="act ab at" title="${H.a}"><span class="aic">${patIcon(H.pat)}</span><span class="alb">${H.a.toLowerCase()}</span><small class="asub">toca la isla roja</small><b class="acost">💧${H.cost}</b></span>${G.tutorial&&!(G.tut&&G.round>=2)?"":`<button class="act amagob ab" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla"><span class="aic">🎭</span><span class="alb">amago</span><small class="asub">huella falsa</small><b class="acost">💧${AMAGO.decoyCost({type:hp.type})}</b></button>`}<span class="act bst" id="bst"></span></div>
+    <div class="acts v2"><span class="act ab mv" title="Moverte una casilla"><span class="aic">👟</span><span class="alb">moverse</span><small class="asub">toca tu isla</small><b class="acost">💧${H.mc}</b></span><span class="act ab at" title="${H.a}"><span class="aic">${patIcon(H.pat)}</span><span class="alb">${H.a.toLowerCase()}</span><small class="asub">toca la isla roja</small><b class="acost">💧${H.cost}</b></span>${R.mod.noAmago||(G.tutorial&&!(G.tut&&G.round>=2))?"":`<button class="act amagob ab" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla"><span class="aic">🎭</span><span class="alb">amago</span><small class="asub">huella falsa</small><b class="acost">💧${AMAGO.decoyCost({type:hp.type})}</b></button>`}<span class="act bst" id="bst"></span></div>
   </div></div>`;
-  B3.build($("#gl"),R,arenaOf(S.tro).a.k);B3.onTile=onTile;B3.onRestore=()=>{if(R&&UI.screen==="game")B3.build($("#gl"),R,arenaOf(S.tro).a.k);};
+  B3.build($("#gl"),R,curArena());B3.onTile=onTile;B3.onRestore=()=>{if(R&&UI.screen==="game")B3.build($("#gl"),R,curArena());};
 }
 function renderLive(){
   if(!R||UI.screen!=="game"||!$("#hp-p"))return;
@@ -5441,7 +5561,7 @@ const ui={
     if(mine){
       if(p.res==="hit"){const ko=(p.vhp??R.heroes.b.hp)<=0,c=B3.screenPos("b",p.vx??0,p.vy??0,1);
         floatText(c.x,c.y,ko?"¡K.O.!":"¡TOCADO! −"+p.dmg,"big");sfx(ko?"kill":"hit");buzz(ko?[40,30,60]:40);if(ko&&!REDUCED)SLOW.until=performance.now()+650;}
-      else if(p.res==="block"){floatText(to.x,to.y,"🛡️ ¡Bloqueado!","miss");sfx("miss");}
+      else if(p.res==="block"){floatText(to.x,to.y,p.under?"⛏️ ¡Bajo tierra!":"🛡️ ¡Bloqueado!","miss");sfx("miss");if(p.under)toast("topounder","⛏️ <b>Está bajo tierra.</b> Ya sabes dónde se esconde: dispárale cuando asome.");}
       else if(p.res==="near"){floatText(to.x,to.y,"¡CERCA! 🔥","near");sfx("near");toast("near","🔥 <b>¡CERCA!</b> El rival estaba justo al lado. ¡Remata!");}
       else{floatText(to.x,to.y,"AGUA","miss");sfx("miss");}
     }else{
@@ -5470,6 +5590,8 @@ const ui={
     if(s==="p"){banner(U.i+" "+TT(U.n).toUpperCase()+"!",TT(U.d),"gold",1100);sfx("burst");buzz([30,20,50]);B3.shake(.3);B3.burst(B3.tileWorld("p",R.heroes.p.x,R.heroes.p.y).setY(.6),[0xffe25a,0xffffff,0xffa81f],46,2.6,3,.14);}
     else if(U.w){banner("⚠️ "+TT("ULTI RIVAL")+": "+TT(U.n),TT(U.w),"red",1500);sfx("radar");buzz(40);}},
   ping(){sfx("radar");},
+  surface(s){if(UI.screen!=="game"||s!=="b")return;sfx("radar");const h=R.heroes.b,c=B3.screenPos("b",h.x,h.y,1);floatText(c.x,c.y,"👑 ¡Asoma! ¡Dale!","near");toast("topoout","👑 <b>¡El Rey Topo asoma!</b> Solo ahora puedes darle. Esquiva su terremoto y dispara.");},
+  enrage(s){if(UI.screen!=="game")return;banner("😡 "+TT("¡REY TOPO FURIOSO!"),TT("Dos terremotos a la vez y asoma menos tiempo"),"red",1600);B3.shake(.4);buzz([40,30,40]);},
   roundOver(w){endRound(w);},
 };
 
@@ -5538,6 +5660,9 @@ document.addEventListener("click",e=>{
     case "arenaclose":el.remove();break;
     case "missions":sfx("tap");UI.modal={k:"missions"};renderModal();break;
     case "keysinfo":sfx("tap");keysInfo();break;
+    case "camp":sfx("tap");UI.modal=null;renderModal();EV.add("screen",{s:"camp"});showCamp();break;
+    case "camplv":{const w=+el.dataset.w,l=+el.dataset.l;if(!campOpen(w,l)){sfx("nope");shake(el);break;}sfx("tap");UI.modal={k:"camplv",w,l};renderModal();break;}
+    case "campgo":sfx("go");actx();UI.modal=null;renderModal();campStart(+el.dataset.w,+el.dataset.l);break;
     case "openbox":EV.add("chest_open",{n:S.box.length});openBox();break;
     case "boxtap":boxTap();break;
     case "buy":buy(el.dataset.id);break;
