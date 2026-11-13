@@ -2887,9 +2887,9 @@ function kkSmooth(g){/* normales medias por posición: el contorno no se abre en
 /* sombreado propio estilo Supercell (no depende de las luces de la escena): color saturado, sombra azulada en vez de gris,
    luz cálida desde arriba-delante, un poco de cielo por encima y borde luminoso que separa al héroe del suelo */
 const KKL={value:new T.Vector3(-.35,.85,.55).normalize()};const KKG={value:new T.Vector4(0,0,0,0)};/* color del suelo que rebota en el héroe (a=0 fuera del combate) */window.AMAGO_KKG=KKG;
-function kkMat(map,col){
-  const m=new T.MeshBasicMaterial({map,toneMapped:false});if(col)m.color.copy(col);m.userData.flash={value:0};
-  m.onBeforeCompile=s=>{s.uniforms.uL=KKL;s.uniforms.uGnd=KKG;s.uniforms.uFlash=m.userData.flash;
+function kkMat(map,col,tone){
+  const m=new T.MeshBasicMaterial({map,toneMapped:false});if(col)m.color.copy(col);m.userData.flash={value:0};m.userData.tone={value:new T.Vector3(...(tone||[1.12,.82,1]))};/* x saturación · y fuerza de la sombra · z brillo */
+  m.onBeforeCompile=s=>{s.uniforms.uL=KKL;s.uniforms.uGnd=KKG;s.uniforms.uFlash=m.userData.flash;s.uniforms.uTone=m.userData.tone;
     s.vertexShader="varying vec3 vKN;varying vec3 vKV;varying float vKY;\n"+s.vertexShader.replace("#include <fog_vertex>",
 `#include <fog_vertex>
 #ifdef USE_SKINNING
@@ -2898,17 +2898,17 @@ function kkMat(map,col){
  vec3 kn0=normal;
 #endif
 vKN=normalize(mat3(modelMatrix)*kn0);vec3 kwp=(modelMatrix*vec4(transformed,1.)).xyz;vKV=normalize(cameraPosition-kwp);vKY=kwp.y;`);
-    s.fragmentShader="varying vec3 vKN;varying vec3 vKV;varying float vKY;uniform vec3 uL;uniform vec4 uGnd;uniform float uFlash;\n"+s.fragmentShader.replace("#include <map_fragment>",
+    s.fragmentShader="varying vec3 vKN;varying vec3 vKV;varying float vKY;uniform vec3 uL;uniform vec4 uGnd;uniform float uFlash;uniform vec3 uTone;\n"+s.fragmentShader.replace("#include <map_fragment>",
 `#include <map_fragment>
 {vec3 N=normalize(vKN);if(!gl_FrontFacing)N=-N;vec3 V=normalize(vKV);
- vec3 base=diffuseColor.rgb;float lg=dot(base,vec3(.299,.587,.114));base=min(max(mix(vec3(lg),base,1.16),0.),vec3(1.));
+ vec3 base=diffuseColor.rgb;float lg=dot(base,vec3(.299,.587,.114));base=min(max(mix(vec3(lg),base,uTone.x),0.),vec3(1.));
  /* tres tonos definidos (sombra fría, medio, luz) con frontera nítida, bajos algo más oscuros y un brillo pequeño: el volumen se lee aunque el color sea muy saturado */
  float nd=dot(N,uL),lit=smoothstep(-.04,.12,nd);
- vec3 shade=base*vec3(.5,.5,.8)+vec3(.01,.015,.05);
+ vec3 shade=mix(base,pow(base,vec3(1.45))*vec3(.7,.7,.86)+vec3(.012,.014,.04),uTone.y);/* sombra más oscura y más saturada, no gris */
  vec3 c=mix(shade,base*.97,lit);
  c*=.86+.14*smoothstep(-.7,.5,N.y);
  c+=(base*.1+vec3(.05,.045,.03))*smoothstep(.6,.82,nd);
- c+=vec3(1.,.98,.92)*.09*smoothstep(.9,.95,dot(N,normalize(uL+V)));
+ c+=vec3(1.,.98,.92)*.09*uTone.z*smoothstep(.9,.95,dot(N,normalize(uL+V)));
  c+=uGnd.rgb*uGnd.a*(.10+.22*clamp(-N.y+.25,0.,1.))*(1.-smoothstep(.0,.9,vKY));c*=mix(1.,.74+.26*smoothstep(-.02,.3,vKY),uGnd.a);
  float rim=pow(1.-clamp(dot(N,V),0.,1.),3.);c+=vec3(1.,.95,.82)*rim*.38*smoothstep(-.2,.5,N.y);
  c=mix(c,vec3(1.),uFlash);diffuseColor.rgb=c;}`);};
@@ -3006,6 +3006,7 @@ function animateKK(u,t,st,act,at_){
 }
 /* ---- héroes 3D sacados de su propia ilustración (art/h3d): la malla está en las mismas coordenadas que la carta 2D,
    así que usa el mismo esqueleto y las mismas animaciones (RIG2D), pero con volumen, luz, contorno y giro real ---- */
+const H3DTONE=(()=>{const q=/[?&]tone=([\d.,]+)/.exec(location.search);return q?q[1].split(",").map(Number):[1.04,.9,.6];})();
 const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira"],H3D={},H3DYAW={};let h3dP=null;
 const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")!=="0";}catch(e){return true;}})();
 function loadH3D(ids){
@@ -3014,13 +3015,13 @@ function loadH3D(ids){
   h3dP=h3dP||{};
   return Promise.all(live.map(id=>h3dP[id]||(h3dP[id]=new Promise(res=>loadGLB(BASE+"h3d/"+id+EXT,g=>{
     let geo=null;g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(o.isMesh&&!geo)geo=o.geometry.clone().applyMatrix4(o.matrixWorld);});
-    L.load(BASE+"h3d/"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=4;if(geo)H3D[id]={geo,tex:t};res();},undefined,()=>res());
+    L.load(BASE+"h3d/"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=8;if(geo)H3D[id]={geo,tex:t};res();},undefined,()=>res());
   },()=>res())))));
 }
 function h3dHero(id){
   const src=H3D[id],im=SPRITES[id].image,h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K,w=h*im.width/im.height;
   const geo=src.geo.clone();geo.scale(h,h,h);
-  const mat=kkMat(src.tex),sf=window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
+  const mat=kkMat(src.tex,null,H3DTONE),sf=window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
   if(sf){const kk0=mat.onBeforeCompile;mat.onBeforeCompile=sh=>{kk0(sh);sh.uniforms.uSk={value:new T.Vector3(sf.h*Math.PI/180,sf.s,sf.b)};
     sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform vec3 uSk;")
       .replace("#include <map_fragment>",`#include <map_fragment>
@@ -3743,10 +3744,25 @@ function build(){
   bill(P.pino,1.8,-3.7,-9.3,.5);bill(P.arbol,1.5,-2.7,-8.6,2.2);bill(P.bandera_roja,1.2,3.2,-12.6,4);bill(P.arbol,1.8,4.4,-13.4,1.1);
   const pt=puffTex();clouds=[];for(const [x,y,z,w] of [[-2.6,4.4,-14,6],[3.2,5.6,-18,8],[.4,3.3,-22,7],[-5.5,6.2,-20,7],[6,3.8,-24,6]]){const m=new T.Mesh(new T.PlaneGeometry(w,w/2),new T.MeshBasicMaterial({map:pt,transparent:true,depthWrite:false,fog:false,opacity:.95}));m.position.set(x,y,z);m.userData.x0=x;sc.add(m);clouds.push(m);}
   const blob=new T.Mesh(new T.PlaneGeometry(1.1,.75),new T.MeshBasicMaterial({map:shadowTex(),transparent:true,depthWrite:false}));blob.rotation.x=-Math.PI/2;blob.position.y=.006;sc.add(blob);sc.userData.blob=blob;
+  /* fondo de estudio (sin isla): color liso de la arena con un foco suave, para que el héroe sea lo único que se mira */
+  if(STUDIO){sc.children.forEach(o=>{if(o!==blob)o.visible=false;});sc.fog=null;r.toneMapping=T.NoToneMapping;blob.scale.set(1.7,1.7,1);blob.material.color.set(0x000a1e);}
   sc.add(new T.HemisphereLight(0xeaf6ff,0x7fae5a,1.5));
   const d=new T.DirectionalLight(0xfff1dc,2.8);d.position.set(3,6,4);d.castShadow=true;d.shadow.mapSize.set(1024,1024);d.shadow.radius=6;d.shadow.bias=-.0006;const c=d.shadow.camera;c.left=c.bottom=-2.5;c.right=c.top=2.5;c.near=1;c.far=20;sc.add(d);
   const rim=new T.DirectionalLight(0xbfe6ff,3);rim.position.set(-3,2.5,-4);sc.add(rim);
   cam=new T.PerspectiveCamera(34,1,.1,120);
+}
+const STUDIO=!/[?&]isla=1/.test(location.search),_stu={};
+function studioTex(k){
+  if(_stu[k])return _stu[k];const col=(typeof ARENA_BG!=="undefined"&&ARENA_BG[k])||["#2a8cf0","#1450b8"];
+  const c=document.createElement("canvas");c.width=512;c.height=1024;const g=c.getContext("2d");
+  g.fillStyle=col[1];g.fillRect(0,0,512,1024);
+  let q=g.createRadialGradient(256,470,20,256,470,620);q.addColorStop(0,col[0]);q.addColorStop(1,col[1]);g.fillStyle=q;g.fillRect(0,0,512,1024);
+  q=g.createRadialGradient(256,430,0,256,430,300);q.addColorStop(0,"rgba(255,255,255,.34)");q.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=q;g.fillRect(0,0,512,1024);
+  /* trama muy sutil de rombos */
+  g.fillStyle="rgba(255,255,255,.045)";for(let y=-1;y<18;y++)for(let x=-1;x<9;x++){const cx=x*64+(y%2?32:0),cy=y*64;g.beginPath();g.moveTo(cx,cy-13);g.lineTo(cx+13,cy);g.lineTo(cx,cy+13);g.lineTo(cx-13,cy);g.closePath();g.fill();}
+  /* suelo: elipse clara bajo el héroe */
+  g.save();g.translate(256,598);g.scale(1,.22);q=g.createRadialGradient(0,0,0,0,0,250);q.addColorStop(0,"rgba(255,255,255,.3)");q.addColorStop(.7,"rgba(255,255,255,.12)");q.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=q;g.beginPath();g.arc(0,0,250,0,7);g.fill();g.restore();
+  const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return _stu[k]=t;
 }
 function frame(){
   if(!r||!stage)return;
@@ -3786,7 +3802,7 @@ function onUp(){if(!drag)return;const d=drag;drag=null;lastTouch=performance.now
 function mount(stageEl,id){
   if(!cv){cv=document.createElement("canvas");cv.id="home3d";cv.setAttribute("aria-hidden","true");document.body.prepend(cv);
     r=new T.WebGLRenderer({canvas:cv,antialias:true});r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=1.05;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;build();sc.environment=GFX.envFor(r);}
-  stage=stageEl;document.body.classList.add("h3d");
+  stage=stageEl;document.body.classList.add("h3d");if(STUDIO){let k="pradera";try{k=arenaOf(S.tro).a.k;}catch(e){}sc.background=studioTex(k);}
   stage.addEventListener("pointerdown",onDown);stage.addEventListener("pointermove",onMove);stage.addEventListener("pointerup",onUp);stage.addEventListener("pointercancel",onUp);
   set(id);if(!on){on=true;loop();}
 }
