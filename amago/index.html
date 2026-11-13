@@ -2810,7 +2810,7 @@ function loadAnim3d(ids=Object.keys(ANIM3D)){
     return Promise.all(jobs);})())));
 }
 /* espera a que estén las animaciones de estos héroes, como mucho ms (si no, salen con su imagen fija) */
-const ensureAnim=(ids,ms=4000)=>Promise.race([loadAnim3d(ids),new Promise(r=>setTimeout(r,ms))]);
+const ensureAnim=(ids,ms=4000)=>Promise.race([Promise.all([loadAnim3d(ids),loadH3D(ids)]),new Promise(r=>setTimeout(r,ms))]);
 const HERO_K=1.04;/* tamaño de los héroes en la arena: que se lean bien en el móvil */
 function anim3dHero(id){
   const m=ANIM3D[id],h0=heroRefH(id)*1.12*(SPRITE_H[id]||1)*(m.k||1)*HERO_K;
@@ -2980,7 +2980,44 @@ function animateKK(u,t,st,act,at_){
   if(u.wings){const f=Math.sin(t*(act==="attack"?26:11));for(const p of u.wings.children)p.rotation.y=p.userData.sd*(.55+.4*f);}
   if(u.spark){const k=.8+.5*Math.abs(Math.sin(t*23))+.2*Math.sin(t*7);u.spark.scale.setScalar(k);u.spark.rotation.set(t*5,t*3,0);}
 }
-function makeHero(id,skin){if(!skin&&KKM[id]&&KKCLIPS){const g=kkHero(id);g.userData.id=id;return g;}if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
+/* ---- héroes 3D sacados de su propia ilustración (art/h3d): la malla está en las mismas coordenadas que la carta 2D,
+   así que usa el mismo esqueleto y las mismas animaciones (RIG2D), pero con volumen, luz, contorno y giro real ---- */
+const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira"],H3D={},H3DYAW={};let h3dP=null;
+const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")==="1";}catch(e){return false;}})();
+function loadH3D(ids){
+  if(!H3DON||!T.GLTFLoader)return Promise.resolve();
+  const L=new T.TextureLoader(),live=(ids||H3D_LIST).filter(id=>H3D_LIST.includes(id)&&(!(AMAGO.HEROES[id]&&AMAGO.HEROES[id].live===false)||window.AMAGO_DEV_HEROES));
+  h3dP=h3dP||{};
+  return Promise.all(live.map(id=>h3dP[id]||(h3dP[id]=new Promise(res=>loadGLB(BASE+"h3d/"+id+EXT,g=>{
+    let geo=null;g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(o.isMesh&&!geo)geo=o.geometry.clone().applyMatrix4(o.matrixWorld);});
+    L.load(BASE+"h3d/"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=4;if(geo)H3D[id]={geo,tex:t};res();},undefined,()=>res());
+  },()=>res())))));
+}
+function h3dHero(id){
+  const src=H3D[id],im=SPRITES[id].image,h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K,w=h*im.width/im.height;
+  const geo=src.geo.clone();geo.scale(h,h,h);
+  const mat=kkMat(src.tex),sf=window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
+  if(sf){const kk0=mat.onBeforeCompile;mat.onBeforeCompile=sh=>{kk0(sh);sh.uniforms.uSk={value:new T.Vector3(sf.h*Math.PI/180,sf.s,sf.b)};
+    sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform vec3 uSk;")
+      .replace("#include <map_fragment>",`#include <map_fragment>
+      {float c=cos(uSk.x),s=sin(uSk.x);mat3 m=mat3(.213+c*.787-s*.213,.213-c*.213+s*.143,.213-c*.213-s*.787,.715-c*.715-s*.715,.715+c*.285+s*.140,.715-c*.715+s*.715,.072-c*.072+s*.928,.072-c*.072-s*.283,.072+c*.928+s*.072);
+       vec3 k=m*diffuseColor.rgb;float l=dot(k,vec3(.2126,.7152,.0722));diffuseColor.rgb=mix(vec3(l),k,uSk.y)*uSk.z;}`);};mat.customProgramCacheKey=()=>"h3dskin"+sf.h+"_"+sf.s+"_"+sf.b;}
+  const card=new T.Mesh(geo,mat);card.frustumCulled=false;
+  const root=new T.Group(),body=new T.Group(),pivot=new T.Group();body.name="body";root.add(body);body.add(pivot);pivot.add(card);
+  const u={body,head:new T.Object3D(),arms:[new T.Object3D(),new T.Object3D()],legs:[new T.Object3D(),new T.Object3D()],eyes:null,t0:Math.random()*10,sprite:true,h3d:true,card,mat,pivot,flip:1,h,id,rig:RIG2D[id],lt:null};
+  u.arms.forEach(a=>a.userData.base=0);root.userData=u;
+  if(u.rig)u.sk=skin2D(geo,u.rig,w,h);
+  root.traverse(o=>o.layers.enable(KKLAYER));KKSET.add(root);
+  return root;
+}
+/* orientación: andando o atacando mira hacia donde va; quieto se gira hacia ti y se inclina un poco hacia la cámara cenital */
+function faceH3D(u,t,st,act){
+  const dt=u.lt==null?0:Math.max(0,Math.min(.1,t-u.lt));u.lt=t;
+  const ry=u.body.parent?u.body.parent.rotation.y:0,face=st.walk||act==="attack",y0=H3DYAW[u.id]||0;
+  const want=face?ry+y0:(u.flat?0:.3),dy=Math.atan2(Math.sin(want-(u.yaw??want)),Math.cos(want-(u.yaw??want)));u.yaw=(u.yaw??want)+dy*Math.min(1,dt*10);
+  _kq1.setFromAxisAngle(_kY,-ry);_kq2.setFromAxisAngle(_kX,u.flat?0:-.5);_kq3.setFromAxisAngle(_kY,u.yaw);u.pivot.quaternion.copy(_kq1).multiply(_kq2).multiply(_kq3);
+}
+function makeHero(id,skin){if(!skin&&H3D[id]&&SPRITES[id]){const g=h3dHero(id);g.userData.id=id;return g;}if(!skin&&KKM[id]&&KKCLIPS){const g=kkHero(id);g.userData.id=id;return g;}if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
 
 /* ---- animación procedural ---- */
 function setFlash(g,on){
@@ -3011,7 +3048,7 @@ function animate(g,t,st){
   const u=g.userData,{body,head,arms,legs,eyes}=u;if(!body)return;
   if(u.kk){st=st||{};animateKK(u,t,st,st.act||null,st.actT||0);return;}
   if(u.a3){st=st||{};animate3d(u,t+u.t0,st,st.act||null,st.actT||0);return;}
-  if(u.sprite){st=st||{};animateSprite(u,t+u.t0,st,st.act||null,st.actT||0);return;}
+  if(u.sprite){st=st||{};if(u.h3d)faceH3D(u,t,st,st.act||null);animateSprite(u,t+u.t0,st,st.act||null,st.actT||0);return;}
   if(u.rig){const tt2=t+u.t0;st=st||{};animateRig(u.rig,tt2,st,st.act||null,st.actT||0);}
   const tt=t+u.t0;st=st||{};
   const walking=st.walk,act=st.act||null,at_=st.actT||0;
@@ -3079,7 +3116,7 @@ function bakePortraits(size=320){
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,loadGLB,BASE,EXT,makeHero,loadKK,KK,KKM,kkOutline,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,loadGLB,BASE,EXT,makeHero,loadH3D,H3D,loadKK,KK,KKM,kkOutline,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -3697,7 +3734,8 @@ function skinHero(id,k){
   const s=GFX.makeHero(id,k),u=s.userData;s.scale.setScalar(HH*.86/(u.a3?u.h*u.m.ih:u.h));u.t0=0;
   if(u.kk){u.flat=true;GFX.animate(s,0,{});s.updateMatrixWorld(true);const b=new T.Box3().setFromObject(s,true),hg=b.max.y-b.min.y,wd=Math.max(b.max.x-b.min.x,(b.max.z-b.min.z)*.7);
     s.scale.multiplyScalar(Math.min(HH*.95/hg,HH*1.15/wd)*(GFX.KK[id].hk||1));}
-  if(u.mat){u.mat.alphaTest=.5;u.mat.needsUpdate=true;}/* sin halo oscuro en los bordes a este tamaño */
+  if(u.h3d)u.flat=true;
+  if(u.mat&&!u.h3d){u.mat.alphaTest=.5;u.mat.needsUpdate=true;}/* sin halo oscuro en los bordes a este tamaño */
   const g=new T.Group(),body=new T.Group();body.add(s);g.add(body);g.userData={B:{},body,spr:s};return Promise.resolve(g);
 }
 let heroKey=null;
@@ -3706,7 +3744,7 @@ function set(id){
   if(!sc||key===heroKey&&hero)return;heroId=id;heroKey=key;const tok=++loadTok;
   /* siempre la ilustración 2D animada (la misma que en la arena y en las fichas); el modelo 3D antiguo solo si aún no ha cargado */
   const ok=GFX.SPRITES[k||id];if(!ok)heroKey=null;
-  (ok?skinHero(id,k):loadHero(id)).then(g=>{if(tok!==loadTok||!g)return;if(hero)sc.remove(hero);hero=g;sc.add(hero);pop=.6;act=null;play("jump");});
+  (ok?GFX.loadH3D([id]).then(()=>skinHero(id,k)):loadHero(id)).then(g=>{if(tok!==loadTok||!g)return;if(hero)sc.remove(hero);hero=g;sc.add(hero);pop=.6;act=null;play("jump");});
 }
 function unmount(){on=false;cancelAnimationFrame(raf);document.body.classList.remove("h3d");
   if(stage){stage.removeEventListener("pointerdown",onDown);stage.removeEventListener("pointermove",onMove);stage.removeEventListener("pointerup",onUp);stage.removeEventListener("pointercancel",onUp);}stage=null;}
@@ -5411,7 +5449,7 @@ function bootGame(){
   else if(!S.tutDone&&!S.games)TUT.welcome();
   else showHome();
 }
-if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadKK(),GFX.loadAnim3d([S.fav]),SHOW?SHOW.preload(S.fav):0,GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
+if(GFX){app.innerHTML=`<div class="mbg"></div><div class="loading"><div class="logo2">AMAGO</div><div class="lbar"><u></u></div><p class="sub">Preparando la arena…</p></div>`;{const all=Promise.all([GFX.loadSprites(),GFX.loadH3D([S.fav]),GFX.loadKK(),GFX.loadAnim3d([S.fav]),SHOW?SHOW.preload(S.fav):0,GFX.loadProps(),GFX.loadArena(arenaOf(S.tro).a.k)]);let booted=false,late=false;
   Promise.race([all,new Promise(r=>setTimeout(()=>{late=true;r();},45000))]).then(()=>{booted=true;bootGame();});
   /* si la conexión es lenta y los modelos llegan después, se cambian al momento */
   all.then(()=>setTimeout(()=>GFX.loadAnim3d(S.unl),1200));/* tus héroes, en segundo plano */
