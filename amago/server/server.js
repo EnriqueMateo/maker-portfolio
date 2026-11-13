@@ -263,6 +263,15 @@ function makeHooks(room) {
     ping() {
       for (const s of ["p", "b"]) ev(s, { e: "ping" });
     },
+    ulti(s, type) {
+      ev(s, { e: "ulti", s: "p", type });
+      // las ULTIs de engaño (sin aviso "w") no se le cuentan al rival
+      if (E.ULTIS[type] && E.ULTIS[type].w) ev(other(s), { e: "ulti", s: "b", type });
+    },
+    burn(s) {
+      ev(s, { e: "burn", s: "p" });
+      ev(other(s), { e: "burn", s: "b" });
+    },
     roundOver(w) {
       endRound(room, w);
     },
@@ -273,7 +282,9 @@ function startRound(room) {
   clearTimeout(room.pickTimer);
   room.track = { p: [], b: [] };
   const bot = room.players.b && room.players.b.isBot ? room.players.b : null;
-  const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params } : undefined);
+  // ULTIs solo si los dos clientes las entienden: contra una app antigua sería injusto
+  const ultiOn = ["p", "b"].every((s) => { const pl = room.players[s]; return pl && (pl.isBot || pl.ulti === true); });
+  const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params, ulti: ultiOn } : { ulti: ultiOn });
   room.R = R;
   room.ids = new Map();
   room.state = "count";
@@ -534,6 +545,7 @@ function handle(ws, m) {
       // una sola presentación por conexión: cambiarla a mitad de partida permitiría cambiar trofeos o de cuenta
       if (ws.helloed) return;
       ws.helloed = true;
+      ws.ulti = m.ulti === 1; // el cliente sabe mostrar las ULTIs (las versiones antiguas de la app no)
       ws.player = cleanPlayer(m);
       if (STORE) {
         // con base de datos, trofeos y héroes salen de la cuenta, nunca de lo que diga el móvil
@@ -602,6 +614,11 @@ function handle(ws, m) {
       room.picks[s] = m.hero;
       send(room.players[other(s)], { t: "oppPicked" });
       if (room.picks.p && room.picks.b) startRound(room);
+      break;
+    }
+    case "ulti": {
+      if (!room || room.state !== "play" || !room.R) return;
+      E.ulti(room.R, sideOf(room, ws), room.hooks);
       break;
     }
     case "move":
