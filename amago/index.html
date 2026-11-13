@@ -3769,9 +3769,9 @@ function frame(){
   const W=innerWidth,H=innerHeight,pr=Math.min(3,devicePixelRatio||1);
   if(cv.width!==Math.round(W*pr)||cv.height!==Math.round(H*pr)){r.setPixelRatio(pr);r.setSize(W,H,false);}
   /* encuadre: el héroe ocupa ~60 % del alto del escenario y queda centrado en él */
-  const rc=stage.getBoundingClientRect(),want=Math.max(160,rc.height*.56),tan=Math.tan(cam.fov*Math.PI/360),dist=HH*H/(2*tan*want),mid=HH*.5;
+  const rc=stage.getBoundingClientRect(),want=Math.max(160,rc.height*(STUDIO?.69:.56)),tan=Math.tan(cam.fov*Math.PI/360),dist=HH*H/(2*tan*want),mid=HH*.5;
   cam.aspect=W/H;cam.position.set(0,mid+dist*.16,dist);cam.lookAt(0,mid,0);
-  const cy=rc.top+rc.height*.43;cam.setViewOffset(W,H,0,H/2-cy,W,H);cam.updateProjectionMatrix();
+  const cy=rc.top+rc.height*(STUDIO?.455:.43);cam.setViewOffset(W,H,0,H/2-cy,W,H);cam.updateProjectionMatrix();
 }
 let skipF=0,lastDrawT=0;
 function loop(){
