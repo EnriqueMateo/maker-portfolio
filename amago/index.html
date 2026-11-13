@@ -1464,6 +1464,24 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
   .boxov .chimg{width:min(64vw,250px);height:min(56vw,224px)}
   .herorev .hi{height:min(44vh,260px)}
 }
+
+/* HUD de combate v2: botones de acción grandes con coste en chapa y gota de energía */
+.gbottom{gap:11px!important;padding-top:14px!important}
+.gbottom .acts.v2{display:flex!important;flex-wrap:wrap!important;gap:8px!important;align-items:stretch;justify-content:stretch}
+.gbottom .acts.v2 .ab{position:relative;flex:1 1 0;min-width:0;min-height:50px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:6px 6px 5px!important;border:3px solid var(--ink)!important;border-radius:16px!important;box-shadow:inset 0 3px 0 rgba(255,255,255,.42),inset 0 -5px 0 rgba(0,0,0,.2),0 5px 0 var(--ink)!important;color:#fff;font-family:var(--f-game)}
+.gbottom .acts.v2 .ab.mv{background:linear-gradient(#5db4ff,#2a74e6)!important}
+.gbottom .acts.v2 .ab.at{flex:1.5 1 0;background:linear-gradient(#ffa24a,#ee4a2c)!important}
+.gbottom .acts.v2 .ab.amagob{background:linear-gradient(#c38bff,#7a3ae0)!important}
+.acts.v2 .aic{font-size:22px;line-height:1;height:24px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 0 rgba(10,8,40,.55))}
+.acts.v2 .aic img,.acts.v2 .aic svg{height:24px;width:auto}
+.acts.v2 .aic .pat{grid-template-columns:repeat(3,7px)!important;gap:1px}.acts.v2 .aic .pat i{width:7px!important;height:7px!important}
+.acts.v2 .alb{font-size:13px;line-height:1.05;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-shadow:0 2px 0 var(--ink),1px 0 0 var(--ink),-1px 0 0 var(--ink),0 -1px 0 var(--ink)}
+.acts.v2 .acost{position:absolute;top:-11px;right:-5px;display:flex;align-items:center;gap:1px;padding:1px 7px 1px 4px;font-size:15px;line-height:1.2;border-radius:999px;background:linear-gradient(#2a2f7a,#171a4d);border:2px solid var(--ink);box-shadow:0 2px 0 var(--ink);color:#fff}
+.acts.v2 .acost img{height:14px;width:auto}
+.gbottom .acts.v2 .bst{flex:1 0 100%;order:-1;justify-content:center;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;min-height:0}
+.gbottom .acts.v2 .bst:empty{display:none}
+.g3 .gbottom .ebar{padding:5px 10px 5px 0!important;border-radius:999px 18px 18px 999px!important;margin-left:10px}
+.gbottom .ebar .elxn{width:46px!important;height:46px;margin:-10px 0 -10px -12px;flex:none;display:grid;place-items:center;border-radius:50% 50% 50% 50%/62% 62% 42% 42%;background:radial-gradient(circle at 34% 30%,#d9f5ff 0,#57bdff 28%,#1f7fe8 68%,#1650b8 100%);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink),inset 0 -4px 0 rgba(0,0,40,.18);color:#fff!important;font-size:26px!important;text-shadow:0 2px 0 var(--ink),1px 0 0 var(--ink),-1px 0 0 var(--ink),0 -1px 0 var(--ink)}
 </style>
 </head>
 <body>
@@ -5219,7 +5237,7 @@ function buildArena(){
   <div class="status" id="status"></div>
   <div class="gbottom">
     <div class="ebar" id="ebar"><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},(_,i)=>`<i class="${i===H.cost-1?"cost":""}"><b></b></i>`).join("")}</div></div>
-    <div class="acts"><span class="act" title="Moverte una casilla">👟 <b>💧${H.mc}</b>${G.tutorial&&G.round===1?" moverse":""}</span><span class="act" title="${H.a}">${patIcon(H.pat)} <b>💧${H.cost}</b> ${H.a.toLowerCase()}</span>${G.tutorial&&!(G.tut&&G.round>=2)?"":`<button class="act amagob" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla">🎭 <b>💧${AMAGO.decoyCost({type:hp.type})}</b> amago</button>`}<span class="act bst" id="bst"></span></div>
+    <div class="acts v2"><span class="act ab mv" title="Moverte una casilla"><span class="aic">👟</span><span class="alb">moverse</span><b class="acost">💧${H.mc}</b></span><span class="act ab at" title="${H.a}"><span class="aic">${patIcon(H.pat)}</span><span class="alb">${H.a.toLowerCase()}</span><b class="acost">💧${H.cost}</b></span>${G.tutorial&&!(G.tut&&G.round>=2)?"":`<button class="act amagob ab" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla"><span class="aic">🎭</span><span class="alb">amago</span><b class="acost">💧${AMAGO.decoyCost({type:hp.type})}</b></button>`}<span class="act bst" id="bst"></span></div>
   </div></div>`;
   B3.build($("#gl"),R,arenaOf(S.tro).a.k);B3.onTile=onTile;B3.onRestore=()=>{if(R&&UI.screen==="game")B3.build($("#gl"),R,arenaOf(S.tro).a.k);};
 }
