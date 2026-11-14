@@ -3,7 +3,7 @@ import sys,os,numpy as np,trimesh,pymeshlab,xatlas,cv2
 from scipy.spatial import cKDTree
 from PIL import Image
 i=sys.argv[1];D=os.path.dirname(os.path.abspath(__file__));NF=int(os.environ.get('NF','14000'));R=int(os.environ.get('TEX','1024'));G=sys.argv[2]
-src=trimesh.load(f'{D}/{i}.glb',force='mesh',process=False);tex=np.asarray(src.visual.material.baseColorTexture.convert('RGB'),np.float32);TH,TW=tex.shape[:2]
+src=trimesh.load(f'{D}/{i}.glb',force='mesh',process=False);_t=src.visual.material.baseColorTexture;tex=np.asarray(_t.convert('RGB'),np.float32);TA=np.asarray(_t.convert('RGBA'))[...,3];TH,TW=tex.shape[:2]
 # nube de puntos de color del original
 pts,fi=trimesh.sample.sample_surface(src,int(os.environ.get('NS','5000000')))
 tri=src.vertices[src.faces[fi]];v0,v1,v2=tri[:,0],tri[:,1],tri[:,2]
@@ -12,13 +12,16 @@ def bary(p,a,b,c):
     v=(d11*d20-d01*d21)/dn;w=(d00*d21-d01*d20)/dn;return np.stack([1-v-w,v,w],1)
 bc=bary(pts,v0,v1,v2);uvs=(np.asarray(src.visual.uv)[src.faces[fi]]*bc[:,:,None]).sum(1)
 cx=np.clip(uvs[:,0]*TW,0,TW-1).astype(int);cy=np.clip((1-uvs[:,1])*TH,0,TH-1).astype(int);pc=tex[cy,cx]
+# partes transparentes del original (capas invisibles con color negro): fuera de la nube de color
+_ok=TA[cy,cx]>=128
+if _ok.mean()>.2:pts=pts[_ok];pc=pc[_ok];print('opacos',round(float(_ok.mean()),2),flush=True)
 tree=cKDTree(pts)
 # malla ligera
 g0=trimesh.Trimesh(src.vertices,src.faces,process=True);g0.merge_vertices()
 ms=pymeshlab.MeshSet();ms.add_mesh(pymeshlab.Mesh(g0.vertices,g0.faces))
 SM=int(os.environ.get('SM','6'))
 if SM:ms.apply_coord_taubin_smoothing(stepsmoothnum=SM,lambda_=.5,mu=-.53)
-ms.meshing_decimation_quadric_edge_collapse(targetfacenum=NF,preservenormal=True,preservetopology=True,qualitythr=.5)
+ms.meshing_decimation_quadric_edge_collapse(targetfacenum=NF,preservenormal=True,preservetopology=os.environ.get('PT','1')=='1',qualitythr=.5)
 ms.apply_coord_taubin_smoothing(stepsmoothnum=2,lambda_=.5,mu=-.53)
 q=ms.current_mesh();m=trimesh.Trimesh(q.vertex_matrix(),q.face_matrix(),process=False)
 # normales de una copia muy suavizada (misma topología): la luz cae en bandas limpias y la silueta conserva el detalle
