@@ -1537,41 +1537,77 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .cmrule{font-size:12.5px;opacity:.8;margin:4px 0}.cmrw{margin:6px 0 12px}.cmrw img{width:20px;height:20px;vertical-align:-4px}
 .cmend{font-family:var(--f-game);font-size:22px;color:#fff;margin:0;text-align:center;width:100%}
 .camptag{font-family:var(--f-game);font-size:13px;color:#ffe25a;letter-spacing:.04em}
-/* ================= estética nueva (ui2): plana, oscura y sin contornos gruesos. Se activa con ?ui=2 (y se recuerda); la partida conserva su HUD ================= */
+/* ================= estéticas nuevas de menús: ?ui=2 Noche (oscura y plana) · ?ui=3 Arcade (viva, con contorno) · ?ui=4 Cielo (clara y redonda). ?ui=1 vuelve a la de siempre. La partida conserva su HUD ================= */
 html.ui2{--bg:#171a30;--bg2:#0c0d1a;--panel:#252843;--panel2:#2c3050;--muted:#b9bfdc}
 html.ui2 body{background:radial-gradient(120% 60% at 50% 0%,color-mix(in srgb,var(--arena,#2b358d) 38%,#171a30) 0%,#15172b 50%,#0c0d1a 100%) fixed,#0c0d1a}
-html.ui2 #app:not(.game),html.ui2 .modal,html.ui2 .page,html.ui2 .boxov{--ink:rgba(8,9,20,0);--ink-tx:#191b30;--ink-bg:#0e0f1d;
+html.ui2 :is(#app:not(.game),.modal,.page,.boxov){--ink:rgba(8,9,20,0);--ink-tx:#191b30;--ink-bg:#0e0f1d;
   --sky-1:#2b3058;--sky-2:#1b1e3a;--sky-3:#121427;--abyss:#0a0b16;
   --pnl-hi:#2e3254;--pnl-1:#272a47;--pnl-2:#21243d;--pnl-lo:#181a2e;--well:#12131f;
   --y-1:#FFDC52;--y-2:#FFB81C;--y-lip:#D99400;--g-1:#5FE36C;--g-2:#27B84A;--g-lip:#1B8F38;
   --b-1:#58B6FF;--b-2:#2F7BEE;--b-lip:#2262C4;--r-1:#FF6F6A;--r-2:#E8404A;--r-lip:#B92C38;
-  --d-1:#6c7190;--d-2:#565b78;--d-lip:#454a63;--tx-2:#c9cee6;--tx-3:#8f95b5}
-html.ui2 #app:not(.game) .out,html.ui2 .modal .out,html.ui2 .page .out,html.ui2 .boxov .out{text-shadow:0 2px 0 rgba(0,0,0,.32),0 0 1px rgba(0,0,0,.4)}
-html.ui2 .mbg::before{opacity:.03}
-html.ui2 #app:not(.game) .pnl,html.ui2 .modal .pnl,html.ui2 .page .pnl{border:1.5px solid rgba(255,255,255,.09);background:linear-gradient(180deg,var(--pnl-hi),var(--pnl-2));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 10px 22px -12px rgba(0,0,0,.7)}
-html.ui2 #app:not(.game) .pnl::before,html.ui2 .modal .pnl::before,html.ui2 .page .pnl::before{display:none}
-html.ui2 #app:not(.game) .gbtn,html.ui2 .modal .gbtn,html.ui2 .page .gbtn,html.ui2 .boxov .gbtn{border:0;border-radius:15px;background:linear-gradient(180deg,var(--t),var(--b));color:#2c1c00;text-shadow:none;
-  box-shadow:inset 0 -5px 0 rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.35),0 10px 20px -10px var(--b)}
-html.ui2 #app:not(.game) .gbtn::before,html.ui2 .modal .gbtn::before,html.ui2 .page .gbtn::before,html.ui2 .boxov .gbtn::before{display:none}
-html.ui2 .gbtn.xl{border-radius:18px}
-html.ui2 #app:not(.game) .gbtn:active:not(:disabled),html.ui2 .modal .gbtn:active:not(:disabled){transform:translateY(2px) scale(.985);box-shadow:inset 0 -2px 0 rgba(0,0,0,.16),0 4px 10px -6px var(--b)}
-html.ui2 #app:not(.game) .gbtn:is(.green,.blue,.red),html.ui2 .modal .gbtn:is(.green,.blue,.red),html.ui2 .page .gbtn:is(.green,.blue,.red),html.ui2 .boxov .gbtn:is(.green,.blue,.red){color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25)}
-html.ui2 #app:not(.game) .gbtn:disabled,html.ui2 .modal .gbtn:disabled,html.ui2 .gbtn.off{color:#c9cde0;box-shadow:inset 0 -4px 0 rgba(0,0,0,.14)}
-html.ui2 .gbtn small{text-shadow:none}
-html.ui2 .modal .sheet{background:linear-gradient(180deg,#262a46,#1c1f35);border:1.5px solid rgba(255,255,255,.1);box-shadow:0 30px 60px -20px rgba(0,0,0,.8)}
-html.ui2 .modal .sheet>h2.out{background:none;border:0;box-shadow:none;padding:2px 8px;font-size:24px}
-html.ui2 .modal .sheet>h2.out::before,html.ui2 .modal .sheet>h2.out::after{display:none}
-html.ui2 .pillbtn{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);box-shadow:none;color:#fff}
+  --d-1:#6c7190;--d-2:#565b78;--d-lip:#454a63;--tx-2:#c9cee6;--tx-3:#8f95b5;
+  --x-out:0 2px 0 rgba(0,0,0,.32),0 0 1px rgba(0,0,0,.4);
+  --x-pnl-bd:1.5px solid rgba(255,255,255,.09);--x-pnl-bg:linear-gradient(180deg,#2e3254,#21243d);--x-pnl-sh:inset 0 1px 0 rgba(255,255,255,.07),0 10px 22px -12px rgba(0,0,0,.7);
+  --x-btn-bd:0 solid transparent;--x-btn-r:15px;--x-btn-rx:18px;--x-btn-col:#2c1c00;--x-btn-ts:none;--x-btn-ts2:0 1px 0 rgba(0,0,0,.25);--x-btn-sh:inset 0 -5px 0 rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.35),0 10px 20px -10px var(--b);--x-btn-tf:none;
+  --x-sheet:linear-gradient(180deg,#262a46,#1c1f35);--x-pill:rgba(255,255,255,.08)}
+html.ui3{--bg:#2a5fe0;--bg2:#12256e;--panel:#171d4a;--panel2:#1c2358}
+html.ui3 body{background:repeating-linear-gradient(135deg,rgba(255,255,255,.055) 0 28px,transparent 28px 56px) fixed,radial-gradient(120% 70% at 50% 0%,color-mix(in srgb,var(--arena,#2b6cf0) 62%,#7fd0ff) 0%,color-mix(in srgb,var(--arena,#2b6cf0) 82%,#3f7cff) 48%,color-mix(in srgb,var(--arena,#2b6cf0) 60%,#080b26) 100%) fixed,#12256e}
+html.ui3 :is(#app:not(.game),.modal,.page,.boxov){--ink:#0d0f24;
+  --sky-1:#5b9bff;--sky-2:#2f66e6;--sky-3:#1c3fb0;--abyss:#11246f;
+  --pnl-hi:#1e2660;--pnl-1:#18204f;--pnl-2:#131940;--pnl-lo:#0e1330;--well:#0a0e26;
+  --y-1:#FFE14D;--y-2:#FFBE0B;--y-lip:#E08A00;
+  --x-out:2px 0px 0 #0d0f24,-2px 0px 0 #0d0f24,0px 2px 0 #0d0f24,0px -2px 0 #0d0f24,1.5px 1.5px 0 #0d0f24,-1.5px 1.5px 0 #0d0f24,1.5px -1.5px 0 #0d0f24,-1.5px -1.5px 0 #0d0f24,0 3.5px 0 #0d0f24;
+  --x-pnl-bd:0 solid transparent;--x-pnl-bg:linear-gradient(180deg,rgba(20,26,70,.9),rgba(12,16,48,.9));--x-pnl-sh:0 4px 0 rgba(4,6,24,.35);
+  --x-btn-bd:3px solid #0d0f24;--x-btn-r:10px;--x-btn-rx:12px;--x-btn-col:#fff;--x-btn-ts:2px 0px 0 #0d0f24,-2px 0px 0 #0d0f24,0px 2px 0 #0d0f24,0px -2px 0 #0d0f24,1.5px 1.5px 0 #0d0f24,-1.5px 1.5px 0 #0d0f24,1.5px -1.5px 0 #0d0f24,-1.5px -1.5px 0 #0d0f24,0 3.5px 0 #0d0f24;--x-btn-ts2:2px 0px 0 #0d0f24,-2px 0px 0 #0d0f24,0px 2px 0 #0d0f24,0px -2px 0 #0d0f24,1.5px 1.5px 0 #0d0f24,-1.5px 1.5px 0 #0d0f24,1.5px -1.5px 0 #0d0f24,-1.5px -1.5px 0 #0d0f24,0 3.5px 0 #0d0f24;--x-btn-sh:inset 0 -6px 0 var(--l),inset 0 3px 0 rgba(255,255,255,.45),0 5px 0 #0d0f24;--x-btn-tf:skewX(-6deg);
+  --x-sheet:linear-gradient(180deg,#232c74,#151b4c);--x-pill:rgba(10,14,40,.7)}
+html.ui4{--bg:#8fd0ff;--bg2:#4f9ff5;--panel:#3a6cf2;--panel2:#4b7dff;--muted:#e6f0ff}
+html.ui4 body{background:linear-gradient(#d4f0ff 0%,#9ad6ff 38%,#5aa9f8 100%) fixed,#5aa9f8}
+html.ui4 :is(#app:not(.game),.modal,.page,.boxov){--ink:rgba(20,40,120,0);--ink-tx:#17306e;--ink-bg:#1b3f9e;
+  --sky-1:#dcf3ff;--sky-2:#9ad6ff;--sky-3:#62aef8;--abyss:#4a94ee;
+  --pnl-hi:#5585ff;--pnl-1:#3f70f4;--pnl-2:#2f5fe6;--pnl-lo:#2449b8;--well:#1d3c9c;
+  --y-1:#FFE066;--y-2:#FFC02E;--y-lip:#E39A00;--g-1:#7BEA6E;--g-2:#34C759;--g-lip:#229A42;
+  --tx-2:#e6eeff;--tx-3:#c3d4ff;
+  --x-out:1.5px 0px 0 #1f3f9c,-1.5px 0px 0 #1f3f9c,0px 1.5px 0 #1f3f9c,0px -1.5px 0 #1f3f9c,1.1px 1.1px 0 #1f3f9c,-1.1px 1.1px 0 #1f3f9c,1.1px -1.1px 0 #1f3f9c,-1.1px -1.1px 0 #1f3f9c,0 3px 0 #1f3f9c;
+  --x-pnl-bd:0 solid transparent;--x-pnl-bg:linear-gradient(180deg,#5585ff,#2f5fe6);--x-pnl-sh:inset 0 2px 0 rgba(255,255,255,.28),0 5px 0 rgba(23,48,130,.45),0 14px 22px -10px rgba(20,50,140,.5);
+  --x-btn-bd:0 solid transparent;--x-btn-r:999px;--x-btn-rx:999px;--x-btn-col:#402800;--x-btn-ts:none;--x-btn-ts2:0 1px 0 rgba(0,0,0,.22);--x-btn-sh:inset 0 -5px 0 rgba(0,0,0,.14),inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 rgba(23,48,130,.35);--x-btn-tf:none;
+  --x-sheet:linear-gradient(180deg,#5585ff,#2c58d8);--x-pill:rgba(255,255,255,.2)}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .out{text-shadow:var(--x-out)}
+html.uix .mbg::before{opacity:.03}
+html.ui4 .mbg::after{opacity:.15}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .pnl{border:var(--x-pnl-bd);background:var(--x-pnl-bg);box-shadow:var(--x-pnl-sh)}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .pnl::before{display:none}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .gbtn{border:var(--x-btn-bd);border-radius:var(--x-btn-r);background:linear-gradient(180deg,var(--t),var(--b));color:var(--x-btn-col);text-shadow:var(--x-btn-ts);box-shadow:var(--x-btn-sh);transform:var(--x-btn-tf)}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .gbtn::before{display:none}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .gbtn.xl{border-radius:var(--x-btn-rx)}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .gbtn:active:not(:disabled){transform:var(--x-btn-tf) translateY(3px);filter:brightness(.95)}
+html.ui3 :is(#app:not(.game),.modal,.page,.boxov) .gbtn:active:not(:disabled){transform:skewX(-6deg) translateY(3px)}
+html:is(.ui2,.ui4) :is(#app:not(.game),.modal,.page,.boxov) .gbtn:active:not(:disabled){transform:translateY(3px)}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .gbtn:is(.green,.blue,.red){color:#fff;text-shadow:var(--x-btn-ts2)}
+html.uix :is(#app:not(.game),.modal,.page,.boxov) .gbtn:disabled,html.uix :is(#app:not(.game),.modal,.page,.boxov) .gbtn.off{color:#e3e6f2}
+html:is(.ui2,.ui4) .gbtn small{text-shadow:none}
+html.uix .modal .sheet{background:var(--x-sheet);border:var(--x-pnl-bd);box-shadow:0 30px 60px -20px rgba(0,0,0,.7)}
+html.uix .modal .sheet>h2.out{background:none;border:0;box-shadow:none;padding:2px 8px;font-size:24px}
+html.uix .modal .sheet>h2.out::before,html.uix .modal .sheet>h2.out::after{display:none}
+html.uix .pillbtn{background:var(--x-pill);border:1.5px solid rgba(255,255,255,.14);box-shadow:none;color:#fff}
 html.ui2 .tabs{background:rgba(16,17,32,.94);border-top:1px solid rgba(255,255,255,.08);box-shadow:0 -10px 30px -10px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-html.ui2 .tabs button{filter:none}
-html.ui2 .tabs button>img,html.ui2 .tabs button>span{opacity:.6}
-html.ui2 .tabs button.on>img,html.ui2 .tabs button.on>span{opacity:1}
-html.ui2 .tabs button.on::before{inset:2px 6px 2px;border:0;border-radius:14px;background:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.05));box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
-html.ui2 .tabs button.on img{transform:translateY(-3px) scale(1.12)}
-html.ui2 .tabs button.on span{margin-top:-2px;color:#ffd84a}
-html.ui2 .badge{border:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+html.ui3 .tabs{background:#0d0f24;border-top:0;box-shadow:0 -4px 0 rgba(4,6,24,.3)}
+html.ui4 .tabs{background:rgba(255,255,255,.95);border-top:0;box-shadow:0 -8px 24px -8px rgba(20,50,140,.45);border-radius:22px 22px 0 0}
+html.ui4 .tabs button span{color:#2a4fb8;text-shadow:none!important}
+html.ui4 .tabs button>img,html.ui4 .tabs button>span{opacity:.9}
+html.ui4 #app:not(.game) :is(.slogan,.sub){color:#17306e}
+html.uix .tabs button{filter:none}
+html.uix .tabs button>img,html.uix .tabs button>span{opacity:.6}
+html.uix .tabs button.on>img,html.uix .tabs button.on>span{opacity:1}
+html.uix .tabs button.on::before{inset:2px 6px 2px;border:0;border-radius:14px;background:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.05));box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+html.ui3 .tabs button.on::before{inset:0 4px 0;border-radius:0;background:linear-gradient(#ffe14d,#ffbe0b);box-shadow:none;transform:skewX(-6deg)}
+html.ui3 .tabs button.on span{color:#fff}
+html.ui4 .tabs button.on::before{background:#dfeaff;box-shadow:none}
+html.uix .tabs button.on img{transform:translateY(-3px) scale(1.12)}
+html.uix .tabs button.on span{margin-top:-2px}
+html.ui2 .tabs button.on span{color:#ffd84a}
+html:is(.ui2,.ui4) .badge{border:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 html.ui2 .cmbg{background:radial-gradient(110% 50% at 50% 0%,#3fae6a 0%,transparent 70%),linear-gradient(#1f6b4c,#143d36 55%,#0f1a24)}
-html.ui2 .cmc{border:0;box-shadow:inset 0 -5px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.4),0 8px 16px -6px rgba(0,0,0,.6)}
+html:is(.ui2,.ui4) .cmc{border:0;box-shadow:inset 0 -5px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.4),0 8px 16px -6px rgba(0,0,0,.6)}
 </style>
 </head>
 <body>
@@ -3046,7 +3082,7 @@ const KQ_BIG={idle:"Idle",walk:"Run",attack:"Punch",hit:"HitReact",ko:"Death",wi
   KQ_FLY={idle:"Flying_Idle",walk:"Fast_Flying",attack:"Headbutt",hit:"HitReact",ko:"Death",win:"Yes"},KQ_ANI={idle:"Idle",walk:"Gallop",attack:"Attack",hit:"Idle_HitReact1",ko:"Death",win:"Idle_2"};
 /* animales: siguen con sus ilustraciones 2D (los modelos gratuitos no llegaban a su nivel) */
 const KK={rayo:{atk:"Ranged_Magic_Shoot",item:1,k:.86},flecha:{atk:"Ranged_Bow_Release",item:1,k:1},sombra:{atk:"Throw",item:1,k:1},muro:{atk:"Melee_2H_Attack_Chop",k:1.12}};
-const UI2=(()=>{let on=false;try{const q=new URLSearchParams(location.search).get("ui");if(q!=null)localStorage.setItem("amago-ui",q);on=localStorage.getItem("amago-ui")==="2";}catch(e){}if(on)document.documentElement.classList.add("ui2");return ()=>document.documentElement.classList.contains("ui2");})();
+const UI2=(()=>{let v="1";try{const q=new URLSearchParams(location.search).get("ui");if(q!=null)localStorage.setItem("amago-ui",q);v=localStorage.getItem("amago-ui")||"1";}catch(e){}if(v==="2"||v==="3"||v==="4")document.documentElement.classList.add("uix","ui"+v);return v;})();
 const KKON=(()=>{try{const q=new URLSearchParams(location.search).get("kk");if(q!=null)localStorage.setItem("amago-kk",q);return localStorage.getItem("amago-kk")!=="0";}catch(e){return true;}})();
 const KKM={},KKI={},KKA={};let KKCLIPS=null,kkP=null;
 function kkSmooth(g){/* normales medias por posición: el contorno no se abre en las aristas duras */
@@ -3925,14 +3961,15 @@ function build(){
 }
 const STUDIO=!/[?&]isla=1/.test(location.search),_stu={};
 function studioTex(k){
-  const k0=k,ui2=document.documentElement.classList.contains("ui2");k=k+(ui2?"~2":"");if(_stu[k])return _stu[k];let col=(typeof ARENA_BG!=="undefined"&&ARENA_BG[k0])||["#2a8cf0","#1450b8"];
-  if(ui2){/* estética nueva: fondo oscuro con un resplandor del color de la arena */
-    const mix=(h,t,q)=>{const n=parseInt(h.slice(1),16),m=parseInt(t.slice(1),16),f=i=>Math.round(((n>>i)&255)*q+((m>>i)&255)*(1-q));return "rgb("+f(16)+","+f(8)+","+f(0)+")";};
-    col=[mix(col[0].length===7?col[0]:"#2a8cf0","#1a1d36",.6),"#10121f"];}
+  const k0=k,cl=document.documentElement.classList,uv=cl.contains("ui2")?2:cl.contains("ui3")?3:cl.contains("ui4")?4:1;k=k+"~"+uv;if(_stu[k])return _stu[k];let col=(typeof ARENA_BG!=="undefined"&&ARENA_BG[k0])||["#2a8cf0","#1450b8"];
+  {const mix=(h,t,q)=>{const n=parseInt(h.slice(1),16),m=parseInt(t.slice(1),16),f=i=>Math.round(((n>>i)&255)*q+((m>>i)&255)*(1-q));return "rgb("+f(16)+","+f(8)+","+f(0)+")";};
+    if(uv===2)col=[mix(col[0],"#1a1d36",.6),"#10121f"];/* Noche: oscuro con resplandor del color de la arena */
+    if(uv===4)col=[mix(col[0],"#ffffff",.3),mix(col[0],"#cfeaff",.55)];/* Cielo: pastel claro */}
   const c=document.createElement("canvas");c.width=512;c.height=1024;const g=c.getContext("2d");
   g.fillStyle=col[1];g.fillRect(0,0,512,1024);
   let q=g.createRadialGradient(256,470,20,256,470,620);q.addColorStop(0,col[0]);q.addColorStop(1,col[1]);g.fillStyle=q;g.fillRect(0,0,512,1024);
   q=g.createRadialGradient(256,430,0,256,430,300);q.addColorStop(0,"rgba(255,255,255,.34)");q.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=q;g.fillRect(0,0,512,1024);
+  if(uv===3){g.save();g.translate(256,512);g.rotate(-Math.PI/4);g.fillStyle="rgba(255,255,255,.06)";for(let i=-14;i<14;i+=2)g.fillRect(-900,i*56,1800,56);g.restore();}/* Arcade: franjas en diagonal */
   /* trama muy sutil de rombos */
   g.fillStyle="rgba(255,255,255,.045)";for(let y=-1;y<18;y++)for(let x=-1;x<9;x++){const cx=x*64+(y%2?32:0),cy=y*64;g.beginPath();g.moveTo(cx,cy-13);g.lineTo(cx+13,cy);g.lineTo(cx,cy+13);g.lineTo(cx-13,cy);g.closePath();g.fill();}
   /* suelo: elipse clara bajo el héroe */
