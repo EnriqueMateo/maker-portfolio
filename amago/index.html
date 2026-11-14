@@ -1661,6 +1661,54 @@ html.ui3 #app.game .gbottom .acts.v2 .ab.amagob{background:linear-gradient(#b87c
 html.ui3 #app.game .acts.v2 .acost{border-radius:4px 9px 4px 9px;background:#0d0f24;box-shadow:none}
 html.ui3 #app.game .gbottom .acts.v2 .bst{border-radius:5px 11px 5px 11px;background:rgba(13,15,36,.88)}
 html.ui3 #app.game .camptag{transform:skewX(-6deg);display:inline-block}
+/* Arcade: pase y camino de trofeos por dentro, y botones de acción pulsables */
+button.act.ab{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button.act.ab:active{filter:brightness(.9)}
+html.ui3 #app:not(.game) .tracks{gap:8px 6px}
+html.ui3 #app:not(.game) .tracks .hd{border-radius:5px 11px 5px 11px;transform:skewX(-6deg);border:3px solid #0d0f24;box-shadow:0 3px 0 #0d0f24;padding:7px 0 8px;font-size:16px}
+html.ui3 #app:not(.game) .tracks .hd.f{background:linear-gradient(#3aa0ff,#2468e0)}
+html.ui3 #app:not(.game) .tracks .hd.p{background:linear-gradient(#ffe14d,#ffbe0b)}
+html.ui3 #app:not(.game) .ptile{border-radius:5px 15px 5px 15px;padding:8px 0 0;justify-content:space-between;gap:4px;min-height:98px}
+html.ui3 #app:not(.game) .ptile.p{border-radius:15px 5px 15px 5px}
+html.ui3 #app:not(.game) .ptile.big{min-height:116px}
+html.ui3 #app:not(.game) .ptile b{align-self:stretch;background:rgba(8,10,34,.6);padding:5px 4px 6px;font-size:12.5px;text-shadow:none!important}
+html.ui3 #app:not(.game) .ptile.f{background:linear-gradient(180deg,#2a3590,#182060);box-shadow:inset 0 0 0 2px rgba(130,160,255,.2),0 4px 0 #070920}
+html.ui3 #app:not(.game) .ptile.p{background:linear-gradient(160deg,#ffdf55 0%,#f4a01c 80%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.3),0 4px 0 #070920}
+html.ui3 #app:not(.game) .ptile.p::after{display:none}
+html.ui3 #app:not(.game) .ptile.p b{background:rgba(90,45,0,.72)}
+html.ui3 #app:not(.game) .ptile.can{outline:0;box-shadow:0 0 0 3px #ffe14d,0 4px 0 #070920}
+html.ui3 #app:not(.game) .tnum i{border-radius:4px 10px 4px 10px;transform:skewX(-6deg);background:#0d0f24;border:0;width:34px;height:34px}
+html.ui3 #app:not(.game) .tnum.reach i{background:linear-gradient(#ffe14d,#ffbe0b);color:#fff;text-shadow:1.5px 0px 0 #0d0f24,-1.5px 0px 0 #0d0f24,0px 1.5px 0 #0d0f24,0px -1.5px 0 #0d0f24,1.1px 1.1px 0 #0d0f24,-1.1px 1.1px 0 #0d0f24,1.1px -1.1px 0 #0d0f24,-1.1px -1.1px 0 #0d0f24}
+html.ui3 #app:not(.game) .tnum.cur i{box-shadow:0 0 0 3px #fff}
+html.ui3 #app:not(.game) .rtile{border-radius:5px 15px 5px 15px;padding:8px 0 0;justify-content:space-between;gap:4px;border:3px solid #0d0f24}
+html.ui3 #app:not(.game) .rnode.r .rtile{border-radius:15px 5px 15px 5px}
+html.ui3 #app:not(.game) .rtile b{align-self:stretch;background:rgba(8,10,34,.6);padding:5px 4px 6px;font-size:13px;text-shadow:none!important}
+html.ui3 #app:not(.game) .rtile.claim{background:linear-gradient(160deg,#ffdf55 0%,#f4a01c 80%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.3),0 4px 0 #070920}
+html.ui3 #app:not(.game) .rtile.claim b{background:rgba(90,45,0,.72)}
+html.ui3 #app:not(.game) .cribn{border-radius:4px 9px 4px 9px;transform:translateX(-50%) skewX(-6deg);border:2.5px solid #0d0f24}
+html.ui3 #app:not(.game) .rnode .tro{border-radius:4px 10px 4px 10px;transform:translate(-50%,-50%) skewX(-6deg);background:#0d0f24;border:0;padding:5px 8px}
+html.ui3 #app:not(.game) .rnode.reach .tro{background:linear-gradient(#ffe14d,#ffbe0b);text-shadow:1.5px 0px 0 #0d0f24,-1.5px 0px 0 #0d0f24,0px 1.5px 0 #0d0f24,0px -1.5px 0 #0d0f24,1.1px 1.1px 0 #0d0f24,-1.1px 1.1px 0 #0d0f24,1.1px -1.1px 0 #0d0f24,-1.1px -1.1px 0 #0d0f24}
+html.ui3 #app:not(.game) .rail::before{border:0;background:#0d0f24;border-radius:3px;width:12px;margin-left:-6px;box-shadow:none}
+html.ui3 #app:not(.game) .rail .fill{border-radius:3px;width:8px;margin-left:-4px;box-shadow:none}
+html.ui3 #app:not(.game) .okc{border-radius:4px 9px 4px 9px}
+/* Arcade: móviles pequeños */
+@media (max-width:350px){
+  .mprof{min-width:84px!important}.mav{width:34px;height:34px}
+  .rpill{margin-left:12px!important;padding:0 5px 0 17px!important;min-width:38px!important;font-size:13px}
+  .rpill>.ico{width:30px;height:30px;left:-14px}.rpill:has(.plus){padding-right:19px!important}
+  html.ui3 #app.game .g3hud .side2{padding:3px 5px 5px!important;gap:4px}
+  html.ui3 #app.game .g3hud .side2 .mini{width:28px!important;height:28px!important}
+  html.ui3 #app.game .g3hud .hearts i{font-size:14px!important}
+  html.ui3 #app.game .g3hud .tbox{min-width:66px}html.ui3 #app.game .g3hud .tbox .t{font-size:17px;padding:3px 8px 4px}
+}
+@media (max-height:640px){
+  html.ui3 .sidecol{gap:4px;top:4px}
+  html.ui3 .sbtn{width:56px}html.ui3 .sbtn .sq{width:44px;height:44px}html.ui3 .sbtn .sq img{width:34px;height:34px}html.ui3 .sbtn .cmico{font-size:28px}
+  html.ui3 .sbtn>span.lb{font-size:10.5px;padding:1px 5px 2px;margin-top:-6px}
+  html.ui3 .keymod{width:64px}html.ui3 .keymod img.c{width:40px;height:34px}
+  html.ui3 .playrow2{margin-top:20px}html.ui3 .gbtn.play2{font-size:32px;padding:10px 16px 16px}
+  html.ui3 .hplate{margin-bottom:2px;padding:3px 12px 3px 6px}
+}
 </style>
 </head>
 <body>
@@ -2169,6 +2217,7 @@ const TR=(()=>{
   if(LANG==="es")return null;
   /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
   Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
+  Object.assign(I18N_EN,{"Toca una casilla de tu isla":"Tap a tile on your island","Toca una casilla de la isla roja":"Tap a tile on the red island"});
   Object.assign(I18N_EN,{"Lluvia de flechas": "Arrow rain", "Flechas en 3 filas a la vez.": "Arrows on 3 rows at once.", "¡Flechas en 3 filas! Muévete a una fila libre": "Arrows on 3 rows! Move to a free row", "Suelo ardiente": "Burning ground", "Tu siguiente bola deja el suelo en llamas 5 s.": "Your next fireball leaves the ground burning for 5 s.", "Su siguiente bola dejará fuego 5 s": "Their next fireball will leave fire for 5 s", "Humo": "Smoke", "4 s sin dejar huellas ni pasos.": "4 s without leaving footprints or steps.", "Fortaleza": "Fortress", "5 s inmune, pero sin poder moverte.": "Immune for 5 s, but you can't move.", "Es inmune 5 s: no gastes energía": "Immune for 5 s: save your energy", "Vista de búho": "Owl sight", "Ves al rival 1,5 s.": "You see your rival for 1.5 s.", "¡Te está viendo! Muévete ya": "They can see you! Move now", "Doble o nada": "Double or nothing", "Apareces al instante en tu huella falsa.": "You instantly appear on your fake footprint.", "Tormenta": "Storm", "Tu siguiente rayo cae en las dos diagonales.": "Your next bolt strikes both diagonals.", "Su siguiente rayo caerá en X": "Their next bolt will strike in an X", "Mecha corta": "Short fuse", "Tu siguiente bomba cae sin aviso y el doble de rápido.": "Your next bomb lands with no warning, twice as fast.", "Campo minado": "Minefield", "3 minas ocultas en la isla rival.": "3 hidden mines on the rival island.", "¡Hay 3 minas ocultas en tu isla!": "There are 3 hidden mines on your island!", "Gran salto": "Big leap", "2,5 s en el aire: nada te alcanza.": "2.5 s in the air: nothing can hit you.", "Está en el aire 2,5 s: nada le alcanza": "In the air for 2.5 s: nothing can hit them", "Florecer": "Bloom", "Recuperas 1 vida.": "You recover 1 life.", "Ha recuperado 1 vida": "They recovered 1 life", "Mira láser": "Laser sight", "Tu siguiente disparo llega al instante.": "Your next shot lands instantly.", "Coro": "Chorus", "5 huellas falsas en tu isla durante 3 s.": "5 fake footprints on your island for 3 s.", "¡Dispara!": "Fire!", "¡ULTI lista!": "ULTI ready!", "Solo una vez por ronda.": "Only once per round.", "Una vez por ronda.": "Once per round.", "Lista en": "Ready in", "Ya tienes toda la vida": "You already have full health", "¡QUEMADO!": "BURNED!", "ULTI RIVAL": "RIVAL ULTI", "¡Tu ULTI está lista! Es el botón dorado: un poder único de cada héroe, una vez por ronda. ¡Tócalo!": "Your ULTI is ready! It's the golden button: a unique power for each hero, once per round. Tap it!", "¡Eso es! Cada héroe tiene una ULTI distinta. Mírala en su ficha.": "That's it! Every hero has a different ULTI. Check it on their card."});
   Object.assign(I18N_EN,{"Nombre: #": "Name: #", "Sonido": "Sound", "Vibración": "Vibration", "Enviar estadísticas de uso": "Send usage statistics", "Cómo se juega": "How to play", "Pasar mi partida a otro móvil": "Move my game to another phone", "Política de privacidad": "Privacy policy", "Copiar código": "Copy code", "Aviso": "Warning", "Racha ×#": "Streak ×#", "Nuevos premios en el camino": "New rewards on the road", "Tras el escalón #: un premio cada # fichas": "After tier #: a reward every # tokens", "¡RECLAMAR!": "CLAIM!", "CÓDIGO": "CODE", "ABRIR": "OPEN", "Muy pronto": "Soon", "DESBLOQUEAR CON": "UNLOCK WITH", "O CON": "OR WITH", "# GEMAS": "# GEMS", "Temporada # · quedan # días": "Season # · # days left", "Temporada # · quedan # días · ": "Season # · # days left · ", "premios": "rewards", "ya alcanzados se desbloquean al momento": "already reached unlock instantly", "1.ª victoria del día: llave doble, +30 monedas y +20 de Poder": "First win of the day: double key, +30 coins and +20 Power", "+20 gemas al crearla": "+20 gems when you create it"});
   const exact=new Map(),pats=[],rx=t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
@@ -3855,6 +3904,7 @@ function update(R,dt){
       const mp=myProjs.find(p=>inArea(p.cells,x,y));
       if(mp){dc=0xff9a2e;dop=.55+Math.sin(t*14)*.2;ring=1-(R.now-mp.launched)/(mp.hitAt-mp.launched);rc=0xff9a2e;}
       else if(inArea(hoverCells,x,y)){dc=0xffe066;dop=.55+Math.sin(t*12)*.1;}
+      else if(G&&G.hint&&G.hint.b==="b"&&performance.now()<G.hint.until){dc=0xffe066;dop=.35+.2*Math.sin(t*14);ring=1;rc=0xffe066;}
       else if(canShoot){dc=0xffffff;dop=.04+.03*Math.sin(t*3+x+y);}
       else{dc=0x1a0a20;dop=.14;}
       {const sm=shotMem[x+","+y],age=sm?t-sm.t:99;if(age<7&&!mp&&!inArea(hoverCells,x,y)){dc=sm.res==="near"?0xff8a1f:0x2a6fd8;dop=Math.max(dop,.32*(1-age/7));}}
@@ -3873,6 +3923,7 @@ function update(R,dt){
       if(tl.haz)tl.haz.visible=!!ip;
       if(ip){dc=0xff1030;dop=.25;ring=1-(R.now-ip.launched)/(ip.hitAt-ip.launched);rc=0xffffff;icon="⚠️";isc=.55;}
       else if(dest&&dest[0]===x&&dest[1]===y){icon="dest";isc=.9;iop=.9;}
+      else if(G&&G.hint&&G.hint.b==="p"&&performance.now()<G.hint.until){dc=0x7fd0ff;dop=.3+.2*Math.sin(t*14);ring=1;rc=0xffffff;}
       else if(G&&G.decoyArm&&!(me.x===x&&me.y===y)){dc=0xd49bff;dop=.16+.1*Math.sin(t*6+x+y);ring=1;rc=0xd49bff;}
       else{const seen=R.marks.p.find(m=>m.x===x&&m.y===y&&(m.t==="huella"||m.t==="pick"));if(seen&&!(me.x===x&&me.y===y)){icon=seen.fake?"foot2":"foot";iop=.55;isc=.6;}}
     }
@@ -5605,7 +5656,7 @@ function buildArena(){
   <div class="status" id="status"></div>
   <div class="gbottom">
     ${R.ultiOn&&AMAGO.ULTIS[hp.type]?`<button class="ultib off" id="ultib" data-a="ulti" aria-label="ULTI"><span class="uring" id="uring"></span><span class="uic">${AMAGO.ULTIS[hp.type].i}</span><span class="ulb out">ULTI</span><span class="unm out" id="unm">${TT(AMAGO.ULTIS[hp.type].n)}</span></button>`:""}<div class="ebar" id="ebar"><span class="elbl">energía · se recarga sola</span><span class="elxn out" id="elxn">5</span><div class="esegs" id="esegs">${Array.from({length:ELX_MAX},(_,i)=>`<i class="${i===H.cost-1?"cost":""}"><b></b></i>`).join("")}</div></div>
-    <div class="acts v2"><span class="act ab mv" title="Moverte una casilla"><span class="aic">👟</span><span class="alb">moverse</span><small class="asub">toca tu isla</small><b class="acost">💧${H.mc}</b></span><span class="act ab at" title="${H.a}"><span class="aic">${patIcon(H.pat)}</span><span class="alb">${H.a.toLowerCase()}</span><small class="asub">toca la isla roja</small><b class="acost">💧${H.cost}</b></span>${R.mod.noAmago||(G.tutorial&&!(G.tut&&G.round>=2))?"":`<button class="act amagob ab" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla"><span class="aic">🎭</span><span class="alb">amago</span><small class="asub">huella falsa</small><b class="acost">💧${AMAGO.decoyCost({type:hp.type})}</b></button>`}<span class="act bst" id="bst"></span></div>
+    <div class="acts v2"><button class="act ab mv" data-a="acthint" data-b="p" title="Moverte una casilla"><span class="aic">👟</span><span class="alb">moverse</span><small class="asub">toca tu isla</small><b class="acost">💧${H.mc}</b></button><button class="act ab at" data-a="acthint" data-b="b" title="${H.a}"><span class="aic">${patIcon(H.pat)}</span><span class="alb">${H.a.toLowerCase()}</span><small class="asub">toca la isla roja</small><b class="acost">💧${H.cost}</b></button>${R.mod.noAmago||(G.tutorial&&!(G.tut&&G.round>=2))?"":`<button class="act amagob ab" id="amagob" data-a="amago" aria-label="Amago: huella falsa en tu isla"><span class="aic">🎭</span><span class="alb">amago</span><small class="asub">huella falsa</small><b class="acost">💧${AMAGO.decoyCost({type:hp.type})}</b></button>`}<span class="act bst" id="bst"></span></div>
   </div></div>`;
   B3.build($("#gl"),R,curArena());B3.onTile=onTile;B3.onRestore=()=>{if(R&&UI.screen==="game")B3.build($("#gl"),R,curArena());};
 }
@@ -5790,6 +5841,8 @@ document.addEventListener("click",e=>{
     case "arenaclose":el.remove();break;
     case "missions":sfx("tap");UI.modal={k:"missions"};renderModal();break;
     case "keysinfo":sfx("tap");keysInfo();break;
+    case "acthint":if(R&&UI.screen==="game"&&!R.over){const b=el.dataset.b;sfx("sel");G.hint={b,until:performance.now()+1400};if(G.decoyArm){G.decoyArm=false;$("#amagob")&&$("#amagob").classList.remove("on");}
+      const c=B3.screenPos(b,2,2);floatText(c.x,c.y,b==="p"?"👇 "+TT("Toca una casilla de tu isla"):"👆 "+TT("Toca una casilla de la isla roja"),"near");}break;
     case "camp":sfx("tap");UI.modal=null;renderModal();EV.add("screen",{s:"camp"});showCamp();break;
     case "camplv":{const w=+el.dataset.w,l=+el.dataset.l;if(!campOpen(w,l)){sfx("nope");shake(el);break;}sfx("tap");UI.modal={k:"camplv",w,l};renderModal();break;}
     case "campgo":sfx("go");actx();UI.modal=null;renderModal();campStart(+el.dataset.w,+el.dataset.l);break;
