@@ -1608,6 +1608,59 @@ html.ui2 .tabs button.on span{color:#ffd84a}
 html:is(.ui2,.ui4) .badge{border:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 html.ui2 .cmbg{background:radial-gradient(110% 50% at 50% 0%,#3fae6a 0%,transparent 70%),linear-gradient(#1f6b4c,#143d36 55%,#0f1a24)}
 html:is(.ui2,.ui4) .cmc{border:0;box-shadow:inset 0 -5px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.4),0 8px 16px -6px rgba(0,0,0,.6)}
+/* ---- Arcade (ui3), acabado: forma de las cajas (esquinas en diagonal: dos casi rectas y dos redondas), tarjetas, títulos, partida ---- */
+html.ui3{--x-r:5px 15px 5px 15px;--x-rl:7px 22px 7px 22px}
+html.ui3 :is(#app:not(.game),.modal,.page,.boxov) .pnl{border-radius:var(--x-r);background:linear-gradient(180deg,#252f7c,#161c54);box-shadow:inset 0 0 0 2px rgba(130,160,255,.2),inset 0 3px 0 rgba(255,255,255,.1),0 4px 0 #070920}
+html.ui3 .modal .sheet{border-radius:var(--x-rl)!important;border:3px solid #0d0f24;background:linear-gradient(180deg,#27317f,#141a4e);box-shadow:inset 0 0 0 2px rgba(130,160,255,.22),0 6px 0 #070920,0 30px 60px -20px rgba(0,0,0,.7)}
+/* píldoras de monedas y perfil */
+html.ui3 .rpill{border-radius:5px 12px 5px 12px}
+html.ui3 .mprof{border-radius:var(--x-r)}
+/* botones laterales del inicio: más aire y etiqueta en placa */
+html.ui3 .sidecol{gap:10px;top:10px}
+html.ui3 .sbtn .sq{border-radius:var(--x-r);width:60px;height:60px}
+html.ui3 .sbtn>span.lb{margin-top:-7px;padding:2px 7px 3px;background:#0d0f24;border-radius:4px 8px 4px 8px;font-size:12px;position:relative;z-index:2;text-shadow:none!important;transform:skewX(-6deg)}
+html.ui3 .sbtn.chest .lb{margin-top:-10px}
+html.ui3 .keymod{border-radius:var(--x-r)}
+html.ui3 .hplate{border-radius:var(--x-r);padding:5px 16px 5px 8px}
+/* fila de jugar: la etiqueta de premio va por encima del botón, no encima de su texto */
+html.ui3 .playrow2{margin-top:26px;gap:12px}
+html.ui3 .fwtag{top:-25px;right:14px;border-radius:5px 10px 5px 10px;background:#0d0f24;border:0;box-shadow:none;padding:3px 10px 4px 6px}
+html.ui3 .modebtn2{border-radius:var(--x-r);flex:0 0 32%}
+html.ui3 .gbtn.play2{font-size:42px;padding:16px 20px 22px}
+/* títulos de sección: etiqueta amarilla inclinada en vez de la cinta azul */
+html.ui3 .ribn{background:linear-gradient(#ffe14d,#ffbe0b);border:3px solid #0d0f24;border-radius:5px 11px 5px 11px;box-shadow:0 4px 0 #0d0f24;transform:skewX(-6deg);padding:6px 22px 7px;text-shadow:2px 0px 0 #0d0f24,-2px 0px 0 #0d0f24,0px 2px 0 #0d0f24,0px -2px 0 #0d0f24,1.5px 1.5px 0 #0d0f24,-1.5px 1.5px 0 #0d0f24,1.5px -1.5px 0 #0d0f24,-1.5px -1.5px 0 #0d0f24,0 3px 0 #0d0f24;margin:18px auto 10px}
+html.ui3 .ribn::before,html.ui3 .ribn::after{display:none}
+html.ui3 .sect .t-h1{font-size:36px;transform:skewX(-6deg)}
+/* tarjetas de héroes: una sola pieza (sin marco dentro del marco), color de rareza al fondo y placa de nombre a todo el ancho */
+html.ui3 .hgrid4{gap:12px 10px;padding-top:16px}
+html.ui3 .card{padding:0;border-radius:var(--x-r);overflow:visible;box-shadow:0 5px 0 #0d0f24!important;background:linear-gradient(160deg,var(--rc) 0%,var(--rd) 78%)}
+html.ui3 .card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(115deg,rgba(255,255,255,.26) 0 34%,transparent 34.5%);pointer-events:none;clip-path:inset(0 round 2px 12px 0 0)}
+html.ui3 .card .art{height:104px;border-radius:0;background:none;box-shadow:none}
+html.ui3 .card .art img,html.ui3 .card .art svg{height:122px}
+html.ui3 .card .plate{margin-top:0;border-radius:0 0 2px 12px;background:linear-gradient(#1b2262,#10143c);padding:6px 7px 7px;border-top:3px solid #0d0f24}
+html.ui3 .card .plate b{font-size:17px}
+html.ui3 .card .art .rartag{left:-6px;top:6px;bottom:auto;transform:skewX(-6deg);border-radius:3px 7px 3px 7px;font-size:9.5px}
+html.ui3 .hgrid4 .crown{left:auto;right:-8px;top:-12px}
+html.ui3 .rartag{border-radius:3px 8px 3px 8px}
+/* ---- la partida ---- */
+html.ui3 #app.game{--ink:#0d0f24}
+html.ui3 #app.game .g3hud .side2{border-radius:var(--x-r)!important;background:linear-gradient(180deg,#3d9dff,#2163dc)!important;box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),0 4px 0 #0d0f24!important;padding:4px 9px 6px!important}
+html.ui3 #app.game .g3hud .side2.foe{border-radius:15px 5px 15px 5px!important;background:linear-gradient(180deg,#ff6f7f,#d6304e)!important}
+html.ui3 #app.game .g3hud .mini{border-radius:4px 10px 4px 10px;background:rgba(8,10,34,.45);box-shadow:none}
+html.ui3 #app.game .g3hud .side2.foe .mini{box-shadow:none;border-radius:10px 4px 10px 4px}
+html.ui3 #app.game .g3hud .tbox .t{border-radius:4px 10px 4px 10px;background:#0d0f24;border:0;box-shadow:0 3px 0 rgba(0,0,0,.35);padding:4px 12px 5px;transform:skewX(-6deg);font-size:20px}
+html.ui3 #app.game .status span{border-radius:5px 12px 5px 12px;border:0;background:rgba(13,15,36,.88);box-shadow:0 3px 0 rgba(0,0,0,.3);padding:5px 14px 6px;transform:skewX(-6deg);display:inline-block}
+html.ui3 #app.game .status .warn{background:#7a4a08}html.ui3 #app.game .status .bad{background:#c22a46;color:#fff}html.ui3 #app.game .status .good{background:#178a4e;color:#fff}html.ui3 #app.game .status .decoy{background:#6a31b8!important}
+html.ui3 #app.game .gpause{border-radius:4px 10px 4px 10px;background:#0d0f24;border:0;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+html.ui3 #app.game .ebar{border-radius:var(--x-r);background:linear-gradient(180deg,#252f7c,#141a4e);box-shadow:inset 0 0 0 2px rgba(130,160,255,.2),0 4px 0 #070920}
+html.ui3 #app.game .esegs i{border-radius:3px 6px 3px 6px!important;transform:skewX(-8deg);background:#0c1034!important}
+html.ui3 #app.game .gbottom .acts.v2 .ab{border-radius:5px 14px 5px 14px!important;box-shadow:inset 0 -5px 0 rgba(0,0,0,.22),inset 0 2px 0 rgba(255,255,255,.3),0 5px 0 #0d0f24!important;transform:skewX(-5deg)}
+html.ui3 #app.game .gbottom .acts.v2 .ab.mv{background:linear-gradient(#52aaff,#2468e0)!important}
+html.ui3 #app.game .gbottom .acts.v2 .ab.at{background:linear-gradient(#ffb03a,#f0531f)!important}
+html.ui3 #app.game .gbottom .acts.v2 .ab.amagob{background:linear-gradient(#b87cff,#7434dc)!important}
+html.ui3 #app.game .acts.v2 .acost{border-radius:4px 9px 4px 9px;background:#0d0f24;box-shadow:none}
+html.ui3 #app.game .gbottom .acts.v2 .bst{border-radius:5px 11px 5px 11px;background:rgba(13,15,36,.88)}
+html.ui3 #app.game .camptag{transform:skewX(-6deg);display:inline-block}
 </style>
 </head>
 <body>
@@ -3082,7 +3135,8 @@ const KQ_BIG={idle:"Idle",walk:"Run",attack:"Punch",hit:"HitReact",ko:"Death",wi
   KQ_FLY={idle:"Flying_Idle",walk:"Fast_Flying",attack:"Headbutt",hit:"HitReact",ko:"Death",win:"Yes"},KQ_ANI={idle:"Idle",walk:"Gallop",attack:"Attack",hit:"Idle_HitReact1",ko:"Death",win:"Idle_2"};
 /* animales: siguen con sus ilustraciones 2D (los modelos gratuitos no llegaban a su nivel) */
 const KK={rayo:{atk:"Ranged_Magic_Shoot",item:1,k:.86},flecha:{atk:"Ranged_Bow_Release",item:1,k:1},sombra:{atk:"Throw",item:1,k:1},muro:{atk:"Melee_2H_Attack_Chop",k:1.12}};
-const UI2=(()=>{let v="1";try{const q=new URLSearchParams(location.search).get("ui");if(q!=null)localStorage.setItem("amago-ui",q);v=localStorage.getItem("amago-ui")||"1";}catch(e){}if(v==="2"||v==="3"||v==="4")document.documentElement.classList.add("uix","ui"+v);return v;})();
+/* estética de los menús: 3 (Arcade) por defecto; ?ui=1 vuelve a la antigua, ?ui=2 Noche, ?ui=4 Cielo */
+const UI2=(()=>{let v="3";try{const q=new URLSearchParams(location.search).get("ui");if(q!=null)localStorage.setItem("amago-ui",q);v=localStorage.getItem("amago-ui")||"3";}catch(e){}if(v==="2"||v==="3"||v==="4")document.documentElement.classList.add("uix","ui"+v);return v;})();
 const KKON=(()=>{try{const q=new URLSearchParams(location.search).get("kk");if(q!=null)localStorage.setItem("amago-kk",q);return localStorage.getItem("amago-kk")!=="0";}catch(e){return true;}})();
 const KKM={},KKI={},KKA={};let KKCLIPS=null,kkP=null;
 function kkSmooth(g){/* normales medias por posición: el contorno no se abre en las aristas duras */
