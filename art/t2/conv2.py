@@ -63,7 +63,9 @@ b0,b1=P.min(0),P.max(0)
 sp=Image.open(f'{D}/../../amago/sprites/{i}.webp').convert('RGBA');bx=sp.getbbox();Ws,Hs=sp.size
 # el modelo ocupa la misma caja que la ilustración en la carta (alto de la imagen = 1)
 sx=(bx[2]-bx[0])/(b1[0]-b0[0]);sy=(bx[3]-bx[1])/(b1[1]-b0[1])
-px=bx[0]+(P[:,0]-b0[0])*sx;py=bx[3]-(P[:,1]-b0[1])*sy
+# UNI=1: misma escala en ancho y alto (cuando el modelo 3D tiene otra pose que la ilustración, estirarlo lo deforma)
+if os.environ.get('UNI')=='1' or not .8<sx/sy<1.25:sx=sy
+px=(bx[0]+bx[2])/2+(P[:,0]-(b0[0]+b1[0])/2)*sx;py=bx[3]-(P[:,1]-b0[1])*sy
 C=np.stack([(px/Ws-.5)*Ws/Hs,1-py/Hs,(P[:,2]-np.median(P[:,2]))*(sx+sy)/2/Hs],1)
 T=Image.fromarray(out)
 g=trimesh.Trimesh(vertices=C,faces=F2,vertex_normals=Nn,process=False);g.visual=trimesh.visual.TextureVisuals(uv=uv)
