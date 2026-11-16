@@ -1512,7 +1512,9 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .cmst{padding:8px 12px;border-radius:14px;font-family:var(--f-game);font-size:17px;color:#ffe25a;flex:none}
 .cmmap{position:relative;flex:1;min-height:340px}
 .cmmap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.cmmap polyline{fill:none;stroke:#fff;stroke-opacity:.75;stroke-width:5;stroke-dasharray:1 12;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.cmdeco{position:absolute;transform:translate(-50%,-100%);pointer-events:none;filter:drop-shadow(0 5px 0 rgba(10,40,20,.28));height:auto}
+.cmmap polyline.cmroad{stroke:#e9d6a0;stroke-opacity:.9;stroke-width:26;stroke-dasharray:none;stroke-linejoin:round}
+.cmmap polyline{fill:none;stroke:#b98a4a;stroke-opacity:.9;stroke-width:5;stroke-dasharray:1 12;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .cmn{position:absolute;transform:translate(-50%,-50%);background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;cursor:pointer;width:130px}
 .cmc{position:relative;width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(#ffd84a,#ff9a1f);border:4px solid var(--ink,#1a1036);box-shadow:0 6px 0 var(--ink,#1a1036),inset 0 3px 0 #fff8;transition:transform .1s}
 .cmc b{font-family:var(--f-game);font-size:30px;color:#fff}
@@ -5049,6 +5051,9 @@ const CAMP=[{k:"pradera",n:"Pradera del Rey Topo",lv:[
   {n:"Rey Topo",foe:"topo",bot:"topo",boss:1,coins:100,gems:10,chest:2,d:"Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto."},
 ]}];
 const CAMP_POS=[[30,86],[68,68],[32,50],[66,33],[50,13]];
+/* decorado del mapa: [ilustración, x %, y % (pie), ancho px, espejo] de atrás hacia delante */
+const CAMP_DECO=[["pino",12,16,74],["arbol",88,20,88,1],["rocas",24,24,56],["pino",84,46,64],["arbol",10,44,84],["rocas",86,60,50,1],["bandera_roja",70,14,40],
+  ["arbol",90,84,92],["pino",8,70,70,1],["rocas",40,64,46,1],["bandera_azul",14,92,40],["rocas",60,96,54]];
 const CAMP_BOT={
   a:{think:1.15,react:.5,perc:.45,dodge:.25,eps:.6,passive:7,gap:5,thr:1.6,moveP:.35},
   b:{think:.95,react:.48,perc:.42,dodge:.35,eps:.5,passive:5,gap:3.2,thr:1.5,moveP:.45},
@@ -5064,7 +5069,8 @@ function showCamp(){
   leaveHome();G=null;R=null;UI.screen="camp";stopLoop();app.className="camp";setBg();
   const w=0,W=CAMP[w],cur=W.lv.findIndex((_,l)=>!(S.camp[w+"."+l]>0));
   app.innerHTML=`<div class="cmbg"></div><div class="cmhead"><button class="gbtn blue sm cmback" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt=""></button><div class="cmtt"><small>CAMPAÑA · MUNDO 1</small><h2 class="out">${W.n}</h2></div><span class="cmst pnl out">★ ${campStars(w)}/${W.lv.length*3}</span></div>
-  <div class="cmmap"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/></svg>
+  <div class="cmmap">${CAMP_DECO.map(([k,x,y,w,f])=>`<img class="cmdeco" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" style="left:${x}%;top:${y}%;width:${w}px${f?";transform:translate(-50%,-100%) scaleX(-1)":""}">`).join("")}
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="cmroad" points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/><polyline points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/></svg>
   ${W.lv.map((L,l)=>{const st=S.camp[w+"."+l]||0,open=campOpen(w,l);
     return `<button class="cmn ${open?"":"lk"} ${st?"done":""} ${L.boss?"boss":""} ${l===cur?"cur":""}" data-a="camplv" data-w="${w}" data-l="${l}" style="left:${CAMP_POS[l][0]}%;top:${CAMP_POS[l][1]}%" aria-label="${L.n}">
       <span class="cmc">${L.boss?heroSVG(L.foe):`<b class="out">${l+1}</b>`}${open?"":`<img class="cmlock" src="${UIA}lock.webp" alt="">`}</span>
