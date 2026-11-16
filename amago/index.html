@@ -1508,7 +1508,7 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .cmhead{display:flex;align-items:center;gap:10px}
 .cmback{width:52px;height:48px;padding:0;flex:none}.cmback img{width:28px;height:28px}
 .cmtt{flex:1;min-width:0}.cmtt small{font-family:var(--f-game);font-size:11px;letter-spacing:.08em;color:#fff;opacity:.9}
-.cmtt h2{margin:0;font-size:18px;line-height:1.05;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmtt h2{margin:0;font-size:17px;line-height:1.05;color:#fff}
 .cmst{padding:8px 12px;border-radius:14px;font-family:var(--f-game);font-size:17px;color:#ffe25a;flex:none}
 .cmmap{position:relative;flex:1;min-height:340px}
 .cmmap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -1696,6 +1696,10 @@ html.ui3 #app:not(.game) .okc{border-radius:4px 9px 4px 9px}
 .vssheet.bossvs .p:last-child .av.big{transform:scale(1.1);transform-origin:50% 60%;animation:bossin .7s cubic-bezier(.3,1.5,.5,1) both}
 .vssheet.bossvs .p:last-child b{font-size:1.4em;position:relative;z-index:2;margin-top:6px}
 @keyframes bossin{from{transform:scale(.2) translateY(60px);opacity:0}to{transform:scale(1.1)}}
+.cmfoot{display:flex;flex-direction:column;gap:8px}
+button.cmnext{width:100%;text-align:left;cursor:pointer;color:#fff;font:inherit}
+.cmnext.lk{opacity:.8}.cmnext .cmarr{font:28px/1 var(--f-game);color:#ffe14d;margin-left:auto}.cmnext>span:nth-child(2),.cmnext>span:first-child:not(.cmarr){flex:1}
+.cmnext small{display:block}
 /* Arcade: móviles pequeños */
 @media (max-width:350px){
   .mprof{min-width:84px!important}.mav{width:34px;height:34px}
@@ -1749,6 +1753,7 @@ Object.assign(HEROES,{
 });
 /* jefes de la campaña: no se pueden elegir ni desbloquear. burrow = segundos que asoma tras atacar (el resto del tiempo es inmune) */
 Object.assign(HEROES,{
+  arana:{n:"Araña Madre",r:"Jefa",rar:3,hp:7,step:.26,mc:1,pat:"row3",cost:3,dmg:1,travel:.75,warn:true,boss:true,web:3,a:"Picadura",d:"Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.",c:"#7a4fd0",l:"#c9b0ff",dk:"#3d2480",proj:"star"},
   topo:{n:"Rey Topo",r:"Jefe",rar:3,hp:8,step:.3,mc:0,pat:"cross5",cost:3,dmg:1,travel:1.15,warn:true,boss:true,burrow:3,a:"Terremoto",d:"Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.",c:"#7a4fd0",l:"#c9b0ff",dk:"#3d2480",proj:"rock"},
 });
 const DEV_HEROES=typeof window!=="undefined"&&!!window.AMAGO_DEV_HEROES;
@@ -1837,20 +1842,29 @@ function newRound(tp,tb,opts){
   if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,perc:opts.bot.perc??.35,pend:[],dr:{},lastPrint:null,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1,blind:!!opts.bot.blind};
   return R;
 }
+function addWebs(R,d,n,hk){
+  const v=R.heroes[d],W=R.webs=R.webs||[];
+  const free=shuffle(allCells().filter(([x,y])=>(x!==v.x||y!==v.y)&&!W.some(w=>w.d===d&&w.x===x&&w.y===y))).slice(0,n);
+  for(const [x,y] of free)W.push({d,x,y,until:R.now+14,id:++MID});
+  const mine=W.filter(w=>w.d===d);if(mine.length>8){const old=mine.slice(0,mine.length-8);R.webs=W.filter(w=>!old.includes(w));}
+  if(free.length)call(hk,"web",d,free);
+}
 function moveTo(R,s,x,y){
   if(!inB(x,y)||R.over)return;
-  const h=R.heroes[s];if(h.fortUntil>R.now)return;/* Fortaleza: no se mueve */
-  h.path=(h.x===x&&h.y===y)?[]:HEROES[h.type].jump?[[x,y]]:pathTo(h,x,y,R.projs.filter(p=>p.d===s&&p.warn).flatMap(p=>p.cells));/* solo los avisos que ve el jugador (amagos incluidos: no se delatan) */
+  const h=R.heroes[s];if(h.fortUntil>R.now||h.stuckUntil>R.now)return;/* Fortaleza o telaraña: no se mueve */
+  h.path=(h.x===x&&h.y===y)?[]:HEROES[h.type].jump?[[x,y]]:pathTo(h,x,y,R.projs.filter(p=>p.d===s&&p.warn).flatMap(p=>p.cells).concat((R.webs||[]).filter(w=>w.d===s&&(w.x!==x||w.y!==y)).map(w=>[w.x,w.y])));/* solo los avisos que ve el jugador (amagos incluidos: no se delatan) */
 }
 function stepHero(R,s,hk,dt){
   const h=R.heroes[s],H=HEROES[h.type];
-  if(h.fortUntil>R.now||h.outUntil>R.now)h.path=[];
+  if(h.fortUntil>R.now||h.outUntil>R.now||h.stuckUntil>R.now)h.path=[];
   if(!h.path.length||R.now<h.nextStep)return;
   const due=Math.max(h.nextStep,R.now-(dt||0));/* el paso tocaba en "due", no en este tick: así cada casilla dura exactamente H.step */
   if(R.elx[s]<H.mc){h.path=[];call(hk,"noElx",s);return;}
   const [x,y]=h.path.shift();
   R.elx[s]-=H.mc;h.x=x;h.y=y;h.nextStep=due+H.step;
   if(!H.jump&&!H.burrow&&!(h.smokeUntil>R.now)&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
+  if(R.webs){const wi=R.webs.findIndex(w=>w.d===s&&w.x===x&&w.y===y);
+    if(wi>=0&&!H.web&&!(h.airUntil>R.now)){R.webs.splice(wi,1);h.stuckUntil=R.now+2;h.path=[];mark(R,s,{t:"ping",x,y,type:h.type,until:R.now+2});call(hk,"stuck",s,x,y);}}
   const mi=R.mines.findIndex(m=>m.d===s&&m.x===x&&m.y===y);
   if(mi>=0){const m=R.mines.splice(mi,1)[0];
     if(h.shieldUntil>R.now||h.invulUntil>R.now){if(h.invulUntil<=R.now)h.shieldUntil=0;mark(R,s,{t:"bloq",x,y,until:R.now+MARK_T});}
@@ -1985,10 +1999,14 @@ function tick(R,dt,hk){
   R.now+=dt;
   if(R.tutFreeze&&R.now>SUDDEN_T-8)R.now=SUDDEN_T-8;/* entrenamiento: el reloj no llega a la muerte súbita mientras el entrenador explica */
   for(const s of SIDES){const h=R.heroes[s],rate=ELX_RATE*(h.turboUntil>R.now?2:1)*(R.sudden?1.5:1)*(1+lvBonus(h.lv).elx)*(R.mod.elx||1);R.elx[s]=Math.min(ELX_MAX,R.elx[s]+rate*dt);}
-  for(const s of SIDES){const h=R.heroes[s];if(!HEROES[h.type].burrow)continue;
+  for(const s of SIDES){const h=R.heroes[s],Hb=HEROES[h.type];if(!Hb.boss)continue;
+    if(!h.rage&&h.hp>0&&h.hp<=h.max/2){h.rage=true;call(hk,"enrage",s);}
+    if(Hb.web&&R.now>=(h.webAt??=HIDE_T+2)){h.webAt=R.now+(h.rage?5:7);addWebs(R,other(s),Hb.web+(h.rage?1:0),hk);}/* Araña Madre: telarañas en la isla rival */
+    if(!Hb.burrow)continue;
     if(!(h.outUntil>R.now)&&h.invulUntil<R.now+.3)h.invulUntil=R.now+.3;/* bajo tierra nada le alcanza */
-    if(h.wasOut&&!(h.outUntil>R.now)){h.wasOut=false;mark(R,s,{t:"hoyo",x:h.x,y:h.y,until:R.now+1.8});call(hk,"burrow",s,h.x,h.y);}
-    if(!h.rage&&h.hp>0&&h.hp<=h.max/2){h.rage=true;call(hk,"enrage",s);}}
+    if(h.wasOut&&!(h.outUntil>R.now)){h.wasOut=false;mark(R,s,{t:"hoyo",x:h.x,y:h.y,until:R.now+1.8});call(hk,"burrow",s,h.x,h.y);}}
+  if(R.webs)R.webs=R.webs.filter(w=>w.until>R.now);
+  if(R.mod.webs&&R.now>=(R.webAt??=HIDE_T+3)){R.webAt=R.now+8;for(const s of SIDES)addWebs(R,s,2,hk);}/* nivel con telarañas en las dos islas */
   /* primero caen los disparos que ya tocaba resolver y después se mueve: no se esquiva un golpe que ya había llegado */
   const due=R.projs.filter(p=>p.hitAt<=R.now);R.projs=R.projs.filter(p=>p.hitAt>R.now);
   for(const p of due)impact(R,p,hk);
@@ -2061,7 +2079,8 @@ function botUpdate(R,dt,hk){
   /* react = tiempo de reacción al aviso; la decisión de esquivar se tira UNA vez por disparo */
   const danger=R.projs.filter(p=>p.d==="b"&&p.warn&&R.now-p.launched>=B.react);
   const unsafe=(x,y)=>danger.some(p=>inArea(p.cells,x,y));
-  const adj=()=>D4.map(([dx,dy])=>[me.x+dx,me.y+dy]).filter(([x,y])=>inB(x,y)&&!unsafe(x,y)&&!(R.fires||[]).some(f=>f.d==="b"&&!f.hit&&inArea(f.cells,x,y)));
+  const webB=(x,y)=>(R.webs||[]).some(w=>w.d==="b"&&w.x===x&&w.y===y);
+  const adj=()=>D4.map(([dx,dy])=>[me.x+dx,me.y+dy]).filter(([x,y])=>inB(x,y)&&!unsafe(x,y)&&!webB(x,y)&&!(R.fires||[]).some(f=>f.d==="b"&&!f.hit&&inArea(f.cells,x,y)));
   const fz=(R.fires||[]).filter(f=>f.d==="b"&&!f.hit);
   const unsafe0=unsafe;
   const threat0=danger.filter(p=>inArea(p.cells,me.x,me.y)).some(p=>(B.dr[p.id]??=Math.random()<B.dodge));
@@ -2077,8 +2096,8 @@ function botUpdate(R,dt,hk){
   if(B.relocateAt&&R.now>=B.relocateAt&&!me.path.length&&!(me.outUntil>R.now)){
     B.relocateAt=0;
     const far=H.burrow?4:Math.random()<.3?3:2;
-    const o=allCells().filter(([x,y])=>{const d=Math.abs(x-me.x)+Math.abs(y-me.y);return d>=1&&d<=far&&!unsafe(x,y);});
-    if(o.length&&R.elx.b>=H.mc*2){const c=pick(o);me.path=pathTo(me,c[0],c[1]);return;}
+    const o=allCells().filter(([x,y])=>{const d=Math.abs(x-me.x)+Math.abs(y-me.y);return d>=1&&d<=far&&!unsafe(x,y)&&!webB(x,y);});
+    if(o.length&&R.elx.b>=H.mc*2){const c=pick(o);me.path=pathTo(me,c[0],c[1],(R.webs||[]).filter(w=>w.d==="b").map(w=>[w.x,w.y]));return;}
   }
   if(R.now<B.passiveUntil)return;
   if(B.decoyAt&&R.now>=B.decoyAt){B.decoyAt=0;const o=allCells().filter(([x,y])=>Math.abs(x-me.x)+Math.abs(y-me.y)>=2);if(o.length){const c=pick(o);amago(R,"b",c[0],c[1],hk);return;}}
@@ -2223,6 +2242,7 @@ const TR=(()=>{
   if(LANG==="es")return null;
   /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
   Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "👑 JEFE": "👑 BOSS", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
+  Object.assign(I18N_EN,{"CAMPAÑA · MUNDO #": "CAMPAIGN · WORLD #", "Bosque de la Araña Madre": "Forest of the Spider Mother", "Araña Madre": "Spider Mother", "Jefa": "Boss", "Picadura": "Bite", "El sendero oscuro": "The dark trail", "Doble engaño": "Double trick", "Telarañas": "Cobwebs", "La cazadora": "The huntress", "Sombra golpea sin avisar y aquí sus huellas duran la mitad.": "Sombra strikes without warning, and here its footprints last half as long.", "Las huellas de Truco son falsas. La energía se recarga un 50 % más rápido para los dos.": "Truco's footprints are fake. Energy refills 50% faster for both.", "Salen telarañas en las dos islas: quien pise una queda atrapado 2 s y a la vista.": "Cobwebs appear on both islands: step on one and you're stuck for 2 s and visible.", "Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas.": "Mira has 4 lives and deals 2 per shot. And there are still cobwebs.", "Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.": "She fills your island with cobwebs. Step on one and you're stuck for 2 s and she sees you. Go around them and strike back.", "Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.": "Fills your island with cobwebs: step on one and you're stuck for 2 s and visible.", "Si pisas una telaraña, quedas atrapado 2 s y a la vista": "Step on a cobweb and you're stuck for 2 s and visible", "¡ARAÑA MADRE FURIOSA!": "SPIDER MOTHER ENRAGED!", "Más telarañas y más seguidas": "More cobwebs, more often", "👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.": "👑 You defeated the Spider Mother! World 2 complete.", "No pises las telarañas: rodéalas y muévete tras cada disparo.": "Don't step on the cobwebs: go around them and move after every shot.", "¡Atrapado!": "Stuck!", "¡Atrapado! ¡Dale!": "Stuck! Hit them!", "¡FURIA!": "RAGE!", "Mundo 3 · Volcán del Coloso de Lava": "World 3 · Volcano of the Lava Colossus", "Mundo # · Pradera del Rey Topo": "World # · The Mole King's Meadow", "Mundo # · Bosque de la Araña Madre": "World # · Forest of the Spider Mother", "Derrota al jefe de este mundo": "Defeat this world's boss", "Entrar": "Enter", "MUNDO #": "WORLD #", "ARAÑA MADRE": "SPIDER MOTHER"});
   Object.assign(I18N_EN,{"Toca una casilla de tu isla":"Tap a tile on your island","Toca una casilla de la isla roja":"Tap a tile on the red island"});
   Object.assign(I18N_EN,{"Lluvia de flechas": "Arrow rain", "Flechas en 3 filas a la vez.": "Arrows on 3 rows at once.", "¡Flechas en 3 filas! Muévete a una fila libre": "Arrows on 3 rows! Move to a free row", "Suelo ardiente": "Burning ground", "Tu siguiente bola deja el suelo en llamas 5 s.": "Your next fireball leaves the ground burning for 5 s.", "Su siguiente bola dejará fuego 5 s": "Their next fireball will leave fire for 5 s", "Humo": "Smoke", "4 s sin dejar huellas ni pasos.": "4 s without leaving footprints or steps.", "Fortaleza": "Fortress", "5 s inmune, pero sin poder moverte.": "Immune for 5 s, but you can't move.", "Es inmune 5 s: no gastes energía": "Immune for 5 s: save your energy", "Vista de búho": "Owl sight", "Ves al rival 1,5 s.": "You see your rival for 1.5 s.", "¡Te está viendo! Muévete ya": "They can see you! Move now", "Doble o nada": "Double or nothing", "Apareces al instante en tu huella falsa.": "You instantly appear on your fake footprint.", "Tormenta": "Storm", "Tu siguiente rayo cae en las dos diagonales.": "Your next bolt strikes both diagonals.", "Su siguiente rayo caerá en X": "Their next bolt will strike in an X", "Mecha corta": "Short fuse", "Tu siguiente bomba cae sin aviso y el doble de rápido.": "Your next bomb lands with no warning, twice as fast.", "Campo minado": "Minefield", "3 minas ocultas en la isla rival.": "3 hidden mines on the rival island.", "¡Hay 3 minas ocultas en tu isla!": "There are 3 hidden mines on your island!", "Gran salto": "Big leap", "2,5 s en el aire: nada te alcanza.": "2.5 s in the air: nothing can hit you.", "Está en el aire 2,5 s: nada le alcanza": "In the air for 2.5 s: nothing can hit them", "Florecer": "Bloom", "Recuperas 1 vida.": "You recover 1 life.", "Ha recuperado 1 vida": "They recovered 1 life", "Mira láser": "Laser sight", "Tu siguiente disparo llega al instante.": "Your next shot lands instantly.", "Coro": "Chorus", "5 huellas falsas en tu isla durante 3 s.": "5 fake footprints on your island for 3 s.", "¡Dispara!": "Fire!", "¡ULTI lista!": "ULTI ready!", "Solo una vez por ronda.": "Only once per round.", "Una vez por ronda.": "Once per round.", "Lista en": "Ready in", "Ya tienes toda la vida": "You already have full health", "¡QUEMADO!": "BURNED!", "ULTI RIVAL": "RIVAL ULTI", "¡Tu ULTI está lista! Es el botón dorado: un poder único de cada héroe, una vez por ronda. ¡Tócalo!": "Your ULTI is ready! It's the golden button: a unique power for each hero, once per round. Tap it!", "¡Eso es! Cada héroe tiene una ULTI distinta. Mírala en su ficha.": "That's it! Every hero has a different ULTI. Check it on their card."});
   Object.assign(I18N_EN,{"Nombre: #": "Name: #", "Sonido": "Sound", "Vibración": "Vibration", "Enviar estadísticas de uso": "Send usage statistics", "Cómo se juega": "How to play", "Pasar mi partida a otro móvil": "Move my game to another phone", "Política de privacidad": "Privacy policy", "Copiar código": "Copy code", "Aviso": "Warning", "Racha ×#": "Streak ×#", "Nuevos premios en el camino": "New rewards on the road", "Tras el escalón #: un premio cada # fichas": "After tier #: a reward every # tokens", "¡RECLAMAR!": "CLAIM!", "CÓDIGO": "CODE", "ABRIR": "OPEN", "Muy pronto": "Soon", "DESBLOQUEAR CON": "UNLOCK WITH", "O CON": "OR WITH", "# GEMAS": "# GEMS", "Temporada # · quedan # días": "Season # · # days left", "Temporada # · quedan # días · ": "Season # · # days left · ", "premios": "rewards", "ya alcanzados se desbloquean al momento": "already reached unlock instantly", "1.ª victoria del día: llave doble, +30 monedas y +20 de Poder": "First win of the day: double key, +30 coins and +20 Power", "+20 gemas al crearla": "+20 gems when you create it"});
@@ -2455,6 +2475,7 @@ function sfx(n){
   if(!S.snd)return;
   switch(n){
     case "tap":tone(700,.05,"triangle",.07);break;
+    case "web":noise(.22,.12,5200,.02,"highpass");tone(1400,.18,"sine",.05,500);break;
     case "dig":noise(.32,.3,320);tone(95,.28,"sine",.22,48);break;
     case "quake":tone(55,.7,"sine",.38,34);noise(.7,.34,180);tone(82,.5,"sawtooth",.05,40);break;
     case "roar":tone(150,.75,"sawtooth",.11,68);tone(225,.6,"square",.045,92);noise(.65,.14,520);break;
@@ -2946,7 +2967,7 @@ function glbHero(id){
   return root;
 }
 /* ---- héroes 2D: la ilustración como una figura de cartón que siempre mira a la cámara ---- */
-const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo"],SPRITES={},SPRITE_H={topo:1.3,flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
+const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo","arana"],SPRITES={},SPRITE_H={topo:1.3,arana:1.25,flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
 const SKIN_LIST=["brasa_glacial","muro_magma","sombra_carmesi","truco_artico","ojo_nevado"];
 function loadSprites(){
   const L=new T.TextureLoader();
@@ -2974,6 +2995,7 @@ const RIG2D={
   muro:{h:[.45,.62],n:[.45,.34],c:[.43,.18],sL:[.22,.3],hL:[.12,.72],sR:[.76,.3],hR:[.86,.74],pL:[.37,.72],fL:[.35,.96],pR:[.56,.72],fR:[.58,.96],atk:"slam",m:"R"},
   rayo:{h:[.56,.76],n:[.56,.5],c:[.56,.36],sL:[.42,.55],hL:[.16,.62],sR:[.7,.55],hR:[.86,.68],pL:[.48,.82],fL:[.45,.97],pR:[.63,.82],fR:[.66,.97],x:[["gorro","head",[.6,.2],[.62,.04]]],atk:"shoot",m:"L"},
   bum:{h:[.5,.78],n:[.5,.6],c:[.5,.42],sL:[.25,.62],hL:[.1,.73],sR:[.78,.62],hR:[.91,.76],pL:[.42,.84],fL:[.4,.97],pR:[.6,.84],fR:[.62,.97],x:[["mecha","head",[.55,.15],[.62,.04]]],atk:"throw",m:"R"},
+  arana:{h:[.5,.62],n:[.5,.44],c:[.5,.34],sL:[.34,.5],hL:[.08,.3],sR:[.66,.5],hR:[.92,.3],pL:[.36,.72],fL:[.22,.97],pR:[.64,.72],fR:[.78,.97],atk:"throw",m:"R"},
   topo:{h:[.48,.72],n:[.47,.49],c:[.47,.34],sL:[.22,.54],hL:[.2,.82],sR:[.7,.52],hR:[.85,.56],pL:[.38,.79],fL:[.33,.965],pR:[.6,.79],fR:[.62,.965],atk:"throw",m:"R"},
   mina:{h:[.48,.68],n:[.47,.42],c:[.47,.25],sL:[.22,.48],hL:[.2,.8],sR:[.7,.46],hR:[.85,.5],pL:[.38,.76],fL:[.33,.96],pR:[.6,.76],fR:[.62,.96],atk:"throw",m:"R"},
   salto:{h:[.5,.68],n:[.5,.45],c:[.5,.25],sL:[.32,.5],hL:[.2,.9],sR:[.68,.48],hR:[.88,.6],pL:[.4,.74],fL:[.45,.95],pR:[.62,.74],fR:[.74,.92],x:[["cinta","head",[.22,.18],[.02,.32]]],atk:"throw",m:"R"},
@@ -3921,6 +3943,7 @@ function update(R,dt){
       {const sm=shotMem[x+","+y],age=sm?t-sm.t:99;if(age<7&&!mp&&!inArea(hoverCells,x,y)){dc=sm.res==="near"?0xff8a1f:0x2a6fd8;dop=Math.max(dop,.32*(1-age/7));}}
       const ms=R.marks.b.filter(m=>m.x===x&&m.y===y&&!m.dud);
       const top=ms.find(m=>m.t==="pick")||ms.find(m=>m.t==="huella")||ms.find(m=>m.t==="cerca")||ms.find(m=>m.t==="bloq")||ms.find(m=>m.t==="hoyo")||ms.find(m=>m.t==="agua")||(Hm.ears?ms.find(m=>m.t==="step"):null);
+      {const wb=R.webs&&R.webs.find(w=>w.d==="b"&&w.x===x&&w.y===y);if(wb&&!top&&!mp){icon="🕸️";isc=1.05;iop=Math.min(1,(wb.until-R.now)/1.2);}}
       if(top){
         if(top.t==="pick"){icon=BOOSTS[top.k].i;isc=.75;}
         else if(top.t==="huella"){icon="foot";iop=Math.max(.45,(top.until-R.now)/HUELLA_T);isc=1.05+Math.sin(t*10)*.1;dc=0xffd23a;dop=.45;}
@@ -3933,7 +3956,9 @@ function update(R,dt){
     }else{
       const ip=inc.find(p=>inArea(p.cells,x,y));tl.icon.renderOrder=ip?8:5;tl.ring.renderOrder=ip?7:4;/* el aviso se ve por encima del héroe */
       if(tl.haz)tl.haz.visible=!!ip;
+      const wb=R.webs&&R.webs.find(w=>w.d==="p"&&w.x===x&&w.y===y);
       if(ip){dc=0xff1030;dop=.25;ring=1-(R.now-ip.launched)/(ip.hitAt-ip.launched);rc=0xffffff;icon="⚠️";isc=.55;}
+      else if(wb){icon="🕸️";isc=1.05;iop=Math.min(1,(wb.until-R.now)/1.2);dc=0xe8e0ff;dop=.3;}
       else if(dest&&dest[0]===x&&dest[1]===y){icon="dest";isc=.9;iop=.9;}
       else if(G&&G.hint&&G.hint.b==="p"&&performance.now()<G.hint.until){dc=0x7fd0ff;dop=.3+.2*Math.sin(t*14);ring=1;rc=0xffffff;}
       else if(G&&G.decoyArm&&!(me.x===x&&me.y===y)){dc=0xd49bff;dop=.16+.1*Math.sin(t*6+x+y);ring=1;rc=0xd49bff;}
@@ -4412,7 +4437,7 @@ function showHome(){
     <div class="sidecol l">
       ${`<button class="sbtn ${unlocked("mis")?"":"lk"}" data-a="missions">${unlocked("mis")&&mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt="">${unlocked("mis")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>`}
       ${`<button class="sbtn ${unlocked("pass")?"":"lk"}" data-a="tab" data-t="pass">${unlocked("pass")&&passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt="">${unlocked("pass")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>`}
-      ${S.tutDone&&S.games>=1?`<button class="sbtn" data-a="camp">${campStars(0)?"":`<i class="badge bob">!</i>`}<span class="sq pnl"><span class="cmico">🗺️</span><span class="bar mini"><u style="width:${campStars(0)/(CAMP[0].lv.length*3)*100}%"></u></span></span><span class="lb out">Campaña</span></button>`:""}
+      ${S.tutDone&&S.games>=1?`<button class="sbtn" data-a="camp">${campAll()?"":`<i class="badge bob">!</i>`}<span class="sq pnl"><span class="cmico">🗺️</span><span class="bar mini"><u style="width:${campAll()/campMax()*100}%"></u></span></span><span class="lb out">Campaña</span></button>`:""}
       ${calReady()?`<button class="sbtn" data-a="calendar"><i class="badge ${at==="cal"?"bob":""}">!</i><span class="sq pnl"><img src="${UIA}chest1.webp" alt=""></span><span class="lb out">Diario</span></button>`:""}
     </div>
     <div class="sidecol r">
@@ -5048,10 +5073,22 @@ const CAMP=[{k:"pradera",n:"Pradera del Rey Topo",lv:[
   {n:"Lluvia de energía",foe:"brasa",bot:"b",coins:25,mod:{elx:2},d:"La energía se recarga al doble para los dos. ¡No pares de disparar!"},
   {n:"Sin trucos",foe:"ojo",bot:"c",coins:30,mod:{noAmago:1},d:"Aquí nadie puede usar el amago. Y Ojo oye tus pasos."},
   {n:"El guardián",foe:"muro",bot:"d",coins:35,mod:{hpB:1.5,huB:.5},d:"Muro tiene 9 vidas y sus huellas duran la mitad."},
-  {n:"Rey Topo",foe:"topo",bot:"topo",boss:1,coins:100,gems:10,chest:2,d:"Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto."},
+  {n:"Rey Topo",foe:"topo",bot:"topo",boss:1,coins:100,gems:10,chest:2,d:"Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.",
+    intro:"Solo puedes darle cuando asoma, justo después de atacar",rage:["¡REY TOPO FURIOSO!","Dos terremotos a la vez y asoma menos tiempo"],won:"👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.",hint:"Guarda energía y dispárale justo cuando asoma tras su terremoto."},
+]},{k:"bosque",n:"Bosque de la Araña Madre",lv:[
+  {n:"El sendero oscuro",foe:"sombra",bot:"c",coins:30,mod:{huB:.5},d:"Sombra golpea sin avisar y aquí sus huellas duran la mitad."},
+  {n:"Doble engaño",foe:"truco",bot:"c",coins:35,mod:{elx:1.5},d:"Las huellas de Truco son falsas. La energía se recarga un 50 % más rápido para los dos."},
+  {n:"Telarañas",foe:"flecha",bot:"d",coins:40,mod:{webs:1},d:"Salen telarañas en las dos islas: quien pise una queda atrapado 2 s y a la vista."},
+  {n:"La cazadora",foe:"mira",bot:"d",coins:45,mod:{hpB:1.34,webs:1},d:"Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas."},
+  {n:"Araña Madre",foe:"arana",bot:"arana",boss:1,coins:130,gems:12,chest:2,d:"Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.",
+    intro:"Si pisas una telaraña, quedas atrapado 2 s y a la vista",rage:["¡ARAÑA MADRE FURIOSA!","Más telarañas y más seguidas"],won:"👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.",hint:"No pises las telarañas: rodéalas y muévete tras cada disparo."},
 ]}];
+const CAMP_NEXT={n:"Mundo 3 · Volcán del Coloso de Lava"};
+const CAMP_BG=[["#bff59a","#6fd16a","#2f9a57","#1d6f4a"],["#8fe0b0","#2f9a6a","#17694f","#0f3f3a"]];
 const CAMP_POS=[[30,86],[68,68],[32,50],[66,33],[50,13]];
 /* decorado del mapa: [ilustración, x %, y % (pie), ancho px, espejo] de atrás hacia delante */
+const CAMP_DECO2=[["pino",12,16,78],["pino",88,20,84,1],["rocas",24,24,56],["pino",84,46,70],["pino",10,44,80,1],["arbol",90,60,70],["bandera_roja",70,14,40],
+  ["pino",90,84,88],["pino",8,70,74,1],["rocas",40,64,46,1],["bandera_azul",14,92,40],["rocas",60,96,54],["arbol",14,30,64]];
 const CAMP_DECO=[["pino",12,16,74],["arbol",88,20,88,1],["rocas",24,24,56],["pino",84,46,64],["arbol",10,44,84],["rocas",86,60,50,1],["bandera_roja",70,14,40],
   ["arbol",90,84,92],["pino",8,70,70,1],["rocas",40,64,46,1],["bandera_azul",14,92,40],["rocas",60,96,54]];
 const CAMP_BOT={
@@ -5060,22 +5097,30 @@ const CAMP_BOT={
   c:{think:.8,react:.45,perc:.4,dodge:.45,eps:.4,passive:4,gap:3.2,thr:1.35,moveP:.55},
   d:{think:.6,react:.42,perc:.36,dodge:.6,eps:.28,passive:3,gap:2.2,thr:1.15,moveP:.7},
   topo:{think:.3,react:.3,perc:.3,dodge:0,eps:.3,passive:4,gap:5,thr:1,moveP:1,blind:true},
+  arana:{think:.45,react:.4,perc:.32,dodge:.55,eps:.25,passive:3,gap:2.6,thr:1.1,moveP:.8},
 };
 const campLv=()=>CAMP[G.camp.w].lv[G.camp.l];
 const curArena=()=>G&&G.camp?CAMP[G.camp.w].k:arenaOf(S.tro).a.k;
 const campStars=w=>CAMP[w].lv.reduce((a,_,l)=>a+(S.camp[w+"."+l]||0),0);
-const campOpen=(w,l)=>l===0||(S.camp[w+"."+(l-1)]||0)>0;
-function showCamp(){
+const campAll=()=>CAMP.reduce((a,_,w)=>a+campStars(w),0),campMax=()=>CAMP.reduce((a,W)=>a+W.lv.length*3,0);
+const campWorldOpen=w=>w===0||(S.camp[(w-1)+"."+(CAMP[w-1].lv.length-1)]||0)>0;
+const campOpen=(w,l)=>campWorldOpen(w)&&(l===0||(S.camp[w+"."+(l-1)]||0)>0);
+function showCamp(ww){
   leaveHome();G=null;R=null;UI.screen="camp";stopLoop();app.className="camp";setBg();
-  const w=0,W=CAMP[w],cur=W.lv.findIndex((_,l)=>!(S.camp[w+"."+l]>0));
-  app.innerHTML=`<div class="cmbg"></div><div class="cmhead"><button class="gbtn blue sm cmback" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt=""></button><div class="cmtt"><small>CAMPAÑA · MUNDO 1</small><h2 class="out">${W.n}</h2></div><span class="cmst pnl out">★ ${campStars(w)}/${W.lv.length*3}</span></div>
-  <div class="cmmap">${CAMP_DECO.map(([k,x,y,w,f])=>`<img class="cmdeco" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" style="left:${x}%;top:${y}%;width:${w}px${f?";transform:translate(-50%,-100%) scaleX(-1)":""}">`).join("")}
+  /* se abre en el último mundo desbloqueado (o en el que se pida) */
+  if(ww==null){ww=UI.campW;if(ww==null){ww=0;for(let i=0;i<CAMP.length;i++)if(campWorldOpen(i))ww=i;}}
+  if(!campWorldOpen(ww))ww=0;UI.campW=ww;
+  const w=ww,W=CAMP[w],cur=W.lv.findIndex((_,l)=>!(S.camp[w+"."+l]>0)),bg=CAMP_BG[w]||CAMP_BG[0],nx=CAMP[w+1],nxOpen=nx&&campWorldOpen(w+1);
+  app.innerHTML=`<div class="cmbg" style="background:radial-gradient(120% 60% at 50% 0%,${bg[0]} 0%,transparent 60%),linear-gradient(${bg[1]},${bg[2]} 55%,${bg[3]})"></div><div class="cmhead"><button class="gbtn blue sm cmback" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt=""></button><div class="cmtt"><small>CAMPAÑA · MUNDO ${w+1}</small><h2 class="out">${W.n}</h2></div><span class="cmst pnl out">★ ${campStars(w)}/${W.lv.length*3}</span></div>
+  <div class="cmmap">${(w===1?CAMP_DECO2:CAMP_DECO).map(([k,x,y,w,f])=>`<img class="cmdeco" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" style="left:${x}%;top:${y}%;width:${w}px${f?";transform:translate(-50%,-100%) scaleX(-1)":""}">`).join("")}
   <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="cmroad" points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/><polyline points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/></svg>
   ${W.lv.map((L,l)=>{const st=S.camp[w+"."+l]||0,open=campOpen(w,l);
     return `<button class="cmn ${open?"":"lk"} ${st?"done":""} ${L.boss?"boss":""} ${l===cur?"cur":""}" data-a="camplv" data-w="${w}" data-l="${l}" style="left:${CAMP_POS[l][0]}%;top:${CAMP_POS[l][1]}%" aria-label="${L.n}">
       <span class="cmc">${L.boss?heroSVG(L.foe):`<b class="out">${l+1}</b>`}${open?"":`<img class="cmlock" src="${UIA}lock.webp" alt="">`}</span>
       <span class="cms">${[1,2,3].map(i=>`<i class="${i<=st?"on":""}">★</i>`).join("")}</span><span class="cml out">${L.n}</span></button>`;}).join("")}</div>
-  <div class="cmnext pnl"><img src="${UIA}lock.webp" alt=""><span><b class="out">Mundo 2 · Bosque de la Araña Madre</b><small>Muy pronto</small></span></div>`;
+  <div class="cmfoot">${w>0?`<button class="cmnext pnl" data-a="campw" data-w="${w-1}"><span class="cmarr out">‹</span><span><b class="out">Mundo ${w} · ${CAMP[w-1].n}</b><small>Volver</small></span></button>`:""}
+  ${nx?`<button class="cmnext pnl ${nxOpen?"":"lk"}" data-a="campw" data-w="${w+1}">${nxOpen?"":`<img src="${UIA}lock.webp" alt="">`}<span><b class="out">Mundo ${w+2} · ${nx.n}</b><small>${nxOpen?"Entrar":"Derrota al jefe de este mundo"}</small></span>${nxOpen?`<span class="cmarr out">›</span>`:""}</button>`
+    :`<div class="cmnext pnl lk"><img src="${UIA}lock.webp" alt=""><span><b class="out">${CAMP_NEXT.n}</b><small>Muy pronto</small></span></div>`}</div>`;
 }
 function campStart(w,l){
   const L=CAMP[w].lv[l];
@@ -5098,11 +5143,11 @@ async function endCamp(w){
     <div class="cmstars big">${[1,2,3].map(i=>`<span class="${i<=stars?"on":""}" style="animation-delay:${i*.18}s">★</span>`).join("")}</div>
     <div class="chips">${coins?`<div class="chip pnl in">${ico("coin")}<b class="out up">+${coins}</b><small>Monedas</small></div>`:""}${gems?`<div class="chip pnl in">${ico("gem")}<b class="out up">+${gems}</b><small>Gemas</small></div>`:""}</div>
     <div class="endrows">${chest?`<button class="endchest feat gold shine top in" data-a="openbox"><img src="${UIA}chest${L.chest}.webp" alt=""><span><b class="out">¡Cofre del jefe!</b><small>Toca para abrirlo</small></span><span class="gbtn green sm">ABRIR</span></button>`:""}
-      ${win&&L.boss&&!prev?`<div class="erow pnl in"><span>👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.</span></div>`:""}
+      ${win&&L.boss&&!prev?`<div class="erow pnl in"><span>${L.won}</span></div>`:""}
       ${win&&!coins&&!gems?`<p class="sub in">Ya tenías los premios de este nivel.</p>`:""}
       ${win&&stars<3?`<p class="sub in">Consigue las 3 estrellas ganando sin perder vida.</p>`:""}
-      ${!win?`<p class="sub in">${L.boss?"Guarda energía y dispárale justo cuando asoma tras su terremoto.":"¡Casi! Prueba con otro héroe."}</p>`:""}</div>
-    <div class="endbtns"><button class="gbtn blue" data-a="camp">MAPA</button><button class="gbtn xl shine" data-a="campgo" data-w="${wi}" data-l="${next??l}">${next!=null?"SIGUIENTE":win?"REPETIR":"REINTENTAR"}</button></div>`);
+      ${!win?`<p class="sub in">${L.boss?L.hint:"¡Casi! Prueba con otro héroe."}</p>`:""}</div>
+    <div class="endbtns"><button class="gbtn blue" data-a="${win&&L.boss&&CAMP[wi+1]?"campw":"camp"}" data-w="${wi+1}">${win&&L.boss&&CAMP[wi+1]?"MUNDO "+(wi+2):"MAPA"}</button><button class="gbtn xl shine" data-a="campgo" data-w="${wi}" data-l="${next??l}">${next!=null?"SIGUIENTE":win?"REPETIR":"REINTENTAR"}</button></div>`);
 }
 function startMatch(){
   sfx("go");actx();
@@ -5146,7 +5191,7 @@ async function startRound(){
   R.paused=false;
   EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
   if(!G.tutorial&&S.games<=3&&$("#amagob"))toast("amagonew","🎭 <b>¡Nuevo: AMAGO!</b> Deja una huella falsa en tu isla para que el rival dispare donde no estás.");
-  if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over){sfx("roar");B3.shake(.35);}if(R&&!R.over)banner("👑 "+TT("REY TOPO"),TT("Solo puedes darle cuando asoma, justo después de atacar"),"red",2200);}return;}
+  if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over){sfx("roar");B3.shake(.35);}if(R&&!R.over)banner("👑 "+TT(campLv().n).toUpperCase(),TT(campLv().intro),"red",2200);}return;}
   if(G.tut)TUT.go();
   else if(G.tutorial&&G.round===1){toast("tut1","🫣 Tu héroe está escondido en tu isla <b>verde</b>. El rival, en la <b>roja</b>: ¡adivina dónde y dispárale!");tutHand();}
   else toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
@@ -5787,9 +5832,12 @@ const ui={
     if(s==="p"){banner(U.i+" "+TT(U.n).toUpperCase()+"!",TT(U.d),"gold",1100);sfx("burst");buzz([30,20,50]);B3.shake(.3);B3.burst(B3.tileWorld("p",R.heroes.p.x,R.heroes.p.y).setY(.6),[0xffe25a,0xffffff,0xffa81f],46,2.6,3,.14);}
     else if(U.w){banner("⚠️ "+TT("ULTI RIVAL")+": "+TT(U.n),TT(U.w),"red",1500);sfx("radar");buzz(40);}},
   ping(){sfx("radar");},
+  web(d){if(UI.screen!=="game")return;sfx("web");if(d==="p")toast("webs","🕸️ <b>¡Telarañas!</b> Si pisas una, quedas atrapado 2 s y el rival te ve. Rodéalas.");},
+  stuck(s,x,y){if(UI.screen!=="game")return;if(s==="p"){const c=B3.heroScreen();floatText(c.x,c.y,"🕸️ "+TT("¡Atrapado!"),"bad");sfx("hurt");buzz([30,20,30]);vignette();}
+    else{const c=B3.screenPos("b",x,y,1);floatText(c.x,c.y,"🕸️ "+TT("¡Atrapado! ¡Dale!"),"near");sfx("radar");}},
   burrow(s,x,y){if(UI.screen!=="game"||s!=="b")return;sfx("dig");B3.burst(B3.tileWorld("b",x,y).setY(.15),[0x7a5230,0x5a3a1c,0xa87a4a],22,1.8,2,.11);},
   surface(s){if(UI.screen!=="game"||s!=="b")return;sfx("dig");B3.shake(.3);B3.burst(B3.tileWorld("b",R.heroes.b.x,R.heroes.b.y).setY(.15),[0x7a5230,0x5a3a1c,0xa87a4a,0xd9b98a],44,2.6,3.2,.14);buzz(30);const h=R.heroes.b,c=B3.screenPos("b",h.x,h.y,1);floatText(c.x,c.y,"👑 ¡Asoma! ¡Dale!","near");toast("topoout","👑 <b>¡El Rey Topo asoma!</b> Solo ahora puedes darle. Esquiva su terremoto y dispara.");},
-  enrage(s){if(UI.screen!=="game")return;sfx("roar");banner("😡 "+TT("¡REY TOPO FURIOSO!"),TT("Dos terremotos a la vez y asoma menos tiempo"),"red",1600);B3.shake(.4);buzz([40,30,40]);},
+  enrage(s){if(UI.screen!=="game")return;const L=G&&G.camp?campLv():null,r=L&&L.rage||["¡FURIA!",""];sfx("roar");banner("😡 "+TT(r[0]),TT(r[1]),"red",1600);B3.shake(.4);buzz([40,30,40]);},
   roundOver(w){endRound(w);},
 };
 
@@ -5861,6 +5909,7 @@ document.addEventListener("click",e=>{
     case "acthint":if(R&&UI.screen==="game"&&!R.over){const b=el.dataset.b;sfx("sel");G.hint={b,until:performance.now()+1400};if(G.decoyArm){G.decoyArm=false;$("#amagob")&&$("#amagob").classList.remove("on");}
       const c=B3.screenPos(b,2,2);floatText(c.x,c.y,b==="p"?"👇 "+TT("Toca una casilla de tu isla"):"👆 "+TT("Toca una casilla de la isla roja"),"near");}break;
     case "camp":sfx("tap");UI.modal=null;renderModal();EV.add("screen",{s:"camp"});showCamp();break;
+    case "campw":{const w=+el.dataset.w;if(!campWorldOpen(w)){sfx("nope");shake(el);break;}sfx("tap");showCamp(w);break;}
     case "camplv":{const w=+el.dataset.w,l=+el.dataset.l;if(!campOpen(w,l)){sfx("nope");shake(el);break;}sfx("tap");UI.modal={k:"camplv",w,l};renderModal();break;}
     case "campgo":sfx("go");actx();UI.modal=null;renderModal();campStart(+el.dataset.w,+el.dataset.l);break;
     case "openbox":EV.add("chest_open",{n:S.box.length});openBox();break;
