@@ -1691,6 +1691,9 @@ html.ui3 #app:not(.game) .rnode.reach .tro{background:linear-gradient(#ffe14d,#f
 html.ui3 #app:not(.game) .rail::before{border:0;background:#0d0f24;border-radius:3px;width:12px;margin-left:-6px;box-shadow:none}
 html.ui3 #app:not(.game) .rail .fill{border-radius:3px;width:8px;margin-left:-4px;box-shadow:none}
 html.ui3 #app:not(.game) .okc{border-radius:4px 9px 4px 9px}
+.vssheet.bossvs .p:last-child .av.big{transform:scale(1.1);transform-origin:50% 60%;animation:bossin .7s cubic-bezier(.3,1.5,.5,1) both}
+.vssheet.bossvs .p:last-child b{font-size:1.4em;position:relative;z-index:2;margin-top:6px}
+@keyframes bossin{from{transform:scale(.2) translateY(60px);opacity:0}to{transform:scale(1.1)}}
 /* Arcade: móviles pequeños */
 @media (max-width:350px){
   .mprof{min-width:84px!important}.mav{width:34px;height:34px}
@@ -1896,7 +1899,7 @@ function fire(R,s,tx,ty,hk){
   R.projs.push(p);call(hk,"fired",p);
   if(H.burrow){/* jefe bajo tierra: al atacar asoma, se queda quieto y a la vista; furioso lanza un segundo golpe y asoma menos */
     if(h.rage){const o=pick(allCells().filter(([x,y])=>Math.abs(x-tx)+Math.abs(y-ty)>=3)),q={o:s,d:other(s),cells:areaOf(H.pat,o[0],o[1]),hitAt:p.hitAt+.25,launched:R.now,dmg:H.dmg,warn:H.warn,type:h.type,id:++MID,hx:p.hx,hy:p.hy};R.projs.push(q);call(hk,"fired",q);}
-    h.outUntil=R.now+H.burrow*(h.rage?.75:1);h.invulUntil=R.now;h.path=[];mark(R,s,{t:"ping",x:h.x,y:h.y,type:h.type,until:h.outUntil});call(hk,"surface",s);}
+    h.outUntil=R.now+H.burrow*(h.rage?.75:1);h.wasOut=true;h.invulUntil=R.now;h.path=[];mark(R,s,{t:"ping",x:h.x,y:h.y,type:h.type,until:h.outUntil});call(hk,"surface",s);}
   return "ok";
 }
 function ulti(R,s,hk){
@@ -1982,6 +1985,7 @@ function tick(R,dt,hk){
   for(const s of SIDES){const h=R.heroes[s],rate=ELX_RATE*(h.turboUntil>R.now?2:1)*(R.sudden?1.5:1)*(1+lvBonus(h.lv).elx)*(R.mod.elx||1);R.elx[s]=Math.min(ELX_MAX,R.elx[s]+rate*dt);}
   for(const s of SIDES){const h=R.heroes[s];if(!HEROES[h.type].burrow)continue;
     if(!(h.outUntil>R.now)&&h.invulUntil<R.now+.3)h.invulUntil=R.now+.3;/* bajo tierra nada le alcanza */
+    if(h.wasOut&&!(h.outUntil>R.now)){h.wasOut=false;mark(R,s,{t:"hoyo",x:h.x,y:h.y,until:R.now+1.8});call(hk,"burrow",s,h.x,h.y);}
     if(!h.rage&&h.hp>0&&h.hp<=h.max/2){h.rage=true;call(hk,"enrage",s);}}
   /* primero caen los disparos que ya tocaba resolver y después se mueve: no se esquiva un golpe que ya había llegado */
   const due=R.projs.filter(p=>p.hitAt<=R.now);R.projs=R.projs.filter(p=>p.hitAt>R.now);
@@ -2216,7 +2220,7 @@ const I18N_EN={"☁️ Pasar mi partida a otro móvil":"☁️ Move my game to a
 const TR=(()=>{
   if(LANG==="es")return null;
   /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
-  Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
+  Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "👑 JEFE": "👑 BOSS", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
   Object.assign(I18N_EN,{"Toca una casilla de tu isla":"Tap a tile on your island","Toca una casilla de la isla roja":"Tap a tile on the red island"});
   Object.assign(I18N_EN,{"Lluvia de flechas": "Arrow rain", "Flechas en 3 filas a la vez.": "Arrows on 3 rows at once.", "¡Flechas en 3 filas! Muévete a una fila libre": "Arrows on 3 rows! Move to a free row", "Suelo ardiente": "Burning ground", "Tu siguiente bola deja el suelo en llamas 5 s.": "Your next fireball leaves the ground burning for 5 s.", "Su siguiente bola dejará fuego 5 s": "Their next fireball will leave fire for 5 s", "Humo": "Smoke", "4 s sin dejar huellas ni pasos.": "4 s without leaving footprints or steps.", "Fortaleza": "Fortress", "5 s inmune, pero sin poder moverte.": "Immune for 5 s, but you can't move.", "Es inmune 5 s: no gastes energía": "Immune for 5 s: save your energy", "Vista de búho": "Owl sight", "Ves al rival 1,5 s.": "You see your rival for 1.5 s.", "¡Te está viendo! Muévete ya": "They can see you! Move now", "Doble o nada": "Double or nothing", "Apareces al instante en tu huella falsa.": "You instantly appear on your fake footprint.", "Tormenta": "Storm", "Tu siguiente rayo cae en las dos diagonales.": "Your next bolt strikes both diagonals.", "Su siguiente rayo caerá en X": "Their next bolt will strike in an X", "Mecha corta": "Short fuse", "Tu siguiente bomba cae sin aviso y el doble de rápido.": "Your next bomb lands with no warning, twice as fast.", "Campo minado": "Minefield", "3 minas ocultas en la isla rival.": "3 hidden mines on the rival island.", "¡Hay 3 minas ocultas en tu isla!": "There are 3 hidden mines on your island!", "Gran salto": "Big leap", "2,5 s en el aire: nada te alcanza.": "2.5 s in the air: nothing can hit you.", "Está en el aire 2,5 s: nada le alcanza": "In the air for 2.5 s: nothing can hit them", "Florecer": "Bloom", "Recuperas 1 vida.": "You recover 1 life.", "Ha recuperado 1 vida": "They recovered 1 life", "Mira láser": "Laser sight", "Tu siguiente disparo llega al instante.": "Your next shot lands instantly.", "Coro": "Chorus", "5 huellas falsas en tu isla durante 3 s.": "5 fake footprints on your island for 3 s.", "¡Dispara!": "Fire!", "¡ULTI lista!": "ULTI ready!", "Solo una vez por ronda.": "Only once per round.", "Una vez por ronda.": "Once per round.", "Lista en": "Ready in", "Ya tienes toda la vida": "You already have full health", "¡QUEMADO!": "BURNED!", "ULTI RIVAL": "RIVAL ULTI", "¡Tu ULTI está lista! Es el botón dorado: un poder único de cada héroe, una vez por ronda. ¡Tócalo!": "Your ULTI is ready! It's the golden button: a unique power for each hero, once per round. Tap it!", "¡Eso es! Cada héroe tiene una ULTI distinta. Mírala en su ficha.": "That's it! Every hero has a different ULTI. Check it on their card."});
   Object.assign(I18N_EN,{"Nombre: #": "Name: #", "Sonido": "Sound", "Vibración": "Vibration", "Enviar estadísticas de uso": "Send usage statistics", "Cómo se juega": "How to play", "Pasar mi partida a otro móvil": "Move my game to another phone", "Política de privacidad": "Privacy policy", "Copiar código": "Copy code", "Aviso": "Warning", "Racha ×#": "Streak ×#", "Nuevos premios en el camino": "New rewards on the road", "Tras el escalón #: un premio cada # fichas": "After tier #: a reward every # tokens", "¡RECLAMAR!": "CLAIM!", "CÓDIGO": "CODE", "ABRIR": "OPEN", "Muy pronto": "Soon", "DESBLOQUEAR CON": "UNLOCK WITH", "O CON": "OR WITH", "# GEMAS": "# GEMS", "Temporada # · quedan # días": "Season # · # days left", "Temporada # · quedan # días · ": "Season # · # days left · ", "premios": "rewards", "ya alcanzados se desbloquean al momento": "already reached unlock instantly", "1.ª victoria del día: llave doble, +30 monedas y +20 de Poder": "First win of the day: double key, +30 coins and +20 Power", "+20 gemas al crearla": "+20 gems when you create it"});
@@ -2449,6 +2453,9 @@ function sfx(n){
   if(!S.snd)return;
   switch(n){
     case "tap":tone(700,.05,"triangle",.07);break;
+    case "dig":noise(.32,.3,320);tone(95,.28,"sine",.22,48);break;
+    case "quake":tone(55,.7,"sine",.38,34);noise(.7,.34,180);tone(82,.5,"sawtooth",.05,40);break;
+    case "roar":tone(150,.75,"sawtooth",.11,68);tone(225,.6,"square",.045,92);noise(.65,.14,520);break;
     case "drop":noise(.35,.10,2200);tone(900,.4,"sine",.04,300);break;
     case "land":tone(95,.28,"sine",.3,45);noise(.18,.32,260);break;
     case "tap1":noise(.1,.27,500);tone(196,.14,"square",.07);tone(392,.10,"triangle",.05,null,.03);break;
@@ -3886,7 +3893,9 @@ function update(R,dt){
   foe.userData.vis+=((fp?1:0)-foe.userData.vis)*Math.min(1,dt*10);
   foe.visible=foe.userData.vis>.02;
   if(fp){foe.position.lerp(fp,foe.visible&&foe.userData.vis>.5?Math.min(1,dt*10):1);}
-  foe.scale.setScalar(Math.max(.01,foe.userData.vis)*HSCALE);
+  if(HEROES[R.heroes.b.type].burrow&&!(t<revealUntil)){const v=foe.userData.vis,e=1-(1-v)*(1-v);if(fp)foe.userData.by=fp.y;
+    foe.scale.setScalar(HSCALE*(.82+.18*e));foe.position.y=(foe.userData.by||0)-(1-e)*1.05+Math.sin(Math.min(1,v)*Math.PI)*.12;foe.rotation.z=(1-e)*.25*Math.sin(t*30);}
+  else{foe.rotation.z=0;foe.scale.setScalar(Math.max(.01,foe.userData.vis)*HSCALE);}
   const aB=act.b&&(t-act.b.t<(act.b.k==="win"||act.b.k==="ko"?99:.62))?act.b:null;
   GFX.animate(foe,t,{act:aB&&aB.k,actT:aB?t-aB.t:0});
   /* casillas */
@@ -3909,12 +3918,13 @@ function update(R,dt){
       else{dc=0x1a0a20;dop=.14;}
       {const sm=shotMem[x+","+y],age=sm?t-sm.t:99;if(age<7&&!mp&&!inArea(hoverCells,x,y)){dc=sm.res==="near"?0xff8a1f:0x2a6fd8;dop=Math.max(dop,.32*(1-age/7));}}
       const ms=R.marks.b.filter(m=>m.x===x&&m.y===y&&!m.dud);
-      const top=ms.find(m=>m.t==="pick")||ms.find(m=>m.t==="huella")||ms.find(m=>m.t==="cerca")||ms.find(m=>m.t==="bloq")||ms.find(m=>m.t==="agua")||(Hm.ears?ms.find(m=>m.t==="step"):null);
+      const top=ms.find(m=>m.t==="pick")||ms.find(m=>m.t==="huella")||ms.find(m=>m.t==="cerca")||ms.find(m=>m.t==="bloq")||ms.find(m=>m.t==="hoyo")||ms.find(m=>m.t==="agua")||(Hm.ears?ms.find(m=>m.t==="step"):null);
       if(top){
         if(top.t==="pick"){icon=BOOSTS[top.k].i;isc=.75;}
         else if(top.t==="huella"){icon="foot";iop=Math.max(.45,(top.until-R.now)/HUELLA_T);isc=1.05+Math.sin(t*10)*.1;dc=0xffd23a;dop=.45;}
         else if(top.t==="cerca"){icon="🔥";dc=0xff8a1f;dop=.5;}
         else if(top.t==="bloq"){icon="🛡️";}
+        else if(top.t==="hoyo"){icon="🕳️";isc=.95;iop=Math.min(1,(top.until-R.now)/.6);dc=0x3a2410;dop=.45*iop;}
         else if(top.t==="agua"){icon="water";iop=.8;}
         else if(top.t==="step"){icon="ripple";isc=.5+(1-(top.until-R.now)/.8)*.4;}
       }
@@ -4923,7 +4933,7 @@ function renderModal(){
       :`<div class="sheet"><h2 class="out">Buscando rival…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroSVG(pick(IDS))}</div></div></div>`;
   }else if(M.k==="vs"){
     const lp=G.lv?G.lv.p:1,lb=G.lv?G.lv.b:1;
-    m.innerHTML=`<div class="sheet vssheet"><h2 class="out">RONDA ${G.round}</h2><div class="vs"><div class="p"><div class="av big">${heroArt(M.p)}</div><b class="out" style="color:var(--me)">${HEROES[M.p].n}</b><small>${esc(S.name)} · Poder ${lp}</small></div><div class="mid out">VS</div><div class="p"><div class="av big">${heroSVG(M.b)}</div><b class="out" style="color:var(--foe)">${HEROES[M.b].n}</b><small>${esc(G.opp.name)} · Poder ${lb}</small></div></div></div>`;
+    m.innerHTML=`<div class="sheet vssheet ${G.camp&&campLv().boss?"bossvs":""}"><h2 class="out">${G.camp?(campLv().boss?"👑 JEFE":"NIVEL "+(G.camp.l+1)):"RONDA "+G.round}</h2><div class="vs"><div class="p"><div class="av big">${heroArt(M.p)}</div><b class="out" style="color:var(--me)">${HEROES[M.p].n}</b><small>${esc(S.name)} · Poder ${lp}</small></div><div class="mid out">VS</div><div class="p"><div class="av big">${heroSVG(M.b)}</div><b class="out" style="color:var(--foe)">${HEROES[M.b].n}</b><small>${esc(G.opp.name)} · Poder ${lb}</small></div></div></div>`;
   }else if(M.k==="camplv"){const L=CAMP[M.w].lv[M.l],st=S.camp[M.w+"."+M.l]||0;
     m.innerHTML=`<div class="sheet camplv"><small class="cmk">${L.boss?"JEFE":"NIVEL "+(M.l+1)}</small><h2 class="out">${L.n}</h2><div class="cmfoe ${L.boss?"boss":""}">${heroSVG(L.foe)}</div><p>${L.d}</p>
       <div class="cmstars">${[1,2,3].map(i=>`<span class="${i<=st?"on":""}">★</span>`).join("")}</div><p class="cmrule">★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida</p>
@@ -5130,7 +5140,7 @@ async function startRound(){
   R.paused=false;
   EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
   if(!G.tutorial&&S.games<=3&&$("#amagob"))toast("amagonew","🎭 <b>¡Nuevo: AMAGO!</b> Deja una huella falsa en tu isla para que el rival dispare donde no estás.");
-  if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over)banner("👑 "+TT("REY TOPO"),TT("Solo puedes darle cuando asoma, justo después de atacar"),"red",2200);}return;}
+  if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over){sfx("roar");B3.shake(.35);}if(R&&!R.over)banner("👑 "+TT("REY TOPO"),TT("Solo puedes darle cuando asoma, justo después de atacar"),"red",2200);}return;}
   if(G.tut)TUT.go();
   else if(G.tutorial&&G.round===1){toast("tut1","🫣 Tu héroe está escondido en tu isla <b>verde</b>. El rival, en la <b>roja</b>: ¡adivina dónde y dispárale!");tutHand();}
   else toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
@@ -5736,7 +5746,7 @@ const ui={
     recEv("impact",p);
     if(UI.screen!=="game")return;
     if(p.dud&&p.show&&p.o==="p")p={...p,cells:p.show};
-    B3.impactFx(p);
+    B3.impactFx(p);if(HEROES[p.type].burrow){sfx("quake");B3.shake(.5);}
     const mine=p.o==="p",to=B3.areaScreen(p.d,p.cells);
     if(mine&&p.dud){floatText(to.x,to.y,"🎭","miss");return;}
     if(mine){
@@ -5771,8 +5781,9 @@ const ui={
     if(s==="p"){banner(U.i+" "+TT(U.n).toUpperCase()+"!",TT(U.d),"gold",1100);sfx("burst");buzz([30,20,50]);B3.shake(.3);B3.burst(B3.tileWorld("p",R.heroes.p.x,R.heroes.p.y).setY(.6),[0xffe25a,0xffffff,0xffa81f],46,2.6,3,.14);}
     else if(U.w){banner("⚠️ "+TT("ULTI RIVAL")+": "+TT(U.n),TT(U.w),"red",1500);sfx("radar");buzz(40);}},
   ping(){sfx("radar");},
-  surface(s){if(UI.screen!=="game"||s!=="b")return;sfx("radar");const h=R.heroes.b,c=B3.screenPos("b",h.x,h.y,1);floatText(c.x,c.y,"👑 ¡Asoma! ¡Dale!","near");toast("topoout","👑 <b>¡El Rey Topo asoma!</b> Solo ahora puedes darle. Esquiva su terremoto y dispara.");},
-  enrage(s){if(UI.screen!=="game")return;banner("😡 "+TT("¡REY TOPO FURIOSO!"),TT("Dos terremotos a la vez y asoma menos tiempo"),"red",1600);B3.shake(.4);buzz([40,30,40]);},
+  burrow(s,x,y){if(UI.screen!=="game"||s!=="b")return;sfx("dig");B3.burst(B3.tileWorld("b",x,y).setY(.15),[0x7a5230,0x5a3a1c,0xa87a4a],22,1.8,2,.11);},
+  surface(s){if(UI.screen!=="game"||s!=="b")return;sfx("dig");B3.shake(.3);B3.burst(B3.tileWorld("b",R.heroes.b.x,R.heroes.b.y).setY(.15),[0x7a5230,0x5a3a1c,0xa87a4a,0xd9b98a],44,2.6,3.2,.14);buzz(30);const h=R.heroes.b,c=B3.screenPos("b",h.x,h.y,1);floatText(c.x,c.y,"👑 ¡Asoma! ¡Dale!","near");toast("topoout","👑 <b>¡El Rey Topo asoma!</b> Solo ahora puedes darle. Esquiva su terremoto y dispara.");},
+  enrage(s){if(UI.screen!=="game")return;sfx("roar");banner("😡 "+TT("¡REY TOPO FURIOSO!"),TT("Dos terremotos a la vez y asoma menos tiempo"),"red",1600);B3.shake(.4);buzz([40,30,40]);},
   roundOver(w){endRound(w);},
 };
 
