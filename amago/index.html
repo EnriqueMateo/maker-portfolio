@@ -1700,6 +1700,9 @@ html.ui3 #app:not(.game) .okc{border-radius:4px 9px 4px 9px}
 button.cmnext{width:100%;text-align:left;cursor:pointer;color:#fff;font:inherit}
 .cmnext.lk{opacity:.8}.cmnext .cmarr{font:28px/1 var(--f-game);color:#ffe14d;margin-left:auto}.cmnext>span:nth-child(2),.cmnext>span:first-child:not(.cmarr){flex:1}
 .cmnext small{display:block}
+.dlysheet{text-align:center}.dlysheet .vs{margin:4px 0}
+.dlytime{font:30px/1 var(--f-game);color:#ffe98a;margin:-4px 0 6px;text-align:center;width:100%}
+.sbtn .okc{top:auto;bottom:-6px;right:-6px}
 .rivline{margin:8px 0 0;text-align:center;font:15px/1.2 var(--f-game);color:#cfe0ff}.rivline.nem{color:#ffb3bd}
 .fwtag.nem span{color:#ffb3bd}
 .stile.num .ts{font-size:10.5px;color:#5a6599;font-weight:800;line-height:1.15}
@@ -2259,6 +2262,7 @@ const TR=(()=>{
   Object.assign(I18N_EN,{"¡Le quedaba solo 1 vida!": "They had just 1 life left!", "# disparos tuyos cayeron justo al lado": "# of your shots landed right next to them", "Un disparo tuyo cayó justo al lado": "One of your shots landed right next to them", "¡A 1 victoria de abrir un cofre!": "1 win away from opening a chest!", "Misión casi hecha:": "Mission almost done:", "A # trofeos de:": "# trophies away from:", "A 1 partida del siguiente premio del pase": "1 match away from the next pass reward", "¡Revancha!": "Rematch!"});
   Object.assign(I18N_EN,{"Le ganas": "You lead", "Te gana": "They lead", "Vais empatados": "You're tied", "Cuenta pendiente": "Unfinished business", "¡Has adelantado a": "You've overtaken", "te gana": "leads you"});
   Object.assign(I18N_EN,{"# rondas seguidas ganadas con": "# rounds in a row won with", "K.O. más rápido con": "Fastest K.O. with", "# esquivas en una ronda": "# dodges in one round", "Puntería récord con": "Record accuracy with", "Puntería": "Accuracy", "esquiva": "dodge", "esquivas": "dodges", "¡Nuevo récord!": "New record!", "¡Nuevos récords!": "New records!", "¡NUEVO RÉCORD!": "NEW RECORD!", "Tus números": "Your stats", "Juega con": "Play with", "y aquí verás tu puntería, tus esquivas y tus récords.": "and you'll see your accuracy, dodges and records here.", "disparos": "shots", "récord": "record", "Esquivas": "Dodges", "de los golpes que iban a por ti": "of the hits aimed at you", "Mejor racha": "Best streak", "rondas seguidas": "rounds in a row", "ahora": "now", "K.O. más rápido": "Fastest K.O.", "rondas jugadas": "rounds played"});
+  Object.assign(I18N_EN,{"RETO DEL DÍA": "DAILY CHALLENGE", "Reto del día": "Daily challenge", "Reto": "Daily", "cambia en": "changes in", "Tu héroe": "Your hero", "Rival": "Rival", "Energía loca": "Crazy energy", "La energía se recarga al doble para los dos.": "Energy refills twice as fast for both.", "Sin trucos": "No tricks", "Nadie puede usar el amago: solo puntería y pies.": "Nobody can feint: just aim and footwork.", "Rival de hierro": "Iron rival", "El rival tiene el doble de vida.": "The rival has double life.", "Huellas fugaces": "Fleeting footprints", "Las huellas del rival duran la mitad. Hay que mirar rápido.": "The rival's footprints last half as long. Look fast.", "Telarañas": "Cobwebs", "Salen telarañas en las dos islas: quien pise una queda atrapado y a la vista.": "Cobwebs appear on both islands: step on one and you're stuck and visible.", "Erupción": "Eruption", "Cada 15 s el volcán delata a quien esté en una casilla de lava.": "Every 15 s the volcano reveals whoever stands on lava.", "La estatua": "The statue", "Una estatua para un golpe en cada isla. Úsala bien.": "A statue blocks one hit on each island. Use it well.", "Vendaval": "Gale", "Ráfagas de viento desvían los disparos una casilla.": "Gusts of wind push shots one tile.", "Cada disparo cuenta": "Every shot counts", "La energía va mucho más lenta para los dos.": "Energy is much slower for both.", "¡Mejoras tu marca de hoy!": "You beat today's best!", "Tu mejor marca de hoy": "Today's best", "aún sin superar": "not beaten yet", "ayer": "yesterday", "Ayer": "Yesterday", "retos superados": "challenges beaten", "premio cada": "reward every", "¡Premio de constancia!": "Consistency reward!", "Puedes reintentarlo todas las veces que quieras. Cambia a medianoche.": "Retry as many times as you like. It changes at midnight.", "intento": "try", "intentos": "tries", "Una ronda. El mismo reto para todos los jugadores.": "One round. The same challenge for every player.", "Premios de hoy cobrados. Mañana, reto nuevo.": "Today's rewards claimed. New challenge tomorrow.", "Con 3 estrellas": "With 3 stars", "con 3 estrellas": "with 3 stars", "Premio": "Reward", "cada": "every", "MEJORAR MARCA": "BEAT MY BEST"});
   Object.assign(I18N_EN,{"Toca una casilla de tu isla":"Tap a tile on your island","Toca una casilla de la isla roja":"Tap a tile on the red island"});
   Object.assign(I18N_EN,{"Lluvia de flechas": "Arrow rain", "Flechas en 3 filas a la vez.": "Arrows on 3 rows at once.", "¡Flechas en 3 filas! Muévete a una fila libre": "Arrows on 3 rows! Move to a free row", "Suelo ardiente": "Burning ground", "Tu siguiente bola deja el suelo en llamas 5 s.": "Your next fireball leaves the ground burning for 5 s.", "Su siguiente bola dejará fuego 5 s": "Their next fireball will leave fire for 5 s", "Humo": "Smoke", "4 s sin dejar huellas ni pasos.": "4 s without leaving footprints or steps.", "Fortaleza": "Fortress", "5 s inmune, pero sin poder moverte.": "Immune for 5 s, but you can't move.", "Es inmune 5 s: no gastes energía": "Immune for 5 s: save your energy", "Vista de búho": "Owl sight", "Ves al rival 1,5 s.": "You see your rival for 1.5 s.", "¡Te está viendo! Muévete ya": "They can see you! Move now", "Doble o nada": "Double or nothing", "Apareces al instante en tu huella falsa.": "You instantly appear on your fake footprint.", "Tormenta": "Storm", "Tu siguiente rayo cae en las dos diagonales.": "Your next bolt strikes both diagonals.", "Su siguiente rayo caerá en X": "Their next bolt will strike in an X", "Mecha corta": "Short fuse", "Tu siguiente bomba cae sin aviso y el doble de rápido.": "Your next bomb lands with no warning, twice as fast.", "Campo minado": "Minefield", "3 minas ocultas en la isla rival.": "3 hidden mines on the rival island.", "¡Hay 3 minas ocultas en tu isla!": "There are 3 hidden mines on your island!", "Gran salto": "Big leap", "2,5 s en el aire: nada te alcanza.": "2.5 s in the air: nothing can hit you.", "Está en el aire 2,5 s: nada le alcanza": "In the air for 2.5 s: nothing can hit them", "Florecer": "Bloom", "Recuperas 1 vida.": "You recover 1 life.", "Ha recuperado 1 vida": "They recovered 1 life", "Mira láser": "Laser sight", "Tu siguiente disparo llega al instante.": "Your next shot lands instantly.", "Coro": "Chorus", "5 huellas falsas en tu isla durante 3 s.": "5 fake footprints on your island for 3 s.", "¡Dispara!": "Fire!", "¡ULTI lista!": "ULTI ready!", "Solo una vez por ronda.": "Only once per round.", "Una vez por ronda.": "Once per round.", "Lista en": "Ready in", "Ya tienes toda la vida": "You already have full health", "¡QUEMADO!": "BURNED!", "ULTI RIVAL": "RIVAL ULTI", "¡Tu ULTI está lista! Es el botón dorado: un poder único de cada héroe, una vez por ronda. ¡Tócalo!": "Your ULTI is ready! It's the golden button: a unique power for each hero, once per round. Tap it!", "¡Eso es! Cada héroe tiene una ULTI distinta. Mírala en su ficha.": "That's it! Every hero has a different ULTI. Check it on their card."});
   Object.assign(I18N_EN,{"Nombre: #": "Name: #", "Sonido": "Sound", "Vibración": "Vibration", "Enviar estadísticas de uso": "Send usage statistics", "Cómo se juega": "How to play", "Pasar mi partida a otro móvil": "Move my game to another phone", "Política de privacidad": "Privacy policy", "Copiar código": "Copy code", "Aviso": "Warning", "Racha ×#": "Streak ×#", "Nuevos premios en el camino": "New rewards on the road", "Tras el escalón #: un premio cada # fichas": "After tier #: a reward every # tokens", "¡RECLAMAR!": "CLAIM!", "CÓDIGO": "CODE", "ABRIR": "OPEN", "Muy pronto": "Soon", "DESBLOQUEAR CON": "UNLOCK WITH", "O CON": "OR WITH", "# GEMAS": "# GEMS", "Temporada # · quedan # días": "Season # · # days left", "Temporada # · quedan # días · ": "Season # · # days left · ", "premios": "rewards", "ya alcanzados se desbloquean al momento": "already reached unlock instantly", "1.ª victoria del día: llave doble, +30 monedas y +20 de Poder": "First win of the day: double key, +30 coins and +20 Power", "+20 gemas al crearla": "+20 gems when you create it"});
@@ -2296,7 +2300,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* ================= guardado ================= */
 const SAVE_KEY="amago-v3";
-const DEF={camp:{},riv:{},hs:{},tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
+const DEF={camp:{},riv:{},hs:{},dly:null,dlyPrev:null,dlyDays:0,tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
   gemsFree:0,gemsPaid:0,own:{skin:[],frame:[]},equip:{skin:{},frame:""},purch:{starter:false,tx:{},pending:[],month:{m:"",cents:0},log:[],bundleWk:-1},gemDeals:{day:-1,got:{}},
   wk:{wk:-1,list:[]},cal:{day:-1,i:0,cyc:0},fw:-1,wc:{day:-1,n:0},ws:0,ls:0,troMax:0,mgot:{},seen:-1,back:0,pity:0,age:{band:""},offerSeen:{day:-1,keys:{}},gemOnce:{},offers:{day:-1,got:[]},lastLoss:false,vib:1,welcome:0};
 /* restos del modo demostración (quitado: Apple no permite códigos que desbloqueen contenido) */
@@ -4458,6 +4462,7 @@ function showHome(){
     </div>
     <div class="sidecol r">
       ${box?`<button class="sbtn chest ${at==="box"?"hop":""}" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="lb out">¡Ábrelo!</span></button>`:""}
+      ${S.tutDone&&S.games>=2?`<button class="sbtn" data-a="daily">${dlyDone()?"":`<i class="badge bob">!</i>`}<span class="sq pnl"><span class="cmico">📅</span>${dlyDone()?`<i class="okc"></i>`:""}</span><span class="lb out">${TT("Reto")}</span></button>`:""}
       <button class="keymod pnl" data-a="keysinfo"><img class="c" src="${UIA}chest1.webp" alt=""><span class="slots">${[0,1,2].map(i=>`<i class="well ${i===S.keys&&S.keys===2?"glow":""}"><img class="${i<S.keys?"":"off"}" src="${UIA}key.webp" alt=""></i>`).join("")}</span></button>
     </div>
     <button class="hplate pnl" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>${ico("trophy")} ${S.hw[S.fav]||0}${mastery(S.fav).t>=0?" · "+MASTERY[mastery(S.fav).t].t:""}</small></span><span class="chev">›</span></button>
@@ -4989,7 +4994,8 @@ function renderModal(){
       :`<div class="sheet"><h2 class="out">Buscando rival…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroSVG(pick(IDS))}</div></div></div>`;
   }else if(M.k==="vs"){
     const lp=G.lv?G.lv.p:1,lb=G.lv?G.lv.b:1;
-    m.innerHTML=`<div class="sheet vssheet ${G.camp&&campLv().boss?"bossvs":""}"><h2 class="out">${G.camp?(campLv().boss?"👑 JEFE":"NIVEL "+(G.camp.l+1)):"RONDA "+G.round}</h2><div class="vs"><div class="p"><div class="av big">${heroArt(M.p)}</div><b class="out" style="color:var(--me)">${HEROES[M.p].n}</b><small>${esc(S.name)} · Poder ${lp}</small></div><div class="mid out">VS</div><div class="p"><div class="av big">${heroSVG(M.b)}</div><b class="out" style="color:var(--foe)">${HEROES[M.b].n}</b><small>${esc(G.opp.name)} · Poder ${lb}</small></div></div></div>`;
+    m.innerHTML=`<div class="sheet vssheet ${G.camp&&campLv().boss?"bossvs":""}"><h2 class="out">${G.camp?(campLv().boss?"👑 JEFE":campTag()):"RONDA "+G.round}</h2><div class="vs"><div class="p"><div class="av big">${heroArt(M.p)}</div><b class="out" style="color:var(--me)">${HEROES[M.p].n}</b><small>${esc(S.name)} · Poder ${lp}</small></div><div class="mid out">VS</div><div class="p"><div class="av big">${heroSVG(M.b)}</div><b class="out" style="color:var(--foe)">${HEROES[M.b].n}</b><small>${esc(G.opp.name)} · Poder ${lb}</small></div></div></div>`;
+  }else if(M.k==="daily"){m.innerHTML=dailyModal();
   }else if(M.k==="camplv"){const L=CAMP[M.w].lv[M.l],st=S.camp[M.w+"."+M.l]||0;
     m.innerHTML=`<div class="sheet camplv"><small class="cmk">${L.boss?"JEFE":"NIVEL "+(M.l+1)}</small><h2 class="out">${L.n}</h2><div class="cmfoe ${L.boss?"boss":""}">${heroSVG(L.foe)}</div><p>${L.d}</p>
       <div class="cmstars">${[1,2,3].map(i=>`<span class="${i<=st?"on":""}">★</span>`).join("")}</div><p class="cmrule">★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida</p>
@@ -5128,8 +5134,77 @@ const CAMP_BOT={
   topo:{think:.3,react:.3,perc:.3,dodge:0,eps:.3,passive:4,gap:5,thr:1,moveP:1,blind:true},
   arana:{think:.45,react:.4,perc:.32,dodge:.55,eps:.25,passive:3,gap:2.6,thr:1.1,moveP:.8},
 };
-const campLv=()=>CAMP[G.camp.w].lv[G.camp.l];
-const curArena=()=>G&&G.camp?CAMP[G.camp.w].k:arenaOf(S.tro).a.k;
+const campLv=()=>G.lvl||CAMP[G.camp.w].lv[G.camp.l];
+const curArena=()=>G&&G.camp?(G.lvl?G.lvl.arena:CAMP[G.camp.w].k):arenaOf(S.tro).a.k;
+const campTag=()=>G.camp.daily?"RETO DEL DÍA":campLv().boss?"JEFE":"NIVEL "+(G.camp.l+1);
+/* ================= reto del día: el mismo para todos (sale de la fecha), una ronda, reintentos sin límite =================
+   Premios: la 1.ª vez que lo superas hoy y la 1.ª vez con 3 estrellas. Cada 5 días superados (no hace falta que sean seguidos), gemas. */
+const DAILY_RULES=[
+  {n:"Energía loca",d:"La energía se recarga al doble para los dos.",mod:{elx:2},arena:"pradera",bot:"c"},
+  {n:"Sin trucos",d:"Nadie puede usar el amago: solo puntería y pies.",mod:{noAmago:1},arena:"bosque",bot:"c"},
+  {n:"Rival de hierro",d:"El rival tiene el doble de vida.",mod:{hpB:2},arena:"pradera",bot:"b"},
+  {n:"Huellas fugaces",d:"Las huellas del rival duran la mitad. Hay que mirar rápido.",mod:{huB:.5},arena:"bosque",bot:"c"},
+  {n:"Telarañas",d:"Salen telarañas en las dos islas: quien pise una queda atrapado y a la vista.",mod:{webs:1},arena:"bosque",bot:"c"},
+  {n:"Erupción",d:"Cada 15 s el volcán delata a quien esté en una casilla de lava.",arena:"volcan",bot:"c"},
+  {n:"La estatua",d:"Una estatua para un golpe en cada isla. Úsala bien.",arena:"trono",bot:"c"},
+  {n:"Vendaval",d:"Ráfagas de viento desvían los disparos una casilla.",arena:"olimpo",bot:"c"},
+  {n:"Cada disparo cuenta",d:"La energía va mucho más lenta para los dos.",mod:{elx:.6},arena:"pradera",bot:"c"},
+];
+function dailyLv(d){
+  d=d??today();let x=(d*2654435761)>>>0;const r=()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296;};
+  r();/* la regla rota por días (5 y 9 no tienen divisores comunes: dos días seguidos nunca repiten) */
+  const R0=DAILY_RULES[((d*5)%DAILY_RULES.length+DAILY_RULES.length)%DAILY_RULES.length],hero=STARTERS[Math.floor(r()*STARTERS.length)];
+  const foes=IDS.filter(i=>i!==hero);const foe=foes[Math.floor(r()*foes.length)];
+  return Object.assign({},R0,{hero,foe,day:d,coins:40,coins3:20});
+}
+const dlyToday=()=>S.dly&&S.dly.d===today()?S.dly:null;
+const dlyDone=()=>{const t=dlyToday();return !!(t&&t.st>0);};
+const DLY_STEP=5,DLY_GEMS=10;
+async function dailyStart(){
+  const L=dailyLv();if(GFX)await Promise.race([GFX.loadArena(L.arena),sleep(4000)]);
+  G={online:false,camp:{w:-1,l:0,daily:true},lvl:L,score:{p:0,b:0},round:1,used:{p:[],b:[]},tutorial:false,opp:{name:TT(L.n),tro:0},oppPool:[L.foe]};
+  G.pickSel=L.hero;EV.add("daily_start",{d:L.day,rule:L.n,hero:L.hero,foe:L.foe});startRound();
+}
+async function endDaily(w){
+  const L=campLv(),me=R.heroes.p,win=w==="p",lost=me.max-me.hp,stars=win?(lost<=0?3:lost<=1?2:1):0,t=Math.round(R.now);
+  const d=today(),cur=dlyToday(),prevSt=cur?cur.st:0;
+  if(S.dly&&S.dly.d!==d&&S.dly.st>0)S.dlyPrev={d:S.dly.d,st:S.dly.st,t:S.dly.t};
+  const best=cur?{...cur}:{d,st:0,t:0,tries:0};best.tries=(best.tries||0)+1;
+  const better=stars>best.st||(stars===best.st&&stars>0&&t<best.t);
+  if(better){best.st=stars;best.t=t;}
+  S.dly=best;
+  let coins=0,gems=0,milestone=false;
+  if(win&&!prevSt){coins+=L.coins;S.dlyDays=(S.dlyDays||0)+1;if(S.dlyDays%DLY_STEP===0){gems=DLY_GEMS;addGems(gems,false);milestone=true;}}
+  if(stars===3&&prevSt<3)coins+=L.coins3;
+  S.coins+=coins;
+  EV.add("daily_end",{d,win,stars,t,tries:best.tries});
+  G.used.p=[me.type];G.score=null;R=null;save();
+  const yest=S.dlyPrev&&S.dlyPrev.d===d-1?S.dlyPrev:null;
+  endScreen(win,!w,`<p class="cmend out">${TT("Reto del día")} · ${TT(L.n)}</p>
+    <div class="cmstars big">${[1,2,3].map(i=>`<span class="${i<=stars?"on":""}" style="animation-delay:${i*.18}s">★</span>`).join("")}</div>
+    ${win?`<p class="dlytime out">${t} s</p>`:""}
+    <div class="chips">${coins?`<div class="chip pnl in">${ico("coin")}<b class="out up">+${coins}</b><small>Monedas</small></div>`:""}${gems?`<div class="chip pnl in">${ico("gem")}<b class="out up">+${gems}</b><small>Gemas</small></div>`:""}</div>
+    <div class="endrows">
+      ${recRows().replace(/class="erow/g,'class="in erow')}
+      ${win&&better&&prevSt?`<div class="erow pnl goalrow in"><span class="rmed">🏅</span><span><em>${TT("¡Mejoras tu marca de hoy!")}</em></span></div>`:""}
+      <div class="erow pnl in">${ico("star")}<span>${TT("Tu mejor marca de hoy")}: ${best.st?"★".repeat(best.st)+" · "+best.t+" s":TT("aún sin superar")}${yest?" · "+TT("ayer")+": "+"★".repeat(yest.st)+" "+yest.t+" s":""}</span></div>
+      ${milestone?`<div class="erow pnl goalrow in">${ico("gem")}<span><em>${S.dlyDays} ${TT("retos superados")}</em>${TT("¡Premio de constancia!")}</span></div>`
+        :`<div class="erow pnl in">${ico("gem")}<span>${S.dlyDays} ${TT("retos superados")} · ${TT("premio cada")} ${DLY_STEP}<i class="gbar"><u style="width:${(S.dlyDays%DLY_STEP)/DLY_STEP*100}%"></u></i></span></div>`}
+      ${!win?`<p class="sub in">${TT("Puedes reintentarlo todas las veces que quieras. Cambia a medianoche.")}</p>`:stars<3?`<p class="sub in">${TT("Consigue las 3 estrellas ganando sin perder vida.")}</p>`:""}
+    </div>
+    <div class="endbtns"><button class="gbtn blue" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt="" style="width:34px;height:34px"></button><button class="gbtn xl shine" data-a="dailygo">${win&&stars===3?"REPETIR":"REINTENTAR"}</button></div>`);
+}
+function dailyModal(){
+  const L=dailyLv(),cur=dlyToday(),yest=S.dlyPrev&&S.dlyPrev.d===today()-1?S.dlyPrev:(S.dly&&S.dly.d===today()-1&&S.dly.st?S.dly:null);
+  return `<div class="sheet dlysheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><small class="cmk">${TT("Reto del día")} · ${TT("cambia en")} ${msToMidnight()}</small><h2 class="out">${TT(L.n)}</h2>
+    <div class="vs"><div class="p"><div class="av">${heroArt(L.hero)}</div><b class="out" style="color:var(--me)">${HEROES[L.hero].n}</b><small>${TT("Tu héroe")}</small></div><div class="mid out">VS</div><div class="p"><div class="av">${heroSVG(L.foe)}</div><b class="out" style="color:var(--foe)">${HEROES[L.foe].n}</b><small>${TT("Rival")}</small></div></div>
+    <p>${TT(L.d)}</p>
+    <div class="cmstars">${[1,2,3].map(i=>`<span class="${cur&&i<=cur.st?"on":""}">★</span>`).join("")}</div>
+    <p class="cmrule">${cur&&cur.st?TT("Tu mejor marca de hoy")+": "+cur.t+" s · "+cur.tries+" "+TT(cur.tries===1?"intento":"intentos"):TT("Una ronda. El mismo reto para todos los jugadores.")}${yest?"<br>"+TT("Ayer")+": "+"★".repeat(yest.st)+" · "+yest.t+" s":""}</p>
+    <p class="cmrw">${cur&&cur.st>=3?TT("Premios de hoy cobrados. Mañana, reto nuevo."):cur&&cur.st?`${TT("Con 3 estrellas")}: <b>+${L.coins3}</b> ${ico("coin","s")}`:`${TT("Premio")}: <b>${L.coins}</b> ${ico("coin","s")}${L.coins3?` · ${TT("con 3 estrellas")} +${L.coins3}`:""}`}</p>
+    <button class="gbtn xl shine" data-a="dailygo">${cur&&cur.st?"MEJORAR":"JUGAR"}</button>
+    <p class="cmrule">${S.dlyDays||0} ${TT("retos superados")} · ${TT("cada")} ${DLY_STEP}: +${DLY_GEMS} ${ico("gem","s")}</p></div>`;
+}
 const campStars=w=>CAMP[w].lv.reduce((a,_,l)=>a+(S.camp[w+"."+l]||0),0);
 const campAll=()=>CAMP.reduce((a,_,w)=>a+campStars(w),0),campMax=()=>CAMP.reduce((a,W)=>a+W.lv.length*3,0);
 const campWorldOpen=w=>w===0||(S.camp[(w-1)+"."+(CAMP[w-1].lv.length-1)]||0)>0;
@@ -5236,7 +5311,7 @@ function showPick(){if(GFX)GFX.loadArena(curArena());
   if(!G.pickSel||!av.includes(G.pickSel))G.pickSel=av.includes(S.fav)?S.fav:av[0];
   const id=G.pickSel,H=HEROES[id],RR=RAR[H.rar];
   const wait=G.online&&G.picked;
-  app.innerHTML=`<div class="mbg"></div><div class="pickhead"><span class="stars big">${starsHTML("p")}</span><h2 class="out">${G.camp?(campLv().boss?"JEFE":"NIVEL "+(G.camp.l+1)):"RONDA "+G.round}</h2><span class="stars big">${starsHTML("b")}</span></div>
+  app.innerHTML=`<div class="mbg"></div><div class="pickhead"><span class="stars big">${starsHTML("p")}</span><h2 class="out">${G.camp?campTag():"RONDA "+G.round}</h2><span class="stars big">${starsHTML("b")}</span></div>
     <p class="slogan">${G.online?`Contra <b>${esc(G.opp.name)}</b> · `:""}${G.camp?esc(TT(campLv().n))+" · Elige héroe.":"Elige héroe. No se puede repetir."}</p>
     <div class="pickstage r${H.rar}"><span class="godrays"></span><span class="floorglow"></span><span class="isle"></span><span class="pkart">${heroArt(id)}</span>
       <div class="pkname"><span class="rartag r${H.rar}">${RR.n}</span><h3 class="out">${H.n}</h3><small>${H.r}</small></div></div>
@@ -5259,6 +5334,7 @@ async function startRound(){
   R.paused=false;
   EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
   if(!G.tutorial&&S.games<=3&&$("#amagob"))toast("amagonew","🎭 <b>¡Nuevo: AMAGO!</b> Deja una huella falsa en tu isla para que el rival dispare donde no estás.");
+  if(G.camp&&G.camp.daily){await sleep(500);if(R&&!R.over)banner("📅 "+TT(campLv().n).toUpperCase(),TT(campLv().d),"blue",2200);return;}
   if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over){sfx("roar");B3.shake(.35);}if(R&&!R.over)banner("👑 "+TT(campLv().n).toUpperCase(),TT(campLv().intro),"red",2200);}return;}
   if(G.tut)TUT.go();
   else if(G.tutorial&&G.round===1){toast("tut1","🫣 Tu héroe está escondido en tu isla <b>verde</b>. El rival, en la <b>roja</b>: ¡adivina dónde y dispárale!");tutHand();}
@@ -5540,7 +5616,7 @@ async function endRound(w){
   const recs=statRound(w);
   renderLive();EV.add("round_end",{win:w==="p",draw:!w,dur:Math.round(R.now*10)/10,hero:R.heroes.p.type,opp:R.heroes.b.type,n:G.round,mode:"bot",tut:!!G.tutorial});
   const b=R.heroes.b;await revealFoe(b.x,b.y,b.type,w);
-  if(G.camp)return endCamp(w);
+  if(G.camp)return G.camp.daily?endDaily(w):endCamp(w);
   const ko=R.heroes.p.hp<=0||R.heroes.b.hp<=0,decisive=w&&(G.score[w]+1>=2||G.round>=5);
   if(ko&&decisive&&!G.tutorial){REC.clip=null;await playReplay(w);}
   if(w)G.score[w]++;
@@ -5801,7 +5877,7 @@ function buildArena(){
   <canvas id="gl" aria-label="Arena. Toca tu isla para moverte y la isla roja para atacar"></canvas><div class="vign"></div>
   <div class="ghud g3hud">
     <div class="side2"><span class="mini">${heroSVG(hp.type)}</span><div class="sinfo"><span class="nm out" style="color:var(--me)">${esc(S.name)}</span><span class="hearts" id="hp-p"></span></div></div>
-    <div class="tbox"><button class="gpause" data-a="gpause" aria-label="Pausa">II</button><span class="t out" id="clock">1:15</span>${G.camp?`<span class="stars camptag out">${campLv().boss?"JEFE":"NIVEL "+(G.camp.l+1)}</span>`:`<span class="stars"><span>${starsHTML("p")}</span>&nbsp;<span>${starsHTML("b")}</span></span>`}</div>
+    <div class="tbox"><button class="gpause" data-a="gpause" aria-label="Pausa">II</button><span class="t out" id="clock">1:15</span>${G.camp?`<span class="stars camptag out">${campTag()}</span>`:`<span class="stars"><span>${starsHTML("p")}</span>&nbsp;<span>${starsHTML("b")}</span></span>`}</div>
     <div class="side2 foe"><div class="sinfo"><span class="nm out" style="color:var(--foe)">${esc(G.opp.name)}</span><span class="hearts" id="hp-b"></span></div><span class="mini">${heroSVG(hb.type)}</span></div>
   </div>
   <div class="status" id="status"></div>
@@ -5999,6 +6075,8 @@ document.addEventListener("click",e=>{
     case "acthint":if(R&&UI.screen==="game"&&!R.over){const b=el.dataset.b;sfx("sel");G.hint={b,until:performance.now()+1400};if(G.decoyArm){G.decoyArm=false;$("#amagob")&&$("#amagob").classList.remove("on");}
       const c=B3.screenPos(b,2,2);floatText(c.x,c.y,b==="p"?"👇 "+TT("Toca una casilla de tu isla"):"👆 "+TT("Toca una casilla de la isla roja"),"near");}break;
     case "camp":sfx("tap");UI.modal=null;renderModal();EV.add("screen",{s:"camp"});showCamp();break;
+    case "daily":sfx("tap");UI.modal={k:"daily"};renderModal();break;
+    case "dailygo":sfx("go");actx();UI.modal=null;renderModal();dailyStart();break;
     case "campw":{const w=+el.dataset.w;if(!campWorldOpen(w)){sfx("nope");shake(el);break;}sfx("tap");showCamp(w);break;}
     case "camplv":{const w=+el.dataset.w,l=+el.dataset.l;if(!campOpen(w,l)){sfx("nope");shake(el);break;}sfx("tap");UI.modal={k:"camplv",w,l};renderModal();break;}
     case "campgo":sfx("go");actx();UI.modal=null;renderModal();campStart(+el.dataset.w,+el.dataset.l);break;
