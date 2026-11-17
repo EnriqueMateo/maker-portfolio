@@ -1702,6 +1702,12 @@ button.cmnext{width:100%;text-align:left;cursor:pointer;color:#fff;font:inherit}
 .cmnext small{display:block}
 .rivline{margin:8px 0 0;text-align:center;font:15px/1.2 var(--f-game);color:#cfe0ff}.rivline.nem{color:#ffb3bd}
 .fwtag.nem span{color:#ffb3bd}
+.stile.num .ts{font-size:10.5px;color:#5a6599;font-weight:800;line-height:1.15}
+html.ui3 .stile.num .ts{color:#c3ccf5!important}
+.stb{font:15px/1 var(--f-game);color:#ffe98a}
+.recrow .rmed{font-size:26px;line-height:1;flex:none!important}
+.recrow{animation:recpop .5s .3s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes recpop{from{transform:scale(.6);opacity:0}}
 .goalrow{box-shadow:inset 0 0 0 2px #ffe14d,0 4px 0 #070920!important}
 .goalrow em{font-style:normal;display:block;color:#ffe98a}
 .goalrow .gbar{display:block;height:8px;margin-top:5px;border-radius:3px 6px 3px 6px;background:rgba(8,10,34,.7);overflow:hidden}
@@ -2252,6 +2258,7 @@ const TR=(()=>{
   Object.assign(I18N_EN,{"CAMPAÑA · MUNDO #": "CAMPAIGN · WORLD #", "Bosque de la Araña Madre": "Forest of the Spider Mother", "Araña Madre": "Spider Mother", "Jefa": "Boss", "Picadura": "Bite", "El sendero oscuro": "The dark trail", "Doble engaño": "Double trick", "Telarañas": "Cobwebs", "La cazadora": "The huntress", "Sombra golpea sin avisar y aquí sus huellas duran la mitad.": "Sombra strikes without warning, and here its footprints last half as long.", "Las huellas de Truco son falsas. La energía se recarga un 50 % más rápido para los dos.": "Truco's footprints are fake. Energy refills 50% faster for both.", "Salen telarañas en las dos islas: quien pise una queda atrapado 2 s y a la vista.": "Cobwebs appear on both islands: step on one and you're stuck for 2 s and visible.", "Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas.": "Mira has 4 lives and deals 2 per shot. And there are still cobwebs.", "Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.": "She fills your island with cobwebs. Step on one and you're stuck for 2 s and she sees you. Go around them and strike back.", "Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.": "Fills your island with cobwebs: step on one and you're stuck for 2 s and visible.", "Si pisas una telaraña, quedas atrapado 2 s y a la vista": "Step on a cobweb and you're stuck for 2 s and visible", "¡ARAÑA MADRE FURIOSA!": "SPIDER MOTHER ENRAGED!", "Más telarañas y más seguidas": "More cobwebs, more often", "👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.": "👑 You defeated the Spider Mother! World 2 complete.", "No pises las telarañas: rodéalas y muévete tras cada disparo.": "Don't step on the cobwebs: go around them and move after every shot.", "¡Atrapado!": "Stuck!", "¡Atrapado! ¡Dale!": "Stuck! Hit them!", "¡FURIA!": "RAGE!", "Mundo 3 · Volcán del Coloso de Lava": "World 3 · Volcano of the Lava Colossus", "Mundo # · Pradera del Rey Topo": "World # · The Mole King's Meadow", "Mundo # · Bosque de la Araña Madre": "World # · Forest of the Spider Mother", "Derrota al jefe de este mundo": "Defeat this world's boss", "Entrar": "Enter", "MUNDO #": "WORLD #", "ARAÑA MADRE": "SPIDER MOTHER"});
   Object.assign(I18N_EN,{"¡Le quedaba solo 1 vida!": "They had just 1 life left!", "# disparos tuyos cayeron justo al lado": "# of your shots landed right next to them", "Un disparo tuyo cayó justo al lado": "One of your shots landed right next to them", "¡A 1 victoria de abrir un cofre!": "1 win away from opening a chest!", "Misión casi hecha:": "Mission almost done:", "A # trofeos de:": "# trophies away from:", "A 1 partida del siguiente premio del pase": "1 match away from the next pass reward", "¡Revancha!": "Rematch!"});
   Object.assign(I18N_EN,{"Le ganas": "You lead", "Te gana": "They lead", "Vais empatados": "You're tied", "Cuenta pendiente": "Unfinished business", "¡Has adelantado a": "You've overtaken", "te gana": "leads you"});
+  Object.assign(I18N_EN,{"# rondas seguidas ganadas con": "# rounds in a row won with", "K.O. más rápido con": "Fastest K.O. with", "# esquivas en una ronda": "# dodges in one round", "Puntería récord con": "Record accuracy with", "Puntería": "Accuracy", "esquiva": "dodge", "esquivas": "dodges", "¡Nuevo récord!": "New record!", "¡Nuevos récords!": "New records!", "¡NUEVO RÉCORD!": "NEW RECORD!", "Tus números": "Your stats", "Juega con": "Play with", "y aquí verás tu puntería, tus esquivas y tus récords.": "and you'll see your accuracy, dodges and records here.", "disparos": "shots", "récord": "record", "Esquivas": "Dodges", "de los golpes que iban a por ti": "of the hits aimed at you", "Mejor racha": "Best streak", "rondas seguidas": "rounds in a row", "ahora": "now", "K.O. más rápido": "Fastest K.O.", "rondas jugadas": "rounds played"});
   Object.assign(I18N_EN,{"Toca una casilla de tu isla":"Tap a tile on your island","Toca una casilla de la isla roja":"Tap a tile on the red island"});
   Object.assign(I18N_EN,{"Lluvia de flechas": "Arrow rain", "Flechas en 3 filas a la vez.": "Arrows on 3 rows at once.", "¡Flechas en 3 filas! Muévete a una fila libre": "Arrows on 3 rows! Move to a free row", "Suelo ardiente": "Burning ground", "Tu siguiente bola deja el suelo en llamas 5 s.": "Your next fireball leaves the ground burning for 5 s.", "Su siguiente bola dejará fuego 5 s": "Their next fireball will leave fire for 5 s", "Humo": "Smoke", "4 s sin dejar huellas ni pasos.": "4 s without leaving footprints or steps.", "Fortaleza": "Fortress", "5 s inmune, pero sin poder moverte.": "Immune for 5 s, but you can't move.", "Es inmune 5 s: no gastes energía": "Immune for 5 s: save your energy", "Vista de búho": "Owl sight", "Ves al rival 1,5 s.": "You see your rival for 1.5 s.", "¡Te está viendo! Muévete ya": "They can see you! Move now", "Doble o nada": "Double or nothing", "Apareces al instante en tu huella falsa.": "You instantly appear on your fake footprint.", "Tormenta": "Storm", "Tu siguiente rayo cae en las dos diagonales.": "Your next bolt strikes both diagonals.", "Su siguiente rayo caerá en X": "Their next bolt will strike in an X", "Mecha corta": "Short fuse", "Tu siguiente bomba cae sin aviso y el doble de rápido.": "Your next bomb lands with no warning, twice as fast.", "Campo minado": "Minefield", "3 minas ocultas en la isla rival.": "3 hidden mines on the rival island.", "¡Hay 3 minas ocultas en tu isla!": "There are 3 hidden mines on your island!", "Gran salto": "Big leap", "2,5 s en el aire: nada te alcanza.": "2.5 s in the air: nothing can hit you.", "Está en el aire 2,5 s: nada le alcanza": "In the air for 2.5 s: nothing can hit them", "Florecer": "Bloom", "Recuperas 1 vida.": "You recover 1 life.", "Ha recuperado 1 vida": "They recovered 1 life", "Mira láser": "Laser sight", "Tu siguiente disparo llega al instante.": "Your next shot lands instantly.", "Coro": "Chorus", "5 huellas falsas en tu isla durante 3 s.": "5 fake footprints on your island for 3 s.", "¡Dispara!": "Fire!", "¡ULTI lista!": "ULTI ready!", "Solo una vez por ronda.": "Only once per round.", "Una vez por ronda.": "Once per round.", "Lista en": "Ready in", "Ya tienes toda la vida": "You already have full health", "¡QUEMADO!": "BURNED!", "ULTI RIVAL": "RIVAL ULTI", "¡Tu ULTI está lista! Es el botón dorado: un poder único de cada héroe, una vez por ronda. ¡Tócalo!": "Your ULTI is ready! It's the golden button: a unique power for each hero, once per round. Tap it!", "¡Eso es! Cada héroe tiene una ULTI distinta. Mírala en su ficha.": "That's it! Every hero has a different ULTI. Check it on their card."});
   Object.assign(I18N_EN,{"Nombre: #": "Name: #", "Sonido": "Sound", "Vibración": "Vibration", "Enviar estadísticas de uso": "Send usage statistics", "Cómo se juega": "How to play", "Pasar mi partida a otro móvil": "Move my game to another phone", "Política de privacidad": "Privacy policy", "Copiar código": "Copy code", "Aviso": "Warning", "Racha ×#": "Streak ×#", "Nuevos premios en el camino": "New rewards on the road", "Tras el escalón #: un premio cada # fichas": "After tier #: a reward every # tokens", "¡RECLAMAR!": "CLAIM!", "CÓDIGO": "CODE", "ABRIR": "OPEN", "Muy pronto": "Soon", "DESBLOQUEAR CON": "UNLOCK WITH", "O CON": "OR WITH", "# GEMAS": "# GEMS", "Temporada # · quedan # días": "Season # · # days left", "Temporada # · quedan # días · ": "Season # · # days left · ", "premios": "rewards", "ya alcanzados se desbloquean al momento": "already reached unlock instantly", "1.ª victoria del día: llave doble, +30 monedas y +20 de Poder": "First win of the day: double key, +30 coins and +20 Power", "+20 gemas al crearla": "+20 gems when you create it"});
@@ -2289,7 +2296,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* ================= guardado ================= */
 const SAVE_KEY="amago-v3";
-const DEF={camp:{},riv:{},tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
+const DEF={camp:{},riv:{},hs:{},tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
   gemsFree:0,gemsPaid:0,own:{skin:[],frame:[]},equip:{skin:{},frame:""},purch:{starter:false,tx:{},pending:[],month:{m:"",cents:0},log:[],bundleWk:-1},gemDeals:{day:-1,got:{}},
   wk:{wk:-1,list:[]},cal:{day:-1,i:0,cyc:0},fw:-1,wc:{day:-1,n:0},ws:0,ls:0,troMax:0,mgot:{},seen:-1,back:0,pity:0,age:{band:""},offerSeen:{day:-1,keys:{}},gemOnce:{},offers:{day:-1,got:[]},lastLoss:false,vib:1,welcome:0};
 /* restos del modo demostración (quitado: Apple no permite códigos que desbloqueen contenido) */
@@ -4499,6 +4506,18 @@ function showHeroes(){
   ${nav("heroes")}`;
   renderModal();
 }
+function heroNums(id){
+  const h=(S.hs||{})[id];
+  if(!h||!h.r)return `<span class="ribn">Tus números</span><p class="sub">${TT("Juega con")} ${HEROES[id].n} ${TT("y aquí verás tu puntería, tus esquivas y tus récords.")}</p>`;
+  const pc=h.sh?Math.round(h.hit/h.sh*100):0,dp=h.dgn?Math.round(h.dg/h.dgn*100):0;
+  const t=(i,v,k,sub)=>`<div class="stile ice num">${ico(i)}<span><span class="tv">${v}</span><br><span class="tk">${k}</span>${sub?`<br><span class="ts">${sub}</span>`:""}</span></div>`;
+  return `<span class="ribn">Tus números</span><div class="tiles">
+    ${t("star",pc+" %","Puntería",h.sh+" "+TT("disparos")+(h.bp?" · "+TT("récord")+" "+h.bp+" %":""))}
+    ${t("heart",h.dg,"Esquivas",h.dgn?dp+" % "+TT("de los golpes que iban a por ti"):"")}
+    ${t("swords",h.bs,"Mejor racha",TT("rondas seguidas")+(h.st>1?" · "+TT("ahora")+" "+h.st:""))}
+    ${t("trophy",h.fk?h.fk.toFixed(1)+" s":"—","K.O. más rápido",h.r+" "+TT("rondas jugadas"))}
+  </div>`;
+}
 function heroPage(id){
   const H=HEROES[id],lock=!S.unl.includes(id),RR=RAR[H.rar],lv=lvOf(id),c=upCost(id),b=lvBonus(lv),nb=c?lvBonus(lv+1):null,road=ROAD.find(r=>r.id===id),cap=LV_CAP[arenaIdx()],ms=mastery(id);
   const rc=["#7FA8D9","#41D97A","#B566FF","#FFC21A"][H.rar],rd=["#3E5C97","#167A45","#5C1FB0","#C46A00"][H.rar];
@@ -4518,6 +4537,7 @@ function heroPage(id){
       <div class="stile ice wide"><span style="display:grid;place-items:center">${patIcon(H.pat)}</span><span><span class="tv" style="font-size:16px">${H.a}</span><br><span class="tk">${H.d}</span></span></div>
     </div>
     ${lock?"":`<div class="mast pnl">${ico("trophy")}<span style="flex:1"><b class="out">Maestría${ms.t>=0?" · "+MASTERY[ms.t].t:""}</b><span class="bar gold"><u style="width:${ms.next?Math.min(100,ms.w/ms.next.n*100):100}%"></u><span>${ms.w}${ms.next?"/"+ms.next.n:""}</span></span></span>${masteryReady(id)?`<button class="gbtn green sm" data-a="mclaimh" data-id="${id}">COBRAR</button>`:ms.next?`<span class="out">${rewardImg(ms.next.r,"ico m")}</span>`:""}</div>`}
+    ${lock?"":heroNums(id)}
     ${skins.length&&!lock?`<span class="ribn">Aspectos</span><div class="skinrow">
       <button class="skin pnl ${!skinOf(id)?"on":""}" data-a="equipskin" data-id="${id}" data-s=""><span class="im">${heroArt(id,null)}</span><b>Clásico</b></button>
       ${skins.map(([k,v])=>{const own=S.own.skin.includes(k);return `<button class="skin pnl ${S.equip.skin[id]===k&&own?"on":""}" data-a="${own?"equipskin":"buyskin"}" data-id="${id}" data-s="${k}"><span class="im">${heroArt(id,k)}</span><b>${v.n}</b>${own?"":`<small>${ico("gem","s")}${v.gems}</small>`}</button>`;}).join("")}</div>`:""}
@@ -5151,13 +5171,36 @@ async function endCamp(w){
   endScreen(win,!w,`<p class="cmend out">${L.n}</p>
     <div class="cmstars big">${[1,2,3].map(i=>`<span class="${i<=stars?"on":""}" style="animation-delay:${i*.18}s">★</span>`).join("")}</div>
     <div class="chips">${coins?`<div class="chip pnl in">${ico("coin")}<b class="out up">+${coins}</b><small>Monedas</small></div>`:""}${gems?`<div class="chip pnl in">${ico("gem")}<b class="out up">+${gems}</b><small>Gemas</small></div>`:""}</div>
-    <div class="endrows">${chest?`<button class="endchest feat gold shine top in" data-a="openbox"><img src="${UIA}chest${L.chest}.webp" alt=""><span><b class="out">¡Cofre del jefe!</b><small>Toca para abrirlo</small></span><span class="gbtn green sm">ABRIR</span></button>`:""}
+    <div class="endrows">${recRows().replace(/class="erow/g,'class="in erow')}${statRow().replace('class="erow','class="in erow')}${chest?`<button class="endchest feat gold shine top in" data-a="openbox"><img src="${UIA}chest${L.chest}.webp" alt=""><span><b class="out">¡Cofre del jefe!</b><small>Toca para abrirlo</small></span><span class="gbtn green sm">ABRIR</span></button>`:""}
       ${win&&L.boss&&!prev?`<div class="erow pnl in"><span>${L.won}</span></div>`:""}
       ${win&&!coins&&!gems?`<p class="sub in">Ya tenías los premios de este nivel.</p>`:""}
       ${win&&stars<3?`<p class="sub in">Consigue las 3 estrellas ganando sin perder vida.</p>`:""}
       ${!win?`<p class="sub in">${L.boss?L.hint:"¡Casi! Prueba con otro héroe."}</p>`:""}</div>
     <div class="endbtns"><button class="gbtn blue" data-a="${win&&L.boss&&CAMP[wi+1]?"campw":"camp"}" data-w="${wi+1}">${win&&L.boss&&CAMP[wi+1]?"MUNDO "+(wi+2):"MAPA"}</button><button class="gbtn xl shine" data-a="campgo" data-w="${wi}" data-l="${next??l}">${next!=null?"SIGUIENTE":win?"REPETIR":"REINTENTAR"}</button></div>`);
 }
+/* ---- maestría: números por héroe y récords personales ----
+   S.hs[id]={r:rondas, sh:disparos, hit:aciertos, dg:esquivas, dgn:golpes que iban a por ti, st:racha de rondas, bs:mejor racha, fk:K.O. más rápido (s), bd:más esquivas en una ronda, bp:mejor puntería en una ronda (con 4+ disparos)} */
+const hsOf=id=>{S.hs=S.hs||{};return S.hs[id]||(S.hs[id]={r:0,sh:0,hit:0,dg:0,dgn:0,st:0,bs:0,fk:0,bd:0,bp:0});};
+const statOn=()=>G&&!G.online&&!G.tutorial&&R;
+function statFired(p){if(!statOn()||p.dud)return;
+  if(p.o==="p")G.rs.sh++;
+  else if(p.warn){const me=R.heroes.p;if(inArea(p.cells,me.x,me.y))(G.rs.aim||(G.rs.aim={}))[p.id]=1;}}
+function statImpact(p){if(!statOn()||p.dud)return;
+  if(p.o==="p"&&p.res==="hit")G.rs.hit++;
+  if(p.o==="b"&&G.rs.aim&&G.rs.aim[p.id]){G.rs.dgn++;if(p.res!=="hit"&&p.res!=="block")G.rs.dg++;}}
+function statRound(w){
+  if(!statOn())return [];
+  const id=R.heroes.p.type,h=hsOf(id),rs=G.rs,old=h.r>=3,recs=[],H=HEROES[id].n;
+  h.r++;h.sh+=rs.sh;h.hit+=rs.hit;h.dg+=rs.dg;h.dgn+=rs.dgn;
+  if(w==="p"){h.st++;if(h.st>h.bs){if(old&&h.st>=3)recs.push(TT("# rondas seguidas ganadas con").replace("#",h.st)+" "+H);h.bs=h.st;}
+    if(R.heroes.b.hp<=0){const t=Math.round(R.now*10)/10;if(!h.fk||t<h.fk){if(old&&h.fk)recs.push(TT("K.O. más rápido con")+" "+H+": "+t.toFixed(1)+" s");h.fk=t;}}}
+  else if(w==="b")h.st=0;
+  if(rs.dg>h.bd){if(old&&rs.dg>=2)recs.push(TT("# esquivas en una ronda").replace("#",rs.dg));h.bd=rs.dg;}
+  if(rs.sh>=4){const pc=Math.round(rs.hit/rs.sh*100);if(pc>h.bp){if(old&&h.bp)recs.push(TT("Puntería récord con")+" "+H+": "+pc+" %");h.bp=pc;}}
+  G.mt.sh+=rs.sh;G.mt.hit+=rs.hit;G.mt.dg+=rs.dg;G.recs.push(...recs);save();return recs;}
+function statRow(){const m=G&&G.mt;if(!m||!m.sh&&!m.dg)return "";
+  return `<div class="erow pnl">${ico("star")}<span>${m.sh?TT("Puntería")+" <b class=\"stb\">"+Math.round(m.hit/m.sh*100)+" %</b> ("+m.hit+"/"+m.sh+")":""}${m.sh&&m.dg?" · ":""}${m.dg?"<b class=\"stb\">"+m.dg+"</b> "+TT(m.dg===1?"esquiva":"esquivas"):""}</span></div>`;}
+const recRows=()=>{const r=(G&&G.recs||[]).slice(0,3);return r.length?`<div class="erow pnl goalrow recrow"><span class="rmed">🏅</span><span><em>${TT(r.length>1?"¡Nuevos récords!":"¡Nuevo récord!")}</em>${r.join("<br>")}</span></div>`:"";};
 /* ---- rivales que vuelven: S.riv[nombre]={w,l,last}. Cada uno tiene su héroe favorito; quien te va ganando es tu "cuenta pendiente" ---- */
 const rivOf=n=>(S.riv&&S.riv[n])||null;
 function rivLine(n){const r=rivOf(n);if(!r||r.w+r.l<1)return "";return (r.w>r.l?TT("Le ganas"):r.w<r.l?TT("Te gana"):TT("Vais empatados"))+" "+Math.max(r.w,r.l)+"–"+Math.min(r.w,r.l);}
@@ -5210,7 +5253,7 @@ async function startRound(){
   /* tu nivel en partida está limitado por la arena; el bot sube con los trofeos (nunca más de 1 por encima de ti) */
   const lp=effLv(tp),base=1+Math.floor(S.tro/110)+(S.diff==="dificil"?1:S.diff==="facil"?-1:0),lb=G.tutorial||G.camp?1:Math.max(1,Math.min(LV_MAX,LV_CAP[arenaIdx()],base,lp+1));
   G.lv={p:lp,b:lb};
-  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:curArena(),ulti:!G.tutorial||G.round>=3,mod:G.camp?campLv().mod:null});recReset();G.nearN=0;
+  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:curArena(),ulti:!G.tutorial||G.round>=3,mod:G.camp?campLv().mod:null});recReset();G.nearN=0;G.rs={sh:0,hit:0,dg:0,dgn:0};if(!G.mt)G.mt={sh:0,hit:0,dg:0};if(!G.recs)G.recs=[];
   if(G.tut)TUT.setup(R);
   await vsAndCountdown(tp,tb);
   R.paused=false;
@@ -5494,6 +5537,7 @@ async function roundBanner(w){
 }
 async function endRound(w){
   if(G.tut)TUT.halt();
+  const recs=statRound(w);
   renderLive();EV.add("round_end",{win:w==="p",draw:!w,dur:Math.round(R.now*10)/10,hero:R.heroes.p.type,opp:R.heroes.b.type,n:G.round,mode:"bot",tut:!!G.tutorial});
   const b=R.heroes.b;await revealFoe(b.x,b.y,b.type,w);
   if(G.camp)return endCamp(w);
@@ -5504,6 +5548,7 @@ async function endRound(w){
   if(w==="p")S.hw[R.heroes.p.type]=(S.hw[R.heroes.p.type]||0)+1;
   if(!G.online){if(w==="p"){misTrack("rounds",1);misTrack("hero",1,R.heroes.p.type);}misTrack("dmg",R.dmg.p||0);save();}
   await roundBanner(w);
+  if(recs.length){sfx("ppding");await banner("🏅 "+TT("¡NUEVO RÉCORD!"),recs[0],"gold",1800);}
   if(G.score.p>=2||G.score.b>=2||G.round>=5)return endMatch();
   G.round++;showPick();
 }
@@ -5582,10 +5627,10 @@ async function endMatch(){
       ${S.games>2?`<div class="chip pnl" data-d="2">${ico("star")}<b class="out up" data-cu="${tk}">+0</b><small>Fichas del pase${tkMult>=2?" ×2":""}</small></div>`:""}
     </div>
     <div class="endrows">
-      ${rivRow}${goals.slice(0,2).map(g=>`<div class="erow pnl goalrow">${ico(g.i)}<span><em>${g.t}</em><i class="gbar"><u style="width:${Math.round(g.f*100)}%"></u></i></span></div>`).join("")}
+      ${recRows()}${statRow()}${rivRow}${goals.slice(0,G.recs&&G.recs.length||rivRow?1:2).map(g=>`<div class="erow pnl goalrow">${ico(g.i)}<span><em>${g.t}</em><i class="gbar"><u style="width:${Math.round(g.f*100)}%"></u></i></span></div>`).join("")}
       ${firstWin?`<div class="erow pnl">${ico("key")}<span>¡Primera victoria del día! Llave doble, +30 monedas y +20 de Poder</span><b class="out" style="color:var(--tx-up)">×2</b></div>`:""}
       ${win&&S.ws>=2?`<div class="erow pnl">${ico("swords")}<span>${S.ws} victorias seguidas${Math.min(4,S.ws-1)?` · +${Math.min(4,S.ws-1)} trofeos extra`:""}</span></div>`:""}
-      ${keysGot&&!gotChest&&S.box.length<BOX_MAX?`<div class="erow pnl">${ico("chest1")}<span>Junta 3 llaves y abres un cofre</span><span class="keyrow">${[0,1,2].map(i=>`<img class="${i<kNow?"":"off"} ${i>=keysBefore&&i<kNow?"new":""}" src="${UIA}key.webp" alt="">`).join("")}</span></div>`:""}
+      ${keysGot&&!gotChest&&S.box.length<BOX_MAX&&!goals.some(g=>g.i==="key")?`<div class="erow pnl">${ico("chest1")}<span>Junta 3 llaves y abres un cofre</span><span class="keyrow">${[0,1,2].map(i=>`<img class="${i<kNow?"":"off"} ${i>=keysBefore&&i<kNow?"new":""}" src="${UIA}key.webp" alt="">`).join("")}</span></div>`:""}
       ${welcome?`<div class="erow pnl">${ico("power")}<span>Regalo de bienvenida: 60 monedas y 40 de Poder. ¡Mejora a tu héroe!</span></div>`:""}
       ${lvGems?`<div class="erow pnl">${ico("gem")}<span>¡Nivel ${level()}! +10 gemas</span></div>`:level()>lvlBefore?`<div class="erow pnl">${ico("star")}<span>¡Nivel de jugador ${level()}!</span></div>`:""}
       ${G.tut?`<div class="erow pnl">${ico("chest1")}<span>¡Premio del entrenamiento: tu primer cofre!</span></div>`:""}
@@ -5826,7 +5871,7 @@ function toast(k,txt){
 }
 const ui={
   fired(p){
-    recEv("fired",p);
+    recEv("fired",p);statFired(p);
     if(UI.screen!=="game")return;
     sfx("shoot");B3.fireFx(p.o,p.dud&&p.show&&p.o==="p"?{...p,cells:p.show}:p);
     if(p.o==="p"){
@@ -5839,7 +5884,7 @@ const ui={
     }
   },
   impact(p){
-    recEv("impact",p);
+    recEv("impact",p);statImpact(p);
     if(UI.screen!=="game")return;
     if(p.dud&&p.show&&p.o==="p")p={...p,cells:p.show};
     B3.impactFx(p);if(HEROES[p.type].burrow){sfx("quake");B3.shake(.5);}
