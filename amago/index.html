@@ -1531,6 +1531,7 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .cmnext{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;opacity:.92}
 .cmnext img{width:26px;height:34px;object-fit:contain}.cmnext b{display:block;font-family:var(--f-game);font-size:15px;color:#fff}.cmnext small{opacity:.8;color:#fff}
 .sbtn .cmico{font-size:36px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3))}
+.calico{display:flex;flex-direction:column;width:70%;height:72%;border-radius:6px;overflow:hidden;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.35);font-family:inherit}.calico b{background:#e8414b;color:#fff;font-size:9px;line-height:1.5;letter-spacing:.5px;text-align:center;font-weight:900}.calico i{flex:1;display:flex;align-items:center;justify-content:center;color:#1d2140;font-style:normal;font-weight:900;font-size:19px;line-height:1}
 .sheet.camplv{text-align:center}.cmk{font-family:var(--f-game);letter-spacing:.1em;color:#ffb21f}
 .cmfoe{width:120px;height:120px;margin:4px auto 6px}.cmfoe.boss{width:150px;height:170px}.cmfoe .h3,.cmfoe svg{width:100%;height:100%;object-fit:contain}
 .cmstars{display:flex;justify-content:center;gap:6px;font-size:34px;line-height:1}.cmstars span{color:#0003}.cmstars span.on{color:#ffcc1f;text-shadow:0 3px 0 var(--ink,#1a1036)}
@@ -4462,7 +4463,7 @@ function showHome(){
     </div>
     <div class="sidecol r">
       ${box?`<button class="sbtn chest ${at==="box"?"hop":""}" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="lb out">¡Ábrelo!</span></button>`:""}
-      ${S.tutDone&&S.games>=2?`<button class="sbtn" data-a="daily">${dlyDone()?"":`<i class="badge bob">!</i>`}<span class="sq pnl"><span class="cmico">📅</span>${dlyDone()?`<i class="okc"></i>`:""}</span><span class="lb out">${TT("Reto")}</span></button>`:""}
+      ${S.tutDone&&S.games>=2?`<button class="sbtn" data-a="daily">${dlyDone()?"":`<i class="badge bob">!</i>`}<span class="sq pnl">${calIco()}${dlyDone()?`<i class="okc"></i>`:""}</span><span class="lb out">${TT("Reto")}</span></button>`:""}
       <button class="keymod pnl" data-a="keysinfo"><img class="c" src="${UIA}chest1.webp" alt=""><span class="slots">${[0,1,2].map(i=>`<i class="well ${i===S.keys&&S.keys===2?"glow":""}"><img class="${i<S.keys?"":"off"}" src="${UIA}key.webp" alt=""></i>`).join("")}</span></button>
     </div>
     <button class="hplate pnl" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>${ico("trophy")} ${S.hw[S.fav]||0}${mastery(S.fav).t>=0?" · "+MASTERY[mastery(S.fav).t].t:""}</small></span><span class="chev">›</span></button>
@@ -5194,6 +5195,7 @@ async function endDaily(w){
     </div>
     <div class="endbtns"><button class="gbtn blue" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt="" style="width:34px;height:34px"></button><button class="gbtn xl shine" data-a="dailygo">${win&&stars===3?"REPETIR":"REINTENTAR"}</button></div>`);
 }
+function calIco(){const d=new Date(),m=d.toLocaleDateString(LANG,{month:"short"}).replace(".","").slice(0,3).toUpperCase();return `<span class="calico"><b>${m}</b><i>${d.getDate()}</i></span>`;}
 function dailyModal(){
   const L=dailyLv(),cur=dlyToday(),yest=S.dlyPrev&&S.dlyPrev.d===today()-1?S.dlyPrev:(S.dly&&S.dly.d===today()-1&&S.dly.st?S.dly:null);
   return `<div class="sheet dlysheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><small class="cmk">${TT("Reto del día")} · ${TT("cambia en")} ${msToMidnight()}</small><h2 class="out">${TT(L.n)}</h2>
