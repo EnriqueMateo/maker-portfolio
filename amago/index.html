@@ -1775,6 +1775,7 @@ Object.assign(HEROES,{
 });
 /* jefes de la campaña: no se pueden elegir ni desbloquear. burrow = segundos que asoma tras atacar (el resto del tiempo es inmune) */
 Object.assign(HEROES,{
+  coloso:{n:"Coloso de Lava",r:"Jefe",rar:3,hp:8,step:.5,mc:1,pat:"sq2",cost:3,dmg:1,travel:1.3,warn:true,boss:true,meteor:2,heavy:true,a:"Lluvia de lava",d:"Lanza rocas de lava a tu isla que dejan el suelo ardiendo. Es lento y sus pasos retumban: se ve dónde pisa.",c:"#e0562a",l:"#ffb070",dk:"#7a1f2a",proj:"fire"},
   arana:{n:"Araña Madre",r:"Jefa",rar:3,hp:7,step:.26,mc:1,pat:"row3",cost:3,dmg:1,travel:.75,warn:true,boss:true,web:3,a:"Picadura",d:"Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.",c:"#7a4fd0",l:"#c9b0ff",dk:"#3d2480",proj:"star"},
   topo:{n:"Rey Topo",r:"Jefe",rar:3,hp:8,step:.3,mc:0,pat:"cross5",cost:3,dmg:1,travel:1.15,warn:true,boss:true,burrow:3,a:"Terremoto",d:"Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.",c:"#7a4fd0",l:"#c9b0ff",dk:"#3d2480",proj:"rock"},
 });
@@ -1871,6 +1872,13 @@ function addWebs(R,d,n,hk){
   const mine=W.filter(w=>w.d===d);if(mine.length>8){const old=mine.slice(0,mine.length-8);R.webs=W.filter(w=>!old.includes(w));}
   if(free.length)call(hk,"web",d,free);
 }
+/* lluvia de lava: rocas que caen con aviso en la isla "d" (una cerca de quien está allí) y dejan el suelo ardiendo 4 s.
+   No dejan marcas de agua ni "cerca": no delatan a nadie, solo obligan a moverse */
+function meteors(R,d,n,o,hk){
+  const v=R.heroes[d],near=allCells().filter(([x,y])=>Math.abs(x-v.x)<=1&&Math.abs(y-v.y)<=1);
+  const cs=[pick(near)];for(const c of shuffle(allCells()))if(cs.length<n&&!cs.some(q=>q[0]===c[0]&&q[1]===c[1]))cs.push(c);
+  for(const c of cs){const p={o,d,cells:[c],hitAt:R.now+1.4,launched:R.now,dmg:1,warn:true,type:"coloso",id:++MID,meteor:true,burn:true};R.projs.push(p);call(hk,"fired",p);}
+}
 function moveTo(R,s,x,y){
   if(!inB(x,y)||R.over)return;
   const h=R.heroes[s];if(h.fortUntil>R.now||h.stuckUntil>R.now)return;/* Fortaleza o telaraña: no se mueve */
@@ -1885,6 +1893,7 @@ function stepHero(R,s,hk,dt){
   const [x,y]=h.path.shift();
   R.elx[s]-=H.mc;h.x=x;h.y=y;h.nextStep=due+H.step;
   if(!H.jump&&!H.burrow&&!(h.smokeUntil>R.now)&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
+  if(H.heavy){mark(R,s,{t:"huella",x,y,until:R.now+1.4,st:true});call(hk,"stomp",s,x,y);}/* Coloso: sus pasos retumban */
   if(R.webs){const wi=R.webs.findIndex(w=>w.d===s&&w.x===x&&w.y===y);
     if(wi>=0&&!H.web&&!(h.airUntil>R.now)){R.webs.splice(wi,1);h.stuckUntil=R.now+2;h.path=[];mark(R,s,{t:"ping",x,y,type:h.type,until:R.now+2});call(hk,"stuck",s,x,y);}}
   const mi=R.mines.findIndex(m=>m.d===s&&m.x===x&&m.y===y);
@@ -2003,7 +2012,7 @@ function impact(R,p,hk){
   }else{
     const near=p.cells.some(([x,y])=>Math.abs(v.x-x)+Math.abs(v.y-y)===1);
     p.res=near?"near":"miss";
-    for(const [x,y] of p.cells)mark(R,p.d,{t:near?"cerca":"agua",x,y,until:R.now+MARK_T});
+    if(p.meteor)p.res="miss";else for(const [x,y] of p.cells)mark(R,p.d,{t:near?"cerca":"agua",x,y,until:R.now+MARK_T});
     if(HEROES[p.type].mine){const [x,y]=p.cells[0];R.mines=R.mines.filter(m=>!(m.o===p.o&&m.x===x&&m.y===y));R.mines.push({o:p.o,d:p.d,x,y,until:R.now+12});}
   }
   if(p.burn){(R.fires=R.fires||[]).push({o:p.o,d:p.d,cells:p.cells,from:R.now+.9,until:R.now+5,hit:false});}/* Suelo ardiente */
@@ -2023,11 +2032,13 @@ function tick(R,dt,hk){
   for(const s of SIDES){const h=R.heroes[s],rate=ELX_RATE*(h.turboUntil>R.now?2:1)*(R.sudden?1.5:1)*(1+lvBonus(h.lv).elx)*(R.mod.elx||1);R.elx[s]=Math.min(ELX_MAX,R.elx[s]+rate*dt);}
   for(const s of SIDES){const h=R.heroes[s],Hb=HEROES[h.type];if(!Hb.boss)continue;
     if(!h.rage&&h.hp>0&&h.hp<=h.max/2){h.rage=true;call(hk,"enrage",s);}
+    if(Hb.meteor&&R.now>=(h.metAt??=HIDE_T+3)){h.metAt=R.now+(h.rage?5.5:7.5);meteors(R,other(s),Hb.meteor+(h.rage?1:0),s,hk);}/* Coloso: lluvia de lava */
     if(Hb.web&&R.now>=(h.webAt??=HIDE_T+2)){h.webAt=R.now+(h.rage?5:7);addWebs(R,other(s),Hb.web+(h.rage?1:0),hk);}/* Araña Madre: telarañas en la isla rival */
     if(!Hb.burrow)continue;
     if(!(h.outUntil>R.now)&&h.invulUntil<R.now+.3)h.invulUntil=R.now+.3;/* bajo tierra nada le alcanza */
     if(h.wasOut&&!(h.outUntil>R.now)){h.wasOut=false;mark(R,s,{t:"hoyo",x:h.x,y:h.y,until:R.now+1.8});call(hk,"burrow",s,h.x,h.y);}}
   if(R.webs)R.webs=R.webs.filter(w=>w.until>R.now);
+  if(R.mod.meteor&&R.now>=(R.metAt??=HIDE_T+4)){R.metAt=R.now+7;for(const s of SIDES)meteors(R,s,2,other(s),hk);}/* nivel con lluvia de lava en las dos islas */
   if(R.mod.webs&&R.now>=(R.webAt??=HIDE_T+3)){R.webAt=R.now+8;for(const s of SIDES)addWebs(R,s,2,hk);}/* nivel con telarañas en las dos islas */
   /* primero caen los disparos que ya tocaba resolver y después se mueve: no se esquiva un golpe que ya había llegado */
   const due=R.projs.filter(p=>p.hitAt<=R.now);R.projs=R.projs.filter(p=>p.hitAt>R.now);
@@ -2265,6 +2276,7 @@ const TR=(()=>{
   /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
   Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "👑 JEFE": "👑 BOSS", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
   Object.assign(I18N_EN,{"CAMPAÑA · MUNDO #": "CAMPAIGN · WORLD #", "Bosque de la Araña Madre": "Forest of the Spider Mother", "Araña Madre": "Spider Mother", "Jefa": "Boss", "Picadura": "Bite", "El sendero oscuro": "The dark trail", "Doble engaño": "Double trick", "Telarañas": "Cobwebs", "La cazadora": "The huntress", "Sombra golpea sin avisar y aquí sus huellas duran la mitad.": "Sombra strikes without warning, and here its footprints last half as long.", "Las huellas de Truco son falsas. La energía se recarga un 50 % más rápido para los dos.": "Truco's footprints are fake. Energy refills 50% faster for both.", "Salen telarañas en las dos islas: quien pise una queda atrapado 2 s y a la vista.": "Cobwebs appear on both islands: step on one and you're stuck for 2 s and visible.", "Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas.": "Mira has 4 lives and deals 2 per shot. And there are still cobwebs.", "Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.": "She fills your island with cobwebs. Step on one and you're stuck for 2 s and she sees you. Go around them and strike back.", "Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.": "Fills your island with cobwebs: step on one and you're stuck for 2 s and visible.", "Si pisas una telaraña, quedas atrapado 2 s y a la vista": "Step on a cobweb and you're stuck for 2 s and visible", "¡ARAÑA MADRE FURIOSA!": "SPIDER MOTHER ENRAGED!", "Más telarañas y más seguidas": "More cobwebs, more often", "👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.": "👑 You defeated the Spider Mother! World 2 complete.", "No pises las telarañas: rodéalas y muévete tras cada disparo.": "Don't step on the cobwebs: go around them and move after every shot.", "¡Atrapado!": "Stuck!", "¡Atrapado! ¡Dale!": "Stuck! Hit them!", "¡FURIA!": "RAGE!", "Mundo 3 · Volcán del Coloso de Lava": "World 3 · Volcano of the Lava Colossus", "Mundo # · Pradera del Rey Topo": "World # · The Mole King's Meadow", "Mundo # · Bosque de la Araña Madre": "World # · Forest of the Spider Mother", "Derrota al jefe de este mundo": "Defeat this world's boss", "Entrar": "Enter", "MUNDO #": "WORLD #", "ARAÑA MADRE": "SPIDER MOTHER"});
+  Object.assign(I18N_EN,{"Volcán del Coloso de Lava":"Volcano of the Lava Colossus","Coloso de Lava":"Lava Colossus","COLOSO DE LAVA":"LAVA COLOSSUS","Lluvia de lava":"Lava rain","Tierra caliente":"Hot ground","Pólvora":"Gunpowder","El gólem de magma":"The magma golem","Cada 15 s el volcán delata a quien esté en una casilla de lava. Mira dónde pisas.":"Every 15 s the volcano reveals whoever stands on a lava tile. Watch your step.","Caen rocas de lava en las dos islas: avisan antes y dejan el suelo ardiendo unos segundos.":"Lava rocks fall on both islands: they warn first and leave the ground burning for a few seconds.","Bum tiene el doble de vida y sus huellas duran la mitad. La energía va más rápida para los dos.":"Bum has double the lives and his footprints last half as long. Energy refills faster for both.","Muro tiene 9 vidas y sigue lloviendo lava.":"Muro has 9 lives and lava keeps raining.","Lanza lluvia de lava a tu isla: avisa antes y deja el suelo ardiendo. Es lento y sus pasos retumban: siempre ves dónde pisa.":"He rains lava on your island: it warns first and leaves the ground burning. He's slow and his steps shake the ground: you always see where he walks.","Lanza rocas de lava a tu isla que dejan el suelo ardiendo. Es lento y sus pasos retumban: se ve dónde pisa.":"Throws lava rocks at your island that leave the ground burning. He's slow and his steps shake the ground: you can see where he walks.","Esquiva la lava y sigue sus pasos: retumban donde pisa":"Dodge the lava and follow his steps: they shake where he walks","¡COLOSO FURIOSO!":"COLOSSUS ENRAGED!","Más rocas de lava y más seguidas":"More lava rocks, more often","👑 ¡Has derrotado al Coloso de Lava! Mundo 3 completado.":"👑 You defeated the Lava Colossus! World 3 complete.","Apártate en cuanto parpadee una casilla y dispara donde retumban sus pasos.":"Move away as soon as a tile flashes and shoot where his steps shake.","Mundo # · Volcán del Coloso de Lava":"World # · Volcano of the Lava Colossus","Mundo 4 · Trono de las Estatuas":"World 4 · Throne of Statues","¡LE HA CAÍDO!":"IT HIT THEM!","¡Ha pisado ahí! Dispara":"He stepped there! Shoot"});
   Object.assign(I18N_EN,{"¡A CIEGAS!":"BLIND SHOT!","¡AL LÍMITE!":"CLUTCH!","¡IMPECABLE!":"FLAWLESS!","¡RELÁMPAGO!":"LIGHTNING!","¡INTOCABLE!":"UNTOUCHABLE!","¡K.O.!":"K.O.!","K.O. sin ver al rival":"K.O. without seeing the rival","Ganó con 1 vida":"Won on 1 life","Sin perder ni una vida":"Without losing a life","K.O. en":"K.O. in","esquivas":"dodges","No se encontró el vídeo de tu jugada.":"Couldn't find your play's video.","¡Jugada destacada de hoy!":"Today's top play!","Tu jugada de hoy sigue siendo":"Your play of the day is still","esta":"this one","puntos":"points","Compartir la jugada":"Share the play","COMPARTIR":"SHARE","Tu jugada de hoy":"Your play of the day","Compartir":"Share"});
   Object.assign(I18N_EN,{"Bote de tu última racha:":"Your last streak pot:","¡Bote cobrado!":"Pot collected!","Bote":"Pot","COBRAR":"CLAIM","partidas seguidas":"games in a row","bote":"pot","Otra más y sube a":"One more and it grows to","Lo cobras al parar.":"Claim it when you stop.","Bote al máximo. Cóbralo en Inicio cuando quieras.":"Pot maxed out. Claim it at Home whenever you like.","Juega otra seguida y empiezas un bote de monedas.":"Play another in a row to start a coin pot."});
   Object.assign(I18N_EN,{"¡Le quedaba solo 1 vida!": "They had just 1 life left!", "# disparos tuyos cayeron justo al lado": "# of your shots landed right next to them", "Un disparo tuyo cayó justo al lado": "One of your shots landed right next to them", "¡A 1 victoria de abrir un cofre!": "1 win away from opening a chest!", "Misión casi hecha:": "Mission almost done:", "A # trofeos de:": "# trophies away from:", "A 1 partida del siguiente premio del pase": "1 match away from the next pass reward", "¡Revancha!": "Rematch!"});
@@ -2995,7 +3007,7 @@ function glbHero(id){
   return root;
 }
 /* ---- héroes 2D: la ilustración como una figura de cartón que siempre mira a la cámara ---- */
-const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo","arana"],SPRITES={},SPRITE_H={topo:1.3,arana:1.25,flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
+const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo","arana","coloso"],SPRITES={},SPRITE_H={topo:1.3,arana:1.25,coloso:1.5,flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
 const SKIN_LIST=["brasa_glacial","muro_magma","sombra_carmesi","truco_artico","ojo_nevado"];
 function loadSprites(){
   const L=new T.TextureLoader();
@@ -3023,6 +3035,7 @@ const RIG2D={
   muro:{h:[.45,.62],n:[.45,.34],c:[.43,.18],sL:[.22,.3],hL:[.12,.72],sR:[.76,.3],hR:[.86,.74],pL:[.37,.72],fL:[.35,.96],pR:[.56,.72],fR:[.58,.96],atk:"slam",m:"R"},
   rayo:{h:[.56,.76],n:[.56,.5],c:[.56,.36],sL:[.42,.55],hL:[.16,.62],sR:[.7,.55],hR:[.86,.68],pL:[.48,.82],fL:[.45,.97],pR:[.63,.82],fR:[.66,.97],x:[["gorro","head",[.6,.2],[.62,.04]]],atk:"shoot",m:"L"},
   bum:{h:[.5,.78],n:[.5,.6],c:[.5,.42],sL:[.25,.62],hL:[.1,.73],sR:[.78,.62],hR:[.91,.76],pL:[.42,.84],fL:[.4,.97],pR:[.6,.84],fR:[.62,.97],x:[["mecha","head",[.55,.15],[.62,.04]]],atk:"throw",m:"R"},
+  coloso:{h:[.45,.64],n:[.45,.371],c:[.43,.216],sL:[.217,.332],hL:[.116,.737],sR:[.765,.332],hR:[.866,.756],pL:[.369,.737],fL:[.349,.968],pR:[.562,.737],fR:[.582,.968],atk:"slam",m:"R"},
   arana:{h:[.5,.62],n:[.5,.44],c:[.5,.34],sL:[.34,.5],hL:[.08,.3],sR:[.66,.5],hR:[.92,.3],pL:[.36,.72],fL:[.22,.97],pR:[.64,.72],fR:[.78,.97],atk:"throw",m:"R"},
   topo:{h:[.48,.72],n:[.47,.49],c:[.47,.34],sL:[.22,.54],hL:[.2,.82],sR:[.7,.52],hR:[.85,.56],pL:[.38,.79],fL:[.33,.965],pR:[.6,.79],fR:[.62,.965],atk:"throw",m:"R"},
   mina:{h:[.48,.68],n:[.47,.42],c:[.47,.25],sL:[.22,.48],hL:[.2,.8],sR:[.7,.46],hR:[.85,.5],pL:[.38,.76],fL:[.33,.96],pR:[.6,.76],fR:[.62,.96],atk:"throw",m:"R"},
@@ -3875,6 +3888,7 @@ function launch(from,to,type,dur,arc){
 function fireFx(side,p){
   if(!scene)return;
   const H=HEROES[p.type];
+    if(p.meteor){launch(V((Math.random()-.5)*4,9,-3),areaWorld(p.d,p.cells).add(V(0,.15,0)),p.type,1.4,.6);return;}
   if(side==="p"){
     act.p={k:"attack",t:now()};
     const from=p.dud?tileWorld("p",p.hx,p.hy).add(V(0,.4,0)):hero.position.clone().add(V(0,.6,0)),to=areaWorld("b",p.cells).add(V(0,.15,0));
@@ -5126,13 +5140,22 @@ const CAMP=[{k:"pradera",n:"Pradera del Rey Topo",lv:[
   {n:"La cazadora",foe:"mira",bot:"d",coins:45,mod:{hpB:1.34,webs:1},d:"Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas."},
   {n:"Araña Madre",foe:"arana",bot:"arana",boss:1,coins:130,gems:12,chest:2,d:"Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.",
     intro:"Si pisas una telaraña, quedas atrapado 2 s y a la vista",rage:["¡ARAÑA MADRE FURIOSA!","Más telarañas y más seguidas"],won:"👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.",hint:"No pises las telarañas: rodéalas y muévete tras cada disparo."},
+]},{k:"volcan",n:"Volcán del Coloso de Lava",lv:[
+  {n:"Tierra caliente",foe:"brasa",bot:"c",coins:35,d:"Cada 15 s el volcán delata a quien esté en una casilla de lava. Mira dónde pisas."},
+  {n:"Lluvia de lava",foe:"rayo",bot:"c",coins:40,mod:{meteor:1},d:"Caen rocas de lava en las dos islas: avisan antes y dejan el suelo ardiendo unos segundos."},
+  {n:"Pólvora",foe:"bum",bot:"d",coins:45,mod:{elx:1.5,huB:.5,hpB:2},d:"Bum tiene el doble de vida y sus huellas duran la mitad. La energía va más rápida para los dos."},
+  {n:"El gólem de magma",foe:"muro",bot:"d",coins:50,mod:{hpB:1.5,meteor:1},d:"Muro tiene 9 vidas y sigue lloviendo lava."},
+  {n:"Coloso de Lava",foe:"coloso",bot:"coloso",boss:1,coins:160,gems:15,chest:2,d:"Lanza lluvia de lava a tu isla: avisa antes y deja el suelo ardiendo. Es lento y sus pasos retumban: siempre ves dónde pisa.",
+    intro:"Esquiva la lava y sigue sus pasos: retumban donde pisa",rage:["¡COLOSO FURIOSO!","Más rocas de lava y más seguidas"],won:"👑 ¡Has derrotado al Coloso de Lava! Mundo 3 completado.",hint:"Apártate en cuanto parpadee una casilla y dispara donde retumban sus pasos."},
 ]}];
-const CAMP_NEXT={n:"Mundo 3 · Volcán del Coloso de Lava"};
-const CAMP_BG=[["#bff59a","#6fd16a","#2f9a57","#1d6f4a"],["#8fe0b0","#2f9a6a","#17694f","#0f3f3a"]];
+const CAMP_NEXT={n:"Mundo 4 · Trono de las Estatuas"};
+const CAMP_BG=[["#bff59a","#6fd16a","#2f9a57","#1d6f4a"],["#8fe0b0","#2f9a6a","#17694f","#0f3f3a"],["#ffc27a","#d9572c","#7a2420","#2e0d16"]];
 const CAMP_POS=[[30,86],[68,68],[32,50],[66,33],[50,13]];
 /* decorado del mapa: [ilustración, x %, y % (pie), ancho px, espejo] de atrás hacia delante */
 const CAMP_DECO2=[["pino",12,16,78],["pino",88,20,84,1],["rocas",24,24,56],["pino",84,46,70],["pino",10,44,80,1],["arbol",90,60,70],["bandera_roja",70,14,40],
   ["pino",90,84,88],["pino",8,70,74,1],["rocas",40,64,46,1],["bandera_azul",14,92,40],["rocas",60,96,54],["arbol",14,30,64]];
+const CAMP_DECO3=[["roca_lava",12,16,70],["geiser_lava",86,22,84,1],["rocas",24,26,52],["arbol_quemado",84,46,66],["roca_lava",10,44,74,1],["geiser_lava",90,62,70],["bandera_roja",70,14,40],
+  ["arbol_quemado",90,86,80],["roca_lava",8,70,66,1],["rocas",40,64,46,1],["bandera_azul",14,92,40],["roca_lava",60,96,54]];
 const CAMP_DECO=[["pino",12,16,74],["arbol",88,20,88,1],["rocas",24,24,56],["pino",84,46,64],["arbol",10,44,84],["rocas",86,60,50,1],["bandera_roja",70,14,40],
   ["arbol",90,84,92],["pino",8,70,70,1],["rocas",40,64,46,1],["bandera_azul",14,92,40],["rocas",60,96,54]];
 const CAMP_BOT={
@@ -5142,6 +5165,7 @@ const CAMP_BOT={
   d:{think:.6,react:.42,perc:.36,dodge:.6,eps:.28,passive:3,gap:2.2,thr:1.15,moveP:.7},
   topo:{think:.3,react:.3,perc:.3,dodge:0,eps:.3,passive:4,gap:5,thr:1,moveP:1,blind:true},
   arana:{think:.45,react:.4,perc:.32,dodge:.55,eps:.25,passive:3,gap:2.6,thr:1.1,moveP:.8},
+  coloso:{think:.5,react:.42,perc:.32,dodge:.3,eps:.28,passive:3,gap:2.6,thr:1.15,moveP:.55},
 };
 const campLv=()=>G.lvl||CAMP[G.camp.w].lv[G.camp.l];
 const curArena=()=>G&&G.camp?(G.lvl?G.lvl.arena:CAMP[G.camp.w].k):arenaOf(S.tro).a.k;
@@ -5227,7 +5251,7 @@ function showCamp(ww){
   if(!campWorldOpen(ww))ww=0;UI.campW=ww;
   const w=ww,W=CAMP[w],cur=W.lv.findIndex((_,l)=>!(S.camp[w+"."+l]>0)),bg=CAMP_BG[w]||CAMP_BG[0],nx=CAMP[w+1],nxOpen=nx&&campWorldOpen(w+1);
   app.innerHTML=`<div class="cmbg" style="background:radial-gradient(120% 60% at 50% 0%,${bg[0]} 0%,transparent 60%),linear-gradient(${bg[1]},${bg[2]} 55%,${bg[3]})"></div><div class="cmhead"><button class="gbtn blue sm cmback" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt=""></button><div class="cmtt"><small>CAMPAÑA · MUNDO ${w+1}</small><h2 class="out">${W.n}</h2></div><span class="cmst pnl out">★ ${campStars(w)}/${W.lv.length*3}</span></div>
-  <div class="cmmap">${(w===1?CAMP_DECO2:CAMP_DECO).map(([k,x,y,w,f])=>`<img class="cmdeco" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" style="left:${x}%;top:${y}%;width:${w}px${f?";transform:translate(-50%,-100%) scaleX(-1)":""}">`).join("")}
+  <div class="cmmap">${([CAMP_DECO,CAMP_DECO2,CAMP_DECO3][w]||CAMP_DECO).map(([k,x,y,w,f])=>`<img class="cmdeco" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" style="left:${x}%;top:${y}%;width:${w}px${f?";transform:translate(-50%,-100%) scaleX(-1)":""}">`).join("")}
   <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="cmroad" points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/><polyline points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/></svg>
   ${W.lv.map((L,l)=>{const st=S.camp[w+"."+l]||0,open=campOpen(w,l);
     return `<button class="cmn ${open?"":"lk"} ${st?"done":""} ${L.boss?"boss":""} ${l===cur?"cur":""}" data-a="camplv" data-w="${w}" data-l="${l}" style="left:${CAMP_POS[l][0]}%;top:${CAMP_POS[l][1]}%" aria-label="${L.n}">
@@ -5268,10 +5292,10 @@ async function endCamp(w){
    S.hs[id]={r:rondas, sh:disparos, hit:aciertos, dg:esquivas, dgn:golpes que iban a por ti, st:racha de rondas, bs:mejor racha, fk:K.O. más rápido (s), bd:más esquivas en una ronda, bp:mejor puntería en una ronda (con 4+ disparos)} */
 const hsOf=id=>{S.hs=S.hs||{};return S.hs[id]||(S.hs[id]={r:0,sh:0,hit:0,dg:0,dgn:0,st:0,bs:0,fk:0,bd:0,bp:0});};
 const statOn=()=>G&&!G.online&&!G.tutorial&&R;
-function statFired(p){if(!statOn()||p.dud)return;
+function statFired(p){if(!statOn()||p.dud||p.meteor)return;
   if(p.o==="p")G.rs.sh++;
   else if(p.warn){const me=R.heroes.p;if(inArea(p.cells,me.x,me.y))(G.rs.aim||(G.rs.aim={}))[p.id]=1;}}
-function statImpact(p){if(!statOn()||p.dud)return;
+function statImpact(p){if(!statOn()||p.dud||p.meteor)return;
   if(p.o==="p"&&p.res==="hit")G.rs.hit++;
   if(p.o==="b"&&G.rs.aim&&G.rs.aim[p.id]){G.rs.dgn++;if(p.res!=="hit"&&p.res!=="block")G.rs.dg++;}}
 function statRound(w){
@@ -5965,7 +5989,8 @@ function renderStatus(){
   else if(myShot){t="🔥 ¡Disparo en camino! Ahora muévete";c="good";}
   else if(R.marks.b.some(m=>m.t==="hit"||m.t==="ping")||me.visionUntil>now){t="👀 ¡Rival a la vista! Dispara";c="good";}
   else if(R.marks.b.some(m=>m.t==="pick")){t="👀 ¡Cogió un objeto ahí!";c="good";}
-  else if(R.marks.b.some(m=>m.t==="huella")){const fh=HEROES[R.heroes.b.type]||{};t=fh.fake?"👣 Huella falsa: allí NO está":fh.stealth?"👣 Huella borrosa: está por esa zona":"👣 ¡Ha disparado desde ahí!";c="good";}
+  else if(R.marks.b.some(m=>m.t==="huella"&&!m.st)){const fh=HEROES[R.heroes.b.type]||{};t=fh.fake?"👣 Huella falsa: allí NO está":fh.stealth?"👣 Huella borrosa: está por esa zona":"👣 ¡Ha disparado desde ahí!";c="good";}
+  else if(R.marks.b.some(m=>m.st)){t="👣 "+TT("¡Ha pisado ahí! Dispara");c="good";}
   else if(R.marks.p.some(m=>(m.t==="huella"&&!m.fake)||m.t==="pick")){t="👣 ¡Te han visto! Cambia de sitio";c="bad";}
   else if(R.boosts.length)t="🎁 Objeto en el mapa: ¿cebo o premio?";
   else if(R.elx.p<HEROES[me.type].cost)t="💧 Cargando elixir…";
@@ -5988,8 +6013,9 @@ function toast(k,txt){
 const ui={
   fired(p){
     recEv("fired",p);statFired(p);
-    if(p.o==="p"&&!p.dud&&R){const bl=!R.marks.b.length&&!(R.heroes.p.visionUntil>R.now);(R._bl||(R._bl={}))[p.id]=bl;R._lb=bl;}
+    if(p.o==="p"&&!p.dud&&!p.meteor&&R){const bl=!R.marks.b.length&&!(R.heroes.p.visionUntil>R.now);(R._bl||(R._bl={}))[p.id]=bl;R._lb=bl;}
     if(UI.screen!=="game")return;
+    if(p.meteor){B3.fireFx(p.o,p);if(p.d==="p"){toast("meteor","🌋 <b>¡Lluvia de lava!</b> Las casillas que parpadean reciben una roca y luego arden unos segundos. ¡Apártate!");}return;}
     sfx("shoot");B3.fireFx(p.o,p.dud&&p.show&&p.o==="p"?{...p,cells:p.show}:p);
     if(p.o==="p"){
       if(p.dud)toast("mydecoy","🎭 <b>¡Amago!</b> El rival ve una huella y un disparo, pero son de pega. Que dispare ahí mientras tú te mueves.");
@@ -6002,10 +6028,14 @@ const ui={
   },
   impact(p){
     recEv("impact",p);statImpact(p);
-    if(p.o==="p"&&p.res==="hit"&&R)R._hb=R._bl&&p.id!=null&&p.id in R._bl?R._bl[p.id]:!!R._lb;
+    if(p.o==="p"&&p.res==="hit"&&!p.meteor&&R)R._hb=R._bl&&p.id!=null&&p.id in R._bl?R._bl[p.id]:!!R._lb;
     if(UI.screen!=="game")return;
     if(p.dud&&p.show&&p.o==="p")p={...p,cells:p.show};
     B3.impactFx(p);if(HEROES[p.type].burrow){sfx("quake");B3.shake(.5);}
+    if(p.meteor){if(p.d==="p"){sfx("quake");B3.shake(.18);}
+      if(p.res==="hit"){if(p.d==="p"){const c=B3.heroScreen(),ko=(p.vhp??R.heroes.p.hp)<=0;floatText(c.x,c.y,ko?"K.O.":"🌋 −1","bad");vignette();sfx(ko?"ko":"hurt");buzz(60);}
+        else{const c=B3.screenPos("b",p.vx??0,p.vy??0,1),ko=(p.vhp??R.heroes.b.hp)<=0;floatText(c.x,c.y,ko?"¡K.O.!":"🌋 "+TT("¡LE HA CAÍDO!"),"big");sfx(ko?"kill":"hit");}}
+      return;}
     const mine=p.o==="p",to=B3.areaScreen(p.d,p.cells);
     if(mine&&p.dud){floatText(to.x,to.y,"🎭","miss");return;}
     if(mine){
@@ -6031,6 +6061,7 @@ const ui={
   boost(){if(UI.screen!=="game")return;sfx("tap");toast("boost","🎁 <b>¡Objeto!</b> Sale en el mismo sitio en las dos islas. Si lo coges, el rival sabrá dónde estás.");},
   noElx(s){if(s&&s!=="p")return;const b=$("#ebar");if(b)shake(b);sfx("miss");toast("noelx","💧 <b>Sin elixir.</b> Espera un momento a que se recargue o coge un 💧.");},
   sudden(){banner("¡MUERTE SÚBITA!","Golpes más rápidos · os veréis cada 5 s","red",1500);},
+  stomp(s){if(UI.screen!=="game"||s!=="b")return;B3.shake(.06);toast("stomp","👣 <b>¡Sus pasos retumban!</b> Cada vez que el Coloso se mueve, ves la casilla que pisa.");},
   erupt(){if(UI.screen!=="game")return;sfx("radar");B3.shake(.25);toast("lava","🌋 <b>¡Erupción!</b> Quien estaba en una casilla de lava ha quedado a la vista.");},
   wind(d){if(UI.screen!=="game")return;banner(d>0?"💨 ¡VIENTO →!":"💨 ¡← VIENTO!","Los disparos caen una casilla desplazados 6 s","blue",1300);},
   cover(s){if(UI.screen!=="game")return;sfx("near");toast("cover","🗿 <b>¡La estatua ha parado el golpe!</b> Se ha roto: solo protege una vez.");},
