@@ -1209,7 +1209,9 @@ body.h3d::after{background:radial-gradient(120% 80% at 50% 46%,transparent 52%,r
 .fwtag.streak span{color:#FFB84D}
 .sespot{position:absolute;top:-25px;right:14px;z-index:5;display:flex;align-items:center;gap:4px;padding:3px 4px 3px 6px;border-radius:5px 10px 5px 10px;background:#0d0f24;border:0;font:14px/1 var(--f-game);color:#FFD54A;cursor:pointer;animation:bob 1.6s ease-in-out infinite}
 .sespot .ico.s{width:18px;height:18px}.sespot i{font-style:normal;background:#3ed13e;color:#fff;border-radius:4px;padding:3px 6px;font-size:12px;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
-.sesrow small{display:block;opacity:.85;margin-top:2px}
+.sesrow small,.hlrow small{display:block;opacity:.85;margin-top:2px}.hlrow{font-size:15px}.hlrow>span{flex:1}.hlrow .gbtn{flex:none;padding:6px 10px;font-size:13px}
+.replay .rsub{position:absolute;top:calc(152px + env(safe-area-inset-top,0px));left:16px;right:16px;text-align:center;font:18px/1.2 var(--f-game);color:#fff;z-index:3}
+.hlbtn{align-self:center;margin:4px 0 2px}
 .sbtn .sq>.lockc{position:absolute;right:-7px;bottom:-8px;width:22px;height:29px;object-fit:contain;filter:drop-shadow(0 2px 0 var(--ink))}
 .sbtn.lk .sq{filter:none}
 .sbtn.lk .sq::after{content:none}
@@ -2263,6 +2265,7 @@ const TR=(()=>{
   /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
   Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "👑 JEFE": "👑 BOSS", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
   Object.assign(I18N_EN,{"CAMPAÑA · MUNDO #": "CAMPAIGN · WORLD #", "Bosque de la Araña Madre": "Forest of the Spider Mother", "Araña Madre": "Spider Mother", "Jefa": "Boss", "Picadura": "Bite", "El sendero oscuro": "The dark trail", "Doble engaño": "Double trick", "Telarañas": "Cobwebs", "La cazadora": "The huntress", "Sombra golpea sin avisar y aquí sus huellas duran la mitad.": "Sombra strikes without warning, and here its footprints last half as long.", "Las huellas de Truco son falsas. La energía se recarga un 50 % más rápido para los dos.": "Truco's footprints are fake. Energy refills 50% faster for both.", "Salen telarañas en las dos islas: quien pise una queda atrapado 2 s y a la vista.": "Cobwebs appear on both islands: step on one and you're stuck for 2 s and visible.", "Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas.": "Mira has 4 lives and deals 2 per shot. And there are still cobwebs.", "Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.": "She fills your island with cobwebs. Step on one and you're stuck for 2 s and she sees you. Go around them and strike back.", "Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.": "Fills your island with cobwebs: step on one and you're stuck for 2 s and visible.", "Si pisas una telaraña, quedas atrapado 2 s y a la vista": "Step on a cobweb and you're stuck for 2 s and visible", "¡ARAÑA MADRE FURIOSA!": "SPIDER MOTHER ENRAGED!", "Más telarañas y más seguidas": "More cobwebs, more often", "👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.": "👑 You defeated the Spider Mother! World 2 complete.", "No pises las telarañas: rodéalas y muévete tras cada disparo.": "Don't step on the cobwebs: go around them and move after every shot.", "¡Atrapado!": "Stuck!", "¡Atrapado! ¡Dale!": "Stuck! Hit them!", "¡FURIA!": "RAGE!", "Mundo 3 · Volcán del Coloso de Lava": "World 3 · Volcano of the Lava Colossus", "Mundo # · Pradera del Rey Topo": "World # · The Mole King's Meadow", "Mundo # · Bosque de la Araña Madre": "World # · Forest of the Spider Mother", "Derrota al jefe de este mundo": "Defeat this world's boss", "Entrar": "Enter", "MUNDO #": "WORLD #", "ARAÑA MADRE": "SPIDER MOTHER"});
+  Object.assign(I18N_EN,{"¡A CIEGAS!":"BLIND SHOT!","¡AL LÍMITE!":"CLUTCH!","¡IMPECABLE!":"FLAWLESS!","¡RELÁMPAGO!":"LIGHTNING!","¡INTOCABLE!":"UNTOUCHABLE!","¡K.O.!":"K.O.!","K.O. sin ver al rival":"K.O. without seeing the rival","Ganó con 1 vida":"Won on 1 life","Sin perder ni una vida":"Without losing a life","K.O. en":"K.O. in","esquivas":"dodges","No se encontró el vídeo de tu jugada.":"Couldn't find your play's video.","¡Jugada destacada de hoy!":"Today's top play!","Tu jugada de hoy sigue siendo":"Your play of the day is still","esta":"this one","puntos":"points","Compartir la jugada":"Share the play","COMPARTIR":"SHARE","Tu jugada de hoy":"Your play of the day","Compartir":"Share"});
   Object.assign(I18N_EN,{"Bote de tu última racha:":"Your last streak pot:","¡Bote cobrado!":"Pot collected!","Bote":"Pot","COBRAR":"CLAIM","partidas seguidas":"games in a row","bote":"pot","Otra más y sube a":"One more and it grows to","Lo cobras al parar.":"Claim it when you stop.","Bote al máximo. Cóbralo en Inicio cuando quieras.":"Pot maxed out. Claim it at Home whenever you like.","Juega otra seguida y empiezas un bote de monedas.":"Play another in a row to start a coin pot."});
   Object.assign(I18N_EN,{"¡Le quedaba solo 1 vida!": "They had just 1 life left!", "# disparos tuyos cayeron justo al lado": "# of your shots landed right next to them", "Un disparo tuyo cayó justo al lado": "One of your shots landed right next to them", "¡A 1 victoria de abrir un cofre!": "1 win away from opening a chest!", "Misión casi hecha:": "Mission almost done:", "A # trofeos de:": "# trophies away from:", "A 1 partida del siguiente premio del pase": "1 match away from the next pass reward", "¡Revancha!": "Rematch!"});
   Object.assign(I18N_EN,{"Le ganas": "You lead", "Te gana": "They lead", "Vais empatados": "You're tied", "Cuenta pendiente": "Unfinished business", "¡Has adelantado a": "You've overtaken", "te gana": "leads you"});
@@ -5210,6 +5213,7 @@ function dailyModal(){
     <p class="cmrule">${cur&&cur.st?TT("Tu mejor marca de hoy")+": "+cur.t+" s · "+cur.tries+" "+TT(cur.tries===1?"intento":"intentos"):TT("Una ronda. El mismo reto para todos los jugadores.")}${yest?"<br>"+TT("Ayer")+": "+"★".repeat(yest.st)+" · "+yest.t+" s":""}</p>
     <p class="cmrw">${cur&&cur.st>=3?TT("Premios de hoy cobrados. Mañana, reto nuevo."):cur&&cur.st?`${TT("Con 3 estrellas")}: <b>+${L.coins3}</b> ${ico("coin","s")}`:`${TT("Premio")}: <b>${L.coins}</b> ${ico("coin","s")}${L.coins3?` · ${TT("con 3 estrellas")} +${L.coins3}`:""}`}</p>
     <button class="gbtn xl shine" data-a="dailygo">${cur&&cur.st?"MEJORAR":"JUGAR"}</button>
+    ${hlToday()?`<button class="pillbtn hlbtn" data-a="sharehl">🎬 ${TT("Tu jugada de hoy")}: ${TT(hlToday().lab)} · ${TT("Compartir")}</button>`:""}
     <p class="cmrule">${S.dlyDays||0} ${TT("retos superados")} · ${TT("cada")} ${DLY_STEP}: +${DLY_GEMS} ${ico("gem","s")}</p></div>`;
 }
 const campStars=w=>CAMP[w].lv.reduce((a,_,l)=>a+(S.camp[w+"."+l]||0),0);
@@ -5538,6 +5542,24 @@ function startLoop(){stopLoop();lastT=performance.now();loopId=requestAnimationF
 /* ================= repetición del final de ronda (y clip para compartir) =================
    Se guardan los últimos segundos de la ronda (casillas de los dos héroes y disparos). Al acabar la ronda
    decisiva por K.O. se repiten a cámara lenta enseñando dónde estaba de verdad el rival, y se graba un vídeo vertical. */
+/* almacén de archivos pequeño (la jugada destacada del día, en vídeo) */
+const IDB=(()=>{let pr=null;const db=()=>pr||(pr=new Promise((res,rej)=>{try{const r=indexedDB.open("amago",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}}));
+  return {async put(k,v){try{const d=await db();await new Promise((res,rej)=>{const t=d.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error);});return true;}catch(e){return false;}},
+    async get(k){try{const d=await db();return await new Promise((res,rej)=>{const q=d.transaction("kv").objectStore("kv").get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}catch(e){return null;}}};})();
+/* jugada destacada: se puntúa el K.O. que gana la partida; la mejor del día se guarda para compartirla */
+function hlRate(){const a=R.heroes.p,t=R.now,tags=[];
+  if(R._hb)tags.push(["¡A CIEGAS!",40,TT("K.O. sin ver al rival")]);
+  if(a.hp===1)tags.push(["¡AL LÍMITE!",30,TT("Ganó con 1 vida")]);
+  else if(a.max&&a.hp>=a.max)tags.push(["¡IMPECABLE!",20,TT("Sin perder ni una vida")]);
+  if(t<15)tags.push(["¡RELÁMPAGO!",20,TT("K.O. en")+" "+fx1(t)+" s"]);
+  if(G.rs&&G.rs.dg>=2)tags.push(["¡INTOCABLE!",10,G.rs.dg+" "+TT("esquivas")]);
+  tags.sort((x,y)=>y[1]-x[1]);
+  return {sc:20+tags.reduce((n,x)=>n+x[1],0),lab:tags[0]?tags[0][0]:"¡K.O.!",sub:HEROES[a.type].n+" · "+(tags.slice(0,2).map(x=>x[2]).join(" · ")||TT("K.O. en")+" "+fx1(t)+" s"),hero:a.type};}
+const fx1=n=>{const t=n.toFixed(1);return LANG==="es"?t.replace(".",","):t;};
+const hlToday=()=>S.hl&&S.hl.d===today()?S.hl:null;
+async function hlKeep(hl){const c=REC.clip;if(!hl||!c)return;const best=hlToday();G.hlBest=best;G.hlNew=!best||hl.sc>best.sc;
+  if(G.hlNew&&await IDB.put("hl",c.blob)){S.hl={d:today(),sc:hl.sc,lab:hl.lab,sub:hl.sub,ext:c.ext};save();EV.add("hl_new",{sc:hl.sc,lab:hl.lab});}else if(G.hlNew)G.hlNew=false;}
+async function shareHL(){const h=hlToday();if(!h)return;const b=await IDB.get("hl");if(!b){toast("hlgone_"+Date.now(),TT("No se encontró el vídeo de tu jugada."));return;}shareClip({blob:b,ext:h.ext||"mp4"},h);}
 const REC={snaps:[],evs:[],clip:null};
 function recReset(){REC.snaps=[];REC.evs=[];}
 function recTick(){
@@ -5550,14 +5572,14 @@ function recEv(k,p){if(!R)return;REC.evs.push({t:R.now,k,p:JSON.parse(JSON.strin
 /* online: el servidor manda por dónde se movió el rival */
 function recFoeTrack(track){if(!track||!track.length)return;for(const sn of REC.snaps){let q=null;for(const tr of track){if(tr[0]<=sn.t+.02)q=tr;else break;}if(q)sn.b=[q[1],q[2]];}}
 function clipMime(){if(!window.MediaRecorder)return null;for(const m of ["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm"])try{if(MediaRecorder.isTypeSupported(m))return m;}catch(e){}return null;}
-async function playReplay(winner){
+async function playReplay(winner,hl){
   const sn=REC.snaps.filter(x=>x.b);if(!B3||sn.length<6||!R)return;
   const end=sn[sn.length-1].t,start=Math.max(sn[0].t,end-4.2),live=R,speed=.5;
   const RR=JSON.parse(JSON.stringify(live));RR.over=true;RR.paused=false;RR.projs=[];RR.marks={p:[],b:[]};RR.boosts=[];RR.heroes.p.path=[];RR.heroes.p.visionUntil=1e9;
   const evs=REC.evs.filter(e=>e.t>=start-.05);let ei=0,t=start;
   stopLoop();G.skipReplay=false;document.body.classList.add("replaying");
   const ov=document.createElement("div");ov.className="replay";ov.dataset.a="skipreplay";
-  ov.innerHTML=`<span class="rtag out">⏪ REPETICIÓN</span><span class="rskip">Toca para saltar</span>`;document.body.appendChild(ov);
+  ov.innerHTML=`<span class="rtag out">${hl?"⭐ "+TT(hl.lab):"⏪ REPETICIÓN"}</span>${hl?`<span class="rsub out">${esc(hl.sub)}</span>`:""}<span class="rskip">Toca para saltar</span>`;document.body.appendChild(ov);
   /* clip vertical: el lienzo 3D + título, a 30 fps */
   let rec=null,cv2=null,g2=null,chunks=[];const mime=clipMime(),src=document.querySelector("#gl");
   if(mime&&src&&src.captureStream!==undefined){try{cv2=document.createElement("canvas");cv2.width=540;cv2.height=960;g2=cv2.getContext("2d");
@@ -5565,7 +5587,8 @@ async function playReplay(winner){
   const drawClip=()=>{if(!g2)return;const W=540,H=960,r=src.width/src.height,h=W/r;g2.fillStyle="#0b1030";g2.fillRect(0,0,W,H);
     const sh=Math.min(H,h),sy=(H-sh)/2;g2.drawImage(src,0,0,src.width,src.height,(W-sh*r)/2,sy,sh*r,sh);
     g2.font="bold 46px 'Lilita One',sans-serif";g2.textAlign="center";g2.lineWidth=8;g2.strokeStyle="#0b1030";g2.fillStyle="#ffd23a";
-    g2.strokeText(TT("¿DÓNDE ESTABA?"),W/2,96);g2.fillText(TT("¿DÓNDE ESTABA?"),W/2,96);
+    const ttl=hl?TT(hl.lab):TT("¿DÓNDE ESTABA?");g2.strokeText(ttl,W/2,96);g2.fillText(ttl,W/2,96);
+    if(hl){g2.font="bold 26px 'Lilita One',sans-serif";g2.fillStyle="#fff";g2.lineWidth=6;g2.strokeText(hl.sub,W/2,140);g2.fillText(hl.sub,W/2,140);g2.lineWidth=8;}
     g2.font="bold 30px 'Lilita One',sans-serif";g2.fillStyle="#fff";g2.strokeText("AMAGO",W/2,H-48);g2.fillText("AMAGO",W/2,H-48);};
   await new Promise(res=>{const t0=performance.now();let last=t0;
     const step=now=>{
@@ -5582,14 +5605,15 @@ async function playReplay(winner){
   if(rec){await new Promise(r=>{rec.onstop=r;try{rec.stop();}catch(e){r();}});if(chunks.length)REC.clip={blob:new Blob(chunks,{type:mime.split(";")[0]}),ext:mime.includes("mp4")?"mp4":"webm"};}
 }
 /* compartir el clip: hoja nativa del móvil (Web Share o el plugin de la app); si no, descarga */
-async function shareClip(){
-  const c=REC.clip;if(!c)return;const name="amago-repeticion."+c.ext;
+async function shareClip(c=REC.clip,hl=G&&G.hl){
+  if(!c)return;const name=(hl?"amago-jugada.":"amago-repeticion.")+c.ext;
+  const txt=hl?TT(hl.lab)+" "+hl.sub+" 🎯 #AMAGO":LANG==="es"?"¿Dónde estaba? 👀 #AMAGO":"Where was it? 👀 #AMAGO";
   try{
     const Cap=window.Capacitor&&window.Capacitor.Plugins;
     if(Cap&&Cap.Filesystem&&Cap.Share){const b64=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(String(fr.result).split(",")[1]);fr.readAsDataURL(c.blob);});
-      const w=await Cap.Filesystem.writeFile({path:name,data:b64,directory:"CACHE"});await Cap.Share.share({title:"AMAGO",text:LANG==="es"?"¿Dónde estaba? 👀 #AMAGO":"Where was it? 👀 #AMAGO",files:[w.uri]});EV.add("clip_share",{via:"app"});return;}
+      const w=await Cap.Filesystem.writeFile({path:name,data:b64,directory:"CACHE"});await Cap.Share.share({title:"AMAGO",text:txt,files:[w.uri]});EV.add("clip_share",{via:"app"});return;}
     const f=new File([c.blob],name,{type:c.blob.type});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:"AMAGO",text:LANG==="es"?"¿Dónde estaba? 👀 #AMAGO":"Where was it? 👀 #AMAGO"});EV.add("clip_share",{via:"web"});return;}
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:"AMAGO",text:txt});EV.add("clip_share",{via:"web"});return;}
   }catch(e){if(e&&e.name==="AbortError")return;}
   const a=document.createElement("a");a.href=URL.createObjectURL(c.blob);a.download=name;document.body.appendChild(a);a.click();a.remove();EV.add("clip_share",{via:"download"});
 }
@@ -5633,7 +5657,7 @@ async function endRound(w){
   const b=R.heroes.b;await revealFoe(b.x,b.y,b.type,w);
   if(G.camp)return G.camp.daily?endDaily(w):endCamp(w);
   const ko=R.heroes.p.hp<=0||R.heroes.b.hp<=0,decisive=w&&(G.score[w]+1>=2||G.round>=5);
-  if(ko&&decisive&&!G.tutorial){REC.clip=null;await playReplay(w);}
+  if(ko&&decisive&&!G.tutorial){REC.clip=null;G.hl=w==="p"&&R.heroes.b.hp<=0?hlRate():null;await playReplay(w,G.hl);await hlKeep(G.hl);}
   if(w)G.score[w]++;
   G.used.p.push(R.heroes.p.type);G.used.b.push(R.heroes.b.type);
   if(w==="p")S.hw[R.heroes.p.type]=(S.hw[R.heroes.p.type]||0)+1;
@@ -5719,7 +5743,7 @@ async function endMatch(){
       ${S.games>2?`<div class="chip pnl" data-d="2">${ico("star")}<b class="out up" data-cu="${tk}">+0</b><small>Fichas del pase${tkMult>=2?" ×2":""}</small></div>`:""}
     </div>
     <div class="endrows">
-      ${ses&&ses.n>=2?`<div class="erow pnl sesrow">${ico("coin")}<span><em>🔥 ${ses.n} ${TT("partidas seguidas")} · ${TT("bote")} +${ses.pot}</em><small>${ses.n<SES_POT.length-1?TT("Otra más y sube a")+" +"+SES_POT[ses.n+1]+". "+TT("Lo cobras al parar."):TT("Bote al máximo. Cóbralo en Inicio cuando quieras.")}</small></span></div>`:ses&&ses.n===1&&S.games>=3&&S.games<=12?`<div class="erow pnl sesrow">${ico("coin")}<span><small>${TT("Juega otra seguida y empiezas un bote de monedas.")}</small></span></div>`:""}${recRows()}${statRow()}${rivRow}${goals.slice(0,G.recs&&G.recs.length||rivRow?1:2).map(g=>`<div class="erow pnl goalrow">${ico(g.i)}<span><em>${g.t}</em><i class="gbar"><u style="width:${Math.round(g.f*100)}%"></u></i></span></div>`).join("")}
+      ${G.hl&&REC.clip?`<div class="erow pnl ${G.hlNew?"goalrow":""} hlrow">🎬<span>${G.hlNew?`<em>${TT("¡Jugada destacada de hoy!")} ${TT(G.hl.lab)}</em>`:`${TT("Tu jugada de hoy")}: <b>${TT(G.hlBest.lab)}</b> (${G.hlBest.sc}) · ${TT("esta")}: ${G.hl.sc}`}${G.hlNew?`<small>${esc(G.hl.sub)} · ${G.hl.sc} ${TT("puntos")}</small>`:""}</span><button class="gbtn green sm" data-a="shareclip">${TT("COMPARTIR")}</button></div>`:""}${ses&&ses.n>=2?`<div class="erow pnl sesrow">${ico("coin")}<span><em>🔥 ${ses.n} ${TT("partidas seguidas")} · ${TT("bote")} +${ses.pot}</em><small>${ses.n<SES_POT.length-1?TT("Otra más y sube a")+" +"+SES_POT[ses.n+1]+". "+TT("Lo cobras al parar."):TT("Bote al máximo. Cóbralo en Inicio cuando quieras.")}</small></span></div>`:ses&&ses.n===1&&S.games>=3&&S.games<=12?`<div class="erow pnl sesrow">${ico("coin")}<span><small>${TT("Juega otra seguida y empiezas un bote de monedas.")}</small></span></div>`:""}${recRows()}${statRow()}${rivRow}${goals.slice(0,G.recs&&G.recs.length||rivRow?1:2).map(g=>`<div class="erow pnl goalrow">${ico(g.i)}<span><em>${g.t}</em><i class="gbar"><u style="width:${Math.round(g.f*100)}%"></u></i></span></div>`).join("")}
       ${firstWin?`<div class="erow pnl">${ico("key")}<span>¡Primera victoria del día! Llave doble, +30 monedas y +20 de Poder</span><b class="out" style="color:var(--tx-up)">×2</b></div>`:""}
       ${win&&S.ws>=2?`<div class="erow pnl">${ico("swords")}<span>${S.ws} victorias seguidas${Math.min(4,S.ws-1)?` · +${Math.min(4,S.ws-1)} trofeos extra`:""}</span></div>`:""}
       ${keysGot&&!gotChest&&S.box.length<BOX_MAX&&!goals.some(g=>g.i==="key")?`<div class="erow pnl">${ico("chest1")}<span>Junta 3 llaves y abres un cofre</span><span class="keyrow">${[0,1,2].map(i=>`<img class="${i<kNow?"":"off"} ${i>=keysBefore&&i<kNow?"new":""}" src="${UIA}key.webp" alt="">`).join("")}</span></div>`:""}
@@ -5731,7 +5755,7 @@ async function endMatch(){
       ${!win&&!note?`<p class="sub">${draw?"¡Igualadísimo!":"¡Casi! La próxima es tuya."}</p>`:""}
       ${misReady()?`<button class="pillbtn" data-a="missions" style="align-self:center">✅ ¡Misión completada! Cóbrala</button>`:claimable().length?`<button class="pillbtn" data-a="tab" data-t="road" style="align-self:center">${ico("trophy","s")} ¡Premios en el camino de trofeos!</button>`:""}
     </div>
-    ${REC.clip?`<button class="pillbtn" data-a="shareclip" style="align-self:center">📤 Compartir la repetición</button>`:""}
+    ${REC.clip&&!G.hl?`<button class="pillbtn" data-a="shareclip" style="align-self:center">📤 Compartir la repetición</button>`:""}
     ${G.tut?`<div class="endbtns"><button class="gbtn xl shine" data-a="tutnext">CONTINUAR</button></div>`:`<div class="endbtns"><button class="gbtn blue" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt="" style="width:34px;height:34px"></button><button class="gbtn xl shine" data-a="play" ${!win&&!draw&&!G.online?`data-rev="1"`:""}>${win||draw?"JUGAR OTRA":"¡REVANCHA!"}</button></div>`}`);
   /* revelado en secuencia; un toque en cualquier parte lo acelera */
   UI.fast=false;const skip=()=>{UI.fast=true;};document.addEventListener("pointerdown",skip,{once:true});
@@ -5867,7 +5891,7 @@ async function onlineRoundEnd(m){
   R.heroes.p.hp=m.hp.you;R.heroes.b.hp=m.hp.opp;renderLive();
   recFoeTrack(m.track);
   await revealFoe(m.reveal.x,m.reveal.y,m.reveal.type,m.w==="you"?"p":m.w==="opp"?"b":null);
-  if((m.hp.you<=0||m.hp.opp<=0)&&(m.score.you>=2||m.score.opp>=2||G.round>=5)){REC.clip=null;await playReplay(m.w==="you"?"p":"b");}
+  if((m.hp.you<=0||m.hp.opp<=0)&&(m.score.you>=2||m.score.opp>=2||G.round>=5)){REC.clip=null;G.hl=m.w==="you"&&m.hp.opp<=0?hlRate():null;await playReplay(m.w==="you"?"p":"b",G.hl);await hlKeep(G.hl);}
   G.score={p:m.score.you,b:m.score.opp};
   G.used.p.push(R.heroes.p.type);
   await roundBanner(m.w==="you"?"p":m.w==="opp"?"b":null);
@@ -5964,6 +5988,7 @@ function toast(k,txt){
 const ui={
   fired(p){
     recEv("fired",p);statFired(p);
+    if(p.o==="p"&&!p.dud&&R){const bl=!R.marks.b.length&&!(R.heroes.p.visionUntil>R.now);(R._bl||(R._bl={}))[p.id]=bl;R._lb=bl;}
     if(UI.screen!=="game")return;
     sfx("shoot");B3.fireFx(p.o,p.dud&&p.show&&p.o==="p"?{...p,cells:p.show}:p);
     if(p.o==="p"){
@@ -5977,6 +6002,7 @@ const ui={
   },
   impact(p){
     recEv("impact",p);statImpact(p);
+    if(p.o==="p"&&p.res==="hit"&&R)R._hb=R._bl&&p.id!=null&&p.id in R._bl?R._bl[p.id]:!!R._lb;
     if(UI.screen!=="game")return;
     if(p.dud&&p.show&&p.o==="p")p={...p,cells:p.show};
     B3.impactFx(p);if(HEROES[p.type].burrow){sfx("quake");B3.shake(.5);}
@@ -6112,6 +6138,7 @@ document.addEventListener("click",e=>{
     case "setdiff":S.diff=el.dataset.d;S.mode="bot";save();sfx("sel");renderModal();showHome();break;
     case "skipreplay":G.skipReplay=true;break;
     case "shareclip":sfx("tap");shareClip();break;
+    case "sharehl":sfx("tap");shareHL();break;
     case "gpause":if(R&&UI.screen==="game"&&!G.tutorial){sfx("tap");UI.modal={k:"gpause"};renderModal();}break;
     case "ulti":if(R&&UI.screen==="game"&&R.ultiOn&&!R.paused&&!R.over){const me=R.heroes.p,c=B3.heroScreen();
         /* online decide el servidor; aquí solo se comprueba lo mismo para dar respuesta al instante */
