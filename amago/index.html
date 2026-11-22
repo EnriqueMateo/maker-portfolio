@@ -3448,7 +3448,7 @@ function animateKK(u,t,st,act,at_){
 /* ---- héroes 3D sacados de su propia ilustración (art/h3d): la malla está en las mismas coordenadas que la carta 2D,
    así que usa el mismo esqueleto y las mismas animaciones (RIG2D), pero con volumen, luz, contorno y giro real ---- */
 const H3DTONE=(()=>{const q=/[?&]tone=([\d.,]+)/.exec(location.search);return q?q[1].split(",").map(Number):[1.04,.9,.6];})();
-const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira"],H3D={},H3DYAW={};let h3dP=null;
+const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","coloso"],H3D={},H3DYAW={};let h3dP=null;
 const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")!=="0";}catch(e){return true;}})();
 function loadH3D(ids){
   if(!H3DON||!T.GLTFLoader)return Promise.resolve();
