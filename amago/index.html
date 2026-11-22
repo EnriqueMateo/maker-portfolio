@@ -190,6 +190,15 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .banner{position:fixed;left:0;right:0;top:38%;z-index:80;display:flex;flex-direction:column;align-items:center;pointer-events:none;animation:ban var(--d,1.4s) ease-in-out forwards}
 .banner b{font-family:var(--f-game);font-weight:400;font-size:clamp(40px,13vw,64px);line-height:1;text-align:center}
 .banner span{margin-top:6px;font-size:16px;background:var(--ink-bg,var(--ink));padding:4px 12px;border-radius:999px}
+.bossban{position:fixed;left:0;right:0;top:0;height:58vh;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:2vh;pointer-events:none;background:linear-gradient(#0008,#0006 70%,#0000);animation:bbfade var(--d,2.6s) ease-in-out forwards}
+.bossban .bbrays{position:absolute;left:50%;top:45%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;background:repeating-conic-gradient(#ff5a4a33 0 8deg,#0000 8deg 20deg);animation:bbspin 9s linear infinite;mask:radial-gradient(#000 10%,#0000 55%);-webkit-mask:radial-gradient(#000 10%,#0000 55%)}
+.bossban img{position:relative;height:min(30vh,62vw);max-width:86vw;object-fit:contain;filter:drop-shadow(0 10px 18px #0008);animation:bbin var(--d,2.6s) cubic-bezier(.2,1.4,.4,1) forwards}
+.bossban b{position:relative;margin-top:4px;font-family:var(--f-game);font-weight:400;font-size:clamp(30px,9.5vw,48px);line-height:1;text-align:center;color:var(--foe);padding:0 12px}
+.bossban span{position:relative;margin:8px 16px 0;font-size:15px;text-align:center;background:var(--ink-bg,var(--ink));padding:5px 12px;border-radius:999px}
+@keyframes bbfade{0%{opacity:0}8%{opacity:1}85%{opacity:1}100%{opacity:0}}
+@keyframes bbin{0%{transform:translateX(60vw) scale(.7) rotate(8deg)}18%{transform:translateX(0) scale(1.06) rotate(-2deg)}26%{transform:scale(1) rotate(0)}100%{transform:scale(1.04)}}
+@keyframes bbspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.bossban img,.bossban .bbrays{animation:none}}
 .banner.gold b{color:var(--gold)} .banner.red b{color:var(--foe)} .banner.blue b{color:var(--me)}
 @keyframes ban{0%{opacity:0;transform:scale(2.2)}12%{opacity:1;transform:scale(.95)}18%{transform:scale(1)}82%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8)}}
 .vign{position:fixed;inset:0;z-index:50;pointer-events:none;background:radial-gradient(transparent 50%,rgba(255,40,70,.55));opacity:0;animation:vign .6s ease-out}
@@ -2633,6 +2642,12 @@ function banner(txt,sub="",cls="gold",dur=1400){
   const e=document.createElement("div");e.className="banner "+cls;e.style.setProperty("--d",dur+"ms");
   e.innerHTML=`<b class="out">${txt}</b>${sub?`<span>${sub}</span>`:""}`;document.body.appendChild(e);sfx("banner");
   return sleep(dur).then(()=>e.remove());
+}
+/* presentación de jefe: su ilustración entra grande con el nombre debajo (estilo cartel de combate) */
+function bossBanner(id,txt,sub,dur=2600){
+  const e=document.createElement("div");e.className="bossban";e.style.setProperty("--d",dur+"ms");
+  e.innerHTML=`<i class="bbrays"></i><img src="${window.AMAGO_ASSETS||""}sprites/${id}.webp" alt=""><b class="out">${txt}</b>${sub?`<span>${sub}</span>`:""}`;
+  document.body.appendChild(e);sfx("banner");return sleep(dur).then(()=>e.remove());
 }
 function shake(el,strong){if(!el||REDUCED)return;const m=strong?9:5;el.animate([{transform:"translate(0,0)"},{transform:`translate(${-m}px,${m/2}px)`},{transform:`translate(${m}px,${-m/2}px)`},{transform:`translate(${-m/2}px,0)`},{transform:"translate(0,0)"}],{duration:strong?380:260});}
 function vignette(){const e=document.createElement("div");e.className="vign";document.body.appendChild(e);setTimeout(()=>e.remove(),700);}
@@ -5455,7 +5470,7 @@ async function startRound(){
   EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
   if(!G.tutorial&&S.games<=3&&$("#amagob"))toast("amagonew","🎭 <b>¡Nuevo: AMAGO!</b> Deja una huella falsa en tu isla para que el rival dispare donde no estás.");
   if(G.camp&&G.camp.daily){await sleep(500);if(R&&!R.over)banner("📅 "+TT(campLv().n).toUpperCase(),TT(campLv().d),"blue",2200);return;}
-  if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over){sfx("roar");B3.shake(.35);}if(R&&!R.over)banner("👑 "+TT(campLv().n).toUpperCase(),TT(campLv().intro),"red",2200);}return;}
+  if(G.camp){if(campLv().boss){await sleep(650);if(R&&!R.over){sfx("roar");B3.shake(.35);}if(R&&!R.over)bossBanner(campLv().foe,"👑 "+TT(campLv().n).toUpperCase(),TT(campLv().intro),2300);}return;}
   if(G.tut)TUT.go();
   else if(G.tutorial&&G.round===1){toast("tut1","🫣 Tu héroe está escondido en tu isla <b>verde</b>. El rival, en la <b>roja</b>: ¡adivina dónde y dispárale!");tutHand();}
   else toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 elixir.");
