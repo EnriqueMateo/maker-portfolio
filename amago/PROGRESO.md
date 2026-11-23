@@ -10,7 +10,8 @@ Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://
 - Las cuentas que han pagado no se borran por inactividad.
 - Cliente: `settlePurchase` (la app entrega solo lo que confirma el servidor; sin conexión queda pendiente y se reintenta al conectar).
 - Pruebas: 18 casos (compra, duplicado, otra cuenta, firma manipulada, otra clave, otra app, pack único, Plus sin Premium, gasto, edición a mano, reembolso) con una cadena de certificados propia (`APPLE_ROOT_PEM_TEST`, ignorada en Railway).
-- **Falta para cobrar:** plugin de compras en la app que devuelva el JWS de StoreKit 2 (`jwsRepresentation`) como `PAY.buy → {ok, tx, jws}`; crear los productos en App Store Connect; el usuario firma el acuerdo de apps de pago.
+- **Componente de compras hecho** (`ios/App/App/StorePlugin.swift`, StoreKit 2, registrado en `MainViewController`): `PAY_NATIVE` en `index.html` se activa solo si Apple devuelve productos; la transacción se cierra (`finish`) solo cuando el servidor la entrega; `payAdopt` recoge las compras a medias o aprobadas más tarde. Compila (simulador) y probado de extremo a extremo con StoreKit simulado.
+- **Falta para cobrar (solo el usuario):** acuerdo de apps de pago, crear los 10 productos (`app/store/compras.md`) y la URL de notificaciones; luego `npx cap sync ios` y nueva versión.
 
 ## 7 nov 2026: auditoría completa y versión 1.1 (leer primero)
 - Auditoría con 6 agentes (176 hallazgos): informes en `docs/auditoria_2026-11/`. Arreglados la mayoría de los graves y lo visual más importante (arena, efectos, HUD, menús, apuntar al soltar, pausa, reconexión online, servidor, rendimiento).
