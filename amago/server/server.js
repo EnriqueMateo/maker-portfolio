@@ -657,7 +657,7 @@ function handle(ws, m) {
     }
     case "emo": {
       // reacciones rápidas (emoticonos) entre jugadores; el bot a veces contesta como haría una persona
-      const EMOS = ["😎", "😱", "👏", "😂"];
+      const EMOS = ["gg", "uy", "jaja", "pille"];
       if (!room || !EMOS.includes(m.e)) return;
       const now = Date.now();
       if (now - (ws.emoAt || 0) < 2500) return;
