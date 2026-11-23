@@ -204,6 +204,9 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .emopick.on{transform:scale(1);opacity:1;pointer-events:auto}
 .emopick button{min-width:150px;padding:9px 14px;border-radius:14px;border:3px solid var(--ink);background:linear-gradient(#fff,#e3e9ff);font-family:var(--f-game);font-size:17px;color:var(--ink);text-align:center;box-shadow:0 3px 0 var(--ink)}
 .emob{display:grid;place-items:center;font-size:0!important}
+.hsay{position:absolute;left:50%;top:9%;z-index:6;max-width:72%;transform:translateX(-50%);font-family:var(--f-game);font-size:17px;line-height:1.15;text-align:center;color:var(--ink);padding:9px 14px;border-radius:18px;background:#fff;border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);pointer-events:none;animation:hsay 3.6s ease-out forwards}
+.hsay::after{content:"";position:absolute;left:50%;bottom:-11px;width:16px;height:16px;margin-left:-8px;background:#fff;border:solid var(--ink);border-width:0 3px 3px 0;transform:rotate(45deg)}
+@keyframes hsay{0%{opacity:0;transform:translateX(-50%) scale(.4)}8%{opacity:1;transform:translateX(-50%) scale(1.08)}13%{transform:translateX(-50%) scale(1)}88%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.95)}}
 .side2{position:relative}.emobub{position:absolute;top:calc(100% + 8px);z-index:31;white-space:nowrap;font-family:var(--f-game);font-size:18px;color:var(--ink);line-height:1;padding:8px 12px;border-radius:16px;background:#fff;border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink);animation:emopop 2.2s ease-out forwards}
 .emobub.p{left:58px}.emobub.b{right:10px}
 .emobub::before{content:"";position:absolute;top:-9px;width:14px;height:14px;background:#fff;border-left:3px solid var(--ink);border-top:3px solid var(--ink);transform:rotate(45deg)}
@@ -1461,7 +1464,7 @@ body.gazing::after{content:"";position:fixed;inset:0;pointer-events:none;z-index
 .boxov .stage{position:relative;left:auto;right:auto;bottom:auto;height:auto;margin:auto 0;padding-bottom:4vh}
 .boxov .chimg{width:min(74vw,300px);height:min(66vw,270px)}
 .boxov .glow{bottom:90px}
-.boxov:has(.stage.open){justify-content:center}
+.boxov:has(.stage.open){justify-content:center}.boxov.direct{justify-content:center}.boxov.direct .rwd,.boxov.direct .herorev{margin-bottom:6vh}
 .boxov .rwd,.boxov .herorev{margin-top:0;z-index:2}
 .boxov .stage.open{margin:-18px 0 0;padding:0;z-index:1}
 .boxov.pur .stage.open{display:none}
@@ -2362,6 +2365,7 @@ const TR=(()=>{
   Object.assign(I18N_EN,{"CAMPAÑA · MUNDO #": "CAMPAIGN · WORLD #", "Bosque de la Araña Madre": "Forest of the Spider Mother", "Araña Madre": "Spider Mother", "Jefa": "Boss", "Picadura": "Bite", "El sendero oscuro": "The dark trail", "Doble engaño": "Double trick", "Telarañas": "Cobwebs", "La cazadora": "The huntress", "Sombra golpea sin avisar y aquí sus huellas duran la mitad.": "Sombra strikes without warning, and here its footprints last half as long.", "Las huellas de Truco son falsas. La energía se recarga un 50 % más rápido para los dos.": "Truco's footprints are fake. Energy refills 50% faster for both.", "Salen telarañas en las dos islas: quien pise una queda atrapado 2 s y a la vista.": "Cobwebs appear on both islands: step on one and you're stuck for 2 s and visible.", "Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas.": "Mira has 4 lives and deals 2 per shot. And there are still cobwebs.", "Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.": "She fills your island with cobwebs. Step on one and you're stuck for 2 s and she sees you. Go around them and strike back.", "Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.": "Fills your island with cobwebs: step on one and you're stuck for 2 s and visible.", "Si pisas una telaraña, quedas atrapado 2 s y a la vista": "Step on a cobweb and you're stuck for 2 s and visible", "¡ARAÑA MADRE FURIOSA!": "SPIDER MOTHER ENRAGED!", "Más telarañas y más seguidas": "More cobwebs, more often", "👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.": "👑 You defeated the Spider Mother! World 2 complete.", "No pises las telarañas: rodéalas y muévete tras cada disparo.": "Don't step on the cobwebs: go around them and move after every shot.", "¡Atrapado!": "Stuck!", "¡Atrapado! ¡Dale!": "Stuck! Hit them!", "¡FURIA!": "RAGE!", "Mundo 3 · Volcán del Coloso de Lava": "World 3 · Volcano of the Lava Colossus", "Mundo # · Pradera del Rey Topo": "World # · The Mole King's Meadow", "Mundo # · Bosque de la Araña Madre": "World # · Forest of the Spider Mother", "Derrota al jefe de este mundo": "Defeat this world's boss", "Entrar": "Enter", "MUNDO #": "WORLD #", "ARAÑA MADRE": "SPIDER MOTHER"});
   Object.assign(I18N_EN,{"¡Bien jugado!":"Well played!","¡Uy!":"Oops!","¡Ja, ja!":"Ha ha!","¡Te pillé!":"Got you!","Reacciones":"Reactions","Música":"Music","¿Te avisamos?":"Want a heads-up?","Un aviso cuando haya un reto del día nuevo. Como mucho uno al día, y lo apagas cuando quieras en Ajustes.":"A notification when there's a new daily challenge. At most one a day, and you can turn it off anytime in Settings.","SÍ, AVÍSAME":"YES, NOTIFY ME","Avisos (como mucho 1 al día)":"Notifications (at most 1 a day)"});
   Object.assign(I18N_EN,{"¿Tu amigo te ganaría?":"Could your friend beat you?","Rétale con un enlace: juega desde el navegador, sin instalar nada.":"Challenge them with a link: they play in the browser, no install needed."});
+  Object.assign(I18N_EN,{"¡Vamos a por ellos!":"Let's get them!","Hoy me siento con suerte.":"Feeling lucky today.","Esta vez no me ven venir.":"They won't see me coming.","¿Una más?":"One more?","¡Estoy listo!":"I'm ready!","Nadie me encuentra.":"Nobody can find me.","¡Una victoria más y abres un cofre!":"One more win and you open a chest!","¡Solo # trofeos para #!":"Only # trophies to #!","¡Me falta 1 para acabar una misión!":"Just 1 more to finish a mission!","¡Puedo subir de nivel! Mírame en Héroes.":"I can level up! Check me in Heroes.","¿Probamos el reto del día?":"Shall we try the daily challenge?"});
   Object.assign(I18N_EN,{"Escalón # de #":"Tier # of #","Temporada #":"Season #"," · ¡fichas dobles para ponerte al día!":" · double tokens to catch up!","Quedan # días · ¡fichas dobles para ponerte al día!":"# days left · double tokens to catch up!","Nivel #":"Level #","de #":"of #","Nivel":"Level","Quita # vida":"Deals # damage","Quita # vidas":"Deals # damage"});
   Object.assign(I18N_EN,{"Batalla":"Battle","Al instante, contra rivales de tu nivel · trofeos, monedas, llaves y fichas":"Instant, against rivals of your level · trophies, coins, keys and tokens","Entrenamiento: elige tú la dificultad":"Training: pick the difficulty yourself","Entreno #":"Training #"});
   Object.assign(I18N_EN,{"¿Nos ayudas a mejorar?":"Help us improve?","Enviar estadísticas anónimas de cómo juegas (partidas, héroes, dónde te atascas) nos ayuda a hacer AMAGO más divertido. Sin anuncios, sin datos personales.":"Sending anonymous stats about how you play (matches, heroes, where you get stuck) helps us make AMAGO more fun. No ads, no personal data.","Puedes cambiarlo cuando quieras en Ajustes.":"You can change it anytime in Settings.","SÍ, CLARO":"SURE","No, gracias":"No, thanks"});
@@ -4462,7 +4466,7 @@ function play(k){act=k;actT=performance.now()/1000;}
 function onDown(e){if(e.target.closest("button,a,input"))return;drag={x:e.clientX,y:e.clientY,r:rotY,t:performance.now(),lx:e.clientX,lt:performance.now(),moved:false};vel=0;lastTouch=performance.now()/1000;try{stage.setPointerCapture(e.pointerId);}catch(err){}}
 function onMove(e){if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>6)drag.moved=true;rotY=drag.r+dx*.013;const now=performance.now();vel=(e.clientX-drag.lx)*.013/Math.max(1,(now-drag.lt)/16);drag.lx=e.clientX;drag.lt=now;}
 function onUp(){if(!drag)return;const d=drag;drag=null;lastTouch=performance.now()/1000;
-  if(!d.moved){vel=0;const k=ACTS[actI++%ACTS.length];play(k);if(typeof sfx==="function")sfx(k==="hit"?"hit":k==="attack"?"pop":"tap");if(typeof hap==="function")hap(8);}
+  if(!d.moved){vel=0;const k=ACTS[actI++%ACTS.length];play(k);if(window.heroTapSay)window.heroTapSay();if(typeof sfx==="function")sfx(k==="hit"?"hit":k==="attack"?"pop":"tap");if(typeof hap==="function")hap(8);}
   else vel=Math.max(-.25,Math.min(.25,vel));}
 function mount(stageEl,id){
   if(!cv){cv=document.createElement("canvas");cv.id="home3d";cv.setAttribute("aria-hidden","true");document.body.prepend(cv);
@@ -4762,6 +4766,21 @@ function attention(){
   if(S.box.length)return "box";if(calReady())return "cal";if(unlocked("shop")&&giftReady())return "gift";if(unlocked("mis")&&misReady())return "mis";if(unlocked("pass")&&passReady())return "pass";if(claimable().length)return "road";if(anyUp())return "up";return "";
 }
 
+/* el héroe del inicio dice en un bocadillo cuál es tu siguiente meta (o una frase suya si no hay ninguna cerca) */
+const SAY_FUN=["¡Vamos a por ellos!","Hoy me siento con suerte.","Esta vez no me ven venir.","¿Una más?","¡Estoy listo!","Nadie me encuentra."];
+let saySeen=0;
+function heroGoal(){
+  try{
+    if(S.keys===2)return TT("¡Una victoria más y abres un cofre!");
+    const {n}=arenaOf(S.tro);if(n&&n.t-S.tro<=30)return TT("¡Solo # trofeos para #!").replace("#",n.t-S.tro).replace("#",TT(n.n));
+    if(unlocked("mis")){const m=[...S.mis.list].find(m=>!m.got&&m.n-m.v===1);if(m)return TT("¡Me falta 1 para acabar una misión!");}
+    if(canUp(S.fav))return TT("¡Puedo subir de nivel! Mírame en Héroes.");
+    if(S.games>=2&&!dlyDone())return TT("¿Probamos el reto del día?");
+  }catch(e){}
+  return null;}
+function heroSay(txt){const st=$(".hstage");if(!st||UI.screen!=="home")return;const o=st.querySelector(".hsay");if(o)o.remove();
+  const b=document.createElement("div");b.className="hsay";b.textContent=txt;st.appendChild(b);setTimeout(()=>b.remove(),3700);}
+window.heroTapSay=()=>{if(Date.now()-saySeen<4000||Math.random()>.45)return;saySeen=Date.now();heroSay(heroGoal()||TT(SAY_FUN[Math.floor(Math.random()*SAY_FUN.length)]));};
 /* ---- inicio ---- */
 function showHome(){
   gameFxOff();UI.screen="home";stopLoop();app.className="home";setBg();ensureDay();MUS.play("menu");
@@ -4802,6 +4821,7 @@ function showHome(){
   ${nav("home")}`;
   renderModal();
   if(SHOW)SHOW.mount($(".hstage"),S.fav);
+  if(S.tutDone&&S.games>=1&&Date.now()-saySeen>45000)setTimeout(()=>{if(UI.screen!=="home"||UI.modal||$(".reveal,.openov,.lvup"))return;const g=heroGoal();if(!g&&Math.random()<.5)return;saySeen=Date.now();heroSay(g||TT(SAY_FUN[Math.floor(Math.random()*SAY_FUN.length)]));},1500);
   if(!UI.modal)homeEvents();
 }
 /* al llegar al inicio: regreso, calendario y (como mucho) una oferta al día */
@@ -5172,7 +5192,7 @@ function boxHTML(M){
   else{const ic={coins:"coin",pp:"power",gems:"gem",tk:"star"}[it.k],lb={coins:"Monedas",pp:"Puntos de Poder",gems:"Gemas",tk:"Fichas del pase"}[it.k];
     const C=CHESTS[M.tier],big=C&&((it.k==="coins"&&it.n>=C.coins[0]+.8*(C.coins[1]-C.coins[0]))||(it.k==="pp"&&it.n>=C.pp[0]+.8*(C.pp[1]-C.pp[0])));
     body=`<div class="rwd fly ${it.k}">${big?`<span class="bigloot out">¡GRAN BOTÍN!</span>`:""}<img class="im" src="${UIA}${ic}.webp" alt=""><span class="amt out">+0</span><span class="lab out">${lb}</span></div>`;}
-  return `<div class="boxov ${it.k==="hero"?"pur":""}" data-a="boxtap"><span class="godrays" ${it.k==="hero"?`style="background:repeating-conic-gradient(${RARC[HEROES[it.id].rar]}44 0 6deg,transparent 6deg 15deg)"`:""}></span>
+  return `<div class="boxov ${it.k==="hero"?"pur":""} ${M.tier?"":"direct"}" data-a="boxtap"><span class="godrays" ${it.k==="hero"?`style="background:repeating-conic-gradient(${RARC[HEROES[it.id].rar]}44 0 6deg,transparent 6deg 15deg)"`:""}></span>
     ${body}${M.tier?`<div class="stage open"><span class="floorglow"></span><span class="chopen"><span class="beam2"></span><img class="cbody" src="${tierImg}.webp" alt=""><img class="clid" src="${tierImg}.webp" alt=""></span></div>${left>0?`<span class="left ${heroLeft?"hero":""}">×${left}</span>`:""}`:""}
     <span class="hint out" style="position:absolute;bottom:2vh">Toca para seguir</span></div>`;
 }
