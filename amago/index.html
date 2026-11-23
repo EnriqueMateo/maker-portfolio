@@ -2321,7 +2321,7 @@ const SKIP={1:30,5:135,10:240},GEM_EUR=0.99/80;
 const SKUS={"amago.gems_80":{n:"80 gemas",eur:.99,gems:80},"amago.gems_450":{n:"450 gemas",eur:4.99,gems:450,tag:"Justo para el Pase"},"amago.gems_1000":{n:"1.000 gemas",eur:9.99,gems:1000,tag:"Popular"},
   "amago.gems_2200":{n:"2.200 gemas",eur:19.99,gems:2200},"amago.gems_6000":{n:"6.000 gemas",eur:49.99,gems:6000},
   "amago.pass_premium":{n:"Pase Premium",eur:4.99},"amago.pass_plus":{n:"Pase Plus",eur:9.99},"amago.pass_plus_upgrade":{n:"Mejora a Pase Plus",eur:4.99},
-  "amago.starter":{n:"Pack de Inicio",eur:1.99},"amago.bundle_power":{n:"Lote de Poder",eur:4.99}};
+  "amago.starter":{n:"Pack de Inicio",eur:.99},"amago.bundle_power":{n:"Lote de Poder",eur:4.99}};
 const fmtEur=v=>v.toFixed(2).replace(".",",")+" €";
 const speedLabel=st=>st<=.22?"Muy rápido":st<=.32?"Rápido":st<=.42?"Normal":"Lento";
 /* servidor online: el mismo origen si el juego lo sirve el servidor, o window.AMAGO_SERVER en la app nativa y de escritorio */
@@ -4750,7 +4750,7 @@ function showShop(scrollTo){
   const gd=gemDeal(),gdDone=(S.gemDeals.got[gd.id]||0)>=1;
   const NH=HEROES[NEWHERO.id];
   const feat=ft==="new"?`<div class="feat gold shine"><span class="seal">NUEVO</span><span class="art">${heroArt(NEWHERO.id)}</span><span class="txt"><b class="out">${NH.n}, el ${NH.r}</b><small>${NH.n} + ${NEWHERO.pp} de Poder</small><small>Contenido fijo · gratis a los ${NEWHERO.road} trofeos</small><span class="row">${priceBtn("newpack","","coins",NEWHERO.coins,coins>=NEWHERO.coins)}<button class="gbtn green sm" data-a="newpackg">${ico("gem","s")} ${NEWHERO.gems}</button></span></span></div>`
-    :ft==="starter"?`<div class="feat gold shine"><span class="seal">×4</span><span class="art"><img src="${UIA}chest2.webp" alt=""></span><span class="txt"><b class="out">Pack de Inicio</b><small>200 ${ico("gem","s")} · 600 ${ico("coin","s")} · 300 ${ico("power","s")} · Cofre grande · aspecto Truco Ártico</small><small>Solo una vez · disponible hasta el Volcán</small>${priceBtn("iap","amago.starter","eur",1.99,true)}</span></div>`
+    :ft==="starter"?`<div class="feat gold shine"><span class="seal">×8</span><span class="art"><img src="${UIA}chest2.webp" alt=""></span><span class="txt"><b class="out">Pack de Inicio</b><small>200 ${ico("gem","s")} · 600 ${ico("coin","s")} · 300 ${ico("power","s")} · Cofre grande · aspecto Truco Ártico</small><small>Solo una vez · disponible hasta el Volcán</small>${priceBtn("iap","amago.starter","eur",1.99,true)}</span></div>`
     :ft==="pass"?`<div class="feat gold shine"><span class="art"><img src="${UIA}crown.webp" alt="" style="max-height:110px"></span><span class="txt"><b class="out">Pase Premium</b><small>Temporada ${S.pass.season+1} · ${premWaiting()?`<b>${premWaiting()} premios</b> esperándote`:"un premio extra en cada escalón"}</small><button class="gbtn premium sm" data-a="premium">VER EL PASE</button></span></div>`
     :ft==="bundle"?`<div class="feat gold shine"><span class="art"><img src="${UIA}power.webp" alt="" style="max-height:110px"></span><span class="txt"><b class="out">Lote de Poder</b><small>1.200 ${ico("coin","s")} · 600 ${ico("power","s")} · 100 ${ico("gem","s")} · una vez por semana</small>${priceBtn("iap","amago.bundle_power","eur",4.99,true)}</span></div>`:"";
   app.innerHTML=`${topbar()}<div class="sect"><h2 class="t-h1 out">Tienda</h2></div>${lockBan("shop")}

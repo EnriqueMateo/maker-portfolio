@@ -21,7 +21,7 @@ Todos son **Consumibles**. El ID tiene que ser exactamente este. Precio: el de l
 | `amago.pass_premium` | Pase Premium | 4,99 € | Pase Premium / Premium Pass | Premios dorados en cada escalón de esta temporada. / Golden rewards on every tier this season. |
 | `amago.pass_plus` | Pase Plus | 9,99 € | Pase Plus / Plus Pass | Pase Premium + 10 escalones y un marco. / Premium Pass + 10 tiers and a frame. |
 | `amago.pass_plus_upgrade` | Mejora a Plus | 4,99 € | Mejora a Pase Plus / Plus Pass upgrade | Para quien ya tiene el Premium. / For Premium Pass owners. |
-| `amago.starter` | Pack de Inicio | 1,99 € | Pack de Inicio / Starter Pack | 200 gemas, monedas, Poder y un aspecto. Una vez por cuenta. / 200 gems, coins, Power and a skin. Once per account. |
+| `amago.starter` | Pack de Inicio | 0,99 € | Pack de Inicio / Starter Pack | 200 gemas, monedas, Poder y un aspecto. Una vez por cuenta. / 200 gems, coins, Power and a skin. Once per account. |
 | `amago.bundle_power` | Lote de Poder | 4,99 € | Lote de Poder / Power Bundle | Monedas, Poder y 100 gemas. Uno por semana. / Coins, Power and 100 gems. One per week. |
 
 Cada producto pide una **captura de revisión** (la tienda del juego vale: `store/capturas`) y una nota para el revisor, por ejemplo:
