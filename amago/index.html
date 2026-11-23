@@ -656,6 +656,9 @@ body:has(#app.home),body[style]:has(#app.home){background:linear-gradient(180deg
 .hrow.pk .hchip{width:100%!important;height:auto!important;aspect-ratio:1}
 /* fin de partida: los botones siempre a la vista aunque haya muchos premios */
 .endbtns{position:sticky;bottom:calc(6px + env(safe-area-inset-bottom,0px));z-index:3}
+.endbtns::before{content:"";position:absolute;left:-16px;right:-16px;bottom:-10px;height:calc(100% + 34px);background:linear-gradient(transparent,rgba(10,22,80,.92) 40%);z-index:-1;pointer-events:none}
+.chip.pulse{animation:chippulse .5s var(--e-pop,ease-out)}
+@keyframes chippulse{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 @media (max-height:900px){.endt2{font-size:46px;margin-top:max(8px,2vh)}.podium{height:130px}.podium .h{height:96px}.podium .h:nth-child(2){height:120px}}
 /* marcador: con 6 o más vidas los corazones encogen y no se salen de la placa */
 .g3hud .hearts:has(i:nth-child(6)) i{font-size:12.5px!important}
@@ -820,6 +823,11 @@ body.h3d .hstage{touch-action:none;cursor:grab}
 .sbtn.chest .sq::before{display:none}
 .sbtn.chest .sq img{width:84px;height:84px}
 .sbtn.chest.hop .sq img{animation:hop 4s ease-in-out infinite}
+/* JUGAR «respira» para invitar a tocarlo */
+#app.home .gbtn.play2{animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+#app.home .gbtn.play2:active{animation:none}
+@media (prefers-reduced-motion:reduce){#app.home .gbtn.play2{animation:none}}
 @keyframes hop{0%,72%,100%{transform:translateY(0) rotate(0)}78%{transform:translateY(-10px) rotate(-6deg)}86%{transform:translateY(0) rotate(4deg)}93%{transform:translateY(-3px) rotate(0)}}
 .keymod{width:76px;display:flex;flex-direction:column;align-items:center;padding:4px 4px 6px;border-radius:14px;cursor:pointer;color:#fff}
 .keymod img.c{width:52px;height:46px;object-fit:contain}
@@ -4635,7 +4643,7 @@ function showHome(){
       ${PORTAL_CTA&&S.games>=1?`<button class="sbtn" data-a="getapp"><span class="sq pnl"><span class="cmico">📱</span></span><span class="lb out">Móvil</span></button>`:""}
     </div>
     <div class="sidecol r">
-      ${box?`<button class="sbtn chest ${at==="box"?"hop":""}" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="lb out">¡Ábrelo!</span></button>`:""}
+      ${box?`<button class="sbtn chest hop" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="lb out">¡Ábrelo!</span></button>`:""}
       ${S.tutDone&&S.games>=2?`<button class="sbtn" data-a="daily">${dlyDone()?"":`<i class="badge soft"></i>`}<span class="sq pnl">${calIco()}${dlyDone()?`<i class="okc"></i>`:""}</span><span class="lb out">${TT("Reto")}</span></button>`:""}
       <button class="keymod pnl" data-a="keysinfo"><img class="c" src="${UIA}chest1.webp" alt=""><span class="slots">${[0,1,2].map(i=>`<i class="well ${i===S.keys&&S.keys===2?"glow":""}"><img class="${i<S.keys?"":"off"}" src="${UIA}key.webp" alt=""></i>`).join("")}</span></button>
     </div>
@@ -5981,7 +5989,7 @@ async function endMatch(){
   endScreen(win,draw,`
     ${gotChest?`<button class="endchest feat gold shine top" data-a="openbox"><img src="${UIA}chest1.webp" alt=""><span><b class="out">¡3 llaves: cofre!</b><small>Toca para abrirlo</small></span><span class="gbtn green sm">ABRIR</span></button>`:""}
     <div class="chips">
-      <div class="chip pnl" data-d="0">${ico("trophy")}<b class="out ${delta>0?"up":delta<0?"dn":""}" id="tro">${delta>0?"+":""}${delta}</b><small>Trofeos · ${before}</small></div>
+      <div class="chip pnl" data-d="0">${ico("trophy")}<b class="out ${delta>0?"up":delta<0?"dn":""}" id="tro" ${delta>0?`data-cu="${delta}"`:""}>${delta>0?"+":""}${delta}</b><small>Trofeos · <span data-tot="${before}" data-to="${S.tro}">${before}</span></small></div>
       <div class="chip pnl" data-d="1">${ico("coin")}<b class="out up" data-cu="${coins}">+0</b><small>Monedas${S.wc.n>=WIN_COINS_CAP&&win?" · tope de hoy":""}</small></div>
       ${S.games>2?`<div class="chip pnl" data-d="2">${ico("star")}<b class="out up" data-cu="${tk}">+0</b><small>Fichas del pase${tkMult>=2?" ×2":""}</small></div>`:""}
     </div>
@@ -6006,7 +6014,9 @@ async function endMatch(){
   UI.fast=false;const skip=()=>{UI.fast=true;};document.addEventListener("pointerdown",skip,{once:true});
   const wait=ms=>UI.fast?Promise.resolve():sleep(ms);
   await wait(600);
-  for(const c of document.querySelectorAll(".chip")){c.classList.add("in");sfx("pop");const b=c.querySelector("[data-cu]");if(b)await countUp(b,0,+b.dataset.cu,500,{prefix:"+"});else await wait(250);}
+  for(const c of document.querySelectorAll(".chip")){c.classList.add("in");sfx("pop");const b=c.querySelector("[data-cu]");if(b)await countUp(b,0,+b.dataset.cu,500,{prefix:"+"});else await wait(250);
+    /* el total de trofeos sube delante del jugador, con un latido al llegar */
+    const tt=c.querySelector("[data-tot]");if(tt&&+tt.dataset.to!==+tt.dataset.tot){await countUp(tt,+tt.dataset.tot,+tt.dataset.to,450,{tick:false});c.classList.add("pulse");}}
   for(const r of document.querySelectorAll(".endrows>*")){r.classList.add("in");if(r.querySelector(".keyrow .new"))sfx("key");await wait(220);}
   document.removeEventListener("pointerdown",skip);UI.fast=false;
   if(arenaNew){await sleep(400);arenaUp(arenaOf(S.troMax).a);}
