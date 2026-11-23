@@ -442,6 +442,8 @@ canvas.bigmodel{position:relative;z-index:1;width:min(96vw,440px);height:min(118
 body,body[style]{background:
   repeating-linear-gradient(135deg,rgba(255,255,255,.055) 0 22px,transparent 22px 44px) fixed,
   radial-gradient(130% 80% at 50% 0%,#6cc8ff 0%,var(--arena2,#2a8cf0) 42%,var(--arena3,#1450b8) 100%) fixed,#1450b8}
+/* inicio: paisaje pintado de tu arena detrás del héroe (oscurecido arriba y abajo para leer los botones) */
+body:has(#app.home),body[style]:has(#app.home){background:linear-gradient(180deg,rgba(8,14,48,.55) 0%,rgba(8,14,48,.08) 22%,rgba(8,14,48,0) 45%,rgba(8,14,48,.15) 70%,rgba(8,14,48,.6) 100%) fixed,var(--arenaimg) center 38%/cover no-repeat fixed,radial-gradient(130% 80% at 50% 0%,#6cc8ff 0%,var(--arena2,#2a8cf0) 42%,var(--arena3,#1450b8) 100%) fixed,#1450b8}
 .tro,.pillbtn,.iconbtn,.bnav button:not(.on),.prof,.modebtn,.sheet,.hcard2,.statbox,.pickcard,.ebar,.act,.side2{background:linear-gradient(180deg,#5ba2ff 0%,#2f6fe0 55%,#2459c7 100%)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 4px 0 var(--ink)!important}
 .sheet{border-radius:22px!important}
 .bnav{background:linear-gradient(transparent,rgba(10,40,120,.75) 35%)!important}
@@ -4276,8 +4278,8 @@ function onUp(){if(!drag)return;const d=drag;drag=null;lastTouch=performance.now
   else vel=Math.max(-.25,Math.min(.25,vel));}
 function mount(stageEl,id){
   if(!cv){cv=document.createElement("canvas");cv.id="home3d";cv.setAttribute("aria-hidden","true");document.body.prepend(cv);
-    r=new T.WebGLRenderer({canvas:cv,antialias:true});r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=1.05;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;build();sc.environment=GFX.envFor(r);}
-  stage=stageEl;document.body.classList.add("h3d");if(STUDIO){let k="pradera";try{k=arenaOf(S.tro).a.k;}catch(e){}sc.background=studioTex(k);}
+    r=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setClearColor(0x000000,0);r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=1.05;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;build();sc.environment=GFX.envFor(r);}
+  stage=stageEl;document.body.classList.add("h3d");if(STUDIO){let k="pradera";try{k=arenaOf(S.tro).a.k;}catch(e){}/* fondo transparente: detrás se ve el paisaje pintado de la arena (CSS del inicio) */sc.background=window.AMAGO_STUDIOBG?studioTex(k):null;}
   stage.addEventListener("pointerdown",onDown);stage.addEventListener("pointermove",onMove);stage.addEventListener("pointerup",onUp);stage.addEventListener("pointercancel",onUp);
   set(id);if(!on){on=true;loop();}
 }
@@ -4325,7 +4327,7 @@ const ARENA_PROP={pradera:"arbol",bosque:"pino",volcan:"geiser_lava",trono:"esta
 const ARENA_SIDE={pradera:["rocas","bandera_azul"],bosque:["arbol","rocas"],volcan:["roca_lava","arbol_quemado"],trono:["antorcha","columna_rota"],olimpo:["nube_dorada","veleta"]};
 const propImg=(k,cls="")=>`<img class="${cls}" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" draggable="false">`;
 const ARENA_BG={pradera:["#2a8cf0","#1450b8"],bosque:["#23a86e","#11613f"],volcan:["#e0562a","#7a1f2a"],trono:["#7a52f0","#3a1f9a"],olimpo:["#f0b02a","#b0681a"]};
-function setBg(){document.body.scrollTop=0;const {a}=arenaOf(S.tro),c=ARENA_BG[a.k]||ARENA_BG.pradera;const st=document.body.style;st.setProperty("--arena",a.bg);st.setProperty("--arena2",c[0]);st.setProperty("--arena3",c[1]);}
+function setBg(){document.body.scrollTop=0;const {a}=arenaOf(S.tro),c=ARENA_BG[a.k]||ARENA_BG.pradera;const st=document.body.style;st.setProperty("--arena",a.bg);st.setProperty("--arena2",c[0]);st.setProperty("--arena3",c[1]);st.setProperty("--arenaimg",`url("${UIA}bg_${a.k}.webp")`);}
 /* ---- utilidades de progresión ---- */
 const UIA=(window.AMAGO_ASSETS||"")+"ui/";
 const ico=(n,c="")=>`<img class="ico ${c}" src="${UIA}${n}.webp" alt="" draggable="false">`;
