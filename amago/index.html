@@ -5624,7 +5624,7 @@ async function startRound(){
   G.lv={p:lp,b:lb};
   R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:curArena(),ulti:!G.tutorial||G.round>=3,mod:G.camp?campLv().mod:null});recReset();G.nearN=0;G.rs={sh:0,hit:0,dg:0,dgn:0};if(!G.mt)G.mt={sh:0,hit:0,dg:0};if(!G.recs)G.recs=[];
   if(G.tut)TUT.setup(R);
-  MUS.play("battle");
+  MUS.play("battle");try{if(MUS.src&&AU.ctx)MUS.src.playbackRate.setTargetAtTime(1,AU.ctx.currentTime,.3);}catch(e){}
   await vsAndCountdown(tp,tb);
   R.paused=false;
   EV.add("round_start",{n:G.round,hero:tp,opp:tb,tut:!!G.tutorial,mode:"bot"});
@@ -6330,7 +6330,7 @@ const ui={
   },
   boost(){if(UI.screen!=="game")return;sfx("tap");toast("boost","🎁 <b>¡Objeto!</b> Sale en el mismo sitio en las dos islas. Si lo coges, el rival sabrá dónde estás.");},
   noElx(s){if(s&&s!=="p")return;const b=$("#ebar");if(b)shake(b);sfx("miss");toast("noelx","💧 <b>Sin energía.</b> Espera un momento a que se recargue o coge un 💧.");},
-  sudden(){banner("¡MUERTE SÚBITA!","Golpes más rápidos · os veréis cada 5 s","red",1500);},
+  sudden(){banner("¡MUERTE SÚBITA!","Golpes más rápidos · os veréis cada 5 s","red",1500);try{if(MUS.src&&MUS.cur==="battle"&&AU.ctx)MUS.src.playbackRate.setTargetAtTime(1.1,AU.ctx.currentTime,.6);}catch(e){}},
   pushwarn(d,q){if(UI.screen!=="game"||d!=="p")return;sfx("radar");toast("push","🌪️ <b>¡Remolino!</b> Te empujará a la casilla marcada y quedarás a la vista un momento. Muévete antes, o cuenta con ello.");},
   pushed(s,x,y){if(UI.screen!=="game")return;if(s==="p"){const c=B3.heroScreen();floatText(c.x,c.y,"🌪️ "+TT("¡Empujado!"),"bad");buzz(30);}else{const c=B3.screenPos("b",x,y,1);floatText(c.x,c.y,"🌪️ "+TT("¡A la vista!"),"big");}sfx("near");},
   gaze(d,g){if(UI.screen!=="game"||d!=="p")return;sfx("radar");toast(g.by?"gaze":"gaze2",g.by?"👁️ <b>¡Mirada de piedra!</b> Mientras te mira, si te mueves te quedas petrificado y a la vista. Quieto estás a salvo. Y él tampoco se mueve: ¡dispárale!":"👁️ <b>¡Las estatuas miran!</b> Mientras miran, quien se mueva queda petrificado y a la vista. Quieto estás a salvo.");},
