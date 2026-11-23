@@ -655,6 +655,20 @@ function handle(ws, m) {
       if (room.picks.p && room.picks.b) startRound(room);
       break;
     }
+    case "emo": {
+      // reacciones rápidas (emoticonos) entre jugadores; el bot a veces contesta como haría una persona
+      const EMOS = ["😎", "😱", "👏", "😂"];
+      if (!room || !EMOS.includes(m.e)) return;
+      const now = Date.now();
+      if (now - (ws.emoAt || 0) < 2500) return;
+      ws.emoAt = now;
+      const me = sideOf(room, ws), op = room.players[me === "p" ? "b" : "p"];
+      if (!op) return;
+      if (op.isBot) {
+        if (Math.random() < 0.35) setTimeout(() => send(ws, { t: "emo", e: Math.random() < 0.5 ? m.e : EMOS[Math.floor(Math.random() * EMOS.length)] }), 900 + Math.random() * 1400);
+      } else send(op, { t: "emo", e: m.e });
+      break;
+    }
     case "ulti": {
       if (!room || room.state !== "play" || !room.R) return;
       E.ulti(room.R, sideOf(room, ws), room.hooks);
