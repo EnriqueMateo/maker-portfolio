@@ -195,21 +195,44 @@ function startPick(room) {
   }
 }
 
+/* habilidad del jugador (0 flojo … 1,45 élite): sube al ganar y baja al perder; objetivo ~55 % de victorias */
+const DIFF = {
+  f: { think: 1.15, react: 0.5, perc: 0.45, dodge: 0.25, eps: 0.6, passive: 7, gap: 5, thr: 1.6, moveP: 0.35 },
+  n: { think: 0.55, react: 0.4, perc: 0.35, dodge: 0.7, eps: 0.22, passive: 3, gap: 1.8, thr: 1.1, moveP: 0.75 },
+  d: { think: 0.2, react: 0.32, perc: 0.28, dodge: 0.85, eps: 0.08, passive: 1.5, gap: 0, thr: 1, moveP: 1 },
+  e: { think: 0.08, react: 0.26, perc: 0.22, dodge: 0.96, eps: 0.025, passive: 0.8, gap: 0, thr: 0.92, moveP: 1 },
+};
+const PERSONAS = [{ think: 0.8, thr: 0.9, wild: 0.32, decoy: 0.12, moveP: 0.8 }, { dodge: 1.2, moveP: 1.25, gap: 1.3, thr: 1.08, decoy: 0.2, wild: 0.08 }, { decoy: 0.6, moveP: 1.1, wild: 0.12 }, { eps: 0.75, think: 1.15, wild: 0.05, decoy: 0.18 }, {}];
+const SK_MAX = 1.45;
+function botByskill(ws) {
+  let d = (typeof ws.sk === "number" ? ws.sk : Math.min(1, (ws.player.tro || 0) / 1000)) + (Math.random() + Math.random() - 1) * 0.12;
+  const r = Math.random();
+  if (r < 0.14) d -= 0.22; else if (r > 0.9) d += 0.15;
+  if ((ws.ls || 0) >= 3) d -= 0.28; else if ((ws.ls || 0) >= 2) d -= 0.14;
+  if ((ws.wsk || 0) >= 3) d += 0.08;
+  d = Math.max(0, Math.min(SK_MAX, d));
+  const [A, B, k] = d < 0.5 ? [DIFF.f, DIFF.n, d / 0.5] : d < 1 ? [DIFF.n, DIFF.d, (d - 0.5) / 0.5] : [DIFF.d, DIFF.e, (d - 1) / (SK_MAX - 1)];
+  const P = {};
+  for (const q of Object.keys(A)) P[q] = A[q] + (B[q] - A[q]) * k;
+  const M = PERSONAS[Math.floor(Math.random() * PERSONAS.length)];
+  for (const [q, v] of Object.entries(M)) P[q] = q === "wild" || q === "decoy" ? v : P[q] * v;
+  P.dodge = Math.min(0.95, P.dodge);
+  P.moveP = Math.min(1, P.moveP);
+  return P;
+}
 /* rival bot para el online: nombre, trofeos y héroes como los de un jugador de tu nivel */
 function makeBot(forWs) {
   const tro = Math.max(0, (forWs.player.tro || 0) + Math.round((Math.random() + Math.random() - 1) * 55));
   const maxR = Math.min(3, 1 + Math.floor(tro / 150));
   const pool = E.IDS.filter((id) => E.HEROES[id].rar <= maxR).sort(() => Math.random() - 0.5);
-  const k = tro / 400; // 0 = flojo, 1+ = fuerte
-  const lerp = (a, b) => a + (b - a) * Math.min(1, k) + (Math.random() - 0.5) * (b - a) * 0.2;
   const name = alias();
   return {
     isBot: true,
     readyState: 0, // send() lo ignora
     alias: name,
     player: { name, tro, unl: pool.slice(0, Math.max(3, pool.length)) },
-    // a 0 trofeos juega como el bot Fácil; con trofeos se acerca al Difícil
-    params: { think: lerp(1.1, 0.35), react: lerp(0.5, 0.38), perc: lerp(0.45, 0.28), dodge: lerp(0.2, 0.7), eps: lerp(0.6, 0.15), passive: lerp(7, 2), gap: lerp(5, 1), thr: lerp(1.6, 1.05), moveP: lerp(0.35, 0.9) },
+    // dificultad que se adapta a cada jugador (habilidad guardada en su cuenta), como en Batalla
+    params: botByskill(forWs),
   };
 }
 
@@ -393,12 +416,18 @@ function rankedResult(ws, res) {
   const before = ws.player.tro || 0;
   const d = res === "win" ? 8 + Math.floor(Math.random() * 3) : res === "lose" ? -Math.min(before, troLoss(before)) : 0;
   ws.player.tro = Math.max(0, before + d);
+  if (res === "win" || res === "lose") {
+    const sk = typeof ws.sk === "number" ? ws.sk : Math.min(1, before / 1000);
+    ws.sk = Math.max(0, Math.min(SK_MAX, sk + (res === "win" ? 0.045 : -0.055)));
+    if (res === "win") { ws.wsk = (ws.wsk || 0) + 1; ws.ls = 0; } else { ws.ls = (ws.ls || 0) + 1; ws.wsk = 0; }
+  }
   if (STORE && ws.uid)
     STORE.get(ws.uid)
       .then((u) => {
         if (!u) return;
         u.tro = Math.max(0, (u.tro || 0) + d);
         u.ranked = u.ranked || { w: 0, l: 0 };
+        if (typeof ws.sk === "number") u.osk = Math.round(ws.sk * 1000) / 1000;
         if (res === "win") u.ranked.w++;
         if (res === "lose") u.ranked.l++;
         return STORE.put(u);
@@ -567,6 +596,7 @@ function handle(ws, m) {
             if (!u) return;
             ws.uid = u.id;
             ws.player.tro = u.tro || 0;
+            ws.sk = typeof u.osk === "number" ? u.osk : u.save && typeof u.save.sk === "number" ? u.save.sk : undefined;
             const unl = u.save && Array.isArray(u.save.unl) ? [...new Set(u.save.unl.filter(isHero))] : [];
             if (unl.length >= 3) ws.player.unl = unl;
           })
