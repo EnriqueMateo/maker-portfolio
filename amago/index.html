@@ -600,6 +600,8 @@ body:has(#app.home),body[style]:has(#app.home){background:linear-gradient(180deg
 .tabs button.on img{transform:translateY(-12px) scale(1.3)}
 .tabs button.on span{height:auto;opacity:1;margin-top:-8px}
 .tabs .badge{top:-2px;right:14%}
+.badge.soft{min-width:13px!important;width:13px;height:13px!important;padding:0!important;background:#fff!important;border:2.5px solid var(--ink)!important;font-size:0!important;top:-3px;right:-1px;animation:none!important}
+.tabs .badge.soft{top:2px;right:20%}
 .badge{position:absolute;top:-7px;right:-5px;z-index:3;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:linear-gradient(#ff7385,#e0193b);border:2px solid var(--ink);font-family:var(--f-game);font-size:13px;line-height:18px;text-align:center;color:#fff;font-style:normal;box-shadow:0 2px 0 var(--ink)}
 .badge.free{background:linear-gradient(var(--g-1),var(--g-2))}
 .badge.bob{animation:bbob 4s ease-out infinite}
@@ -4560,14 +4562,15 @@ function confirmGems(n,label,onOk){
 /* ---- barra superior y pestañas ---- */
 const PEND={coins:0,pp:0,gems:0};
 function nav(active){
-  const it=(t,img,l,n)=>`<button class="${active===t?"on":""}" data-a="tab" data-t="${t}" aria-label="${l}">${n?`<i class="badge">${n}</i>`:""}<img src="${UIA}${img}.webp" alt=""><span class="out">${l}</span></button>`;
+  /* rojo solo para lo que se cobra ya; lo demás (mejoras posibles) con un punto discreto */
+  const it=(t,img,l,n)=>`<button class="${active===t?"on":""}" data-a="tab" data-t="${t}" aria-label="${l}">${n==="↑"?`<i class="badge soft"></i>`:n?`<i class="badge">${n}</i>`:""}<img src="${UIA}${img}.webp" alt=""><span class="out">${l}</span></button>`;
   const lk=S.games<3;/* al principio, sin avisos rojos en todas partes */
   return `<nav class="tabs">${it("shop","gem","Tienda",!lk&&giftReady()?"!":0)}${it("heroes","swords","Héroes",!lk&&anyUp()?"↑":0)}${it("home","house","Inicio")}${it("pass","crown","Pase",!lk&&passReady())}${it("road","trophy","Trofeos",claimable().length)}</nav>`;
 }
 function topbar(){
   ensureDay();
   return `<div class="mbg"></div><div class="mtop">
-    <button class="mprof pnl" data-a="settings" aria-label="Perfil y ajustes">${ONLINE_OK&&isGuest()&&S.games>=1?`<i class="badge gnag">!</i>`:""}<span class="mav ${S.equip.frame}">${heroArt(S.fav)}</span><span class="mpi"><b class="out">${esc(S.name)}</b><span class="mlv"><i class="out">${level()}</i><span class="bar"><u style="width:${xpPct()}%"></u></span></span></span></button>
+    <button class="mprof pnl" data-a="settings" aria-label="Perfil y ajustes">${ONLINE_OK&&isGuest()&&S.games>=1?`<i class="badge soft gnag"></i>`:""}<span class="mav ${S.equip.frame}">${heroArt(S.fav)}</span><span class="mpi"><b class="out">${esc(S.name)}</b><span class="mlv"><i class="out">${level()}</i><span class="bar"><u style="width:${xpPct()}%"></u></span></span></span></button>
     <button class="rpill" data-a="tab" data-t="shop" aria-label="Monedas">${ico("coin")}<span class="out" id="coinsn">${fmt(S.coins-PEND.coins)}</span></button>
     <button class="rpill" data-a="tab" data-t="heroes" aria-label="Puntos de poder">${ico("power")}<span class="out" id="ppn">${fmt(S.pp-PEND.pp)}</span></button>
     <button class="rpill" data-a="gemshop" aria-label="Gemas">${ico("gem")}<span class="out" id="gemsn">${fmt(gems()-PEND.gems)}</span><i class="plus">+</i></button>
@@ -4588,6 +4591,8 @@ function showHome(){
   gameFxOff();UI.screen="home";stopLoop();app.className="home";setBg();ensureDay();
   if(GFX)GFX.loadArena(arenaOf(S.tro).a.k);/* al subir de arena, que el escenario nuevo ya esté listo para la siguiente partida */
   S.news=S.news||{};
+  /* premios del camino de trofeos: se entregan solos al volver a Inicio (antes se quedaban sin cobrar) */
+  if(!UI.modal&&!G&&S.tutDone&&claimable().length)setTimeout(()=>{if(UI.screen!=="home"||UI.modal||$(".reveal,.openov"))return;const l=claimable();if(!l.length)return;l.forEach(m=>S.claimed.push(m.t));save();claimMany(l);},700);
   if(S.noStats&&S.statsOk==null)S.statsOk=0;
   if(S.statsOk==null&&S.games>=1&&ONLINE_OK&&!UI.modal&&!G){UI.modal={k:"statsask"};setTimeout(renderModal,900);}
   if(!S.news[NEWHERO.id]&&!UI.modal&&!G&&S.tutDone&&S.games>=3&&!S.unl.includes(NEWHERO.id)){S.news[NEWHERO.id]=1;save();UI.modal={k:"news",id:NEWHERO.id};setTimeout(renderModal,600);}
@@ -4602,13 +4607,13 @@ function showHome(){
     <div class="sidecol l">
       ${`<button class="sbtn ${unlocked("mis")?"":"lk"}" data-a="missions">${unlocked("mis")&&mr?`<i class="badge ${at==="mis"?"bob":""}">${mr}</i>`:""}<span class="sq pnl"><img src="${UIA}mission.webp" alt="">${unlocked("mis")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${missDone/3*100}%"></u></span></span><span class="lb out">Misiones</span></button>`}
       ${`<button class="sbtn ${unlocked("pass")?"":"lk"}" data-a="tab" data-t="pass">${unlocked("pass")&&passReady()?`<i class="badge ${at==="pass"?"bob":""}">${passReady()}</i>`:""}<span class="sq pnl"><img src="${UIA}crown.webp" alt="">${unlocked("pass")?"":`<img class="lockc" src="${UIA}lock.webp" alt="">`}<span class="bar mini"><u style="width:${tier>=PASS_N?100:S.pass.tk%PASS_STEP/PASS_STEP*100}%"></u></span></span><span class="lb out">Pase</span></button>`}
-      ${S.tutDone&&S.games>=1?`<button class="sbtn" data-a="camp">${!campAll()||campRoadReady()?`<i class="badge bob">!</i>`:""}<span class="sq pnl"><span class="cmico">🗺️</span><span class="bar mini"><u style="width:${campAll()/campMax()*100}%"></u></span></span><span class="lb out">Campaña</span></button>`:""}
+      ${S.tutDone&&S.games>=1?`<button class="sbtn" data-a="camp">${campRoadReady()?`<i class="badge bob">!</i>`:!campAll()?`<i class="badge soft"></i>`:""}<span class="sq pnl"><span class="cmico">🗺️</span><span class="bar mini"><u style="width:${campAll()/campMax()*100}%"></u></span></span><span class="lb out">Campaña</span></button>`:""}
       ${calReady()?`<button class="sbtn" data-a="calendar"><i class="badge ${at==="cal"?"bob":""}">!</i><span class="sq pnl"><img src="${UIA}chest1.webp" alt=""></span><span class="lb out">Diario</span></button>`:""}
       ${PORTAL_CTA&&S.games>=1?`<button class="sbtn" data-a="getapp"><span class="sq pnl"><span class="cmico">📱</span></span><span class="lb out">Móvil</span></button>`:""}
     </div>
     <div class="sidecol r">
       ${box?`<button class="sbtn chest ${at==="box"?"hop":""}" data-a="openbox"><i class="badge">${box}</i><span class="sq"><img src="${UIA}chest${Math.max(...S.box)}.webp" alt=""></span><span class="lb out">¡Ábrelo!</span></button>`:""}
-      ${S.tutDone&&S.games>=2?`<button class="sbtn" data-a="daily">${dlyDone()?"":`<i class="badge bob">!</i>`}<span class="sq pnl">${calIco()}${dlyDone()?`<i class="okc"></i>`:""}</span><span class="lb out">${TT("Reto")}</span></button>`:""}
+      ${S.tutDone&&S.games>=2?`<button class="sbtn" data-a="daily">${dlyDone()?"":`<i class="badge soft"></i>`}<span class="sq pnl">${calIco()}${dlyDone()?`<i class="okc"></i>`:""}</span><span class="lb out">${TT("Reto")}</span></button>`:""}
       <button class="keymod pnl" data-a="keysinfo"><img class="c" src="${UIA}chest1.webp" alt=""><span class="slots">${[0,1,2].map(i=>`<i class="well ${i===S.keys&&S.keys===2?"glow":""}"><img class="${i<S.keys?"":"off"}" src="${UIA}key.webp" alt=""></i>`).join("")}</span></button>
     </div>
     <button class="hplate pnl" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>${ico("trophy")} ${S.hw[S.fav]||0}${mastery(S.fav).t>=0?" · "+MASTERY[mastery(S.fav).t].t:""}</small></span><span class="chev">›</span></button>
