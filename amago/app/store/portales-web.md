@@ -15,7 +15,7 @@ Sale `app/portal/amago-web-itch.zip` (~45 MB). Para CrazyGames: el mismo comando
 3. **Viewport:** 400 × 780, marca «Mobile friendly» (vertical) y «Fullscreen button».
 4. **Título:** `AMAGO: Blind Duel` · **Precio:** gratis · **Género:** Strategy · **Tags:** `pvp, 1v1, multiplayer, strategy, hide-and-seek, bluffing, cute, mobile, browser, real-time`.
 5. **Descripción** (en inglés, el público de itch es internacional):
-   > Real-time 1v1 blind duels. Your hero hides on your island, your rival's on theirs: nobody sees anybody. Move, read the footprints and strike first, or leave a FEINT so they shoot where you are not. 13 heroes, a 5-world campaign with bosses, online matches and private rooms. Free, no ads. Also on the App Store.
+   > Real-time 1v1 blind duels. Your hero hides on your island, your rival's on theirs: nobody sees anybody. Move, read the footprints and strike first, or leave a FEINT so they shoot where you are not. 9 heroes, a 5-world campaign with bosses, online matches and private rooms. Free, no ads. Also on the App Store.
 6. Capturas: usa las de `store/capturas/en` y una portada de 630×500.
 
 ## 3. CrazyGames (más tráfico, revisan el juego)
