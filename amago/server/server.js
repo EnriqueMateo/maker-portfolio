@@ -94,13 +94,20 @@ const server = http.createServer((req, res) => {
   }
   const root = path.join(__dirname, "..");
   if (url === "/vendor/three.min.js") return serve(req, res, path.join(root, "vendor", "three.min.js"), "text/javascript; charset=utf-8", 86400);
-  const asset = url.match(/^\/(models|portraits|arenas|sprites|skins|props|ui|anim|kk)\/([a-z0-9_-]+)\.(glb|webp)$/);
+  const asset = url.match(/^\/(models|portraits|arenas|sprites|skins|props|ui|anim|kk|h3d)\/([a-z0-9_-]+)\.(glb|webp)$/);
   if (asset) return serve(req, res, path.join(root, asset[1], asset[2] + "." + asset[3]), asset[3] === "glb" ? "model/gltf-binary" : "image/webp", 86400);
   const font = url.match(/^\/fonts\/([a-z0-9_-]+)\.woff2$/);
   if (font) return serve(req, res, path.join(root, "fonts", font[1] + ".woff2"), "font/woff2", 604800);
   if (url === "/privacidad") return serve(req, res, path.join(root, "privacidad.html"), "text/html; charset=utf-8", 3600);
   if (url === "/privacy") return serve(req, res, path.join(root, "privacy.html"), "text/html; charset=utf-8", 3600);
   if (url === "/soporte" || url === "/support") return serve(req, res, path.join(root, "soporte.html"), "text/html; charset=utf-8", 3600);
+  /* enlaces cortos para compartir: /s/ABCD abre el juego y entra en la sala ABCD; /j lleva a la App Store desde iPhone/iPad y al juego web desde lo demás */
+  const inv = url.match(/^\/s\/([A-Za-z]{4})$/);
+  if (inv) { res.writeHead(302, { location: "/?sala=" + inv[1].toUpperCase(), "cache-control": "no-store" }); res.end(); return; }
+  if (url === "/j") {
+    const ios = /iPhone|iPad|iPod/i.test(String(req.headers["user-agent"] || ""));
+    res.writeHead(302, { location: ios ? "https://apps.apple.com/app/id6821653359" : "/?src=share", "cache-control": "no-store" }); res.end(); return;
+  }
   if (url === "/" || url === "/index.html") return serve(req, res, INDEX, "text/html; charset=utf-8", 0);
   res.writeHead(404, { "content-type": "text/plain" });
   res.end("No encontrado");
