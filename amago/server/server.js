@@ -470,7 +470,7 @@ function matchRoom(r) {
 const queue = [];
 function enqueue(ws) {
   ws.qAt = Date.now();
-  ws.botAt = ws.qAt + 8000 + Math.random() * 10000; // si no hay nadie, rival en 8-18 s (como un emparejamiento real)
+  ws.botAt = ws.qAt + 4000 + Math.random() * 5000; // si no hay nadie, rival en 4-9 s (parece un emparejamiento real sin hacerse pesado)
   queue.push(ws);
   send(ws, { t: "queued" });
   matchmake();
