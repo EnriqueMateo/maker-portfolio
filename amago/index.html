@@ -2434,7 +2434,7 @@ const CLOUD={ready:false,tried:false,timer:0,
       else this.push(true);
       /* gemas de pago: manda el saldo del servidor; y las compras que quedaron a medias se entregan ahora */
       if(typeof c.gp==="number"&&S.gemsPaid>c.gp){S.gemsPaid=c.gp;save();}
-      setTimeout(()=>{for(const p of (S.purch.pending||[]).slice())settlePurchase(p);},1500);
+      setTimeout(async()=>{if(PAY.native)payAdopt(await PAY.unfinished());for(const p of (S.purch.pending||[]).slice())settlePurchase(p);},1500);
     }catch(e){}
     this.tried=true;EV.flush();
   },
@@ -4472,7 +4472,21 @@ function shopChest(t){
 /* ---- pagos: adaptador. Web de pruebas: simula y nunca cobra; app nativa: tienda real (RevenueCat / cordova-plugin-purchase) ---- */
 const PAY_TEST={test:true,buy(sku){return new Promise(res=>{UI.modal={k:"paytest",sku,res};renderModal();});},async restore(){return Object.entries(S.purch.tx).map(([tx,v])=>({sku:v.sku,tx}));}};
 const PAY_NONE={none:true,async buy(){return {ok:false,reason:"unavailable"};},async restore(){return [];}};
-const PAY=window.AMAGO_PAY||(window.AMAGO_PAY_TEST&&!window.AMAGO_APP?PAY_TEST:PAY_NONE);
+/* app de iPhone: compras reales con StoreKit 2 (plugin propio «Store»). Se activan solas cuando Apple devuelve los productos
+   (cuando estén creados en App Store Connect); hasta entonces se comporta como PAY_NONE. El precio que se enseña es el de Apple. */
+const STORE=window.AMAGO_APP&&window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Store;
+const PAY_NATIVE={native:true,ready:false,loc:{},get none(){return !this.ready;},
+  async init(){try{const r=await STORE.products({ids:Object.keys(SKUS)});for(const p of (r&&r.products)||[])this.loc[p.id]=p.price;this.ready=Object.keys(this.loc).length>0;
+    STORE.addListener("purchase",row=>payAdopt([row]));if(this.ready&&UI.screen==="shop")refreshScreen();}catch(e){}},
+  async buy(sku){if(!this.loc[sku])return {ok:false,reason:"unavailable"};try{return await STORE.buy({id:sku});}catch(e){return {ok:false,reason:"error"};}},
+  finish(tx){try{STORE.finish({tx:String(tx)});}catch(e){}},
+  async unfinished(){try{const r=await STORE.unfinished();return (r&&r.list)||[];}catch(e){return [];}},
+  async restore(){return [];}};
+const PAY=window.AMAGO_PAY||(STORE?PAY_NATIVE:window.AMAGO_PAY_TEST&&!window.AMAGO_APP?PAY_TEST:PAY_NONE);
+/* compras que Apple tiene sin cerrar (se cortó la app, «Preguntar para comprar»…): se añaden a pendientes y se entregan vía servidor */
+function payAdopt(rows){let add=false;for(const r of rows||[]){if(!r||!r.tx||!SKUS[r.sku]||S.purch.tx[r.tx])continue;
+  const have=S.purch.pending.find(p=>p.tx===r.tx);if(have){if(!have.jws)have.jws=r.jws;}else{S.purch.pending.push({sku:r.sku,tx:r.tx,jws:r.jws,cents:Math.round(SKUS[r.sku].eur*100)});add=true;}}
+  if(add)save();for(const p of S.purch.pending.slice())settlePurchase(p);}
 const payOn=()=>!PAY.none&&S.age.band!=="u13";
 function ageGate(then){UI.modal={k:"age",then};renderModal();}
 function canSpend(cents){
@@ -4709,7 +4723,7 @@ function showShop(scrollTo){
   UI.screen="shop";stopLoop();app.className="home"+(unlocked("shop")?"":" lockd");setBg();ensureDay();
   const coins=S.coins,locked=IDS.filter(id=>!S.unl.includes(id)),gift=giftReady(),ft=featured();
   /* precio siempre a color (gemas en verde, monedas en amarillo); si no alcanza, el número en rojo y al tocar se avisa */
-  const priceBtn=(act,id,cur,price,can,extra="")=>`<button class="gbtn sm ${cur==="gems"?"green":""} ${can?"":"need"}" data-a="${act}" data-id="${id}" data-t="${id}">${cur==="eur"?fmtEur(price):`<span class="row">${ico(cur==="gems"?"gem":"coin")}<span class="${can?"":"short"}">${price}</span></span>`}${extra}</button>`;
+  const priceBtn=(act,id,cur,price,can,extra="")=>`<button class="gbtn sm ${cur==="gems"?"green":""} ${can?"":"need"}" data-a="${act}" data-id="${id}" data-t="${id}">${cur==="eur"?(PAY.loc&&PAY.loc[id]||fmtEur(price)):`<span class="row">${ico(cur==="gems"?"gem":"coin")}<span class="${can?"":"short"}">${price}</span></span>`}${extra}</button>`;
   const oc=o=>{const done=S.offers.got.includes(o.id),can=coins>=o.price&&!done;
     return `<div class="ocard pnl ${done?"done":""}">${o.stamp?`<i class="stamp">${o.stamp}</i>`:""}<span class="im">${rewardImg(o.r)}</span><b class="out">${o.r.r==="pp"?`${o.r.n} de Poder`:rewardName(o.r)}</b>${done?`<small>Comprado</small>`:priceBtn("offer",o.id,"coins",o.price,can)}</div>`;};
   const gd=gemDeal(),gdDone=(S.gemDeals.got[gd.id]||0)>=1;
@@ -6397,6 +6411,7 @@ document.addEventListener("visibilitychange",()=>{lastT=performance.now();
 
 fxInit();
 function bootGame(){
+  if(PAY.native)PAY.init();/* productos y precios de Apple; sin productos creados, la tienda sigue sin compras */
   if(GFX){try{GFX.bakePortraits();}catch(e){console.warn("Sin retratos 3D",e);}}
   EV.add("app_open",{ms:Math.round(performance.now()),games:S.games,app:!!window.AMAGO_APP});CLOUD.init();
   if(!B3){app.innerHTML=`<div class="sheet" style="margin:auto"><h2 class="out">AMAGO</h2><p>Tu navegador no puede mostrar gráficos 3D (WebGL). Prueba con Chrome, Safari o Edge actualizados.</p></div>`;}
