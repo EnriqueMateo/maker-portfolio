@@ -199,6 +199,12 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @keyframes bbin{0%{transform:translateX(60vw) scale(.7) rotate(8deg)}18%{transform:translateX(0) scale(1.06) rotate(-2deg)}26%{transform:scale(1) rotate(0)}100%{transform:scale(1.04)}}
 @keyframes bbspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.bossban img,.bossban .bbrays{animation:none}}
+.kostamp{position:fixed;inset:0;z-index:81;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle,rgba(255,240,180,.35),transparent 55%);animation:kof .95s ease-out forwards}
+.kostamp b{position:relative;font-family:var(--f-game);font-size:clamp(90px,30vw,150px);color:#ffd23a;transform:rotate(-8deg);animation:kos .45s cubic-bezier(.2,1.6,.4,1) both;text-shadow:0 8px 0 #b3540f}
+.kostamp .ksr{position:absolute;left:50%;top:50%;width:140vmax;height:140vmax;margin:-70vmax 0 0 -70vmax;background:repeating-conic-gradient(rgba(255,226,90,.35) 0 6deg,transparent 6deg 18deg);mask:radial-gradient(#000 8%,transparent 45%);-webkit-mask:radial-gradient(#000 8%,transparent 45%);animation:bbspin 3s linear infinite}
+@keyframes kos{0%{transform:rotate(-8deg) scale(3);opacity:0}60%{opacity:1}100%{transform:rotate(-8deg) scale(1)}}
+@keyframes kof{0%,75%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.kostamp b,.kostamp .ksr{animation:none}}
 .banner.gold b{color:var(--gold)} .banner.red b{color:var(--foe)} .banner.blue b{color:var(--me)}
 @keyframes ban{0%{opacity:0;transform:scale(2.2)}12%{opacity:1;transform:scale(.95)}18%{transform:scale(1)}82%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8)}}
 .vign{position:fixed;inset:0;z-index:50;pointer-events:none;background:radial-gradient(transparent 50%,rgba(255,40,70,.55));opacity:0;animation:vign .6s ease-out}
@@ -5891,10 +5897,12 @@ async function revealFoe(x,y,type,w){
   const c=B3?B3.screenPos("b",x,y,0):null;if(c)floatText(c.x,c.y-40,"¡Estaba aquí!","big");
   await sleep(2000);
 }
+/* sello de K.O. en el centro: estampa con destello y rayos (se celebra cada ronda ganada por K.O.) */
+function koStamp(){const e=document.createElement("div");e.className="kostamp";e.innerHTML=`<i class="ksr"></i><b class="out">K.O.</b>`;document.body.appendChild(e);sfx("quake");buzz([30,30,50]);return sleep(REDUCED?500:950).then(()=>e.remove());}
 async function roundBanner(w){
   const byTime=R&&R.heroes.p.hp>0&&R.heroes.b.hp>0,pc=s=>Math.round(R.heroes[s].hp/R.heroes[s].max*100);
   const why=byTime?`Se acabó el tiempo: vida ${pc("p")} % contra ${pc("b")} %`:"";
-  if(w==="p"){confetti();sfx("win");await banner("¡RONDA PARA TI!",why,"gold",2200);}
+  if(w==="p"){if(!byTime)await koStamp();confetti();sfx("win");await banner("¡RONDA PARA TI!",why,"gold",2200);}
   else if(w==="b"){sfx("lose");/* lo cerca que estuviste, con datos reales de la ronda */
     const fh=R?R.heroes.b.hp:9,casi=byTime?why:fh===1?"¡Le quedaba solo 1 vida!":G.nearN>1?TT(G.nearN+" disparos tuyos cayeron justo al lado"):G.nearN===1?"Un disparo tuyo cayó justo al lado":"";
     await banner("RONDA PARA "+esc(G.opp.name.toUpperCase()),casi,"red",casi?2600:2200);}
