@@ -477,6 +477,8 @@ body:has(#app.home),body[style]:has(#app.home){background:linear-gradient(180deg
 .chestc .shm svg{width:92px;height:80px}
 .bnav button{flex:0 1 96px!important}
 #app.game ~ .toast{bottom:auto!important;top:calc(118px + env(safe-area-inset-top,0px));pointer-events:none;font-size:15px!important;padding:8px 12px!important}
+/* en la elección de héroe el aviso va arriba, sobre el título, para no tapar nunca el botón de luchar */
+#app.pick ~ .toast{bottom:auto!important;top:calc(10px + env(safe-area-inset-top,0px));font-size:15px!important;padding:8px 12px!important}
 .hearts i,.hbar i{font-size:20px!important}
 .side2 .mini{width:46px!important;height:46px!important}
 .tbox .stars{font-size:17px!important}
@@ -6193,6 +6195,9 @@ function renderStatus(){
 const TQ=[];let tqOn=null;
 function toast(k,txt){
   if(S.tips[k]||TQ.some(q=>q.k===k)||(tqOn&&tqOn.k===k))return;
+  /* como mucho un aviso por ronda (y uno en la elección de héroe): los demás salen otro día, cuando toquen */
+  if(UI.screen==="game"&&R){if((R._tips||0)>=1)return;R._tips=(R._tips||0)+1;}
+  if(UI.screen==="pick"){if(UI._pickTip===G)return;UI._pickTip=G;}
   if(tqOn&&document.body.contains(tqOn.e)&&performance.now()-tqOn.t<2200){TQ.push({k,txt});return;}
   const old=$(".toast");if(old)old.remove();
   S.tips[k]=1;save();
