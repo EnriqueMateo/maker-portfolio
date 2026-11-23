@@ -1890,7 +1890,7 @@ function newRound(tp,tb,opts){
   if(R.arena==="volcan")R.lava={next:15,warnAt:12,tiles:shuffle(allCells()).slice(0,2)};
   if(R.arena==="trono"){const c=pick(allCells().filter(([x,y])=>Math.abs(x-2)+Math.abs(y-2)<=2));R.cover={x:c[0],y:c[1],used:{p:false,b:false}};}
   if(R.arena==="olimpo")R.wind={next:20,until:0,dir:0};
-  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,perc:opts.bot.perc??.35,pend:[],dr:{},lastPrint:null,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1,blind:!!opts.bot.blind};
+  if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,perc:opts.bot.perc??.35,pend:[],dr:{},lastPrint:null,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1,blind:!!opts.bot.blind,decoy:opts.bot.decoy??.25,wild:opts.bot.wild??.15};
   return R;
 }
 function addWebs(R,d,n,hk){
@@ -2200,14 +2200,14 @@ function botUpdate(R,dt,hk){
       if(amago(R,"b",c[0],c[1],hk)==="ok"){B.next=R.now+.4+Math.random()*.6;return;}
     }
     /* sin pistas durante mucho rato, a veces dispara a ciegas como haría una persona */
-    if(best.v<thr&&R.now-B.lastShot>6&&R.elx.b>=H.cost+2&&Math.random()<.15)best.v=thr,best.t=[rnd(N),rnd(N)];
+    if(best.v<thr&&R.now-B.lastShot>6&&R.elx.b>=H.cost+2&&Math.random()<B.wild)best.v=thr,best.t=[rnd(N),rnd(N)];
     if(B.blind&&best.v<thr)best.v=thr;/* jefes: atacan a su ritmo aunque no tengan pistas */
     if(best.v>=thr){
       let t=best.t;
       if(Math.random()<eps)t=[clampN(t[0]+rnd(3)-1),clampN(t[1]+rnd(3)-1)];
       if(Math.random()<eps*.5)t=[rnd(N),rnd(N)];
       fire(R,"b",t[0],t[1],hk);B.lastShot=R.now;
-      if(Math.random()<.25)B.decoyAt=R.now+.6+Math.random()*1.2;
+      if(Math.random()<B.decoy)B.decoyAt=R.now+.6+Math.random()*1.2;
       if(Math.random()<B.moveP*(H.stealth?.4:1))B.relocateAt=R.now+.2+Math.random()*1.2;
       return;
     }
@@ -2329,6 +2329,7 @@ const TR=(()=>{
   /* textos nuevos de las mejoras de menús (auditoría nov 2026) */
   Object.assign(I18N_EN,{"Campaña": "Campaign", "CAMPAÑA · MUNDO 1": "CAMPAIGN · WORLD 1", "Pradera del Rey Topo": "The Mole King's Meadow", "El espantapájaros": "The scarecrow", "Lluvia de energía": "Energy rain", "Sin trucos": "No tricks", "El guardián": "The guardian", "Rey Topo": "Mole King", "👑 JEFE": "👑 BOSS", "REY TOPO": "MOLE KING", "Jefe": "Boss", "JEFE": "BOSS", "NIVEL #": "LEVEL #", "Terremoto": "Earthquake", "Un duelo a una sola ronda para calentar.": "A single-round duel to warm up.", "La energía se recarga al doble para los dos. ¡No pares de disparar!": "Energy refills twice as fast for both. Keep shooting!", "Aquí nadie puede usar el amago. Y Ojo oye tus pasos.": "Nobody can use the feint here. And Ojo hears your steps.", "Muro tiene 9 vidas y sus huellas duran la mitad.": "Muro has 9 lives and its footprints last half as long.", "Vive bajo tierra y nada le alcanza. Solo puedes darle cuando asoma, justo después de lanzar su terremoto.": "He lives underground and nothing reaches him. You can only hit him when he pops up, right after his earthquake.", "Vive bajo tierra: solo se le puede golpear cuando asoma, justo después de atacar.": "Lives underground: can only be hit when he pops up, right after attacking.", "★ Gana · ★★ Pierde 1 vida como mucho · ★★★ Sin perder vida": "★ Win · ★★ Lose 1 life at most · ★★★ Lose no lives", "Premio ya cobrado. Cada estrella nueva da monedas.": "Reward already claimed. Each new star gives coins.", "Premio:": "Reward:", "Volver": "Back", "MAPA": "MAP", "SIGUIENTE": "NEXT", "REPETIR": "REPLAY", "REINTENTAR": "RETRY", "Gemas": "Gems", "Mundo 2 · Bosque de la Araña Madre": "World 2 · Forest of the Spider Mother", "¡Cofre del jefe!": "Boss chest!", "👑 ¡Has derrotado al Rey Topo! Mundo 1 completado.": "👑 You defeated the Mole King! World 1 complete.", "Ya tenías los premios de este nivel.": "You already had this level's rewards.", "Consigue las 3 estrellas ganando sin perder vida.": "Get all 3 stars by winning without losing a life.", "Guarda energía y dispárale justo cuando asoma tras su terremoto.": "Save energy and shoot right when he pops up after his earthquake.", "¡Casi! Prueba con otro héroe.": "So close! Try another hero.", "Solo puedes darle cuando asoma, justo después de atacar": "You can only hit him when he pops up, right after he attacks", "¡REY TOPO FURIOSO!": "MOLE KING ENRAGED!", "Dos terremotos a la vez y asoma menos tiempo": "Two earthquakes at once and he pops up for less time", "⛏️ ¡Bajo tierra!": "⛏️ Underground!", "👑 ¡Asoma! ¡Dale!": "👑 He's up! Hit him!"});
   Object.assign(I18N_EN,{"CAMPAÑA · MUNDO #": "CAMPAIGN · WORLD #", "Bosque de la Araña Madre": "Forest of the Spider Mother", "Araña Madre": "Spider Mother", "Jefa": "Boss", "Picadura": "Bite", "El sendero oscuro": "The dark trail", "Doble engaño": "Double trick", "Telarañas": "Cobwebs", "La cazadora": "The huntress", "Sombra golpea sin avisar y aquí sus huellas duran la mitad.": "Sombra strikes without warning, and here its footprints last half as long.", "Las huellas de Truco son falsas. La energía se recarga un 50 % más rápido para los dos.": "Truco's footprints are fake. Energy refills 50% faster for both.", "Salen telarañas en las dos islas: quien pise una queda atrapado 2 s y a la vista.": "Cobwebs appear on both islands: step on one and you're stuck for 2 s and visible.", "Mira tiene 4 vidas y quita 2 por disparo. Y sigue habiendo telarañas.": "Mira has 4 lives and deals 2 per shot. And there are still cobwebs.", "Llena tu isla de telarañas. Si pisas una, quedas atrapado 2 s y te ve. Rodéalas y contraataca.": "She fills your island with cobwebs. Step on one and you're stuck for 2 s and she sees you. Go around them and strike back.", "Llena tu isla de telarañas: si pisas una, quedas atrapado 2 s y a la vista.": "Fills your island with cobwebs: step on one and you're stuck for 2 s and visible.", "Si pisas una telaraña, quedas atrapado 2 s y a la vista": "Step on a cobweb and you're stuck for 2 s and visible", "¡ARAÑA MADRE FURIOSA!": "SPIDER MOTHER ENRAGED!", "Más telarañas y más seguidas": "More cobwebs, more often", "👑 ¡Has derrotado a la Araña Madre! Mundo 2 completado.": "👑 You defeated the Spider Mother! World 2 complete.", "No pises las telarañas: rodéalas y muévete tras cada disparo.": "Don't step on the cobwebs: go around them and move after every shot.", "¡Atrapado!": "Stuck!", "¡Atrapado! ¡Dale!": "Stuck! Hit them!", "¡FURIA!": "RAGE!", "Mundo 3 · Volcán del Coloso de Lava": "World 3 · Volcano of the Lava Colossus", "Mundo # · Pradera del Rey Topo": "World # · The Mole King's Meadow", "Mundo # · Bosque de la Araña Madre": "World # · Forest of the Spider Mother", "Derrota al jefe de este mundo": "Defeat this world's boss", "Entrar": "Enter", "MUNDO #": "WORLD #", "ARAÑA MADRE": "SPIDER MOTHER"});
+  Object.assign(I18N_EN,{"Batalla":"Battle","Al instante, contra rivales de tu nivel · trofeos, monedas, llaves y fichas":"Instant, against rivals of your level · trophies, coins, keys and tokens","Entrenamiento: elige tú la dificultad":"Training: pick the difficulty yourself","Entreno #":"Training #"});
   Object.assign(I18N_EN,{"¿Nos ayudas a mejorar?":"Help us improve?","Enviar estadísticas anónimas de cómo juegas (partidas, héroes, dónde te atascas) nos ayuda a hacer AMAGO más divertido. Sin anuncios, sin datos personales.":"Sending anonymous stats about how you play (matches, heroes, where you get stuck) helps us make AMAGO more fun. No ads, no personal data.","Puedes cambiarlo cuando quieras en Ajustes.":"You can change it anytime in Settings.","SÍ, CLARO":"SURE","No, gracias":"No, thanks"});
   Object.assign(I18N_EN,{"No hemos podido comprobar esta compra con Apple. Si te la han cobrado, escríbenos desde Ajustes → Soporte y lo arreglamos.":"We couldn't verify this purchase with Apple. If you were charged, contact us from Settings → Support and we'll fix it."});
   Object.assign(I18N_EN,{"ENVIAR RETO":"SEND CHALLENGE","Tu amigo entra con el enlace y juega en el navegador, sin instalar nada.":"Your friend opens the link and plays in the browser, no install needed.","¡Te reto a un duelo a ciegas en AMAGO! Entra aquí:":"I challenge you to a blind duel in AMAGO! Join here:","¡Enlace copiado!":"Link copied!"});
@@ -2388,7 +2389,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* ================= guardado ================= */
 const SAVE_KEY="amago-v3";
-const DEF={camp:{},riv:{},hs:{},dly:null,dlyPrev:null,dlyDays:0,tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"facil",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
+const DEF={camp:{},riv:{},hs:{},dly:null,dlyPrev:null,dlyDays:0,tutDone:0,news:{},tro:0,unl:STARTERS.slice(),chests:0,box:[],tips:{},snd:1,games:0,wins:0,name:"",fav:"flecha",mode:"bot",diff:"auto",coins:0,pp:0,lv:{},keys:0,claimed:[],xp:0,hw:{},pass:{season:-1,tk:0,got:[],gotP:[],prem:false,plus:false,nextPrem:false,vault:0,vgot:0},mis:{day:-1,list:[],rr:0},gift:-1,
   gemsFree:0,gemsPaid:0,own:{skin:[],frame:[]},equip:{skin:{},frame:""},purch:{starter:false,tx:{},pending:[],month:{m:"",cents:0},log:[],bundleWk:-1},gemDeals:{day:-1,got:{}},
   wk:{wk:-1,list:[]},cal:{day:-1,i:0,cyc:0},fw:-1,wc:{day:-1,n:0},ws:0,ls:0,troMax:0,mgot:{},seen:-1,back:0,pity:0,age:{band:""},offerSeen:{day:-1,keys:{}},gemOnce:{},offers:{day:-1,got:[]},lastLoss:false,vib:1,welcome:0};
 /* restos del modo demostración (quitado: Apple no permite códigos que desbloqueen contenido) */
@@ -2406,6 +2407,8 @@ function loadSave(){
   for(const k of ["pass","purch","own","equip","mis"])s[k]=Object.assign(clone(DEF[k]),s[k]||{});
   s.troMax=Math.max(s.troMax||0,s.tro);
   if(s.games>0)s.tutDone=1;/* quien ya ha jugado no repite el entrenamiento */
+  /* nov 2026: el modo por defecto pasa a Batalla (dificultad que se adapta); la habilidad de partida sale de la dificultad que usaba */
+  if(!s.skMig){s.skMig=1;if(s.sk==null)s.sk={facil:.15,normal:.5,dificil:.85}[s.diff]??.12;if(s.mode==="bot"&&s.diff!=="dificil")s.diff="auto";}
   return s;
 }
 function save(){S.at=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}CLOUD.push();}
@@ -4606,7 +4609,7 @@ function showHome(){
     <button class="hplate pnl" data-a="hero" data-id="${S.fav}">${pwrHTML(lvOf(S.fav))}<span><b class="out">${H.n}</b><small>${ico("trophy")} ${S.hw[S.fav]||0}${mastery(S.fav).t>=0?" · "+MASTERY[mastery(S.fav).t].t:""}</small></span><span class="chev">›</span></button>
   </div>
   <div class="playrow2">
-    <button class="modebtn2 pnl" data-a="mode"><small>MODO</small><b class="out">${S.mode==="bot"?ico("swords")+" Bot "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase():S.mode==="online"?ico("trophy")+" Online":ico("crown")+" Amigos"}</b><em>Cambiar</em></button>
+    <button class="modebtn2 pnl" data-a="mode"><small>MODO</small><b class="out">${S.mode==="bot"?(S.diff==="auto"||!S.diff?ico("swords")+" Batalla":ico("swords")+" Entreno "+(DIFFS[S.diff]||DIFFS.facil).n.toLowerCase()):S.mode==="online"?ico("trophy")+" Online":ico("crown")+" Amigos"}</b><em>Cambiar</em></button>
     <span class="playw">${ses.pot?`<button class="sespot" data-a="sescash">${ico("coin","s")}<span class="out">${TT("Bote")} +${ses.pot}</span><i>${TT("COBRAR")}</i></button>`:fwOn?`<span class="fwtag" title="1.ª victoria del día: llave doble, +30 monedas y +20 de Poder">${ico("key")}<b class="out">×2</b><span class="out">+30</span>${ico("coin","s")}<span class="out">+20</span>${ico("power","s")}</span>`:S.ws>=2?`<span class="fwtag streak">${ico("swords","s")}<span class="out">Racha ×${S.ws}</span></span>`:homeNem()?`<span class="fwtag nem">${ico("swords","s")}<span class="out">${esc(homeNem())} ${TT("te gana")} ${rivOf(homeNem()).l}–${rivOf(homeNem()).w}</span></span>`:""}<button class="gbtn xl play2 shine" data-a="play">JUGAR</button></span>
   </div>
   ${nav("home")}`;
@@ -5100,8 +5103,9 @@ function renderModal(){
     m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><div class="dots">${HOW.map((_,i)=>`<i class="${i===M.i?"on":""}"></i>`).join("")}</div><div class="howc"><div class="big hwimg">${HOW_IMG(M.i)}</div><h3 class="out">${c.h}</h3><p>${c.p}</p></div><button class="gbtn" data-a="hownext">${last?"¡ENTENDIDO!":"SIGUIENTE"}</button></div>`;
   }else if(M.k==="mode"){
     m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Elige modo</h2>
-      <button class="modecard ${S.mode==="bot"?"on":""}" data-a="setmode" data-m="bot"><span class="mi">${ico("swords","m")}</span><span><b>Contra bot</b><small>Trofeos, monedas, llaves y fichas del pase</small></span></button>
-      <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${(S.diff||"facil")===k?"on":""}" data-a="setdiff" data-d="${k}"><span class="dpt">${heroSVG(DIFF_BOT[k]||"ojo")}</span><span class="dst">${[0,1,2].map(j=>`<img class="${j<Object.keys(DIFFS).indexOf(k)+1?"":"off"}" src="${UIA}star.webp" alt="">`).join("")}</span><b>${d.n}</b><small>${d.d}</small><small class="nw">+${WIN_COINS[k]} ${ico("coin","s")}</small></button>`).join("")}</div>
+      <button class="modecard ${S.mode==="bot"&&(S.diff==="auto"||!S.diff)?"on":""}" data-a="setdiff" data-d="auto"><span class="mi">${ico("swords","m")}</span><span><b>Batalla</b><small>Al instante, contra rivales de tu nivel · trofeos, monedas, llaves y fichas</small></span></button>
+      <p class="sub" style="margin:10px 0 4px;text-align:left">Entrenamiento: elige tú la dificultad</p>
+      <div class="diffrow">${Object.entries(DIFFS).map(([k,d])=>`<button class="diffchip ${S.mode==="bot"&&S.diff===k?"on":""}" data-a="setdiff" data-d="${k}"><span class="dpt">${heroSVG(DIFF_BOT[k]||"ojo")}</span><span class="dst">${[0,1,2].map(j=>`<img class="${j<Object.keys(DIFFS).indexOf(k)+1?"":"off"}" src="${UIA}star.webp" alt="">`).join("")}</span><b>${d.n}</b><small>${d.d}</small><small class="nw">+${WIN_COINS[k]} ${ico("coin","s")}</small></button>`).join("")}</div>
       <button class="modecard ${S.mode==="online"?"on":""}" data-a="setmode" data-m="online"><span class="mi">${ico("trophy","m")}</span><span><b>Online</b><small>${ONLINE_OK?"Rival real con tus trofeos · mismas recompensas que Normal":"Disponible al abrir el juego desde su servidor"}</small></span></button>
       <button class="modecard ${S.mode==="friends"?"on":""}" data-a="setmode" data-m="friends"><span class="mi">${ico("crown","m")}</span><span><b>Con amigos</b><small>Sala privada con código · cuenta para misiones y pase</small></span></button><button class="gbtn" data-a="close">LISTO</button></div>`;
   }else if(M.k==="friends"){
@@ -5227,8 +5231,34 @@ const DIFFS={
   normal:{n:"Normal",i:"😎",d:"Para quien ya sabe jugar",think:.55,react:.4,perc:.35,dodge:.7,eps:.22,passive:3,gap:1.8,thr:1.1,moveP:.75},
   dificil:{n:"Difícil",i:"😈",d:"Rápido y certero",think:.2,react:.32,perc:.28,dodge:.85,eps:.08,passive:1.5,gap:0,thr:1,moveP:1},
 };
+/* Batalla: dificultad oculta que se adapta a cada jugador (S.sk, 0 flojo … 1 muy bueno), con variación entre rivales
+   y personalidades, para ganar más o menos la mitad sin que siempre se gane ni siempre se pierda */
+const PERSONAS={
+  agresivo:{think:.8,thr:.9,wild:.32,decoy:.12,moveP:.8},
+  prudente:{dodge:1.2,moveP:1.25,gap:1.3,thr:1.08,decoy:.2,wild:.08},
+  amagador:{decoy:.6,moveP:1.1,wild:.12},
+  certero:{eps:.75,think:1.15,wild:.05,decoy:.18},
+  normal:{}};
+function autoBot(){
+  let d=(S.sk==null?.12:S.sk)+(Math.random()+Math.random()-1)*.12;
+  const r=Math.random();if(r<.14)d-=.22;else if(r>.9)d+=.15;/* de vez en cuando, un rival claramente más flojo o más fuerte */
+  if((S.ls||0)>=3)d-=.28;else if((S.ls||0)>=2)d-=.14;if((S.ws||0)>=3)d+=.08;/* tras varias derrotas seguidas, un rival más asequible */
+  d=Math.max(0,Math.min(SK_MAX,d));
+  const ELITE={think:.08,react:.26,perc:.22,dodge:.96,eps:.025,passive:.8,gap:0,thr:.92,moveP:1};
+  const A=d<.5?DIFFS.facil:d<1?DIFFS.normal:DIFFS.dificil,B=d<.5?DIFFS.normal:d<1?DIFFS.dificil:ELITE,k=d<.5?d/.5:d<1?(d-.5)/.5:(d-1)/(SK_MAX-1),P={};
+  for(const q of ["think","react","perc","dodge","eps","passive","gap","thr","moveP"])P[q]=A[q]+(B[q]-A[q])*k;
+  const names=Object.keys(PERSONAS),pn=names[Math.floor(Math.random()*names.length)],M=PERSONAS[pn];
+  for(const [q,v] of Object.entries(M)){if(q==="wild"||q==="decoy")P[q]=v;else P[q]=P[q]*v;}
+  P.dodge=Math.min(.95,P.dodge);P.moveP=Math.min(1,P.moveP);
+  G.botD={d:Math.round(d*100)/100,p:pn};
+  return P;
+}
+const SK_MAX=1.45;
+function skillUpdate(win){/* tras cada partida de Batalla: sube si ganas, baja si pierdes (objetivo: ~55 % de victorias) */
+  const sk=S.sk==null?.12:S.sk;S.sk=Math.max(0,Math.min(SK_MAX,sk+(win?.045:-.055)));}
 function botParams(){
   if(G.camp)return Object.assign({},CAMP_BOT[campLv().bot]);
+  if(!G.tutorial&&(S.diff==="auto"||!S.diff)){const P=autoBot();if(G.score.b>G.score.p){P.react+=.2;P.eps+=.15;}return P;}
   const P=Object.assign({},DIFFS[S.diff]||DIFFS.facil);
   /* curva suave: antes de Fácil a Normal se pasaba de ganar ~45 % a ~11 % de las rondas. Fácil se endurece poco a poco
      hasta 300 trofeos y Normal empieza a medio camino y llega a su valor a los 400 */
@@ -5479,6 +5509,7 @@ function startMatch(){
   sfx("go");actx();
   const maxR=Math.min(3,1+Math.floor(S.tro/150));
   G={online:false,score:{p:0,b:0},round:0,used:{p:[],b:[]},tutorial:S.games===0,opp:{name:pick(NAMES),tro:Math.max(0,S.tro+rnd(41)-20)},oppPool:shuffle(IDS.filter(i=>HEROES[i].rar<=maxR))};
+  if(S.diff==="auto"||!S.diff)G.diff="normal";/* Batalla: recompensas de Normal */
   const rev=UI.rev;UI.rev=null;if(rev&&!G.tutorial){G.opp={name:rev.name,tro:rev.tro};G.oppPool=shuffle(rev.pool);G.rev=true;}
   if(!G.tutorial){
     const want=UI.wantRival;UI.wantRival=null;
@@ -5842,8 +5873,9 @@ async function endRound(w){
   G.round++;showPick();
 }
 async function endMatch(){
-  R=null;ensureDay();EV.add("match_end",{win:G.score.p>G.score.b,draw:G.score.p===G.score.b,score:G.score.p+"-"+G.score.b,mode:G.online?(G.ranked?"online":"amigos"):"bot",diff:G.online?null:S.diff,n:S.games+1,left:!!G.left});
+  R=null;ensureDay();EV.add("match_end",{win:G.score.p>G.score.b,draw:G.score.p===G.score.b,score:G.score.p+"-"+G.score.b,mode:G.online?(G.ranked?"online":"amigos"):"bot",bd:G.botD||null,sk:S.sk,diff:G.online?null:S.diff,n:S.games+1,left:!!G.left});
   const win=G.score.p>G.score.b,draw=G.score.p===G.score.b,d=today(),diff=G.diff||S.diff||"facil";
+  if(!G.online&&!G.tutorial&&!G.camp&&(S.diff==="auto"||!S.diff)&&!draw)skillUpdate(win);
   const before=S.tro,lvlBefore=level(),arenaBefore=arenaOf(S.troMax).a.k;
   /* trofeos: según la dificultad, con racha; derrotas suaves y escudos */
   let delta=0,note="";
