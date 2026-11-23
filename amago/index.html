@@ -2648,7 +2648,9 @@ function sfx(n){
 }
 /* vibración: en la app, el motor háptico del móvil (plugin Haptics); en el navegador, navigator.vibrate si existe */
 function vib(p){if(typeof S!=="undefined"&&S&&!S.vib)return;try{const H=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Haptics,ms=Array.isArray(p)?Math.max(...p):p;
-  if(H){H.impact({style:ms>=40?"HEAVY":ms>=18?"MEDIUM":"LIGHT"}).catch(()=>{});return;}navigator.vibrate&&navigator.vibrate(p);}catch(e){}}
+  const st=v=>v>=40?"HEAVY":v>=18?"MEDIUM":"LIGHT";
+  /* en iPhone, los patrones (golpe doble, K.O.) se convierten en varios toques seguidos */
+  if(H){if(Array.isArray(p)){let t=0;for(let i=0;i<p.length;i+=2){const v=p[i];setTimeout(()=>H.impact({style:st(v)}).catch(()=>{}),t);t+=v+(p[i+1]||0);}}else H.impact({style:st(ms)}).catch(()=>{});return;}navigator.vibrate&&navigator.vibrate(p);}catch(e){}}
 const buzz=ms=>vib(ms);
 
 /* ================= partículas ================= */
@@ -5833,11 +5835,12 @@ async function shareClip(c=REC.clip,hl=G&&G.hl){
   const a=document.createElement("a");a.href=URL.createObjectURL(c.blob);a.download=name;document.body.appendChild(a);a.click();a.remove();EV.add("clip_share",{via:"download"});
 }
 function stopLoop(){if(loopId)cancelAnimationFrame(loopId);loopId=null;}
-const SLOW={until:0};
+const SLOW={until:0},HITSTOP={until:0};/* congelación breve al acertar: el golpe «pesa» */
 function loop(t){
   if(!R||UI.screen!=="game")return;
   let dt=Math.min(.1,(t-lastT)/1000);lastT=t;
   if(!G.online&&t<SLOW.until)dt*=.3;/* cámara lenta del K.O. */
+  if(!G.online&&t<HITSTOP.until)dt*=.04;
   if(!G.online&&t<(SLOW.stop||0))dt=0;/* parada breve al golpear */
   if(!R.over){
     if(G.online){if(!R.paused)R.now+=dt;}
@@ -6243,13 +6246,13 @@ const ui={
     if(mine&&p.dud){floatText(to.x,to.y,"🎭","miss");return;}
     if(mine){
       if(p.res==="hit"){const ko=(p.vhp??R.heroes.b.hp)<=0,c=B3.screenPos("b",p.vx??0,p.vy??0,1);
-        floatText(c.x,c.y,ko?"¡K.O.!":"¡TOCADO! −"+p.dmg,"big");sfx(ko?"kill":"hit");buzz(ko?[40,30,60]:40);if(ko&&!REDUCED)SLOW.until=performance.now()+650;}
+        floatText(c.x,c.y,ko?"¡K.O.!":"¡TOCADO! −"+p.dmg,"big");sfx(ko?"kill":"hit");buzz(ko?[40,30,60]:[25,20,25]);if(!REDUCED){HITSTOP.until=performance.now()+(ko?60:90);B3.shake(ko?.45:.22);}if(ko&&!REDUCED)SLOW.until=performance.now()+650;}
       else if(p.res==="block"){floatText(to.x,to.y,p.under?"⛏️ ¡Bajo tierra!":"🛡️ ¡Bloqueado!","miss");sfx("miss");if(p.under)toast("topounder","⛏️ <b>Está bajo tierra.</b> Ya sabes dónde se esconde: dispárale cuando asome.");}
       else if(p.res==="near"){G.nearN=(G.nearN||0)+1;floatText(to.x,to.y,"¡CERCA! 🔥","near");sfx("near");toast("near","🔥 <b>¡CERCA!</b> El rival estaba justo al lado. ¡Remata!");}
       else{floatText(to.x,to.y,"AGUA","miss");sfx("miss");}
     }else{
       const c=B3.heroScreen(),ko=(p.vhp??R.heroes.p.hp)<=0;
-      if(p.res==="hit"){floatText(c.x,c.y,ko?"K.O.":"−"+p.dmg,"bad");vignette();sfx(ko?"ko":"hurt");buzz(60);}
+      if(p.res==="hit"){floatText(c.x,c.y,ko?"K.O.":"−"+p.dmg,"bad");vignette();sfx(ko?"ko":"hurt");buzz(ko?[80,40,120]:70);if(!REDUCED){HITSTOP.until=performance.now()+70;B3.shake(ko?.55:.35);}}
       else if(p.res==="block"){floatText(c.x,c.y,"🛡️ ¡Parado!","good");sfx("near");}
       else if(p.res==="near")floatText(to.x,to.y,"¡Uf! Por poco","miss");
     }
