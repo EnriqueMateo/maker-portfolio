@@ -3,6 +3,7 @@
 "use strict";
 const crypto = require("crypto");
 const { hash, newId, newSecret } = require("./store");
+const ECO = require("./eco");
 
 const MAX_BODY = 64 * 1024;
 const MAX_SAVE = 48 * 1024;
@@ -236,7 +237,7 @@ function makeApi(store, opts) {
           u.last = Date.now();
           if (reviewBoost(u, opts.heroIds)) u.rev = (u.rev || 0) + 1;
           await store.put(u);
-          return json(res, 200, { save: u.save, saveAt: u.saveAt, rev: u.rev || 0, tro: u.tro, email: u.email || null, via: u.apple ? "apple" : u.email ? "email" : null, now: Date.now() }), true;
+          return json(res, 200, { save: u.save, saveAt: u.saveAt, rev: u.rev || 0, tro: u.tro, gp: (u.eco && u.eco.gp) || 0, email: u.email || null, via: u.apple ? "apple" : u.email ? "email" : null, now: Date.now() }), true;
         }
         case "/api/register": {
           // el invitado se da de alta: su cuenta (y su progreso) pasa a tener correo y contraseña
@@ -350,12 +351,35 @@ function makeApi(store, opts) {
           }
           u.games = prevG + dG;
           b.save.tro = u.tro || 0;
+          // economía: gemas de pago y compras las decide el servidor; lo gratis tiene tope diario
+          const sent = { gemsPaid: b.save.gemsPaid, coins: b.save.coins, gemsFree: b.save.gemsFree, pp: b.save.pp };
+          ECO.checkSave(u, b.save, now, !!(u.email && REVIEW_EMAILS.includes(u.email)));
+          const fix = {};
+          for (const k of Object.keys(sent)) if (sent[k] !== b.save[k]) fix[k] = b.save[k];
           u.save = b.save;
           u.rev = (u.rev || 0) + 1;
           u.saveAt = now;
           u.last = now;
           await store.put(u);
-          return json(res, 200, { ok: true, rev: u.rev, tro: u.tro || 0 }), true;
+          return json(res, 200, { ok: true, rev: u.rev, tro: u.tro || 0, ...(Object.keys(fix).length ? { fix } : {}) }), true;
+        }
+        case "/api/iap": {
+          // compra hecha en el móvil: el servidor comprueba la transacción firmada de Apple y dice qué se entrega
+          if (limited(ip, "iap", 20)) return json(res, 429, { error: "espera" }), true;
+          const u = await auth(store, b.id, b.secret);
+          if (!u) return json(res, 401, { error: "cuenta" }), true;
+          const r = await ECO.grantPurchase(store, u, b.jws, b.season);
+          if (r.ok && !r.dup) {
+            if (u.save && typeof u.save === "object") u.save.gemsPaid = Math.min(Number(u.save.gemsPaid) || 0, u.eco.gp - (r.grant.gems || 0)) + (r.grant.gems || 0);
+            u.rev = (u.rev || 0) + 1;
+            await store.put(u);
+          }
+          return json(res, r.ok ? 200 : 400, { ...r, rev: u.rev || 0 }), true;
+        }
+        case "/api/asn": {
+          // notificaciones del servidor de Apple (reembolsos); URL a poner en App Store Connect: …/api/asn
+          const r = await ECO.refund(store, b.signedPayload);
+          return json(res, r.ok ? 200 : 400, r), true;
         }
         case "/api/link": {
           // código de 6 letras para pasar la cuenta a otro móvil (15 min)

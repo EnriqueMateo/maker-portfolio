@@ -2,6 +2,16 @@
 
 Rama: `claude/eager-gates-4i58a1`. Juego jugable publicado (privado) en https://claude.ai/artifact/MS8opPSQAqRnR4aCtnmPHk
 
+## 23 nov 2026: economía en el servidor (lista antes de activar compras)
+- `server/eco.js`: las **gemas de pago** (`u.eco.gp`) solo suben con una compra verificada; el guardado del móvil solo puede gastarlas. El registro de compras (`purch.tx`, `starter`) lo pone el servidor.
+- **Compras:** `POST /api/iap {id, secret, jws, season}` comprueba la transacción firmada de StoreKit 2 (JWS) con la cadena de certificados hasta **Apple Root CA - G3** (`server/apple-root-g3.pem`, huella comprobada), el bundle, que no esté reembolsada, y la entrega **una sola vez** (también entre cuentas: índice `tx:<id>`). Pack de inicio una vez, lote de Poder uno por semana, pase por temporada, mejora a Plus solo con Premium.
+- **Reembolsos:** `POST /api/asn` (App Store Server Notifications V2). Poner en App Store Connect → App → Información general → «URL de notificaciones del servidor de App Store»: `https://maker-portfolio-production-7712.up.railway.app/api/asn` (producción y sandbox).
+- **Recursos gratis:** tope diario de lo que pueden subir (25.000 monedas, 600 gemas gratis, 25.000 de Poder); la cuenta de revisión de Apple está exenta. El servidor devuelve `fix` y el móvil acepta sus valores.
+- Las cuentas que han pagado no se borran por inactividad.
+- Cliente: `settlePurchase` (la app entrega solo lo que confirma el servidor; sin conexión queda pendiente y se reintenta al conectar).
+- Pruebas: 18 casos (compra, duplicado, otra cuenta, firma manipulada, otra clave, otra app, pack único, Plus sin Premium, gasto, edición a mano, reembolso) con una cadena de certificados propia (`APPLE_ROOT_PEM_TEST`, ignorada en Railway).
+- **Falta para cobrar:** plugin de compras en la app que devuelva el JWS de StoreKit 2 (`jwsRepresentation`) como `PAY.buy → {ok, tx, jws}`; crear los productos en App Store Connect; el usuario firma el acuerdo de apps de pago.
+
 ## 7 nov 2026: auditoría completa y versión 1.1 (leer primero)
 - Auditoría con 6 agentes (176 hallazgos): informes en `docs/auditoria_2026-11/`. Arreglados la mayoría de los graves y lo visual más importante (arena, efectos, HUD, menús, apuntar al soltar, pausa, reconexión online, servidor, rendimiento).
 - Sombra reequilibrada: `hp:3`, `cost:4` (simulación: media 32 % → 52 %). Siguen flojos para Sombra Brasa (27 %) y Muro (18 %); Mira pierde casi siempre contra Sombra (revisar Mira).

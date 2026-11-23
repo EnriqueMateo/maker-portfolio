@@ -58,7 +58,7 @@ function fileStore(dir) {
       return true;
     },
     async purge(cutoff) {
-      for (const [id, u] of Object.entries(users)) if ((u.last || 0) < cutoff && !u.email) delete users[id];
+      for (const [id, u] of Object.entries(users)) if ((u.last || 0) < cutoff && !u.email && !(u.eco && u.eco.paid)) delete users[id];
       dirty = true;
       try {
         const keep = fs.readFileSync(ef, "utf8").split("\n").filter((l) => l && JSON.parse(l).t >= cutoff);
@@ -115,7 +115,7 @@ async function pgStore(url) {
     },
     async purge(cutoff) {
       // las cuentas registradas no se borran por inactividad; las de invitado, a los 2 años
-      await pool.query("delete from users where coalesce((data->>'last')::bigint,0) < $1 and data->>'email' is null", [cutoff]);
+      await pool.query("delete from users where coalesce((data->>'last')::bigint,0) < $1 and data->>'email' is null and data->'eco'->>'paid' is null", [cutoff]);
       await pool.query("delete from events where t < $1", [cutoff]);
     },
     async addEvents(rows) {
