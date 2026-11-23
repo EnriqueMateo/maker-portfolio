@@ -9,7 +9,7 @@ const SRC = path.join(__dirname, "..", ".."), P = (process.argv[2] || "itch").to
 const OUT = path.join(__dirname, "..", "portal", P), ZIP = path.join(__dirname, "..", "portal", `amago-web-${P}.zip`);
 const SERVER = (process.env.AMAGO_SERVER || "").replace(/\/+$/, "");
 const EMBED = process.argv.includes("--embed");
-const DIRS = ["vendor", "fonts", "models", "portraits", "arenas", "sprites", "skins", "props", "ui", "anim", "kk", "h3d"];
+const DIRS = ["vendor", "fonts", "models", "portraits", "arenas", "sprites", "skins", "props", "ui", "anim", "kk", "h3d", "sfx"];
 if (!/^https:\/\//.test(SERVER)) { console.error("Falta AMAGO_SERVER (https://…)."); process.exit(1); }
 fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT, { recursive: true });
 if (EMBED) {

@@ -96,6 +96,8 @@ const server = http.createServer((req, res) => {
   if (url === "/vendor/three.min.js") return serve(req, res, path.join(root, "vendor", "three.min.js"), "text/javascript; charset=utf-8", 86400);
   const asset = url.match(/^\/(models|portraits|arenas|sprites|skins|props|ui|anim|kk|h3d)\/([a-z0-9_-]+)\.(glb|webp)$/);
   if (asset) return serve(req, res, path.join(root, asset[1], asset[2] + "." + asset[3]), asset[3] === "glb" ? "model/gltf-binary" : "image/webp", 86400);
+  const snd = url.match(/^\/sfx\/([a-z0-9_-]+)\.m4a$/);
+  if (snd) return serve(req, res, path.join(root, "sfx", snd[1] + ".m4a"), "audio/mp4", 604800);
   const font = url.match(/^\/fonts\/([a-z0-9_-]+)\.woff2$/);
   if (font) return serve(req, res, path.join(root, "fonts", font[1] + ".woff2"), "font/woff2", 604800);
   if (url === "/privacidad") return serve(req, res, path.join(root, "privacidad.html"), "text/html; charset=utf-8", 3600);

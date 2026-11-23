@@ -2586,7 +2586,7 @@ const AU={ctx:null};
 function actx(){if(!S.snd)return null;try{if(!AU.ctx){AU.ctx=new (window.AudioContext||window.webkitAudioContext)();
   /* bus maestro con compresor: varias capas a la vez no saturan */
   const comp=AU.ctx.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=6;comp.attack.value=.003;comp.release.value=.15;
-  AU.bus=AU.ctx.createGain();AU.bus.gain.value=.9;AU.bus.connect(comp).connect(AU.ctx.destination);}
+  AU.bus=AU.ctx.createGain();AU.bus.gain.value=.9;AU.bus.connect(comp).connect(AU.ctx.destination);sfxLoad();}
   if(AU.ctx.state==="suspended"||AU.ctx.state==="interrupted")AU.ctx.resume();return AU.ctx;}catch(e){return null;}}
 document.addEventListener("visibilitychange",()=>{try{if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else AU.ctx.resume();}catch(e){}
   /* al volver de segundo plano: si la conexión online se cortó, intentar volver a la partida */
@@ -2606,8 +2606,17 @@ function noise(d,vol=.2,freq=800,delay=0,ftype="lowpass"){
   s.buffer=b;f.type=ftype;f.frequency.value=freq;g.gain.value=vol;
   s.connect(f).connect(g).connect(AU.bus||c.destination);s.start(t);
 }
+/* sonidos reales (Kenney, CC0, sfx/*.m4a); si alguno no ha cargado, suena la versión sintetizada de siempre */
+const SFX_FILE={tap:"tap",tap1:"tap",tap2:"tap",tap3:"tap",sel:"sel",nope:"nope",buy:"buy",coin:"coin",ding:"coin",ppding:"coin",key:"coin",chest:"chest",open:"chest",
+  hit:"hit",hurt:"hurt",ko:"ko",kill:"kill",miss:"miss",near:"near",shoot:"shoot",fire:"shoot",win:"win",lose:"lose",levelup:"reward",arena:"reward",go:"go",banner:"banner",pop:"pop",drop:"pop",quake:"quake",stamp:"quake"};
+const SFX_VOL={tap:.5,sel:.6,nope:.6,miss:.55,near:.7,shoot:.55,banner:.6,pop:.6,go:.7,win:.85,lose:.8,reward:.85,kill:.9,hit:1,hurt:1,ko:1,quake:.8,coin:.7,buy:.7,chest:.8};
+function sfxLoad(){if(AU.buf)return;AU.buf={};const base=(window.AMAGO_ASSETS||"")+"sfx/";
+  for(const f of new Set(Object.values(SFX_FILE)))fetch(base+f+".m4a").then(r=>r.ok?r.arrayBuffer():null).then(b=>b&&new Promise((res,rej)=>AU.ctx.decodeAudioData(b,res,rej))).then(d=>{if(d)AU.buf[f]=d;}).catch(()=>{});}
+function sfxPlay(n){const f=SFX_FILE[n],b=f&&AU.buf&&AU.buf[f];if(!b)return false;const c=actx();if(!c)return false;
+  try{const src=c.createBufferSource(),g=c.createGain();src.buffer=b;src.playbackRate.value=n==="tap2"?1.08:n==="tap3"?1.16:1+(Math.random()-.5)*.06;g.gain.value=SFX_VOL[f]??.8;src.connect(g).connect(AU.bus);src.start();return true;}catch(e){return false;}}
 function sfx(n){
   if(!S.snd)return;
+  if(sfxPlay(n))return;
   switch(n){
     case "tap":tone(700,.05,"triangle",.07);break;
     case "web":noise(.22,.12,5200,.02,"highpass");tone(1400,.18,"sine",.05,500);break;
