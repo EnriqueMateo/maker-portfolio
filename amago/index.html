@@ -3901,7 +3901,7 @@ function resize(){
   const w=canvas.clientWidth||innerWidth,h=canvas.clientHeight||innerHeight;
   rnd3.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();fitCamera(cam.aspect);
 }
-let keepR=null,prNow=Math.min(3,devicePixelRatio||1),prT=0,prN=0,prAt=0;
+let keepR=null,prNow=Math.min(2.5,devicePixelRatio||1),prT=0,prN=0,prAt=0;
 /* calidad adaptativa: mide los fotogramas y baja la resolución de dibujo si va lento (nunca por debajo de 1,5×) */
 function prWatch(){
   const now=performance.now();if(!prAt){prAt=now;return;}
@@ -4257,7 +4257,7 @@ function studioTex(k){
 }
 function frame(){
   if(!r||!stage)return;
-  const W=innerWidth,H=innerHeight,pr=Math.min(3,devicePixelRatio||1);
+  const W=innerWidth,H=innerHeight,pr=Math.min(2.25,devicePixelRatio||1);/* a 3× no se nota la diferencia y cuesta casi el doble de píxeles */
   if(cv.width!==Math.round(W*pr)||cv.height!==Math.round(H*pr)){r.setPixelRatio(pr);r.setSize(W,H,false);}
   /* encuadre: el héroe ocupa ~60 % del alto del escenario y queda centrado en él */
   const rc=stage.getBoundingClientRect(),want=Math.max(160,rc.height*(STUDIO?.69:.56)),tan=Math.tan(cam.fov*Math.PI/360),dist=HH*H/(2*tan*want),mid=HH*.5;
