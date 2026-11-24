@@ -3698,6 +3698,7 @@ function animateKK(u,t,st,act,at_){
 /* ---- héroes 3D sacados de su propia ilustración (art/h3d): la malla está en las mismas coordenadas que la carta 2D,
    así que usa el mismo esqueleto y las mismas animaciones (RIG2D), pero con volumen, luz, contorno y giro real ---- */
 const H3DTONE=(()=>{const q=/[?&]tone=([\d.,]+)/.exec(location.search);return q?q[1].split(",").map(Number):[1.04,.9,.6];})();
+const H3DFLIP=new Set(["bum"]);
 const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","coloso"],H3D={},H3DYAW={};let h3dP=null;
 const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")!=="0";}catch(e){return true;}})();
 function loadH3D(ids){
@@ -3706,6 +3707,7 @@ function loadH3D(ids){
   h3dP=h3dP||{};
   return Promise.all(live.map(id=>h3dP[id]||(h3dP[id]=new Promise(res=>loadGLB(BASE+"h3d/"+id+EXT,g=>{
     let geo=null;g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(o.isMesh&&!geo)geo=o.geometry.clone().applyMatrix4(o.matrixWorld);});
+    /* algunos modelos generados salen con la cara hacia atrás */if(geo&&H3DFLIP.has(id))geo.rotateY(Math.PI);
     L.load(BASE+"h3d/"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=8;if(geo)H3D[id]={geo,tex:t};res();},undefined,()=>res());
   },()=>res())))));
 }
@@ -3714,8 +3716,8 @@ function h3dHero(id){
   const geo=src.geo.clone();geo.scale(h,h,h);
   /* colas y piezas que salen mucho hacia atrás: con la inclinación hacia la cámara cenital se hundían bajo las casillas
      (se veía solo su contorno). Se acercan al cuerpo por detrás de un tope, sin tocar la parte visible */
-  {const P=geo.attributes.position,a=P.array;let zf=-1e9;for(let i=2;i<a.length;i+=3)zf=Math.max(zf,a[i]);const zc=zf-h*.42;
-    for(let i=2;i<a.length;i+=3)if(a[i]<zc)a[i]=zc+(a[i]-zc)*.25;P.needsUpdate=true;geo.computeBoundingSphere();}
+  {const P=geo.attributes.position,a=P.array;let zf=-1e9;for(let i=2;i<a.length;i+=3)zf=Math.max(zf,a[i]);const zc=zf-h*.75;/* solo colas muy largas: el cuerpo conserva todo su volumen */
+    for(let i=2;i<a.length;i+=3)if(a[i]<zc)a[i]=zc+(a[i]-zc)*.4;P.needsUpdate=true;geo.computeBoundingSphere();}
   const mat=kkMat(src.tex,null,H3DTONE),sf=window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
   /* las mallas generadas traen caras con la orientación al revés (la cola del dragón salía hueca, solo con contorno): se dibujan por las dos caras */
   mat.side=T.DoubleSide;
@@ -3738,7 +3740,7 @@ function faceH3D(u,t,st,act){
   const ry=u.body.parent?u.body.parent.rotation.y:0,face=st.walk||act==="attack",y0=H3DYAW[u.id]||0;
   /* al atacar se gira hacia el rival pero en tres cuartos: de espaldas a la cámara la textura generada pierde color */
   const want=act==="attack"?Math.sin(ry)*.95+(Math.cos(ry)<0?.55*Math.sign(Math.sin(ry)||1):0)+y0:st.walk?Math.sin(ry)*.75+y0:(u.flat?0:.3),dy=Math.atan2(Math.sin(want-(u.yaw??want)),Math.cos(want-(u.yaw??want)));u.yaw=(u.yaw??want)+dy*Math.min(1,dt*10);
-  _kq1.setFromAxisAngle(_kY,-ry);_kq2.setFromAxisAngle(_kX,u.flat?0:-.5);_kq3.setFromAxisAngle(_kY,u.yaw);u.pivot.quaternion.copy(_kq1).multiply(_kq2).multiply(_kq3);
+  _kq1.setFromAxisAngle(_kY,-ry);_kq2.setFromAxisAngle(_kX,u.flat?0:-.3);_kq3.setFromAxisAngle(_kY,u.yaw);u.pivot.quaternion.copy(_kq1).multiply(_kq2).multiply(_kq3);
 }
 function makeHero(id,skin){if(!skin&&H3D[id]&&SPRITES[id]){const g=h3dHero(id);g.userData.id=id;return g;}if(!skin&&KKM[id]&&KKCLIPS){const g=kkHero(id);g.userData.id=id;return g;}if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
 
