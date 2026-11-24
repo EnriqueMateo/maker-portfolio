@@ -1,0 +1,172 @@
+<title>AMAGO: plan 500</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: una columna de lectura de ~70 caracteres, con bandas a lo ancho solo para la simulación y el plan */
+:root{
+  --bg:#eef2fb; --card:#ffffff; --fg:#1d1033; --mut:#5a5878; --line:#d5dbef;
+  --acc:#2f6fe0; --gold:#e3a400; --red:#d8394f; --ok:#1f9e57; --band:#e2e8f8;
+  --f-disp:"Lilita One","Arial Rounded MT Bold",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12122a; --card:#1c1c3c; --fg:#ecebff; --mut:#a6a6cc; --line:#2f2f5a;
+  --acc:#7aa8ff; --gold:#ffd23f; --red:#ff6b80; --ok:#4fd17a; --band:#181836; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12122a; --card:#1c1c3c; --fg:#ecebff; --mut:#a6a6cc; --line:#2f2f5a;
+  --acc:#7aa8ff; --gold:#ffd23f; --red:#ff6b80; --ok:#4fd17a; --band:#181836; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--f-body);margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:400;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,6vw,46px)}
+h2{font-size:clamp(23px,4vw,30px);margin-top:44px}
+h3{font-size:19px;margin-top:22px}
+p,li{max-width:68ch}
+.lede{font-size:18px;color:var(--mut);margin-top:10px}
+.eyebrow{font:800 12px/1 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--acc)}
+.verdict{margin-top:22px;background:var(--card);border:2px solid var(--fg);border-radius:18px;padding:18px 20px;box-shadow:0 5px 0 var(--fg)}
+.verdict b{color:var(--red)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:18px}
+.kpi{background:var(--card);border-radius:14px;padding:14px;border:1px solid var(--line)}
+.kpi .n{font:400 30px/1 var(--f-disp);font-variant-numeric:tabular-nums}
+.kpi .l{font-size:13.5px;color:var(--mut);margin-top:6px;line-height:1.35}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto;margin-top:12px;background:var(--card);border-radius:14px;border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;font:800 12px/1 var(--f-body);padding:5px 8px;border-radius:99px;white-space:nowrap}
+.p-ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.p-mid{background:color-mix(in srgb,var(--gold) 22%,transparent);color:var(--fg)}
+.p-no{background:color-mix(in srgb,var(--red) 16%,transparent);color:var(--red)}
+.chart{margin-top:14px;background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:560px;height:auto}
+.note{font-size:13.5px;color:var(--mut)}
+.weeks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.week{background:var(--card);border-radius:14px;border:1px solid var(--line);padding:14px 16px;min-width:0}
+.week h3{margin:0 0 6px;font-size:18px}
+.week ul{margin:0;padding-left:18px}.week li{margin:4px 0;font-size:15px}
+.who{font:800 11px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;border-radius:6px;margin-right:6px;vertical-align:1px}
+.w-yo{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+.w-tu{background:color-mix(in srgb,var(--gold) 26%,transparent);color:var(--fg)}
+.src{font-size:13.5px;color:var(--mut)}.src a{color:var(--acc)}
+a{color:var(--acc)}
+a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<p class="eyebrow">AMAGO · lanzamiento</p>
+<h1>¿Se pueden conseguir 500 jugadores el primer mes sin pagar?</h1>
+<p class="lede">Investigación con fuentes públicas, una simulación de 20.000 mundos posibles y el plan que sale de ella. Escrito el 24 de noviembre de 2026.</p>
+
+<div class="verdict">
+<p style="margin:0"><b>Respuesta corta:</b> 500 <em>jugadores</em> (web + móvil) sí, casi seguro, si sacas también la versión web y la mueves en Reddit, itch.io y CrazyGames. 500 <em>descargas en el iPhone</em> en el primer mes es difícil: con todo lo gratis sale en 1 de cada 3 mundos, y con 150–300 € de Apple Ads en 1 de cada 2. Lo que no funciona, y lo confirma tu otra app, es publicar en la App Store y esperar: da unas 40 descargas al mes.</p>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="n">42</div><div class="l">descargas/mes si no se hace nada (tu otra app: ~33/mes)</div></div>
+  <div class="kpi"><div class="n">407</div><div class="l">descargas/mes (mediana) con el plan gratis completo + prensa</div></div>
+  <div class="kpi"><div class="n">≈2.500</div><div class="l">jugadores totales/mes contando la versión web</div></div>
+  <div class="kpi"><div class="n">≈21</div><div class="l">jugadores activos al día 30 (mediana): aquí está el problema real</div></div>
+</div>
+
+<h2>1. ¿Es viable como negocio?</h2>
+<p>Como juego, sí tiene algo distinto: duelo 1 contra 1 a ciegas, partidas de 2 minutos, jugable en el navegador sin instalar. Eso es justo lo que funciona en portales web y en clips cortos. Como fuente de ingresos a corto plazo, no: con compras éticas (sin anuncios en iOS, sin trucos de casino) un juego así ingresa unos 0,02–0,05 € por jugador activo y día.</p>
+<div class="tw"><table>
+<tr><th>Escenario</th><th>Activos al día</th><th>Ingresos/mes aprox.</th><th>Lectura</th></tr>
+<tr><td>Mes 1 típico (plan gratis)</td><td>15–25</td><td>25–40 €</td><td><span class="pill p-no">Cubre Railway y la cuota de Apple</span></td></tr>
+<tr><td>Si un canal explota (CrazyGames, un clip viral, destacado de Apple)</td><td>150–400</td><td>150–400 €</td><td><span class="pill p-mid">Proyecto que se paga solo</span></td></tr>
+<tr><td>Para vivir de ello (≈1.000 €/mes)</td><td>1.500–3.000</td><td>1.000 €+</td><td><span class="pill p-no">Hace falta un éxito, no solo trabajo</span></td></tr>
+</table></div>
+<p>Recomendación: trátalo como un producto que tiene que demostrar retención antes de meter dinero en anuncios. Si en el primer mes el 25 % vuelve al día siguiente y el 8 % a la semana, merece la pena invertir; si no, primero se arregla el juego. La palanca de ingresos más realista no es la App Store sino la web: CrazyGames y Poki reparten publicidad de los portales y no necesitan que nadie descargue nada.</p>
+
+<h2>2. Qué dicen los datos (búsqueda real)</h2>
+<div class="tw"><table>
+<tr><th>Hallazgo</th><th>Qué significa para AMAGO</th></tr>
+<tr><td>Mediana de la industria en 2025: vuelve el 22 % al día 1, menos del 4 % al día 7 y el 0,7 % al día 30. El 10 % mejor: 40 % / 12 % / 4 %.</td><td>Captar sin retener es tirar el esfuerzo. Por eso el juego sigue teniendo prioridad: metas diarias, Mi isla, rachas sin castigo.</td></tr>
+<tr><td>Unos 60 % de las descargas de la App Store vienen de la búsqueda.</td><td>El texto de la ficha en 6 idiomas (ya preparado) es lo único que da descargas solas cada día.</td></tr>
+<tr><td>CrazyGames: en un estudio de 230 juegos web nuevos, la mitad tuvo 11 visitas o menos la primera semana y el 10 % se llevó el 84 %. Si superas la prueba inicial (tiempo de juego y retención), pasas al lanzamiento completo con mucho tráfico.</td><td>Es una lotería con buenas cartas: un juego de 2 minutos con partidas rápidas encaja. En la simulación lo supera 1 de cada 5 mundos.</td></tr>
+<tr><td>Reddit: los subreddits de juegos piden juego jugable gratis, que el autor participe y no repetir el mismo juego a menudo. Un clip editado típico da 0–150 visitas; a veces miles.</td><td>Hay que llevar la versión web, no la de la App Store, y escribir como desarrollador, no como anuncio.</td></tr>
+<tr><td>TikTok: el alcance orgánico de juegos es menos predecible desde 2025; los clips crudos de desarrollo suelen ganar a los pulidos.</td><td>Clips cortos de partidas reales con texto encima («¿dónde estaba?»), no anuncios. El enlace va en la biografía.</td></tr>
+<tr><td>Apple permite nominar tu juego a destacados desde App Store Connect, con al menos 2 semanas de antelación.</td><td>Gratis y lleva 10 minutos. Pocas veces sale, pero cuando sale son miles de descargas.</td></tr>
+<tr><td>Apple Ads España 2025: unos 2,7 $ por descarga de media; juegos más caros (4–6 $).</td><td>150 € ≈ 40–55 descargas. Útil para ganar posiciones en búsqueda, no para escalar.</td></tr>
+</table></div>
+
+<h3>Sobre OnTopRank (el correo que te llegó)</h3>
+<p><span class="pill p-no">No usarlo</span> Es un intercambio en el que desarrolladores instalan y reseñan las apps de otros a cambio de «estrellas», que también se compran con dinero (6,99–59,99 $). Instalar da 10 estrellas y dejar una reseña en la tienda da 20. Las normas de Apple (5.6.3, fraude de descubrimiento) prohíben manipular reseñas, búsquedas y listas, y la sanción es retirar las apps y expulsar al desarrollador. Sus propias condiciones dicen que cumplir las normas de la tienda es tu responsabilidad. No da nombre de empresa ni dirección. Con una cuenta de desarrollador como la tuya, el riesgo no compensa unas pocas descargas.</p>
+
+<h2>3. La simulación: 20.000 mundos por estrategia</h2>
+<p>Cada mundo sortea cómo le va a cada canal (con colas largas: la mayoría de posts dan poco y unos pocos mucho) y un factor común de «gancho» del juego que afecta a todos los canales a la vez. El escenario «no hacer nada» está calibrado con tu otra app.</p>
+<div class="chart" id="chart" role="img" aria-label="Descargas del primer mes por estrategia, rango del 10 al 90 por ciento y mediana, con una línea en 500"></div>
+<p class="note">Barra: del mundo malo (10 %) al bueno (90 %). Punto: mediana. Línea discontinua: 500 descargas.</p>
+<div class="tw"><table id="simtab"><tr><th>Estrategia</th><th>Descargas (mediana)</th><th>Jugadores con web (mediana)</th><th>Prob. ≥500 descargas</th><th>Prob. ≥250 descargas</th><th>Activos día 30</th></tr></table></div>
+<p class="note">Supuestos clave: 1,3 descargas/día de búsqueda sin trabajo (×1,8 con la ficha en 6 idiomas); 4 % de probabilidad de destacado de Apple; 8 posts de Reddit con ~80 visitas de mediana; 30 clips con un 0,5 % de probabilidad de viral cada uno; 40 correos a medios y creadores pequeños con un 6 % de respuesta; 22 % de probabilidad de superar la prueba de CrazyGames. El script está en amago/app/store/sim/sim500.py.</p>
+
+<h2>4. El plan</h2>
+<p>Lo marcado <span class="who w-yo">yo</span> lo hago yo de forma automática o te lo dejo listo. Lo marcado <span class="who w-tu">tú</span> necesita tu cuenta o tu cara: publicar en redes, enviar correos y aceptar condiciones lo haces tú. Calcula unos 20 minutos al día.</p>
+<div class="weeks">
+  <div class="week"><h3>2 semanas antes</h3><ul>
+    <li><span class="who w-tu">tú</span>Nominación a destacados en App Store Connect (tipo «App Launch»). Texto: <span class="who w-yo">yo</span>.</li>
+    <li><span class="who w-yo">yo</span>Ficha en 6 idiomas lista; tú la pegas con la versión.</li>
+    <li><span class="who w-tu">tú</span>Subir la versión web a itch.io (zip listo) y a CrazyGames.</li>
+    <li><span class="who w-yo">yo</span>Lista de 40 medios y creadores pequeños de juegos móviles en ES/EN con correo redactado para cada uno.</li>
+  </ul></div>
+  <div class="week"><h3>Semana 1: lanzamiento</h3><ul>
+    <li><span class="who w-tu">tú</span>Posts en r/WebGames, r/playmygame y r/iosgaming (uno por día, textos míos).</li>
+    <li><span class="who w-tu">tú</span>Enviar los 40 correos (borradores míos).</li>
+    <li><span class="who w-yo">yo</span>Un clip al día de una partida real con texto, listo para subir a TikTok, Shorts y Reels.</li>
+    <li><span class="who w-yo">yo</span>Vigilar en el servidor descargas, retención y dónde abandonan; arreglar lo que falle ese mismo día.</li>
+  </ul></div>
+  <div class="week"><h3>Semanas 2 y 3</h3><ul>
+    <li><span class="who w-tu">tú</span>Screenshot Saturday, r/IndieGaming (una vez), foros ES (Mediavida, Discord indie).</li>
+    <li><span class="who w-yo">yo</span>Actualización pequeña con novedad visible (héroe o estilo de isla) para una segunda ronda de posts.</li>
+    <li><span class="who w-tu">tú</span>Opcional: Apple Ads 5–10 €/día a palabras exactas («juego 1 contra 1», «duelo»).</li>
+  </ul></div>
+  <div class="week"><h3>Semana 4: decidir</h3><ul>
+    <li><span class="who w-yo">yo</span>Informe con datos reales frente a esta simulación.</li>
+    <li>Si el día 7 retiene ≥8 %: subir Apple Ads y probar Poki. Si no: dos semanas solo de juego.</li>
+  </ul></div>
+</div>
+
+<h3>Lo que no hago</h3>
+<p>Nada de reseñas pagadas o intercambiadas, cuentas falsas, bots, amigos ni familia. Tampoco puedo publicar en tus redes ni enviar correos sin que tú lo apruebes cada vez: por eso «totalmente autónomo» se queda en «yo preparo todo y tú pulsas publicar».</p>
+
+<h2>Fuentes</h2>
+<ul class="src">
+<li><a href="https://gamedevreports.substack.com/p/gameanalytics-mobile-gaming-benchmarks">GameAnalytics: benchmarks de juegos móviles 2025</a></li>
+<li><a href="https://vibetoplist.com/blog/get-people-to-play-your-game">VibeTopList: primeras semanas de 230 juegos web</a></li>
+<li><a href="https://portalready.world/portals/crazygames/">CrazyGames: fases de lanzamiento</a> · <a href="https://docs.crazygames.com/faq/">FAQ oficial de CrazyGames</a></li>
+<li><a href="https://app.cinevva.com/guides/web-game-monetization">Monetización de juegos web 2026</a> · <a href="https://www.bountyboard.gg/blog/how-to-monetize-an-html5-game">Reparto de ingresos HTML5</a></li>
+<li><a href="https://www.steampageanalyzer.com/blog/reddit-indie-game-marketing">Reddit para juegos indie: normas y resultados</a> · <a href="https://www.threadotter.com/subreddit-rules/playmygame">Normas de r/playmygame</a></li>
+<li><a href="https://presskit.gg/field-guides/tiktok-indie-game-marketing">TikTok para desarrolladores indie</a> · <a href="https://gtstu.com/indie-game-devlog-audience-growth-youtube-tiktok/">Devlogs en 2026</a></li>
+<li><a href="https://developer.apple.com/app-store/getting-featured">Apple: conseguir un destacado</a> · <a href="https://developer.apple.com/app-store/review/guidelines/">Normas de revisión de Apple</a></li>
+<li><a href="https://www.mobileaction.co/report/apple-ads-2026-benchmark-report/executive-summary/">MobileAction: Apple Ads 2026</a> · <a href="https://www.apptweak.com/en/aso-blog/apple-ads-benchmarks">AppTweak: Apple Ads por categoría</a></li>
+<li><a href="https://screenfast.app/blog/indie-ios-app-marketing-strategy-2026">Marketing de apps iOS indie 2026</a> · <a href="https://cas.ai/blog/the-mobile-game-publishing-reality-why-most-indies-fail-and-what-actually-works/">La realidad de publicar juegos móviles</a></li>
+<li><a href="https://ontoprank.com/developers">OnTopRank: página para desarrolladores</a></li>
+</ul>
+</div>
+
+<script>
+const SIM=[
+ ["A · No hacer nada",[19,42,90],42,0,0,1],
+ ["B · ASO + nominación Apple",[37,82,197],82,4,6,2],
+ ["C · Gratis completo (web, Reddit, foros, clips)",[133,252,581],2240,13,51,16],
+ ["D · C + prensa y creadores",[190,407,1076],2465,38,79,21],
+ ["E · D + Apple Ads 150 €",[227,471,1182],2535,46,86,22],
+ ["F · D + Apple Ads 300 €",[259,531,1301],2606,54,91,23]];
+const tab=document.getElementById("simtab");
+for(const [n,q,pl,p5,p2,a] of SIM){const r=tab.insertRow();r.innerHTML=`<td>${n}</td><td>${q[1]}</td><td>${pl.toLocaleString("es")}</td><td>${p5} %</td><td>${p2} %</td><td>${a}</td>`;}
+(function(){const W=760,L=270,R=24,rowH=46,top=30,H=top+SIM.length*rowH+30,max=1400,x=v=>L+(W-L-R)*Math.min(v,max)/max;
+  const cs=getComputedStyle(document.documentElement),c=k=>cs.getPropertyValue(k).trim();
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Nunito,system-ui,sans-serif">`;
+  for(const t of [0,250,500,750,1000,1250]){s+=`<line x1="${x(t)}" x2="${x(t)}" y1="${top-8}" y2="${H-24}" stroke="${c("--line")}"/><text x="${x(t)}" y="${H-8}" font-size="12" text-anchor="middle" fill="${c("--mut")}">${t}</text>`;}
+  s+=`<line x1="${x(500)}" x2="${x(500)}" y1="${top-14}" y2="${H-24}" stroke="${c("--red")}" stroke-width="2" stroke-dasharray="5 4"/><text x="${x(500)+6}" y="${top-16}" font-size="12" font-weight="800" fill="${c("--red")}">500</text>`;
+  SIM.forEach(([n,q],i)=>{const y=top+i*rowH+rowH/2;
+    s+=`<text x="${L-12}" y="${y+4}" font-size="13" text-anchor="end" fill="${c("--fg")}">${n.length>34?n.slice(0,33)+"…":n}</text>`;
+    s+=`<rect x="${x(q[0])}" y="${y-8}" width="${Math.max(3,x(q[2])-x(q[0]))}" height="16" rx="8" fill="${c("--acc")}" opacity=".35"/>`;
+    s+=`<circle cx="${x(q[1])}" cy="${y}" r="7" fill="${c("--acc")}" stroke="${c("--card")}" stroke-width="2"/>`;
+    s+=`<text x="${x(q[1])}" y="${y-13}" font-size="12" font-weight="800" text-anchor="middle" fill="${c("--fg")}">${q[1]}</text>`;});
+  document.getElementById("chart").innerHTML=s+"</svg>";})();
+</script>
