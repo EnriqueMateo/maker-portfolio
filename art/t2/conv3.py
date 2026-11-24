@@ -19,6 +19,10 @@ if len(F) > MAXF:
     d = trimesh.load(f'{td}/d.obj', force='mesh', process=False)
     V = np.asarray(d.vertices, np.float64); F = np.asarray(d.faces); UV = np.asarray(d.visual.uv, np.float64)
     print('reducido a', len(F), flush=True)
+# fuera las láminas finas a ras de suelo (sombras del dibujo convertidas en malla): se veían como líneas negras junto a los pies
+_h = V[:, 1].max() - V[:, 1].min(); _low = V[:, 1] < V[:, 1].min() + _h * .012
+_fl = _low[F].all(1)
+if _fl.any() and _fl.sum() < len(F) * .05: F = F[~_fl]; print('láminas de suelo quitadas', int(_fl.sum()), flush=True)
 # modelos que el generador deja mirando hacia otro lado: se giran (eje Y) antes de todo para que el frente sea +Z
 ROTS = {'bum': np.pi, 'flecha': -np.pi / 2, 'rey': np.pi, 'brasa': np.pi, 'arana': -np.pi * .75}
 r = float(os.environ.get('ROT', ROTS.get(i, 0)))
@@ -87,11 +91,18 @@ if os.environ.get('PROJ', '0' if (i.startswith('pr_') or i.startswith('sk_') or 
     if cc < float(os.environ.get('CCMIN', '-1')): print('no encaja: sin proyección', flush=True); inner[:] = False
     # recorrer la textura: posición, normal y profundidad de cada texel
     T = np.asarray(tex, np.float32); TH, TW = T.shape[:2]
+    # los colores del modelo se igualan a los del dibujo (media y contraste en Lab) para que no haya saltos al pasar de uno a otro
+    lab = cv2.cvtColor(T.astype(np.uint8), cv2.COLOR_RGB2LAB).astype(np.float32); ref = cv2.cvtColor(spa[..., :3].astype(np.uint8)[inner][None], cv2.COLOR_RGB2LAB).astype(np.float32)[0]
+    cur = cv2.cvtColor(np.asarray(Image.fromarray(Mimg.astype(np.uint8)), np.uint8)[Mm & inner][None], cv2.COLOR_RGB2LAB).astype(np.float32)[0]
+    for ch in range(3):
+        sc_ = np.clip(ref[:, ch].std() / max(cur[:, ch].std(), 1e-3), .85, 1.2); lab[..., ch] = (lab[..., ch] - cur[:, ch].mean()) * sc_ + ref[:, ch].mean()
+    T = cv2.cvtColor(np.clip(lab, 0, 255).astype(np.uint8), cv2.COLOR_LAB2RGB).astype(np.float32)
+    # el dibujo se difumina hacia sus bordes: sin líneas ni cortes donde termina
+    feather = np.clip(cv2.distanceTransform(inner.astype(np.uint8), cv2.DIST_L2, 5) / 16., 0, 1)
     U = np.stack([UV[:, 0] * TW, (1 - UV[:, 1]) * TH], 1)
     out = T.copy(); hits = 0
     for f in F:
-        nz = (N[f, 2]).mean()
-        if nz < .2: continue
+        if N[f, 2].max() < .25: continue
         t = U[f]; mn = np.clip(np.floor(t.min(0)).astype(int), 0, [TW - 1, TH - 1]); mx = np.clip(np.ceil(t.max(0)).astype(int), 0, [TW - 1, TH - 1])
         gx, gy = np.meshgrid(np.arange(mn[0], mx[0] + 1) + .5, np.arange(mn[1], mx[1] + 1) + .5)
         d = (t[1, 1] - t[2, 1]) * (t[0, 0] - t[2, 0]) + (t[2, 0] - t[1, 0]) * (t[0, 1] - t[2, 1])
@@ -107,10 +118,17 @@ if os.environ.get('PROJ', '0' if (i.startswith('pr_') or i.startswith('sk_') or 
         xs = np.clip(Xs.astype(int), 0, Ws - 1); ys = np.clip(Ys.astype(int), 0, Hs - 1)
         vis = (Zt >= zb[yi, xi] - zr * .012) & inner[ys, xs] & (sal[ys, xs] > 250)
         if not vis.any(): continue
-        wt = np.clip((nz - .2) / .35, 0, 1)
+        nzt = (w0 * N[f[0], 2] + w1 * N[f[1], 2] + w2 * N[f[2], 2])[vis]
+        k_ = np.clip((nzt - .3) / .45, 0, 1); wt = (k_ * k_ * (3 - 2 * k_) * feather[ys[vis], xs[vis]])[:, None]
         ty = (gy[ok] - .5).astype(int)[vis]; tx = (gx[ok] - .5).astype(int)[vis]
         out[ty, tx] = out[ty, tx] * (1 - wt) + spa[ys[vis], xs[vis], :3] * wt; hits += vis.sum()
     tex = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)); print('proyectados', hits, flush=True)
+# pintura suave: quita el ruido y los cambios bruscos de color sin borrar los bordes (ojos, líneas)
+if not i.startswith('pr_') and os.environ.get('SMOOTH', '1') == '1':
+    import cv2
+    a_ = np.asarray(tex)
+    for _ in range(2): a_ = cv2.bilateralFilter(a_, 9, 26, 6)
+    tex = Image.fromarray(a_)
 g = trimesh.Trimesh(vertices=C, faces=F, vertex_normals=N, process=False); g.visual = trimesh.visual.TextureVisuals(uv=UV)
 os.makedirs(G, exist_ok=True); g.export(f'{G}/{i}.glb'); tex.save(f'{G}/{i}.webp', quality=92, method=6)
 print('ok', i, len(F), len(C), 'ratio xy', round(sx / sy, 3), C.min(0).round(2), C.max(0).round(2))
