@@ -1158,6 +1158,7 @@ body.h3d .hstage{touch-action:none;cursor:grab}
 .endt2.win{color:#ffd23f;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);letter-spacing:.01em}
 .endt2.lose{color:#d9e2ff;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
 .endt2.draw{color:#bfe9ff;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
+.endstage{position:relative;width:100%;height:clamp(170px,26vh,250px);flex:none}
 .podium{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:2px;height:170px}
 .podium .h{height:120px;display:grid;place-items:end center;animation:appear .4s var(--e-pop) both}
 .podium .h:nth-child(2){height:150px}
@@ -4428,7 +4429,7 @@ const STYLE={brasa:"breath",ojo:"breath",muro:"stomp",rayo:"cast"};
 const ACTS=["attack","jump","hit","attack","jump"];/* sin voltereta: girar sobre sí mismo parecía un baile */
 const HH=1.25;/* altura del héroe en la escena */
 let r=null,cv=null,sc,cam,isle,hero=null,heroId=null,raf=0,stage=null,on=false,anim=[],water=null,clouds=[],trees=[];
-let rotY=.3,vel=0,drag=null,lastTouch=0,act=null,actT=0,actI=0,pop=1,loadTok=0;
+let rotY=.3,vel=0,drag=null,lastTouch=0,act=null,actT=0,actI=0,pop=1,loadTok=0,cele=false;
 const GLB={};
 function loadHero(id){return GLB[id]||(GLB[id]=new Promise(res=>GFX.loadGLB(GFX.BASE+"models/"+id+GFX.EXT,g=>res(prep(patch(g.scene,id))),()=>{delete GLB[id];res(null);})));}
 /* arreglos de los modelos generados: Rayo tiene un agujero donde va la nariz */
@@ -4536,7 +4537,7 @@ function loop(){
   /* batería: con una ventana encima no se dibuja, y con el héroe quieto se va a 30 fps */
   const t=performance.now()/1000;
   if((document.hidden||(typeof UI!=="undefined"&&UI.modal))&&t-lastDrawT<.5)return;
-  if(!drag&&Math.abs(vel)<.001&&!act&&(skipF^=1))return;
+  if(!drag&&Math.abs(vel)<.001&&!act&&!cele&&(skipF^=1))return;
   lastDrawT=t;frame();
   if(water){water.offset.x=t*.012;water.offset.y=Math.sin(t*.4)*.012;}
   for(const c of clouds)c.position.x=c.userData.x0+Math.sin(t*.05+c.userData.x0)*1.5;
@@ -4544,7 +4545,7 @@ function loop(){
   if(hero){
     if(!drag){rotY+=vel;vel*=.94;if(Math.abs(vel)<.0005&&t-lastTouch>2.5)rotY+=(.3-norm(rotY))*.03;}
     hero.rotation.y=rotY;pop+=(1-pop)*.18;animate(t);
-    if(hero.userData.spr){const a=act==="attack"||act==="hit"?act:null;GFX.animate(hero.userData.spr,t,{act:a,actT:a?t-actT:0});}
+    if(hero.userData.spr){const a=cele?"win":act==="attack"||act==="hit"?act:null;GFX.animate(hero.userData.spr,t,{act:a,actT:a?t-actT:0});}
     const b=sc.userData.blob,yy=hero.userData.body.position.y;b.scale.setScalar(1-Math.min(.5,yy*.6));b.material.opacity=1-Math.min(.6,yy);
   }
   r.render(sc,cam);GFX.kkOutline(r,sc,cam,3);
@@ -4559,7 +4560,7 @@ function onUp(){if(!drag)return;const d=drag;drag=null;lastTouch=performance.now
 function mount(stageEl,id){
   if(!cv){cv=document.createElement("canvas");cv.id="home3d";cv.setAttribute("aria-hidden","true");document.body.prepend(cv);
     r=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setClearColor(0x000000,0);r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=1.05;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;build();sc.environment=GFX.envFor(r);}
-  stage=stageEl;document.body.classList.add("h3d");if(STUDIO){let k="pradera";try{k=arenaOf(S.tro).a.k;}catch(e){}/* fondo transparente: detrás se ve el paisaje pintado de la arena (CSS del inicio) */sc.background=window.AMAGO_STUDIOBG?studioTex(k):null;}
+  stage=stageEl;cele=false;document.body.classList.add("h3d");if(STUDIO){let k="pradera";try{k=arenaOf(S.tro).a.k;}catch(e){}/* fondo transparente: detrás se ve el paisaje pintado de la arena (CSS del inicio) */sc.background=window.AMAGO_STUDIOBG?studioTex(k):null;}
   stage.addEventListener("pointerdown",onDown);stage.addEventListener("pointermove",onMove);stage.addEventListener("pointerup",onUp);stage.addEventListener("pointercancel",onUp);
   set(id);if(!on){on=true;loop();}
 }
@@ -4582,7 +4583,7 @@ function set(id){
 }
 function unmount(){on=false;cancelAnimationFrame(raf);document.body.classList.remove("h3d");
   if(stage){stage.removeEventListener("pointerdown",onDown);stage.removeEventListener("pointermove",onMove);stage.removeEventListener("pointerup",onUp);stage.removeEventListener("pointercancel",onUp);}stage=null;}
-return {mount,unmount,set,preload:loadHero,rot:v=>{rotY=v;vel=0;lastTouch=performance.now()/1000;}};
+return {mount,unmount,set,preload:loadHero,celebrate:v=>{cele=!!v;act=null;},rot:v=>{rotY=v;vel=0;lastTouch=performance.now()/1000;}};
 })();
 
 /* ================= pantallas ================= */
@@ -6337,7 +6338,9 @@ function endScreen(win,draw,body){
   {const t=$(".toast");if(t)t.remove();TQ.length=0;tqOn=null;}
   UI.screen="end";app.className="center";setBg();
   app.innerHTML=`<div class="mbg"></div><span class="godrays" style="position:fixed;top:30%;z-index:-1"></span><p class="endt2 ${win?"win":draw?"draw":"lose out"}">${win?"¡VICTORIA!":draw?"EMPATE":"DERROTA"}</p>${G&&G.score?`<p class="endscore out">${G.score.p} – ${G.score.b}${G.opp?` <small>contra ${esc(G.opp.name)}</small>`:""}</p>`:""}
-    <div class="podium">${G.used.p.slice(0,3).map(t=>`<div class="h">${heroArt(t)}</div>`).join("")}<span class="floorglow" style="bottom:-10px"></span></div>${body}`;
+    ${win&&SHOW?`<div class="endstage"></div>`:`<div class="podium">${G.used.p.slice(0,3).map(t=>`<div class="h">${heroArt(t)}</div>`).join("")}<span class="floorglow" style="bottom:-10px"></span></div>`}${body}`;
+  /* victoria: tu último héroe celebra en 3D (antes, dibujos planos) */
+  if(win&&SHOW){const hid=G.used.p[G.used.p.length-1]||S.fav;SHOW.mount($(".endstage"),hid);SHOW.celebrate(true);}
   if(win){confetti();sfx("win");}else if(!draw)sfx("lose");
 }
 function arenaUp(A){
