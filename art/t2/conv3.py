@@ -140,9 +140,21 @@ if os.environ.get('CLEANBACK') == '1':
         if N[f, 2].mean() > -.15: continue
         cv2.fillConvexPoly(back, np.round(U2[f]).astype(np.int32), 1)
     l_ = T2.astype(np.float32).mean(2) / 255; sat_ = (T2.max(2).astype(np.float32) - T2.min(2)) / (T2.max(2) + 1e-6)
-    wm = ((back > 0) & (l_ > .62) & (sat_ < .2)).astype(np.uint8)
+    wm = ((back > 0) & (l_ > float(os.environ.get('CBT', '.62'))) & (sat_ < .25)).astype(np.uint8)
     wm = cv2.dilate(wm, np.ones((5, 5), np.uint8))
     tex = Image.fromarray(cv2.inpaint(T2, wm * 255, 9, cv2.INPAINT_TELEA)); print('manchas de espalda', int(wm.sum()), flush=True)
+# puntos oscuros sueltos en una zona de la cara (FIXDOT="x0,x1,y0,y1" en coordenadas 0-1 de la ilustración): se rellenan con la piel de alrededor
+if os.environ.get('FIXDOT'):
+    import cv2
+    x0, x1, y0, y1 = map(float, os.environ['FIXDOT'].split(','))
+    T3 = np.asarray(tex).copy(); TH3, TW3 = T3.shape[:2]; box = np.zeros((TH3, TW3), np.uint8)
+    U3 = np.stack([UV[:, 0] * TW3, (1 - UV[:, 1]) * TH3], 1)
+    fx = px[F].mean(1) / Ws; fy = py[F].mean(1) / Hs
+    for k_, f in enumerate(F):
+        if x0 <= fx[k_] <= x1 and y0 <= fy[k_] <= y1 and N[f, 2].mean() > .2: cv2.fillConvexPoly(box, np.round(U3[f]).astype(np.int32), 1)
+    lum3 = T3.astype(np.float32).mean(2)
+    dark = ((box > 0) & (lum3 < 95)).astype(np.uint8); dark = cv2.dilate(dark, np.ones((7, 7), np.uint8))
+    tex = Image.fromarray(cv2.inpaint(T3, dark * 255, 7, cv2.INPAINT_TELEA)); print('puntos oscuros', int(dark.sum()), flush=True)
 # pintura suave: quita el ruido y los cambios bruscos de color sin borrar los bordes (ojos, líneas)
 if not i.startswith('pr_') and os.environ.get('SMOOTH', '1') == '1':
     import cv2

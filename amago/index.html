@@ -831,7 +831,8 @@ body.replaying .gbottom{opacity:0;pointer-events:none}
 /* entrenamiento guiado */
 .tcoach{bottom:auto;position:fixed;left:50%;top:calc(118px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(440px,calc(100% - 24px));box-sizing:border-box;z-index:58;display:flex;gap:10px;align-items:center;background:#fff;color:var(--ink-tx,var(--ink));border:3px solid var(--ink);border-radius:18px;padding:10px 12px;box-shadow:0 5px 0 var(--ink);animation:coach .35s cubic-bezier(.3,1.5,.5,1);pointer-events:none}
 .tcoach:not(.ingame){top:auto;bottom:calc(196px + env(safe-area-inset-bottom,0px))}
-.tcoach.ingame{top:auto;bottom:calc(132px + env(safe-area-inset-bottom,0px))}/* abajo: arriba tapaba al rival justo cuando pedía dispararle */
+.tcoach.ingame{top:auto;bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+.tcoach.up{top:calc(118px + env(safe-area-inset-top,0px))!important;bottom:auto!important}/* abajo: arriba tapaba al rival justo cuando pedía dispararle */
 .tcoach .cface{width:62px;height:62px;flex:none;display:grid;place-items:center}
 .tcoach .cface img,.tcoach .cface svg{width:100%;height:100%;object-fit:contain}
 .tcoach .cbody{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
@@ -4898,7 +4899,9 @@ const arenaTile=()=>{try{return ARENA_TILE[arenaOf(S.tro).a.k]||ARENA_TILE.prade
 function isleIco(t,f){t=t||myIsle()||arenaTile();f=f||myFrame();
   return `<span class="isleico" style="--a:${hx(t[0])};--b:${hx(t[1])};--f:${hx(f[0])}">${Array.from({length:9},(_,i)=>`<i class="${i%2?"b":""}"></i>`).join("")}</span>`;}
 /* la mano del tutorial nunca se sale de la pantalla (se cortaba en los bordes) */
-function placeHand(el,x,y){el.style.left=Math.max(6,Math.min(innerWidth-64,x))+"px";el.style.top=Math.max(70,Math.min(innerHeight-90,y))+"px";}
+function placeHand(el,x,y){el.style.left=Math.max(6,Math.min(innerWidth-64,x))+"px";el.style.top=Math.max(70,Math.min(innerHeight-90,y))+"px";
+  /* si lo que señala queda detrás del cuadro del entrenador, el cuadro sube arriba (la mano tapaba el texto) */
+  const c=document.querySelector(".tcoach");if(c){const r=c.getBoundingClientRect(),up=c.classList.contains("up");const hit=!up&&y>r.top-40&&y<r.bottom+20;if(hit)c.classList.add("up");else if(up&&y<innerHeight*.45)c.classList.remove("up");}}
 /* ---- inicio ---- */
 function showHome(){
   gameFxOff();UI.screen="home";stopLoop();app.className="home";setBg();ensureDay();MUS.play("menu");
