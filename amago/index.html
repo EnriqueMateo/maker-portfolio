@@ -1146,9 +1146,9 @@ body.h3d .hstage{touch-action:none;cursor:grab}
 
 /* resultados */
 .endt2{margin:max(16px,4vh) 0 0;text-align:center;font:56px/1 var(--f-game);animation:slam .5s var(--e-out) both}
-.endt2.win{background:linear-gradient(#FFF7B0 0%,#FFD84A 45%,#FF9E1A 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:3px var(--ink);filter:drop-shadow(0 5px 0 var(--ink))}
-.endt2.lose{color:#d9e2ff}
-.endt2.draw{color:#bfe9ff}
+.endt2.win{color:#ffd23f;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);letter-spacing:.01em}
+.endt2.lose{color:#d9e2ff;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
+.endt2.draw{color:#bfe9ff;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
 .podium{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:2px;height:170px}
 .podium .h{height:120px;display:grid;place-items:end center;animation:appear .4s var(--e-pop) both}
 .podium .h:nth-child(2){height:150px}
@@ -1584,7 +1584,7 @@ body.gazing::after{content:"";position:fixed;inset:0;pointer-events:none;z-index
 .cmhead{display:flex;align-items:center;gap:10px}
 .cmback{width:52px;height:48px;padding:0;flex:none}.cmback img{width:28px;height:28px}
 .cmtt{flex:1;min-width:0}.cmtt small{font-family:var(--f-game);font-size:12.5px;letter-spacing:.08em;color:#fff;opacity:.9}
-.cmtt h2{margin:0;font-size:17px;line-height:1.05;color:#fff}
+.cmtt h2{margin:0;font:400 20px/1.05 var(--f-game);color:#fff;letter-spacing:.01em;text-wrap:balance}
 .cmst{padding:8px 12px;border-radius:14px;font-family:var(--f-game);font-size:17px;color:#ffe25a;flex:none}
 .cmko{position:relative;width:min(46vw,180px);height:min(30vw,124px);margin:-6px auto 6px;display:flex;align-items:center;justify-content:center}
 .cmko img{height:100%;width:auto;max-width:100%;object-fit:contain;filter:grayscale(.85) brightness(.75) drop-shadow(0 6px 10px #0007);transform:rotate(-8deg)}
@@ -3710,6 +3710,10 @@ function loadH3D(ids){
 function h3dHero(id){
   const src=H3D[id],im=SPRITES[id].image,h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K,w=h*im.width/im.height;
   const geo=src.geo.clone();geo.scale(h,h,h);
+  /* colas y piezas que salen mucho hacia atrás: con la inclinación hacia la cámara cenital se hundían bajo las casillas
+     (se veía solo su contorno). Se acercan al cuerpo por detrás de un tope, sin tocar la parte visible */
+  {const P=geo.attributes.position,a=P.array;let zf=-1e9;for(let i=2;i<a.length;i+=3)zf=Math.max(zf,a[i]);const zc=zf-h*.42;
+    for(let i=2;i<a.length;i+=3)if(a[i]<zc)a[i]=zc+(a[i]-zc)*.25;P.needsUpdate=true;geo.computeBoundingSphere();}
   const mat=kkMat(src.tex,null,H3DTONE),sf=window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
   /* las mallas generadas traen caras con la orientación al revés (la cola del dragón salía hueca, solo con contorno): se dibujan por las dos caras */
   mat.side=T.DoubleSide;
