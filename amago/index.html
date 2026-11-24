@@ -1732,6 +1732,8 @@ html.ui3 .card .art img,html.ui3 .card .art svg{height:122px}
 html.ui3 .card .plate{margin-top:0;border-radius:0 0 2px 12px;background:linear-gradient(#1b2262,#10143c);padding:6px 7px 7px;border-top:3px solid #0d0f24}
 html.ui3 .card .plate b{font-size:17px}
 html.ui3 .card .art .rartag{left:-6px;top:6px;bottom:auto;transform:skewX(-6deg);border-radius:3px 7px 3px 7px;font-size:11px}
+/* la rareza no tapa al héroe: la carta ya lleva su color; abajo queda una franja fina con el nombre de la rareza */
+.card .art .rartag,html.ui3 .card .art .rartag{left:0!important;right:0;top:auto!important;bottom:0!important;transform:none!important;border-radius:0!important;border:0!important;border-top:2px solid var(--ink)!important;box-shadow:none!important;font-size:9.5px!important;padding:2px 0 1px!important;text-align:center;opacity:.95;letter-spacing:.08em}
 html.ui3 .hgrid4 .crown{left:auto;right:-8px;top:-12px}
 html.ui3 .rartag{border-radius:3px 8px 3px 8px}
 /* ---- la partida ---- */
