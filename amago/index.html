@@ -3427,7 +3427,8 @@ function skin2D(geo,R,w,h,h3d){
     const x=rest[i*3],y=rest[i*3+1];let sum=0;const bk=back?back[i]:0;
     for(let j=0;j<nb;j++){const {a,b}=bones[j],dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1e-6;
       const t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/L)),px=a[0]+dx*t-x,py=a[1]+dy*t-y;
-      let v=1/((px*px+py*py+e2)**2)*(j===0?.6:1);if(bk&&j>1)v*=1-bk;W[i*nb+j]=v;sum+=v;}
+      const dd=px*px+py*py;/* en 3D cada hueso solo arrastra lo que tiene muy cerca: al mover un brazo no se mueve el torso */
+      let v=(h3d?1/((dd+e2*.4)**3):1/((dd+e2)**2))*(j===0?.6:1);if(bk&&j>1)v*=1-bk;W[i*nb+j]=v;sum+=v;}
     if(!(sum>0)){W[i*nb]=1;sum=1;}
     for(let j=0;j<nb;j++)W[i*nb+j]/=sum;
   }
@@ -3462,7 +3463,7 @@ function animateSprite(u,tt,st,act,at_){
   if(!sk){/* sin esqueleto: solo estirar y aplastar */
     const br=Math.sin(tt*2.6);c.scale.set(u.flip*(1-br*.015),1+br*.025,1);return;}
   const P=sk.pose,I=sk.idx;for(const p of P){p.r=0;p.x=0;p.y=0;}
-  const set=(n,r,x,y)=>{const j=I[n];if(j==null)return;P[j].r+=r||0;P[j].x+=x||0;P[j].y+=y||0;};
+  let set=(n,r,x,y)=>{const j=I[n];if(j==null)return;P[j].r+=r||0;P[j].x+=x||0;P[j].y+=y||0;};
   const rig=u.rig||RIG2D[u.id]||{},hs=rig.m==="L"?-1:1,aH=rig.m==="L"?"armL":"armR",aO=rig.m==="L"?"armR":"armL";
   /* reposo: respiración y balanceo suave */
   const br=Math.sin(tt*2.4);
@@ -3510,6 +3511,7 @@ function animateSprite(u,tt,st,act,at_){
     }else{R.r=1.4*f;R.px=-.2;R.y=.03*f;R.sy=1-.06*f;set("armL",-.5*f);set("armR",.4*f);set("head",.3*f);set("legL",.3*f);set("legR",-.2*f);tint=.45*cl(at_*3);}
   }
   let spinY=0;
+  if(act==="win"&&u.h3d){const set0=set;set=(n,r,x,y)=>/^(spine|leg)/.test(n)?0:set0(n,/^arm/.test(n)?r*.4:r*.6,x,y);}/* modelo de una pieza: el cuerpo no se dobla ni se estira, solo salta y gira; brazos y cabeza, contenidos */
   if(act==="win"){/* celebración propia de cada tipo de héroe; la vuelta es un giro 3D de verdad (antes se aplastaba como una carta) */
     const st_=rig.atk||"swing",wv=Math.sin(tt*13);
     if(st_==="slam"){/* pesados: puñetazos al aire alternos y pisotón */
@@ -3524,6 +3526,7 @@ function animateSprite(u,tt,st,act,at_){
     }else{const j=Math.abs(Math.sin(tt*6.5));R.y=j*.2;R.sy=1+j*.06-(1-j)*.06;R.sx=1-j*.04+(1-j)*.05;set("armL",-.55+wv*.15);set("armR",.55+wv*.15);set("head",Math.sin(tt*6.5)*.12);}
     const sp=(tt%3)/3;if(sp>.72){const q=(sp-.72)/.28;spinY=q*q*(3-2*q)*Math.PI*2;R.y+=Math.sin(q*Math.PI)*.12;}
     if(!u.h3d&&spinY)R.sx*=Math.cos(spinY);/* las figuras 2D no pueden girar: se aplastan como antes */
+    if(u.h3d){R.sx=1;R.sy=1;R.r=0;R.x=0;}
   }
   /* matriz de la raíz: aplastar y estirar desde los pies, girar y desplazar */
   /* px: punto del suelo sobre el que gira (al caer, el pie del lado de la caída) */

@@ -24,7 +24,7 @@ _h = V[:, 1].max() - V[:, 1].min(); _low = V[:, 1] < V[:, 1].min() + _h * .012
 _fl = _low[F].all(1)
 if _fl.any() and _fl.sum() < len(F) * .05: F = F[~_fl]; print('láminas de suelo quitadas', int(_fl.sum()), flush=True)
 # modelos que el generador deja mirando hacia otro lado: se giran (eje Y) antes de todo para que el frente sea +Z
-ROTS = {'bum': np.pi, 'flecha': -np.pi / 2, 'rey': np.pi, 'brasa': np.pi, 'arana': -np.pi * .75}
+ROTS = {'bum': np.pi, 'flecha': 0, 'rey': np.pi, 'brasa': np.pi, 'arana': -np.pi * .75}
 r = float(os.environ.get('ROT', ROTS.get(i, 0)))
 if r:
     c_, s_ = np.cos(r), np.sin(r); V = np.stack([V[:, 0] * c_ + V[:, 2] * s_, V[:, 1], -V[:, 0] * s_ + V[:, 2] * c_], 1)
