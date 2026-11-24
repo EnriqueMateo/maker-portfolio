@@ -3699,11 +3699,15 @@ function animateKK(u,t,st,act,at_){
    así que usa el mismo esqueleto y las mismas animaciones (RIG2D), pero con volumen, luz, contorno y giro real ---- */
 const H3DTONE=(()=>{const q=/[?&]tone=([\d.,]+)/.exec(location.search);return q?q[1].split(",").map(Number):[1.04,.9,.6];})();
 const H3DROT={bum:Math.PI,flecha:-Math.PI/2,rey:-Math.PI/2};/* giro de los modelos generados que no salen mirando al frente */
+const H3D_SKINS=["sk_brasa_glacial","sk_sombra_carmesi","sk_muro_magma","sk_ojo_nevado","sk_truco_artico"];/* aspectos con modelo 3D propio */
 const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","coloso","rey","reina","topo","arana"],H3D={},H3DYAW={};let h3dP=null;
 const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")!=="0";}catch(e){return true;}})();
 function loadH3D(ids){
   if(!H3DON||!T.GLTFLoader)return Promise.resolve();
-  const L=new T.TextureLoader(),live=(ids||H3D_LIST).filter(id=>H3D_LIST.includes(id)&&(!(AMAGO.HEROES[id]&&AMAGO.HEROES[id].live===false)||window.AMAGO_DEV_HEROES));
+  const base=(ids||H3D_LIST).filter(id=>H3D_LIST.includes(id)&&(!(AMAGO.HEROES[id]&&AMAGO.HEROES[id].live===false)||window.AMAGO_DEV_HEROES));
+  /* con cada héroe se cargan también sus aspectos en 3D */
+  const live=base.concat(H3D_SKINS.filter(s=>{const k=s.slice(3);return typeof SKINS!=="undefined"&&SKINS[k]&&base.includes(SKINS[k].hero);}));
+  const L=new T.TextureLoader();
   h3dP=h3dP||{};
   return Promise.all(live.map(id=>h3dP[id]||(h3dP[id]=new Promise(res=>loadGLB(BASE+"h3d/"+id+EXT,g=>{
     let geo=null;g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(o.isMesh&&!geo)geo=o.geometry.clone().applyMatrix4(o.matrixWorld);});
@@ -3711,14 +3715,14 @@ function loadH3D(ids){
     L.load(BASE+"h3d/"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=8;if(geo)H3D[id]={geo,tex:t};res();},undefined,()=>res());
   },()=>res())))));
 }
-function h3dHero(id){
-  const src=H3D[id],im=SPRITES[id].image,h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K,w=h*im.width/im.height;
+function h3dHero(id,skin){
+  const src=H3D[skin?"sk_"+skin:id],im=SPRITES[skin||id].image,h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K,w=h*im.width/im.height;
   const geo=src.geo.clone();geo.scale(h,h,h);
   /* colas y piezas que salen mucho hacia atrás: con la inclinación hacia la cámara cenital se hundían bajo las casillas
      (se veía solo su contorno). Se acercan al cuerpo por detrás de un tope, sin tocar la parte visible */
   {const P=geo.attributes.position,a=P.array;let zf=-1e9;for(let i=2;i<a.length;i+=3)zf=Math.max(zf,a[i]);const zc=zf-h*.75;/* solo colas muy largas: el cuerpo conserva todo su volumen */
     for(let i=2;i<a.length;i+=3)if(a[i]<zc)a[i]=zc+(a[i]-zc)*.4;P.needsUpdate=true;geo.computeBoundingSphere();}
-  const mat=kkMat(src.tex,null,H3DTONE),sf=window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
+  const mat=kkMat(src.tex,null,H3DTONE),sf=!skin&&window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
   /* las mallas generadas traen caras con la orientación al revés (la cola del dragón salía hueca, solo con contorno): se dibujan por las dos caras */
   mat.side=T.DoubleSide;
   if(sf){const kk0=mat.onBeforeCompile;mat.onBeforeCompile=sh=>{kk0(sh);sh.uniforms.uSk={value:new T.Vector3(sf.h*Math.PI/180,sf.s,sf.b)};
@@ -3728,7 +3732,7 @@ function h3dHero(id){
        vec3 k=m*diffuseColor.rgb;float l=dot(k,vec3(.2126,.7152,.0722));diffuseColor.rgb=mix(vec3(l),k,uSk.y)*uSk.z;}`);};mat.customProgramCacheKey=()=>"h3dskin"+sf.h+"_"+sf.s+"_"+sf.b;}
   const card=new T.Mesh(geo,mat);card.frustumCulled=false;
   const root=new T.Group(),body=new T.Group(),pivot=new T.Group();body.name="body";root.add(body);body.add(pivot);pivot.add(card);
-  const u={body,head:new T.Object3D(),arms:[new T.Object3D(),new T.Object3D()],legs:[new T.Object3D(),new T.Object3D()],eyes:null,t0:Math.random()*10,sprite:true,h3d:true,card,mat,pivot,flip:1,h,id,rig:RIG2D[id],lt:null};
+  const u={body,head:new T.Object3D(),arms:[new T.Object3D(),new T.Object3D()],legs:[new T.Object3D(),new T.Object3D()],eyes:null,t0:Math.random()*10,sprite:true,h3d:true,card,mat,pivot,flip:1,h,id,rig:skin?null:RIG2D[id],lt:null};/* el aspecto tiene otra pose: sin esqueleto, solo balanceo */
   u.arms.forEach(a=>a.userData.base=0);root.userData=u;
   if(u.rig)u.sk=skin2D(geo,u.rig,w,h,true);
   root.traverse(o=>o.layers.enable(KKLAYER));KKSET.add(root);
@@ -3742,7 +3746,7 @@ function faceH3D(u,t,st,act){
   const want=act==="attack"?Math.sin(ry)*.95+(Math.cos(ry)<0?.55*Math.sign(Math.sin(ry)||1):0)+y0:st.walk?Math.sin(ry)*.75+y0:(u.flat?0:.3),dy=Math.atan2(Math.sin(want-(u.yaw??want)),Math.cos(want-(u.yaw??want)));u.yaw=(u.yaw??want)+dy*Math.min(1,dt*10);
   _kq1.setFromAxisAngle(_kY,-ry);_kq2.setFromAxisAngle(_kX,u.flat?0:-.3);_kq3.setFromAxisAngle(_kY,u.yaw);u.pivot.quaternion.copy(_kq1).multiply(_kq2).multiply(_kq3);
 }
-function makeHero(id,skin){if(!skin&&H3D[id]&&SPRITES[id]){const g=h3dHero(id);g.userData.id=id;return g;}if(!skin&&KKM[id]&&KKCLIPS){const g=kkHero(id);g.userData.id=id;return g;}if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
+function makeHero(id,skin){if(skin&&H3D["sk_"+skin]&&SPRITES[skin]){const g=h3dHero(id,skin);g.userData.id=id;return g;}if(!skin&&H3D[id]&&SPRITES[id]){const g=h3dHero(id);g.userData.id=id;return g;}if(!skin&&KKM[id]&&KKCLIPS){const g=kkHero(id);g.userData.id=id;return g;}if(skin&&SPRITES[skin]){const g=spriteHero(id,skin);g.userData.id=id;return g;}const g=A3[id]&&A3[id].f&&A3[id].f.idle&&A3[id].b&&Object.keys(A3[id].f).length+Object.keys(A3[id].b).length>=2*Object.keys(ANIM3D[id].n).length?anim3dHero(id):SPRITES[id]?spriteHero(id):MODELS[id]?glbHero(id):(BUILD[id]||BUILD.flecha)(HEROES[id]);g.userData.id=id;return g;}
 
 /* ---- animación procedural ---- */
 function setFlash(g,on){
