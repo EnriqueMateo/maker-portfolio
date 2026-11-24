@@ -3712,7 +3712,7 @@ function animateKK(u,t,st,act,at_){
 /* ---- héroes 3D sacados de su propia ilustración (art/h3d): la malla está en las mismas coordenadas que la carta 2D,
    así que usa el mismo esqueleto y las mismas animaciones (RIG2D), pero con volumen, luz, contorno y giro real ---- */
 const H3DTONE=(()=>{const q=/[?&]tone=([\d.,]+)/.exec(location.search);return q?q[1].split(",").map(Number):[1.04,.9,.6];})();
-const H3DROT={bum:Math.PI,flecha:-Math.PI/2,rey:Math.PI,brasa:Math.PI,mira:Math.PI/2,sombra:-Math.PI/2};/* giro de los modelos generados que no salen mirando al frente */
+const H3DROT={};/* el giro de los modelos que no miran al frente ya se aplica al convertirlos (art/t2/conv3.py) *//* giro de los modelos generados que no salen mirando al frente */
 const H3D_SKINS=["sk_brasa_glacial","sk_sombra_carmesi","sk_muro_magma","sk_ojo_nevado","sk_truco_artico"];/* aspectos con modelo 3D propio */
 const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","coloso","rey","reina","topo","arana"],H3D={},H3DYAW={};let h3dP=null;
 const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")!=="0";}catch(e){return true;}})();
@@ -4561,7 +4561,7 @@ function set(id){
 }
 function unmount(){on=false;cancelAnimationFrame(raf);document.body.classList.remove("h3d");
   if(stage){stage.removeEventListener("pointerdown",onDown);stage.removeEventListener("pointermove",onMove);stage.removeEventListener("pointerup",onUp);stage.removeEventListener("pointercancel",onUp);}stage=null;}
-return {mount,unmount,set,preload:loadHero};
+return {mount,unmount,set,preload:loadHero,rot:v=>{rotY=v;vel=0;lastTouch=performance.now()/1000;}};
 })();
 
 /* ================= pantallas ================= */
