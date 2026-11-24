@@ -23,8 +23,16 @@ if len(F) > MAXF:
 _h = V[:, 1].max() - V[:, 1].min(); _low = V[:, 1] < V[:, 1].min() + _h * .012
 _fl = _low[F].all(1)
 if _fl.any() and _fl.sum() < len(F) * .05: F = F[~_fl]; print('láminas de suelo quitadas', int(_fl.sum()), flush=True)
+# piezas blancas pegadas a la espalda (láminas del dibujo): fuera de la malla
+if os.environ.get('CLEANBACK') == '1':
+    T0_ = np.asarray(tex, np.float32); th_, tw_ = T0_.shape[:2]
+    uvc = UV[F].mean(1); col = T0_[np.clip(((1 - uvc[:, 1]) * th_).astype(int), 0, th_ - 1), np.clip((uvc[:, 0] * tw_).astype(int), 0, tw_ - 1)]
+    lum_ = col.mean(1) / 255; sat_ = (col.max(1) - col.min(1)) / (col.max(1) + 1e-6)
+    zc_ = V[F][:, :, 2].mean(1); zmid = np.median(V[:, 2]); yc_ = V[F][:, :, 1].mean(1); hh_ = V[:, 1].max() - V[:, 1].min()
+    kill = (lum_ > float(os.environ.get('CBL', '.62'))) & (sat_ < float(os.environ.get('CBS', '.18'))) & (zc_ < zmid - .02 * hh_) & (yc_ > V[:, 1].min() + .3 * hh_)
+    if kill.sum() < len(F) * .15: F = F[~kill]; print('piezas blancas quitadas', int(kill.sum()), flush=True)
 # modelos que el generador deja mirando hacia otro lado: se giran (eje Y) antes de todo para que el frente sea +Z
-ROTS = {'bum': np.pi, 'flecha': 0, 'rey': np.pi, 'brasa': np.pi, 'arana': -np.pi * .75}
+ROTS = {'bum': np.pi, 'flecha': 0, 'eco': 0, 'rey': np.pi, 'brasa': np.pi, 'arana': -np.pi * .75}
 r = float(os.environ.get('ROT', ROTS.get(i, 0)))
 if r:
     c_, s_ = np.cos(r), np.sin(r); V = np.stack([V[:, 0] * c_ + V[:, 2] * s_, V[:, 1], -V[:, 0] * s_ + V[:, 2] * c_], 1)
@@ -123,6 +131,18 @@ if os.environ.get('PROJ', '0') == '1':  # desactivada por defecto: con la proyec
         ty = (gy[ok] - .5).astype(int)[vis]; tx = (gx[ok] - .5).astype(int)[vis]
         out[ty, tx] = out[ty, tx] * (1 - wt) + spa[ys[vis], xs[vis], :3] * wt; hits += vis.sum()
     tex = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)); print('proyectados', hits, flush=True)
+# manchas blancas en la espalda (restos del dibujo que el generador convierte en lámina blanca): se repintan con el color de alrededor
+if os.environ.get('CLEANBACK') == '1':
+    import cv2
+    T2 = np.asarray(tex).copy(); TH2, TW2 = T2.shape[:2]; back = np.zeros((TH2, TW2), np.uint8)
+    U2 = np.stack([UV[:, 0] * TW2, (1 - UV[:, 1]) * TH2], 1)
+    for f in F:
+        if N[f, 2].mean() > -.15: continue
+        cv2.fillConvexPoly(back, np.round(U2[f]).astype(np.int32), 1)
+    l_ = T2.astype(np.float32).mean(2) / 255; sat_ = (T2.max(2).astype(np.float32) - T2.min(2)) / (T2.max(2) + 1e-6)
+    wm = ((back > 0) & (l_ > .62) & (sat_ < .2)).astype(np.uint8)
+    wm = cv2.dilate(wm, np.ones((5, 5), np.uint8))
+    tex = Image.fromarray(cv2.inpaint(T2, wm * 255, 9, cv2.INPAINT_TELEA)); print('manchas de espalda', int(wm.sum()), flush=True)
 # pintura suave: quita el ruido y los cambios bruscos de color sin borrar los bordes (ojos, líneas)
 if not i.startswith('pr_') and os.environ.get('SMOOTH', '1') == '1':
     import cv2
