@@ -50,7 +50,7 @@ C = np.stack([(px / Ws - .5) * Ws / Hs, 1 - py / Hs, (V[:, 2] - np.median(V[:, 2
 # El modelo está colocado exactamente sobre la ilustración, así que cada punto visible de frente tiene su píxel en el dibujo.
 # revisado a ojo: en estos el modelo no coincide con el dibujo (pose distinta) y la proyección deja caras dobles
 PROJ_OFF = {'brasa', 'mira', 'mina', 'salto', 'savia', 'rey', 'topo', 'arana', 'ojo', 'truco', 'muro', 'coloso'}
-if os.environ.get('PROJ', '0' if (i.startswith('pr_') or i.startswith('sk_') or i in PROJ_OFF) else '1') == '1':
+if os.environ.get('PROJ', '0') == '1':  # desactivada por defecto: con la proyección las caras salían peor que con la textura propia
     import cv2
     spa = np.asarray(sp, np.float32); sal = spa[..., 3]
     inner = cv2.erode((sal > 250).astype(np.uint8), np.ones((9, 9), np.uint8)) > 0   # sin el contorno negro del borde

@@ -230,6 +230,14 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .hearts .hpn{font:400 17px/1 var(--f-game);color:#fff;margin-left:3px;letter-spacing:.02em}.hearts .hpn small{font-size:12px;opacity:.8}
 .hearts i.hp.lost{animation:hplost .5s ease-out}
 @keyframes hplost{0%{transform:scale(1.5)}40%{transform:scale(.8)}100%{transform:scale(1)}}
+.setsheet .setprof{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;margin:6px 0 4px}
+.setsheet .setprof .tav{width:52px;height:52px;flex:none;display:grid;place-items:center;overflow:hidden;border-radius:12px;background:rgba(255,255,255,.08)}.setsheet .setprof .tav img{width:100%;height:100%;object-fit:contain}
+.setsheet .setprof .spn{flex:1;min-width:0;display:flex;flex-direction:column;text-align:left}.setsheet .setprof .spn b{font:18px/1.1 var(--f-game)}.setsheet .setprof .spn small{font-size:12px;opacity:.8;line-height:1.25}
+.setsheet .setprof .spb{display:flex;flex-direction:column;gap:6px}.setsheet .setprof .spb .gbtn{font-size:12.5px;padding:7px 10px;min-height:0;width:auto;white-space:nowrap}
+.setsheet .setsec{margin:14px 2px 6px;text-align:left;font:15px/1 var(--f-game);color:var(--tx-hl,#ffd23f);letter-spacing:.02em}
+.setsheet .setfoot{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px;opacity:.85}.setsheet .setfoot small{font-size:11.5px;opacity:.7}
+.setsheet .linkbtn{background:none;border:0;color:#ff9fae;font:600 13px var(--f-ui,inherit);text-decoration:underline;padding:4px}
+.setsheet .setdel{display:flex;flex-direction:column;align-items:center;gap:6px}.setsheet .setdel b{font-size:13px}
 .side2{position:relative}.emobub{position:absolute;top:calc(100% + 8px);z-index:31;white-space:nowrap;font-family:var(--f-game);font-size:18px;color:var(--ink);line-height:1;padding:8px 12px;border-radius:16px;background:#fff;border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink);animation:emopop 2.2s ease-out forwards}
 .emobub.p{left:58px}.emobub.b{right:10px}
 .emobub::before{content:"";position:absolute;top:-9px;width:14px;height:14px;background:#fff;border-left:3px solid var(--ink);border-top:3px solid var(--ink);transform:rotate(45deg)}
@@ -1123,8 +1131,9 @@ body.h3d .hstage{touch-action:none;cursor:grab}
 .herorev .hi.sil{filter:brightness(0) drop-shadow(0 0 18px var(--g))}
 .herorev .beam{position:absolute;left:50%;bottom:-40vh;width:140px;height:110vh;margin-left:-70px;background:linear-gradient(transparent,var(--g));opacity:.5;transform-origin:bottom;animation:beam .4s ease-out both;pointer-events:none}
 @keyframes beam{from{transform:scaleY(0)}}
-.boxsum2{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(92vw,400px);margin-top:4vh}
-.boxsum2>div{display:flex;flex-direction:column;align-items:center;padding:8px 4px;color:#fff}
+.boxsum2{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:12px 10px;width:min(92vw,400px);margin-top:3vh}
+.boxsum2>div{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;padding:8px 4px;color:#fff;width:calc(33.3% - 8px);min-width:92px;text-align:center}
+.boxov.sum{justify-content:center!important;gap:0}.boxov.sum .bt{margin-top:0!important}
 .boxsum2 img,.boxsum2 svg{width:64px;height:64px;object-fit:contain}
 .boxsum2 b{font:20px/1 var(--f-game)}
 .boxsum2 small{font-size:12.5px}
@@ -1582,7 +1591,7 @@ body.gazing::after{content:"";position:fixed;inset:0;pointer-events:none;z-index
 .cmbg{position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 60% at 50% 0%,#bff59a 0%,transparent 60%),linear-gradient(#6fd16a,#2f9a57 55%,#1d6f4a)}
 .cmbg::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 30%,#fff3 0 3px,transparent 4px),radial-gradient(circle at 78% 58%,#fff3 0 3px,transparent 4px),radial-gradient(circle at 40% 80%,#0001 0 26px,transparent 27px),radial-gradient(circle at 86% 22%,#0001 0 34px,transparent 35px);}
 .cmhead{display:flex;align-items:center;gap:10px}
-.cmback{width:52px;height:48px;padding:0;flex:none}.cmback img{width:28px;height:28px}
+.cmback{width:58px;height:54px;padding:2px 0 0;flex:none;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:0}.cmback img{width:26px;height:26px}.cmback small{font:11px/1 var(--f-game);color:#fff;letter-spacing:.02em}
 .cmtt{flex:1;min-width:0}.cmtt small{font-family:var(--f-game);font-size:12.5px;letter-spacing:.08em;color:#fff;opacity:.9}
 .cmtt h2{margin:0;font:400 20px/1.05 var(--f-game);color:#fff;letter-spacing:.01em;text-wrap:balance}
 .cmst{padding:8px 12px;border-radius:14px;font-family:var(--f-game);font-size:17px;color:#ffe25a;flex:none}
@@ -2393,6 +2402,7 @@ const TR=(()=>{
   Object.assign(I18N_EN,{"¿Tu amigo te ganaría?":"Could your friend beat you?","Rétale con un enlace: juega desde el navegador, sin instalar nada.":"Challenge them with a link: they play in the browser, no install needed."});
   Object.assign(I18N_EN,{"¡Vamos a por ellos!":"Let's get them!","Hoy me siento con suerte.":"Feeling lucky today.","Esta vez no me ven venir.":"They won't see me coming.","¿Una más?":"One more?","¡Estoy listo!":"I'm ready!","Nadie me encuentra.":"Nobody can find me.","¡Una victoria más y abres un cofre!":"One more win and you open a chest!","¡Solo # trofeos para #!":"Only # trophies to #!","¡Me falta 1 para acabar una misión!":"Just 1 more to finish a mission!","¡Puedo subir de nivel! Mírame en Héroes.":"I can level up! Check me in Heroes.","¿Probamos el reto del día?":"Shall we try the daily challenge?"});
   Object.assign(I18N_EN,{"Mi isla":"My island","De la arena":"Arena default","Hielo":"Ice","Dunas":"Dunes","Menta":"Mint","Noche":"Night","Cerezo":"Cherry","Lima":"Lime","Oro":"Gold","Azul":"Blue","Verde":"Green","Morado":"Purple","Carbón":"Charcoal","Chicle":"Bubblegum","Casillas":"Tiles","Marco":"Frame","Así se ve tu tablero en cada partida. Los estilos nuevos se ganan jugando.":"This is how your board looks in every match. New styles are earned by playing.","Juega # partidas":"Play # matches","Gana # partidas":"Win # matches","Llega a # trofeos":"Reach # trophies","Llega al nivel #":"Reach level #","Te faltan #":"# to go"});
+  Object.assign(I18N_EN,{"Sonido y avisos":"Sound & alerts","Ayuda":"Help","Nombre":"Name","Invitado · tu progreso solo está en este móvil":"Guest · your progress is only on this phone","Datos anónimos de juego":"Anonymous gameplay data","¿Seguro? Se borra todo tu progreso.":"Sure? All your progress will be deleted.","SÍ, BORRAR":"YES, DELETE","Inicio":"Home"});
   Object.assign(I18N_EN,{"Escalón # de #":"Tier # of #","Temporada #":"Season #"," · ¡fichas dobles para ponerte al día!":" · double tokens to catch up!","Quedan # días · ¡fichas dobles para ponerte al día!":"# days left · double tokens to catch up!","Nivel #":"Level #","de #":"of #","Nivel":"Level","Quita # vida":"Deals # damage","Quita # vidas":"Deals # damage"});
   Object.assign(I18N_EN,{"Batalla":"Battle","Al instante, contra rivales de tu nivel · trofeos, monedas, llaves y fichas":"Instant, against rivals of your level · trophies, coins, keys and tokens","Entrenamiento: elige tú la dificultad":"Training: pick the difficulty yourself","Entreno #":"Training #"});
   Object.assign(I18N_EN,{"¿Nos ayudas a mejorar?":"Help us improve?","Enviar estadísticas anónimas de cómo juegas (partidas, héroes, dónde te atascas) nos ayuda a hacer AMAGO más divertido. Sin anuncios, sin datos personales.":"Sending anonymous stats about how you play (matches, heroes, where you get stuck) helps us make AMAGO more fun. No ads, no personal data.","Puedes cambiarlo cuando quieras en Ajustes.":"You can change it anytime in Settings.","SÍ, CLARO":"SURE","No, gracias":"No, thanks"});
@@ -4883,6 +4893,8 @@ const ARENA_TILE={pradera:[0x86d84c,0x62b73a],bosque:[0x5cb845,0x479f35],volcan:
 const arenaTile=()=>{try{return ARENA_TILE[arenaOf(S.tro).a.k]||ARENA_TILE.pradera;}catch(e){return ARENA_TILE.pradera;}};
 function isleIco(t,f){t=t||myIsle()||arenaTile();f=f||myFrame();
   return `<span class="isleico" style="--a:${hx(t[0])};--b:${hx(t[1])};--f:${hx(f[0])}">${Array.from({length:9},(_,i)=>`<i class="${i%2?"b":""}"></i>`).join("")}</span>`;}
+/* la mano del tutorial nunca se sale de la pantalla (se cortaba en los bordes) */
+function placeHand(el,x,y){el.style.left=Math.max(6,Math.min(innerWidth-64,x))+"px";el.style.top=Math.max(70,Math.min(innerHeight-90,y))+"px";}
 /* ---- inicio ---- */
 function showHome(){
   gameFxOff();UI.screen="home";stopLoop();app.className="home";setBg();ensureDay();MUS.play("menu");
@@ -4891,8 +4903,8 @@ function showHome(){
   /* premios del camino de trofeos: se entregan solos al volver a Inicio (antes se quedaban sin cobrar) */
   if(!UI.modal&&!G&&S.tutDone&&claimable().length)setTimeout(()=>{if(UI.screen!=="home"||UI.modal||$(".reveal,.openov"))return;const l=claimable();if(!l.length)return;l.forEach(m=>S.claimed.push(m.t));save();claimMany(l);},700);
   if(S.noStats&&S.statsOk==null)S.statsOk=0;
-  if(S.statsOk==null&&S.games>=1&&ONLINE_OK&&!UI.modal&&!G){UI.modal={k:"statsask"};setTimeout(renderModal,900);}
-  else if(NOTIF.P&&S.notif==null&&S.games>=4&&!S.lastLoss&&!UI.modal&&!G){UI.modal={k:"notifask"};setTimeout(renderModal,900);}
+  /* sin ventana de "¿nos ayudas a mejorar?" (daba desconfianza): las estadísticas solo se envían si el jugador las activa en Ajustes */
+  if(NOTIF.P&&S.notif==null&&S.games>=4&&!S.lastLoss&&!UI.modal&&!G){UI.modal={k:"notifask"};setTimeout(renderModal,900);}
   if(!S.news[NEWHERO.id]&&!UI.modal&&!G&&S.tutDone&&S.games>=3&&!S.unl.includes(NEWHERO.id)){S.news[NEWHERO.id]=1;save();UI.modal={k:"news",id:NEWHERO.id};setTimeout(renderModal,600);}
   const {a}=arenaOf(S.tro),H=HEROES[S.fav],box=S.box.length,mr=misReady(),at=attention();
   const missDone=S.mis.list.filter(m=>m.v>=m.n).length,tier=passTier();
@@ -5284,7 +5296,7 @@ function boxHTML(M){
   }
   if(M.phase==="sum"){
     const sum=M.items.map(it=>`<div class="pnl" data-k="${it.k}" data-n="${it.n||0}">${it.k==="hero"?heroArt(it.id):it.k==="skin"?heroArt(SKINS[it.id].hero,it.id):`<img src="${UIA}${({coins:"coin",pp:"power",gems:"gem",tk:"star",frame:"crown"})[it.k]}.webp" alt="">`}<b class="out">${it.k==="hero"?HEROES[it.id].n:it.k==="skin"?"Aspecto":it.k==="frame"?"Marco":"+"+it.n}</b><small>${({coins:"Monedas",pp:"Poder",gems:"Gemas",tk:"Fichas",hero:"¡Nuevo héroe!",skin:SKINS[it.id]?SKINS[it.id].n:"",frame:FRAMES[it.id]?FRAMES[it.id].n:""})[it.k]}</small></div>`).join("");
-    return `<div class="boxov" data-a="boxtap"><span class="godrays"></span><span class="ribn gold bt">¡Has conseguido!</span><div class="boxsum2 stagger">${sum}</div>
+    return `<div class="boxov sum" data-a="boxtap"><span class="godrays"></span><span class="ribn gold bt">¡Has conseguido!</span><div class="boxsum2 stagger">${sum}</div>
       <button class="gbtn" data-a="boxtap" style="position:relative;margin-top:20px">CONTINUAR</button>${M.boxesAfter?`<p class="sub" style="position:relative;margin-top:8px">+${M.boxesAfter} cofre${M.boxesAfter>1?"s":""} para abrir</p>`:""}</div>`;
   }
   const it=M.items[M.step],left=M.items.length-M.step-1,heroLeft=M.items.slice(M.step+1).some(x=>x.k==="hero");
@@ -5383,25 +5395,28 @@ function renderModal(){
       <button class="gbtn" data-a="acc" data-m="reg"><span class="row">CREAR CUENTA${!S.gemOnce.acc?` <span class="gtag">+20 ${ico("gem","s")}</span>`:""}</span></button><button class="pillbtn" data-a="close">Ahora no</button></div>`;
   }
   else if(M.k==="settings"){
-    m.innerHTML=`<div class="sheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Ajustes</h2>
-      ${ONLINE_OK?`<button class="toggle acc" data-a="acc"><span class="tav">${heroArt(S.fav)}</span><span>${isGuest()?"Invitado":ACC.via==="apple"?"Cuenta de Apple":esc(ACC.email)}</span><i class="pill ${isGuest()?"go":""}">${isGuest()?"Crear cuenta":"Cuenta"}</i></button>`:""}
-      <button class="toggle" data-a="name"><span>Nombre: ${esc(S.name)}</span><i class="pill">Cambiar</i></button>
+    /* ordenado por secciones: perfil, sonido y avisos, ayuda; lo destructivo, discreto al final */
+    m.innerHTML=`<div class="sheet setsheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Ajustes</h2>
+      <div class="setprof pnl"><span class="tav">${heroArt(S.fav)}</span><span class="spn"><b>${esc(S.name)}</b><small>${ONLINE_OK?(isGuest()?"Invitado · tu progreso solo está en este móvil":ACC.via==="apple"?"Cuenta de Apple":esc(ACC.email)):""}</small></span>
+        <span class="spb"><button class="gbtn blue sm" data-a="name">Nombre</button>${ONLINE_OK?`<button class="gbtn ${isGuest()?"green":"blue"} sm" data-a="acc">${isGuest()?"Crear cuenta":"Cuenta"}</button>`:""}</span></div>
+      <p class="setsec">Sonido y avisos</p>
       <div class="tgroup">
       <button class="toggle" data-a="tsnd" aria-pressed="${S.snd?"true":"false"}"><span>Sonido</span><i class="sw ${S.snd?"on":""}" aria-hidden="true"></i></button>
       <button class="toggle" data-a="tmus" aria-pressed="${S.mus!==0&&S.snd?"true":"false"}"><span>Música</span><i class="sw ${S.mus!==0&&S.snd?"on":""}" aria-hidden="true"></i></button>
       <button class="toggle" data-a="tvib" aria-pressed="${S.vib?"true":"false"}"><span>Vibración</span><i class="sw ${S.vib?"on":""}" aria-hidden="true"></i></button>
       ${NOTIF.P?`<button class="toggle" data-a="tnotif" aria-pressed="${S.notif===1?"true":"false"}"><span>Avisos (como mucho 1 al día)</span><i class="sw ${S.notif===1?"on":""}" aria-hidden="true"></i></button>`:""}
-      ${ONLINE_OK?`<button class="toggle" data-a="tstats" aria-pressed="${S.statsOk===1?"true":"false"}"><span>Enviar estadísticas de uso</span><i class="sw ${S.statsOk===1?"on":""}" aria-hidden="true"></i></button>`:""}
-      </div>
       <button class="toggle" data-a="lang"><span>${LANG==="es"?"Idioma":"Language"}</span><i class="pill">${LANG==="es"?"Español":"English"}</i></button>
+      </div>
+      <p class="setsec">Ayuda</p>
       <div class="tgroup">
       <button class="toggle" data-a="how"><span>Cómo se juega</span><i class="chev">›</i></button>
       <button class="toggle" data-a="purchinfo"><span>Compras y probabilidades</span><i class="chev">›</i></button>
+      <button class="toggle" data-a="restore"><span>Restaurar compras</span><i class="chev">›</i></button>
       ${ONLINE_OK?`<button class="toggle" data-a="cloud"><span>Pasar mi partida a otro móvil</span><i class="chev">›</i></button>`:""}
       <button class="toggle" data-a="privacy"><span>Política de privacidad</span><i class="chev">›</i></button>
-      <button class="toggle" data-a="restore"><span>Restaurar compras</span><i class="chev">›</i></button>
+      ${ONLINE_OK?`<button class="toggle" data-a="tstats" aria-pressed="${S.statsOk===1?"true":"false"}"><span>Datos anónimos de juego</span><i class="sw ${S.statsOk===1?"on":""}" aria-hidden="true"></i></button>`:""}
       </div>
-      ${M.confirm?`<button class="gbtn red" data-a="reset2">SÍ, BORRAR TODO</button><button class="pillbtn" data-a="reset0">Cancelar</button>`:`<button class="pillbtn dangerlink" data-a="reset1">${isGuest()?"Borrar progreso":"Borrar cuenta y progreso"}</button>`}</div>`;
+      <div class="setfoot"><small>AMAGO ${window.AMAGO_VER||"1.2"}</small>${M.confirm?`<span class="setdel"><b>¿Seguro? Se borra todo tu progreso.</b><button class="gbtn red sm" data-a="reset2">SÍ, BORRAR</button><button class="pillbtn" data-a="reset0">Cancelar</button></span>`:`<button class="linkbtn" data-a="reset1">${isGuest()?"Borrar progreso":"Borrar cuenta y progreso"}</button>`}</div></div>`;
   }else if(M.k==="name"){
     m.innerHTML=`<div class="sheet"><h2 class="out">Tu nombre</h2><p>Es el que verán tus amigos.</p>
       <input id="nameinp" class="inp" maxlength="14" value="${esc(S.name)}" autocomplete="off" aria-label="Nombre">
@@ -5751,7 +5766,7 @@ function showCamp(ww){
   if(ww==null){ww=UI.campW;if(ww==null){ww=0;for(let i=0;i<CAMP.length;i++)if(campWorldOpen(i))ww=i;}}
   if(!campWorldOpen(ww))ww=0;UI.campW=ww;
   const w=ww,W=CAMP[w],cur=W.lv.findIndex((_,l)=>!(S.camp[w+"."+l]>0)),bg=CAMP_BG[w]||CAMP_BG[0],nx=CAMP[w+1],nxOpen=nx&&campWorldOpen(w+1);
-  app.innerHTML=`<div class="cmbg" style="background:radial-gradient(120% 60% at 50% 0%,${bg[0]} 0%,transparent 60%),linear-gradient(${bg[1]},${bg[2]} 55%,${bg[3]})"></div><div class="cmhead"><button class="gbtn blue sm cmback" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt=""></button><div class="cmtt"><small>CAMPAÑA · MUNDO ${w+1}</small><h2 class="out">${W.n}</h2></div><span class="cmst pnl out">★ ${campStars(w)}/${W.lv.length*3}</span></div>${campRoadHTML()}
+  app.innerHTML=`<div class="cmbg" style="background:radial-gradient(120% 60% at 50% 0%,${bg[0]} 0%,transparent 60%),linear-gradient(${bg[1]},${bg[2]} 55%,${bg[3]})"></div><div class="cmhead"><button class="gbtn blue sm cmback" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt=""><small>Inicio</small></button><div class="cmtt"><small>CAMPAÑA · MUNDO ${w+1}</small><h2 class="out">${W.n}</h2></div><span class="cmst pnl out">★ ${campStars(w)}/${W.lv.length*3}</span></div>${campRoadHTML()}
   <div class="cmmap">${([CAMP_DECO,CAMP_DECO2,CAMP_DECO3,CAMP_DECO4,CAMP_DECO5][w]||CAMP_DECO).map(([k,x,y,w,f])=>`<img class="cmdeco" src="${(window.AMAGO_ASSETS||"")}props/${k}.webp" alt="" style="left:${x}%;top:${y}%;width:${w}px${f?";transform:translate(-50%,-100%) scaleX(-1)":""}">`).join("")}
   <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="cmroad" points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/><polyline points="${CAMP_POS.map(p=>p.join(",")).join(" ")}"/></svg>
   ${W.lv.map((L,l)=>{const st=S.camp[w+"."+l]||0,open=campOpen(w,l);
@@ -5789,7 +5804,7 @@ async function endCamp(w){
       ${win&&!coins&&!gems?`<p class="sub in">Ya tenías los premios de este nivel.</p>`:""}
       ${win&&stars<3?`<p class="sub in">Consigue las 3 estrellas ganando sin perder vida.</p>`:""}
       ${!win?`<p class="sub in">${L.boss?L.hint:"¡Casi! Prueba con otro héroe."}</p>`:""}</div>
-    <div class="endbtns"><button class="gbtn blue" data-a="${win&&L.boss&&CAMP[wi+1]?"campw":"camp"}" data-w="${wi+1}">${win&&L.boss&&CAMP[wi+1]?"MUNDO "+(wi+2):"MAPA"}</button><button class="gbtn xl shine" data-a="campgo" data-w="${wi}" data-l="${next??l}">${next!=null?"SIGUIENTE":win?"REPETIR":"REINTENTAR"}</button></div>`);
+    <div class="endbtns"><button class="gbtn blue" data-a="home" aria-label="Inicio"><img src="${UIA}house.webp" alt="" style="width:34px;height:34px"></button><button class="gbtn blue" data-a="${win&&L.boss&&CAMP[wi+1]?"campw":"camp"}" data-w="${wi+1}">${win&&L.boss&&CAMP[wi+1]?"MUNDO "+(wi+2):"MAPA"}</button><button class="gbtn xl shine" data-a="campgo" data-w="${wi}" data-l="${next??l}">${next!=null?"SIGUIENTE":win?"REPETIR":"REINTENTAR"}</button></div>`);
 }
 /* ---- maestría: números por héroe y récords personales ----
    S.hs[id]={r:rondas, sh:disparos, hit:aciertos, dg:esquivas, dgn:golpes que iban a por ti, st:racha de rondas, bs:mejor racha, fk:K.O. más rápido (s), bd:más esquivas en una ronda, bp:mejor puntería en una ronda (con 4+ disparos)} */
@@ -5897,7 +5912,7 @@ function tutHand(){
     if(!R||R.over||UI.screen!=="game"||R.projs.some(p=>p.o==="p")||R.marks.p.some(m=>m.t==="huella")){h.remove();return;}
     if(R.now>=AMAGO.HIDE_T){
       if(!target){const f=R.heroes.b;target=[Math.max(0,Math.min(4,f.x+(Math.random()<.5?0:Math.sign(2-f.x)))),f.y];}
-      const c=B3.screenPos("b",target[0],target[1]);h.style.left=c.x+"px";h.style.top=c.y+"px";h.classList.add("on");
+      const c=B3.screenPos("b",target[0],target[1]);placeHand(h,c.x,c.y);h.classList.add("on");
     }
     requestAnimationFrame(tick);
   };
@@ -5967,7 +5982,7 @@ const TUT={
       const hide=!!UI.modal&&UI.modal.k!=="tutname";
       if(this.box)this.box.style.visibility=hide?"hidden":"";
       if(this.hand){const c=!hide&&this.handFn&&this.handFn();
-        if(c){this.hand.style.left=c.x+"px";this.hand.style.top=c.y+"px";this.hand.classList.add("on");}else this.hand.classList.remove("on");}
+        if(c){placeHand(this.hand,c.x,c.y);this.hand.classList.add("on");}else this.hand.classList.remove("on");}
       this.raf=requestAnimationFrame(f);
     };
     this.raf=requestAnimationFrame(f);
