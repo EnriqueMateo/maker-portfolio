@@ -3598,7 +3598,8 @@ vKN=normalize(mat3(modelMatrix)*kn0);vec3 kwp=(modelMatrix*vec4(transformed,1.))
  c+=(base*.1+vec3(.05,.045,.03))*smoothstep(.6,.82,nd);
  c+=vec3(1.,.98,.92)*.09*uTone.z*smoothstep(.9,.95,dot(N,normalize(uL+V)));
  c+=uGnd.rgb*uGnd.a*(.10+.22*clamp(-N.y+.25,0.,1.))*(1.-smoothstep(.0,.9,vKY));c*=mix(1.,.74+.26*smoothstep(-.02,.3,vKY),uGnd.a);
- float rim=pow(1.-clamp(dot(N,V),0.,1.),3.);c+=vec3(1.,.95,.82)*rim*.38*smoothstep(-.2,.5,N.y);
+ /* contraluz suave y del color del propio personaje: blanco y fuerte lavaba las piezas finas (colas, orejas) vistas desde arriba */
+ float rim=pow(1.-clamp(dot(N,V),0.,1.),3.);c+=mix(vec3(1.,.95,.82),base,.65)*rim*.16*smoothstep(-.2,.5,N.y);
  c=mix(c,vec3(1.),uFlash);diffuseColor.rgb=c;}`);};
   return m;
 }
@@ -3710,6 +3711,8 @@ function h3dHero(id){
   const src=H3D[id],im=SPRITES[id].image,h=heroRefH(id)*1.12*(SPRITE_H[id]||1)*HERO_K,w=h*im.width/im.height;
   const geo=src.geo.clone();geo.scale(h,h,h);
   const mat=kkMat(src.tex,null,H3DTONE),sf=window.AMAGO_SKINF&&window.AMAGO_SKINF(id);
+  /* las mallas generadas traen caras con la orientación al revés (la cola del dragón salía hueca, solo con contorno): se dibujan por las dos caras */
+  mat.side=T.DoubleSide;
   if(sf){const kk0=mat.onBeforeCompile;mat.onBeforeCompile=sh=>{kk0(sh);sh.uniforms.uSk={value:new T.Vector3(sf.h*Math.PI/180,sf.s,sf.b)};
     sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform vec3 uSk;")
       .replace("#include <map_fragment>",`#include <map_fragment>
