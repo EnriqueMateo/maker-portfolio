@@ -3315,8 +3315,22 @@ function loadSprites(){
 }
 /* ilustraciones del escenario (árboles, rocas, puente, banderas) y texturas pintadas de suelo y agua */
 const PROP_LIST=["arbol","pino","rocas","puente","bandera_azul","bandera_roja","hierba","agua","roca_lava","geiser_lava","arbol_quemado","estatua","columna_rota","antorcha","nube_dorada","columna_dorada","veleta"],PROPS={};
+/* decorados en 3D (generados a partir de su ilustración): sustituyen a la imagen plana en la arena */
+const PR3D_LIST=["arbol_quemado","estatua","columna_rota","columna_dorada","roca_lava","geiser_lava","veleta","nube_dorada"],PR3D={};
+function loadPr3d(){
+  if(!T.GLTFLoader)return Promise.resolve();const L=new T.TextureLoader();
+  return Promise.all(PR3D_LIST.map(id=>new Promise(res=>loadGLB(BASE+"h3d/pr_"+id+EXT,g=>{let geo=null;g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(o.isMesh&&!geo)geo=o.geometry.clone().applyMatrix4(o.matrixWorld);});
+    if(!geo)return res();geo.computeBoundingBox();
+    /* fuera las láminas planas a ras de suelo (la sombra de la ilustración convertida en placa) */
+    {const b0=geo.boundingBox,cut=b0.min.y+(b0.max.y-b0.min.y)*.035,P=geo.attributes.position,I=geo.index;if(I){const a=I.array,keep=[];for(let f=0;f<a.length;f+=3){if(P.getY(a[f])<cut&&P.getY(a[f+1])<cut&&P.getY(a[f+2])<cut)continue;keep.push(a[f],a[f+1],a[f+2]);}geo.setIndex(keep);geo.computeBoundingBox();}}
+    const b=geo.boundingBox;geo.translate(-(b.min.x+b.max.x)/2,-b.min.y,-(b.min.z+b.max.z)/2);geo.computeBoundingBox();
+    L.load(BASE+"h3d/pr_"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=4;PR3D[id]={geo,tex:t};res();},undefined,()=>res());},()=>res()))));
+}
+function prMesh(id,h){const d=PR3D[id];if(!d)return null;const geo=d.geo.clone(),bh=d.geo.boundingBox.max.y||1;geo.scale(h/bh,h/bh,h/bh);
+  const mat=kkMat(d.tex,null,[1.05,.85,.7]);mat.side=T.DoubleSide;const m=new T.Mesh(geo,mat);m.frustumCulled=false;const g=new T.Group();g.add(m);
+  g.traverse(o=>o.layers.enable(KKLAYER));KKSET.add(g);return g;}
 function loadProps(){
-  const L=new T.TextureLoader();
+  const L=new T.TextureLoader();loadPr3d();
   return Promise.all(PROP_LIST.map(id=>new Promise(res=>L.load(BASE+"props/"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;if(id==="hierba"||id==="agua"){t.wrapS=t.wrapT=T.RepeatWrapping;}PROPS[id]=t;res();},undefined,e=>{console.warn("Sin ilustración",id,e);res();}))));
 }
 const _pq=new T.Quaternion(),_fw=new T.Vector3();
@@ -3845,7 +3859,7 @@ function bakePortraits(size=320){
   }
   r.dispose();r.forceContextLoss&&r.forceContextLoss();
 }
-return {T,kkMat,loadGLB,BASE,EXT,makeHero,loadH3D,H3D,loadKK,KK,KKM,kkOutline,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
+return {T,kkMat,loadGLB,BASE,EXT,prMesh,PR3D,makeHero,loadH3D,H3D,loadKK,KK,KKM,kkOutline,animate,setFlash,bakePortraits,PORTRAIT,loadModels,MODELS,loadSprites,SPRITES,loadAnim3d,ensureAnim,ANIM3D,loadProps,PROPS,loadArena,ARENA,lights,setupRenderer,envFor,mat,toon,part,OUT,glowMat,S,B,Cy,Co,To,at,rbox,lathe,taper};
 })();
 
 /* ================= arena 3D ================= */
@@ -4013,7 +4027,7 @@ function prop3d(id,h){
 }
 function addProps(list){
   for(const [id,x,z,h,ty] of list){
-    const p3=!/[?&]p2d=1/.test(location.search)&&prop3d(id,h);
+    const p3=!/[?&]p2d=1/.test(location.search)&&(GFX.prMesh(id,h*1.05)||prop3d(id,h));
     if(p3){p3.position.set(x,ty==="p"?-.19:-.13,z);if(ty!=="p"){p3.rotation.y=(x*13.7+z*7.3)%6.28*(id.startsWith("bandera")?0:1)+(id.startsWith("bandera")?(x<0?0:0):0);
         const sh=new T.Mesh(new T.CircleGeometry(h*(id==="rocas"?.75:.34),24),new T.MeshBasicMaterial({color:0x0b2a10,transparent:true,opacity:.3,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.set(x+.06,-.11,z+.05);sh.renderOrder=1;root.add(sh);}
       if(ty==="s")p3.userData.sway=Math.random()*6;if(ty==="f")p3.userData.flag=Math.random()*6;
