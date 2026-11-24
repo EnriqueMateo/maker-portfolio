@@ -3304,7 +3304,7 @@ function glbHero(id){
   return root;
 }
 /* ---- héroes 2D: la ilustración como una figura de cartón que siempre mira a la cámara ---- */
-const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo","arana","coloso","rey","reina"],SPRITES={},SPRITE_H={reina:1.25,rey:1.35,topo:1.3,arana:1.25,coloso:1.5,flecha:1,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
+const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo","arana","coloso","rey","reina"],SPRITES={},SPRITE_H={reina:1.25,rey:1.35,topo:1.3,arana:1.25,coloso:1.5,flecha:1.12,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
 const SKIN_LIST=["brasa_glacial","muro_magma","sombra_carmesi","truco_artico","ojo_nevado"];
 function loadSprites(){
   const L=new T.TextureLoader();
@@ -3324,7 +3324,7 @@ const _pq=new T.Quaternion(),_fw=new T.Vector3();
    n=nuca, c=centro de la cabeza, h=cadera, sL/hL=hombro/mano izquierda de la imagen, sR/hR derecha, pL/fL y pR/fR cadera/pie;
    x=extras [nombre,padre,desde,hasta]; atk=estilo de ataque; m=mano que ataca (L/R de la imagen) */
 const RIG2D={
-  flecha:{h:[.48,.66],n:[.46,.41],c:[.45,.24],sL:[.28,.45],hL:[.08,.62],sR:[.66,.45],hR:[.84,.58],pL:[.4,.72],fL:[.36,.96],pR:[.58,.72],fR:[.6,.96],atk:"shoot",m:"R"},
+  flecha:{h:[.48,.66],n:[.5,.41],c:[.5,.24],sL:[.3,.44],hL:[.28,.6],sR:[.68,.44],hR:[.77,.67],pL:[.4,.73],fL:[.36,.95],pR:[.6,.73],fR:[.62,.95],atk:"shoot",m:"R"},/* arquera (misma que su ficha) */
   brasa:{h:[.52,.7],n:[.52,.42],c:[.56,.2],sL:[.3,.5],hL:[.22,.66],sR:[.72,.48],hR:[.88,.72],pL:[.42,.8],fL:[.4,.96],pR:[.64,.8],fR:[.68,.96],x:[["cola","root",[.3,.74],[.06,.56]]],atk:"breath",m:"R"},
   sombra:{h:[.45,.62],n:[.45,.34],c:[.45,.18],sL:[.28,.42],hL:[.08,.7],sR:[.62,.42],hR:[.72,.74],pL:[.38,.7],fL:[.3,.96],pR:[.55,.7],fR:[.6,.96],x:[["bufanda","spine",[.6,.33],[.95,.32]]],atk:"throw",m:"R"},
   ojo:{h:[.5,.76],n:[.5,.47],c:[.5,.25],sL:[.28,.45],hL:[.06,.7],sR:[.72,.45],hR:[.95,.72],pL:[.42,.86],fL:[.4,.97],pR:[.6,.86],fR:[.6,.97],atk:"shoot",m:"L"},
@@ -3698,8 +3698,8 @@ function animateKK(u,t,st,act,at_){
 /* ---- héroes 3D sacados de su propia ilustración (art/h3d): la malla está en las mismas coordenadas que la carta 2D,
    así que usa el mismo esqueleto y las mismas animaciones (RIG2D), pero con volumen, luz, contorno y giro real ---- */
 const H3DTONE=(()=>{const q=/[?&]tone=([\d.,]+)/.exec(location.search);return q?q[1].split(",").map(Number):[1.04,.9,.6];})();
-const H3DFLIP=new Set(["bum"]);
-const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","coloso"],H3D={},H3DYAW={};let h3dP=null;
+const H3DROT={bum:Math.PI,flecha:-Math.PI/2,rey:-Math.PI/2};/* giro de los modelos generados que no salen mirando al frente */
+const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","coloso","rey","reina","topo","arana"],H3D={},H3DYAW={};let h3dP=null;
 const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")!=="0";}catch(e){return true;}})();
 function loadH3D(ids){
   if(!H3DON||!T.GLTFLoader)return Promise.resolve();
@@ -3707,7 +3707,7 @@ function loadH3D(ids){
   h3dP=h3dP||{};
   return Promise.all(live.map(id=>h3dP[id]||(h3dP[id]=new Promise(res=>loadGLB(BASE+"h3d/"+id+EXT,g=>{
     let geo=null;g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(o.isMesh&&!geo)geo=o.geometry.clone().applyMatrix4(o.matrixWorld);});
-    /* algunos modelos generados salen con la cara hacia atrás */if(geo&&H3DFLIP.has(id))geo.rotateY(Math.PI);
+    /* algunos modelos generados salen con la cara hacia atrás */if(geo&&H3DROT[id])geo.rotateY(H3DROT[id]);
     L.load(BASE+"h3d/"+id+".webp",t=>{t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=8;if(geo)H3D[id]={geo,tex:t};res();},undefined,()=>res());
   },()=>res())))));
 }
