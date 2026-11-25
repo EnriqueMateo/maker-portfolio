@@ -1579,12 +1579,12 @@ body.gazing::after{content:"";position:fixed;inset:0;pointer-events:none;z-index
 .ultib .uic{font-size:32px;line-height:1;margin-top:-8px;filter:drop-shadow(0 2px 0 #0005)}
 .ultib .ulb{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:13px;font-weight:900;letter-spacing:.5px}
 .ultib .unm{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);white-space:nowrap;font-size:14px;font-weight:900;color:#ffe066;opacity:0;transition:opacity .2s;pointer-events:none}
-.ultib.ready .unm,.ultib.armed .unm{opacity:1}
+.ultib.ready .unm,.ultib.armed .unm{opacity:1}.ultib.lock .unm{opacity:1;left:50%;top:auto;bottom:-8px;transform:translateX(-50%);font-size:12px;color:#fff;background:#1b1530;padding:2px 8px;border-radius:10px;display:flex;align-items:center;gap:3px}
 .ultib.armed{outline:4px solid #fff;animation:ultip .35s infinite alternate;pointer-events:none}
 .ultib .uring{position:absolute;inset:-3px;border-radius:50%;display:none;background:conic-gradient(#0000 var(--k,0deg),#0a0e2ecc 0);pointer-events:none}
 .ultib.off{filter:saturate(.35) brightness(.8)}.ultib.off .uring{display:block}
 .ultib.ready{animation:ultip .7s infinite alternate}
-.ultib.used{filter:grayscale(1) brightness(.55);opacity:.55;pointer-events:none}.ultib.used .ulb{text-decoration:line-through}
+.ultib.used{filter:grayscale(1) brightness(.55);opacity:.55;pointer-events:none}.ultib.lock{filter:grayscale(1) brightness(.6);opacity:.75}.ultib.lock .uic{opacity:.5}.ultib.used .ulb{text-decoration:line-through}
 .ultib:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
 @keyframes ultip{from{box-shadow:0 5px 0 var(--ink),0 0 0 0 #ffe066aa,inset 0 -6px 0 #0002,inset 0 3px 0 #fff8;transform:scale(1)}to{box-shadow:0 5px 0 var(--ink),0 0 0 12px #ffe06600,inset 0 -6px 0 #0002,inset 0 3px 0 #fff8;transform:scale(1.07)}}
 .tcoach.ingame.up{bottom:auto!important;top:calc(118px + env(safe-area-inset-top,0px))!important}
@@ -1936,7 +1936,8 @@ function areaOf(pat,tx,ty){
 }
 let MID=0;
 /* nivel de poder del héroe (1-9): un poco más de recarga de energía (+1 % por nivel). Sin vida extra: la habilidad decide */
-const LV_MAX=9,lvBonus=lv=>{lv=Math.max(1,Math.min(LV_MAX,lv||1));return {hp:0,elx:.01*(lv-1)};};
+/* 10 niveles de fuerza: más energía cada nivel (+1,5 %), +1 de vida en los niveles 4 y 8, y la ULTI desde el nivel 5 */
+const LV_MAX=10,ULTI_LV=5,lvBonus=lv=>{lv=Math.max(1,Math.min(LV_MAX,lv||1));return {hp:(lv>=4?1:0)+(lv>=8?1:0),elx:.015*(lv-1)};};
 function newHero(type,x,y,lv){const H=HEROES[type],hp=H.hp+lvBonus(lv).hp;return {type,x,y,lv:lv||1,hp,max:hp,path:[],nextStep:0,cdUntil:0,shieldUntil:0,turboUntil:0,visionUntil:0,invulUntil:0,decoyUntil:0};}
 function mark(R,s,m){m.id=++MID;R.marks[s].push(m);return m;}
 /* ruta en L determinista: elige el orden (primero X o primero Y) que pisa menos casillas en peligro;
@@ -1960,7 +1961,7 @@ function newRound(tp,tb,opts){
   /* reglas propias de las arenas avanzadas (mismas casillas en las dos islas: es justo para los dos) */
   /* reglas de nivel de la campaña: elx (recarga ×), hpB (vida del rival ×), huB (duración de las huellas del rival ×), noAmago */
   R.mod=opts.mod||{};if(R.mod.hpB){const b=R.heroes.b;b.hp=b.max=Math.round(b.max*R.mod.hpB);}
-  R.arena=opts.arena||null;R.ultiOn=!!opts.ulti;/* las ULTIs solo en partidas locales por ahora: online el cliente aún no tiene botón */
+  R.arena=opts.arena||null;R.ultiOn=!!opts.ulti;R.ultiLv=opts.ultiLv||0;/* las ULTIs solo en partidas locales por ahora: online el cliente aún no tiene botón */
   if(R.arena==="volcan")R.lava={next:15,warnAt:12,tiles:shuffle(allCells()).slice(0,2)};
   if(R.arena==="trono"){const c=pick(allCells().filter(([x,y])=>Math.abs(x-2)+Math.abs(y-2)<=2));R.cover={x:c[0],y:c[1],used:{p:false,b:false}};}
   if(R.arena==="olimpo")R.wind={next:20,until:0,dir:0};
@@ -2075,6 +2076,7 @@ function ulti(R,s,hk){
   if(R.paused||R.over)return "no";
   const h=R.heroes[s],H=HEROES[h.type],o=other(s),v=R.heroes[o];
   if(!R.ultiOn||!ULTIS[h.type])return "no";
+  if(R.ultiLv&&(h.lv||1)<R.ultiLv)return "lvl";
   if(h.ultiUsed)return "used";
   if(R.now<ULTI_T)return "wait";
   if(h.type==="savia"&&h.hp>=h.max)return "full";
@@ -2298,14 +2300,14 @@ function viewFor(R,s){
   const o=other(s),me=R.heroes[s],foe=R.heroes[o],sw=x=>x===s?"p":"b";
   const vis=me.visionUntil>R.now;
   return {now:R.now,sudden:R.sudden,paused:R.paused,over:R.over,elx:{p:R.elx[s]},
-    heroes:{p:{type:me.type,x:me.x,y:me.y,hp:me.hp,max:me.max,path:me.path,cdUntil:me.cdUntil,decoyUntil:me.decoyUntil,shieldUntil:me.shieldUntil,turboUntil:me.turboUntil,visionUntil:me.visionUntil,ultiUsed:!!me.ultiUsed,ultiNext:!!me.ultiNext,smokeUntil:me.smokeUntil||0,fortUntil:me.fortUntil||0,airUntil:me.airUntil||0},
+    heroes:{p:{type:me.type,x:me.x,y:me.y,hp:me.hp,max:me.max,path:me.path,cdUntil:me.cdUntil,decoyUntil:me.decoyUntil,shieldUntil:me.shieldUntil,turboUntil:me.turboUntil,visionUntil:me.visionUntil,lv:me.lv||1,ultiUsed:!!me.ultiUsed,ultiNext:!!me.ultiNext,smokeUntil:me.smokeUntil||0,fortUntil:me.fortUntil||0,airUntil:me.airUntil||0},
             b:{type:foe.type,hp:foe.hp,max:foe.max,x:vis?foe.x:-9,y:vis?foe.y:-9,path:[],cdUntil:0,shieldUntil:0,turboUntil:0,visionUntil:0}},
     boosts:R.boosts,
     projs:R.projs.filter(p=>p.o===s||p.warn).map(p=>persp(p,s)),
     /* huellas del rival tal y como las ve el jugador: sin "decoy" y con "fake" solo si su héroe es Truco (si no, delataría el amago) */
     marks:{b:R.marks[o].filter(m=>m.t!=="step"||HEROES[me.type].ears).filter(m=>!m.dud).map(m=>{const c=Object.assign({},m);delete c.decoy;if(m.t==="huella"){c.fake=!!HEROES[foe.type].fake;c.blur=!!HEROES[foe.type].stealth;}return c;}),
       p:R.marks[s].filter(m=>m.t!=="step"||HEROES[foe.type].ears).map(m=>{if(!m.dud)return m;const c=Object.assign({},m);delete c.dud;return c;})},
-    ultiOn:!!R.ultiOn,fires:(R.fires||[]).map(f=>({d:sw(f.d),cells:f.cells,until:f.until})),
+    ultiOn:!!R.ultiOn,ultiLv:R.ultiLv||0,fires:(R.fires||[]).map(f=>({d:sw(f.d),cells:f.cells,until:f.until})),
     mines:(R.mines||[]).filter(m=>m.o===s).map(m=>({x:m.x,y:m.y,until:m.until})),
     lava:R.lava||null,cover:R.cover?{x:R.cover.x,y:R.cover.y,used:{p:R.cover.used[s],b:R.cover.used[o]}}:null,wind:R.wind||null,
     dmg:{p:R.dmg[s],b:R.dmg[o]}};
@@ -2319,13 +2321,13 @@ function persp(p,s){
   if(p.vx!=null&&(p.o===s||p.d===s)){q.vx=p.vx;q.vy=p.vy;}
   return q;
 }
-return {LV_MAX,lvBonus,N,D4,SIDES,ELX_MAX,ELX_START,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,HIDE_T,INVUL_T,HEROES,IDS,STARTERS,BOOSTS,
+return {LV_MAX,ULTI_LV,lvBonus,N,D4,SIDES,ELX_MAX,ELX_START,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,HIDE_T,INVUL_T,HEROES,IDS,STARTERS,BOOSTS,
   ULTIS,ULTI_T,ulti,rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf,newRound,moveTo,fire,amago,decoyCost,DECOY_COST,DECOY_CD,tick,viewFor,persp};
 })();
 /* ENGINE-END */
 
 /* ================= datos del cliente ================= */
-const {LV_MAX,lvBonus,N,D4,HEROES,IDS,STARTERS,BOOSTS,ELX_MAX,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf}=AMAGO;
+const {LV_MAX,ULTI_LV,lvBonus,N,D4,HEROES,IDS,STARTERS,BOOSTS,ELX_MAX,ROUND_T,SUDDEN_T,HUELLA_T,BOOST_LIFE,rnd,pick,shuffle,key,inB,other,grid,inArea,allCells,areaOf}=AMAGO;
 const RAR=[{n:"Común",c:"#8fb4e0",bg:"linear-gradient(160deg,#6f9fe0,#3b5fb0)"},{n:"Raro",c:"#41e08a",bg:"linear-gradient(160deg,#4fdc8f,#1f8a55)"},{n:"Épico",c:"#c07bff",bg:"linear-gradient(160deg,#c48bff,#6a2fc0)"},{n:"Legendario",c:"#ffcc1f",bg:"linear-gradient(160deg,#ffe066,#e08a00)"}];
 const ARENAS=[{t:0,k:"pradera",n:"Pradera Aprendiz",bg:"#2b358d"},{t:100,k:"bosque",n:"Bosque Cazador",bg:"#1f6b4f"},{t:250,k:"volcan",n:"Volcán Estratega",bg:"#8a2d1f"},{t:500,k:"trono",n:"Trono de Leyendas",bg:"#6a2fa0"},{t:900,k:"olimpo",n:"Olimpo del Amago",bg:"#a07a10"}];
 const NAMES=["LoboSolar","Nacho_77","PixelKing","Mr.Taco","ZetaGamer","Kira09","ElPeque","Rayito_x","DonPatata","LaReina","NinjaMiau","Turbo_Ale","Chispa","Bruma_33","CapitánNube"];
@@ -2350,9 +2352,9 @@ const ROAD=[{t:10,r:"coins",n:50},{t:20,r:"pp",n:40},{t:30,r:"chest",tier:1},{t:
 for(let t=1100;t<=5000;t+=100)ROAD.push(t%500===0?{t,r:"chest",tier:3}:{t,r:"chest",tier:2});
 const KEYS_PER_CHEST=3,BOX_MAX=6,PRICE=[150,300,600,1000],GEM_HERO=[30,60,110,180];
 /* coste de subir a cada nivel (índice = nivel al que se sube): barato al principio, lento al final */
-const UPG=[null,null,{pp:25,c:40},{pp:55,c:90},{pp:100,c:170},{pp:180,c:300},{pp:310,c:520},{pp:510,c:850},{pp:890,c:1480},{pp:1530,c:2550}];
+const UPG=[null,null,{pp:25,c:40},{pp:55,c:90},{pp:100,c:170},{pp:180,c:300},{pp:310,c:520},{pp:510,c:850},{pp:890,c:1480},{pp:1530,c:2550},{pp:2600,c:4300}];
 /* nivel máximo que cuenta en partida según la arena: pagar adelanta, pero no compra victorias */
-const LV_CAP=[3,5,7,8,9];
+const LV_CAP=[5,6,8,9,10];/* nivel máximo que cuenta según la arena (en la primera ya llega al 5: la ULTI) */
 const CHESTS={1:{n:"Cofre",coins:[20,30],pp:[15,25],hero:.06,taps:1},2:{n:"Cofre grande",coins:[70,90],pp:[50,70],hero:.15,taps:2},3:{n:"Megacofre",coins:[220,280],pp:[160,200],hero:.35,taps:3}};
 const SHOP_CHEST={1:60,2:160,3:420},PITY_MAX=8,PITY_PTS={1:1,2:2,3:4};
 /* pase: temporadas de 28 días, 40 escalones de 200 fichas; después, la bóveda */
@@ -2377,7 +2379,7 @@ const MASTERY=[{n:3,t:"Bronce",r:T_("coins",40)},{n:10,t:"Plata",r:T_("pp",40)},
 const WIN_COINS={facil:5,normal:8,dificil:12},WIN_COINS_CAP=100,TRO_MULT={facil:.7,normal:1,dificil:1.4};
 /* aspectos (variantes de color de la ilustración) y marcos de avatar */
 /* img: ilustración propia (skins/<id>.webp); f: filtro de color de reserva si la imagen no carga */
-/* aspectos exclusivos: solo con gemas compradas. Cada uno trae su efecto de ataque (proyectil, estela e impacto): es lo que el rival SÍ ve, porque tu héroe está escondido. Solo estética: ninguna ventaja */
+/* aspectos exclusivos: los más caros (250 gemas). Cada uno trae su efecto de ataque (proyectil, estela e impacto): es lo que el rival SÍ ve, porque tu héroe está escondido. Solo estética: ninguna ventaja */
 const SKINS={brasa_glacial:{hero:"brasa",n:"Brasa Glacial",img:1,f:{h:185,s:1.1,b:1.05},gems:250,prem:1,fx:{n:"Aliento de hielo",c:0x7fd8ff,c2:0xe8fbff,parts:[0x7fd8ff,0xffffff,0xb8ecff]}},
   muro_magma:{hero:"muro",n:"Muro Magma",img:1,f:{h:170,s:1.3,b:1},gems:250,prem:1,fx:{n:"Golpe de lava",c:0xff5a10,c2:0xffd23f,parts:[0xff4a10,0xffd23f,0xff9a3a]}},
   sombra_carmesi:{hero:"sombra",n:"Sombra Carmesí",img:1,f:{h:70,s:1.2,b:1},gems:250,prem:1,fx:{n:"Filo carmesí",c:0x3a0014,c2:0xff3a5a,parts:[0x1a0008,0xff2a4a,0x5a0020,0x000000]}},
@@ -2413,7 +2415,10 @@ const TR=(()=>{
   Object.assign(I18N_EN,{"¡Vamos a por ellos!":"Let's get them!","Hoy me siento con suerte.":"Feeling lucky today.","Esta vez no me ven venir.":"They won't see me coming.","¿Una más?":"One more?","¡Estoy listo!":"I'm ready!","Nadie me encuentra.":"Nobody can find me.","¡Una victoria más y abres un cofre!":"One more win and you open a chest!","¡Solo # trofeos para #!":"Only # trophies to #!","¡Me falta 1 para acabar una misión!":"Just 1 more to finish a mission!","¡Puedo subir de nivel! Mírame en Héroes.":"I can level up! Check me in Heroes.","¿Probamos el reto del día?":"Shall we try the daily challenge?"});
   Object.assign(I18N_EN,{"Mi isla":"My island","De la arena":"Arena default","Hielo":"Ice","Dunas":"Dunes","Menta":"Mint","Noche":"Night","Cerezo":"Cherry","Lima":"Lime","Oro":"Gold","Azul":"Blue","Verde":"Green","Morado":"Purple","Carbón":"Charcoal","Chicle":"Bubblegum","Casillas":"Tiles","Marco":"Frame","Así se ve tu tablero en cada partida. Los estilos nuevos se ganan jugando.":"This is how your board looks in every match. New styles are earned by playing.","Juega # partidas":"Play # matches","Gana # partidas":"Win # matches","Llega a # trofeos":"Reach # trophies","Llega al nivel #":"Reach level #","Te faltan #":"# to go"});
   Object.assign(I18N_EN,{"Sonido y avisos":"Sound & alerts","Ayuda":"Help","Nombre":"Name","Invitado · tu progreso solo está en este móvil":"Guest · your progress is only on this phone","Datos anónimos de juego":"Anonymous gameplay data","¿Seguro? Se borra todo tu progreso.":"Sure? All your progress will be deleted.","SÍ, BORRAR":"YES, DELETE","Inicio":"Home"});
-  Object.assign(I18N_EN,{"Aspecto exclusivo":"Exclusive skin","Tus ataques lucen su propio efecto, y tu rival lo ve en cada disparo. Solo es estética: no da ventaja.":"Your attacks show their own effect, and your rival sees it on every shot. Cosmetic only: no advantage.","Se consigue con gemas compradas en la tienda.":"Get it with gems bought in the shop.","VER GEMAS":"SEE GEMS","EXCLUSIVO":"EXCLUSIVE","exclusivo":"exclusive","Aliento de hielo":"Ice breath","Golpe de lava":"Lava slam","Filo carmesí":"Crimson edge","Cartas de escarcha":"Frost cards","Ventisca":"Blizzard"});
+  Object.assign(I18N_EN,{"Aspecto exclusivo":"Exclusive skin","Tus ataques lucen su propio efecto, y tu rival lo ve en cada disparo. Solo es estética: no da ventaja.":"Your attacks show their own effect, and your rival sees it on every shot. Cosmetic only: no advantage.","Gana gemas jugando o consíguelas en la tienda.":"Earn gems by playing or get them in the shop.","VER GEMAS":"SEE GEMS","EXCLUSIVO":"EXCLUSIVE","exclusivo":"exclusive","Aliento de hielo":"Ice breath","Golpe de lava":"Lava slam","Filo carmesí":"Crimson edge","Cartas de escarcha":"Frost cards","Ventisca":"Blizzard"});
+  Object.assign(I18N_EN,{"¡Desbloqueada!":"Unlocked!"});
+  Object.assign(I18N_EN,{"Se desbloquea en el nivel #.":"Unlocks at level #.","Cada nivel: +1,5 % de energía. Nivel 4 y 8: +1 de vida. Nivel 5: ULTI.":"Each level: +1.5% energy. Levels 4 and 8: +1 life. Level 5: ULTI."});
+  Object.assign(I18N_EN,{"La ULTI se desbloquea en el nivel #":"ULTI unlocks at level #"});
   Object.assign(I18N_EN,{"Escalón # de #":"Tier # of #","Temporada #":"Season #"," · ¡fichas dobles para ponerte al día!":" · double tokens to catch up!","Quedan # días · ¡fichas dobles para ponerte al día!":"# days left · double tokens to catch up!","Nivel #":"Level #","de #":"of #","Nivel":"Level","Quita # vida":"Deals # damage","Quita # vidas":"Deals # damage"});
   Object.assign(I18N_EN,{"Batalla":"Battle","Al instante, contra rivales de tu nivel · trofeos, monedas, llaves y fichas":"Instant, against rivals of your level · trophies, coins, keys and tokens","Entrenamiento: elige tú la dificultad":"Training: pick the difficulty yourself","Entreno #":"Training #"});
   Object.assign(I18N_EN,{"¿Nos ayudas a mejorar?":"Help us improve?","Enviar estadísticas anónimas de cómo juegas (partidas, héroes, dónde te atascas) nos ayuda a hacer AMAGO más divertido. Sin anuncios, sin datos personales.":"Sending anonymous stats about how you play (matches, heroes, where you get stuck) helps us make AMAGO more fun. No ads, no personal data.","Puedes cambiarlo cuando quieras en Ajustes.":"You can change it anytime in Settings.","SÍ, CLARO":"SURE","No, gracias":"No, thanks"});
@@ -4618,11 +4623,11 @@ function statsHTML(id){
   const cost=n=>`<i class="cost">${ico("drop","s")}<span class="out">${n}</span></i>`;
   return `<div class="pstats well">
     <div class="pst">${ico("heart")}<span><b class="out">${H.hp+bo.hp}</b><small>Vida</small></span></div>
-    <div class="pst"><span class="pwrs">${pwrHTML(lv)}</span><span><b class="out">Nivel ${lv}</b><small>de ${LV_MAX}</small></span>${bo.elx?`<i class="cost up"><span class="out">+${Math.round(bo.elx*100)} %</span></i>`:""}</div>
+    <div class="pst"><span class="pwrs">${pwrHTML(lv)}</span><span><b class="out">Nivel ${lv}</b><small>de ${LV_MAX}</small></span>${bo.elx?`<i class="cost up"><span class="out">+${pctf(bo.elx)} %</span></i>`:""}</div>
     <div class="pst">${ico("star")}<span><b class="out">${speedLabel(H.step)}</b><small>Velocidad</small></span>${cost(H.mc)}</div>
     <div class="pst atk"><span class="pt2">${patIcon(H.pat)}</span><span><b class="out">${H.a}</b><small>Quita ${H.dmg} ${H.dmg>1?"vidas":"vida"}</small></span>${cost(H.cost)}</div>
     <div class="pst wide ${H.warn?"":"nowarn"}">${ico(H.warn?"swords":"power")}<span><b>${H.warn?"El rival lo ve venir":"Sin aviso: casi imposible de esquivar"}</b></span></div>
-  </div><p class="special">${H.d}</p>${AMAGO.ULTIS[id]?`<p class="special ultiinfo"><b>${AMAGO.ULTIS[id].i} ULTI · ${TT(AMAGO.ULTIS[id].n)}:</b> ${TT(AMAGO.ULTIS[id].d)} <i>Una vez por ronda.</i></p>`:""}`;
+  </div><p class="special">${H.d}</p>${AMAGO.ULTIS[id]?`<p class="special ultiinfo"><b>${AMAGO.ULTIS[id].i} ULTI · ${TT(AMAGO.ULTIS[id].n)}:</b> ${TT(AMAGO.ULTIS[id].d)} <i>${lv>=ULTI_LV?"Una vez por ronda.":`${ico("lock","s")} Se desbloquea en el nivel ${ULTI_LV}.`}</i></p>`:""}<p class="special lvinfo">${TT("Cada nivel: +1,5 % de energía. Nivel 4 y 8: +1 de vida. Nivel 5: ULTI.")}</p>`;
 }
 const ARENA_PROP={pradera:"arbol",bosque:"pino",volcan:"geiser_lava",trono:"estatua",olimpo:"columna_dorada"};
 /* decorado lateral de cada arena (pantalla de arena nueva y separadores del camino de trofeos) */
@@ -4648,6 +4653,7 @@ const gems=()=>S.gemsFree+S.gemsPaid;
 function addGems(n,paid){if(paid)S.gemsPaid+=n;else S.gemsFree+=n;}
 function spendGems(n){if(gems()<n)return false;const f=Math.min(S.gemsFree,n);S.gemsFree-=f;S.gemsPaid-=n-f;return true;}
 const eur=g=>!payOn()?"":"≈ "+fmtEur(Math.max(.05,Math.round(g*GEM_EUR*20)/20));
+const pctf=x=>{const v=Math.round(x*1000)/10;return String(v).replace(".",LANG==="en"?".":",");};
 function pwrHTML(lv,cls=""){return `<span class="pwr ${lv>=LV_MAX?"max":""} ${cls}" title="Nivel ${lv}"><span class="out">${lv}</span></span>`;}
 function skinOf(id){const k=S.equip.skin[id];return k&&SKINS[k]&&S.own.skin.includes(k)?SKINS[k]:null;}
 function skinCSS(f){return f?`filter:hue-rotate(${f.h}deg) saturate(${f.s}) brightness(${f.b})`:"";}
@@ -5116,9 +5122,9 @@ function buyGemItem(id){
   confirmGems(g.gems,g.n,()=>{if(!spendGems(g.gems))return;S.gemDeals.got[g.id]=(S.gemDeals.got[g.id]||0)+1;save();sfx("buy");const it=rewardItems(g.r);applyItems(it);openItems(it,g.r.r==="chest"?3:0);showShop();});
 }
 function buySkin(k){const v=SKINS[k];if(S.own.skin.includes(k))return;
-  /* exclusivos: solo con gemas compradas (las ganadas jugando no valen) */
-  if(v.prem&&(S.gemsPaid||0)<v.gems){UI.modal={k:"info2",title:TT("Aspecto exclusivo"),html:`<div style="display:flex;justify-content:center"><span class="im" style="width:120px;height:120px;display:block">${heroArt(v.hero,k)}</span></div><p><b>${TT(v.n)}</b> · ${TT(v.fx.n)}</p><p>${TT("Tus ataques lucen su propio efecto, y tu rival lo ve en cada disparo. Solo es estética: no da ventaja.")}</p><p class="sub">${TT("Se consigue con gemas compradas en la tienda.")} ${v.gems} ${ico("gem","s")}</p><button class="gbtn" data-a="gemshop">${TT("VER GEMAS")}</button>`};renderModal();return;}
-  confirmGems(v.gems,v.n,()=>{if(S.own.skin.includes(k))return;if(v.prem){if((S.gemsPaid||0)<v.gems)return;S.gemsPaid-=v.gems;}else if(!spendGems(v.gems))return;applyItems([{k:"skin",id:k}]);sfx("buy");openItems([{k:"skin",id:k}]);refreshScreen();});}
+  /* exclusivos: valen todas las gemas (las ganadas jugando, que son pocas, y las de la tienda). Si faltan, se explica el efecto y se ofrece la tienda */
+  if(v.prem&&gems()<v.gems){UI.modal={k:"info2",title:TT("Aspecto exclusivo"),html:`<div style="display:flex;justify-content:center"><span class="im" style="width:120px;height:120px;display:block">${heroArt(v.hero,k)}</span></div><p><b>${TT(v.n)}</b> · ${TT(v.fx.n)}</p><p>${TT("Tus ataques lucen su propio efecto, y tu rival lo ve en cada disparo. Solo es estética: no da ventaja.")}</p><p class="sub">${TT("Gana gemas jugando o consíguelas en la tienda.")} ${v.gems} ${ico("gem","s")}</p><button class="gbtn" data-a="gemshop">${TT("VER GEMAS")}</button>`};renderModal();return;}
+  confirmGems(v.gems,v.n,()=>{if(S.own.skin.includes(k))return;if(!spendGems(v.gems))return;applyItems([{k:"skin",id:k}]);sfx("buy");openItems([{k:"skin",id:k}]);refreshScreen();});}
 function buyHeroGems(id){const p=GEM_HERO[HEROES[id].rar];confirmGems(p,HEROES[id].n,()=>{if(S.unl.includes(id)||!spendGems(p))return;sfx("buy");giveReward({r:"hero",id});refreshScreen();});}
 function claimGift(){if(!giftReady())return;S.gift=today();save();giveReward(C_(1));refreshScreen();}
 function nope(sel){const el=$(sel);sfx("nope");hap(40);if(el){const p=el.closest(".rpill")||el;p.animate([{transform:"translateX(0)",color:"#fff"},{transform:"translateX(-5px)",color:"#ff6b78"},{transform:"translateX(5px)"},{transform:"translateX(0)",color:"#fff"}],{duration:260});}}
@@ -5361,8 +5367,8 @@ function renderModal(){
   if(M.k==="lvup"){const H=HEROES[M.id],lv=lvOf(M.id),b=lvBonus(lv),pb=lvBonus(lv-1);
     put(`<div class="lvup" data-a="lvclose"><span class="godrays"></span><span class="ribn gold slam">¡NIVEL SUPERADO!</span>${heroArt(M.id,undefined,"h3 hi")}
       <span class="pwr ${lv>=LV_MAX?"max":""}"><span class="roll out"><b>${lv-1}</b><b>${lv}</b></span></span><h2 class="t-h1 out slam" style="animation-delay:.6s">${H.n} · Poder ${lv}</h2>
-      <div class="cmp pnl"><div style="animation-delay:1s">${ico("drop")}<span>Recarga de energía</span><em>+${Math.round(pb.elx*100)} → +${Math.round(b.elx*100)} %</em></div>
-      ${b.hp>pb.hp?`<div style="animation-delay:1.25s">${ico("heart")}<span>Vida</span><em>+1</em></div>`:""}</div>
+      <div class="cmp pnl"><div style="animation-delay:1s">${ico("drop")}<span>Recarga de energía</span><em>+${pctf(pb.elx)} → +${pctf(b.elx)} %</em></div>
+      ${b.hp>pb.hp?`<div style="animation-delay:1.25s">${ico("heart")}<span>Vida</span><em>+1</em></div>`:""}${lv===ULTI_LV&&AMAGO.ULTIS[M.id]?`<div style="animation-delay:1.4s">${ico("star")}<span>ULTI · ${TT(AMAGO.ULTIS[M.id].n)}</span><em>${TT("¡Desbloqueada!")}</em></div>`:""}</div>
       <span class="hint out" style="color:var(--tx-hl);animation:appear .3s 1.3s both">Toca para seguir</span></div>`);M.lock=performance.now()+1200;return;}
   const m=document.createElement("div");m.className="modal";m.dataset.a="mback";
   if(M.k==="missions"||M.k==="calendar"){m.classList.add("bottom");m.innerHTML=M.k==="missions"?missionsHTML():calHTML();}
@@ -5913,7 +5919,7 @@ async function startRound(){
   /* tu nivel en partida está limitado por la arena; el bot sube con los trofeos (nunca más de 1 por encima de ti) */
   const lp=effLv(tp),base=1+Math.floor(S.tro/110)+(S.diff==="dificil"?1:S.diff==="facil"?-1:0),lb=G.tutorial||G.camp?1:Math.max(1,Math.min(LV_MAX,LV_CAP[arenaIdx()],base,lp+1));
   G.lv={p:lp,b:lb};
-  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:curArena(),ulti:!G.tutorial||G.round>=3,mod:G.camp?campLv().mod:null});recReset();G.nearN=0;G.rs={sh:0,hit:0,dg:0,dgn:0};if(!G.mt)G.mt={sh:0,hit:0,dg:0};if(!G.recs)G.recs=[];
+  R=AMAGO.newRound(tp,tb,{bot:botParams(),lv:G.lv,arena:G.tutorial?null:curArena(),ulti:!G.tutorial||G.round>=3,ultiLv:G.tutorial?0:AMAGO.ULTI_LV,mod:G.camp?campLv().mod:null});recReset();G.nearN=0;G.rs={sh:0,hit:0,dg:0,dgn:0};if(!G.mt)G.mt={sh:0,hit:0,dg:0};if(!G.recs)G.recs=[];
   if(G.tut)TUT.setup(R);
   MUS.play("battle");try{if(MUS.src&&AU.ctx)MUS.src.playbackRate.setTargetAtTime(1,AU.ctx.currentTime,.3);}catch(e){}
   await vsAndCountdown(tp,tb);
@@ -6383,7 +6389,7 @@ function netOpen(){
     if(NET.ws&&NET.ws.readyState===1)return res();
     let ws;try{ws=new WebSocket(SERVER?SERVER.replace(/^http/,"ws"):(location.protocol==="https:"?"wss://":"ws://")+location.host);}catch(e){return rej(e);}
     NET.closing=false;
-    ws.onopen=()=>{NET.ws=ws;netSend({t:"hello",ulti:1,name:S.name,tro:S.tro,unl:S.unl,skin:Object.fromEntries(Object.entries((S.equip&&S.equip.skin)||{}).filter(([h,k])=>SKINS[k]&&SKINS[k].fx&&S.own.skin.includes(k))),...(ACC||{})});res();};
+    ws.onopen=()=>{NET.ws=ws;netSend({t:"hello",ulti:1,name:S.name,tro:S.tro,unl:S.unl,lv:Object.fromEntries(S.unl.map(h=>[h,effLv(h)])),skin:Object.fromEntries(Object.entries((S.equip&&S.equip.skin)||{}).filter(([h,k])=>SKINS[k]&&SKINS[k].fx&&S.own.skin.includes(k))),...(ACC||{})});res();};
     ws.onerror=()=>rej(new Error("conexión"));
     ws.onclose=()=>{const was=NET.ws===ws;NET.ws=null;if(was&&!NET.closing)netLost();};
     ws.onmessage=e=>{let m;try{m=JSON.parse(e.data);}catch(err){return;}netMsg(m);};
@@ -6538,7 +6544,8 @@ function renderLive(){
   $("#bst").textContent=bst.join(" ");
   if(me.smokeUntil>now)bst.push("💨"+Math.ceil(me.smokeUntil-now)+"s");if(me.fortUntil>now)bst.push("🏰"+Math.ceil(me.fortUntil-now)+"s");if(me.airUntil>now)bst.push("🦘"+Math.ceil(me.airUntil-now)+"s");
   $("#bst").textContent=bst.join(" ");
-  {const ub=$("#ultib");if(ub){const k=Math.min(1,now/AMAGO.ULTI_T),st=me.ultiNext?"armed":me.ultiUsed?"used":k<1?"off":"ready";
+  {const ub=$("#ultib");if(ub){const k=Math.min(1,now/AMAGO.ULTI_T),st=R.ultiLv&&(me.lv||1)<R.ultiLv?"lock":me.ultiNext?"armed":me.ultiUsed?"used":k<1?"off":"ready";
+    if(st==="lock"){if(ub.dataset.st!=="lock"){ub.dataset.st="lock";ub.className="ultib lock";$("#unm").innerHTML=ico("lock","s")+" "+TT("Nivel")+" "+AMAGO.ULTI_LV;}}else
     if(ub.dataset.st!==st){ub.dataset.st=st;ub.classList.toggle("off",st==="off");ub.classList.toggle("ready",st==="ready");ub.classList.toggle("used",st==="used");ub.classList.toggle("armed",st==="armed");$("#unm").textContent=TT(st==="armed"?"¡Dispara!":AMAGO.ULTIS[me.type].n);
       if(st==="ready"&&!R.over){sfx("near");toast("ultiready","⭐ <b>¡ULTI lista!</b> "+TT(AMAGO.ULTIS[me.type].n)+": "+TT(AMAGO.ULTIS[me.type].d)+" <i>Solo una vez por ronda.</i>");}}
     if(st==="off")$("#uring").style.setProperty("--k",(k*360).toFixed(0)+"deg");}}
@@ -6770,8 +6777,9 @@ document.addEventListener("click",e=>{
     case "gpause":if(R&&UI.screen==="game"&&!G.tutorial){sfx("tap");UI.modal={k:"gpause"};renderModal();}break;
     case "ulti":if(R&&UI.screen==="game"&&R.ultiOn&&!R.paused&&!R.over){const me=R.heroes.p,c=B3.heroScreen();
         /* online decide el servidor; aquí solo se comprueba lo mismo para dar respuesta al instante */
-        const r=G.online?(me.ultiUsed?"used":R.now<AMAGO.ULTI_T?"wait":me.type==="savia"&&me.hp>=me.max?"full":"net"):AMAGO.ulti(R,"p",ui);
-        if(r==="wait"){floatText(c.x,c.y,"⭐ "+TT("Lista en")+" "+Math.ceil(AMAGO.ULTI_T-R.now)+" s","miss");sfx("miss");}
+        const r=G.online?(R.ultiLv&&(me.lv||1)<R.ultiLv?"lvl":me.ultiUsed?"used":R.now<AMAGO.ULTI_T?"wait":me.type==="savia"&&me.hp>=me.max?"full":"net"):AMAGO.ulti(R,"p",ui);
+        if(r==="lvl"){floatText(c.x,c.y,TT("La ULTI se desbloquea en el nivel #").replace("#",AMAGO.ULTI_LV),"miss");sfx("nope");}
+        else if(r==="wait"){floatText(c.x,c.y,"⭐ "+TT("Lista en")+" "+Math.ceil(AMAGO.ULTI_T-R.now)+" s","miss");sfx("miss");}
         else if(r==="full"){floatText(c.x,c.y,"🌸 "+TT("Ya tienes toda la vida"),"miss");sfx("miss");}
         else if(r==="net"){me.ultiUsed=true;netSend({t:"ulti"});EV.add("ulti",{h:me.type,t:Math.round(R.now),on:1});renderLive();}
         else if(r==="ok"){EV.add("ulti",{h:me.type,t:Math.round(R.now)});renderLive();}}break;

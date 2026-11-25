@@ -159,7 +159,11 @@ function cleanPlayer(m) {
   // aspecto exclusivo equipado por héroe (solo estética: efecto de ataque que verá el rival)
   const skin = {};
   if (m.skin && typeof m.skin === "object") for (const [h, k] of Object.entries(m.skin).slice(0, 12)) if (isHero(h) && /^[a-z_]{3,30}$/.test(String(k))) skin[h] = String(k);
-  return { name, tro, unl, skin };
+  // nivel de fuerza por héroe (1–10). Sin datos (apps antiguas) se juega a nivel 5 para que la ULTI siga disponible
+  const lv = {};
+  const hasLv = m.lv && typeof m.lv === "object";
+  for (const h of unl) lv[h] = hasLv ? Math.max(1, Math.min(E.LV_MAX || 10, Math.floor(Number(m.lv[h]) || 1))) : (E.ULTI_LV || 5);
+  return { name, tro, unl, skin, lv };
 }
 
 function broadcast(room, fn) {
@@ -319,7 +323,11 @@ function startRound(room) {
   const bot = room.players.b && room.players.b.isBot ? room.players.b : null;
   // ULTIs solo si los dos clientes las entienden: contra una app antigua sería injusto
   const ultiOn = ["p", "b"].every((s) => { const pl = room.players[s]; return pl && (pl.isBot || pl.ulti === true); });
-  const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params, ulti: ultiOn } : { ulti: ultiOn });
+  // niveles: cada jugador el suyo; el rival de la casa juega al nivel del héroe del jugador (nunca por encima)
+  const lvOf = (s) => { const pl = room.players[s]; return pl && pl.player && pl.player.lv ? pl.player.lv[room.picks[s]] || 1 : 0; };
+  const lv = { p: lvOf("p") || 1, b: lvOf("b") || 1 };
+  if (bot) lv.b = lvOf("p") || 1;
+  const R = E.newRound(room.picks.p, room.picks.b, bot ? { bot: bot.params, ulti: ultiOn, lv, ultiLv: E.ULTI_LV } : { ulti: ultiOn, lv, ultiLv: E.ULTI_LV });
   room.R = R;
   room.ids = new Map();
   room.state = "count";
