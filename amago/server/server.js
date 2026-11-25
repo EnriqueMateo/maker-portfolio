@@ -156,7 +156,10 @@ function cleanPlayer(m) {
   let unl = Array.isArray(m.unl) ? m.unl.slice(0, 32).filter(isHero) : [];
   unl = [...new Set(unl)];
   if (unl.length < 3) unl = E.STARTERS.slice();
-  return { name, tro, unl };
+  // aspecto exclusivo equipado por héroe (solo estética: efecto de ataque que verá el rival)
+  const skin = {};
+  if (m.skin && typeof m.skin === "object") for (const [h, k] of Object.entries(m.skin).slice(0, 12)) if (isHero(h) && /^[a-z_]{3,30}$/.test(String(k))) skin[h] = String(k);
+  return { name, tro, unl, skin };
 }
 
 function broadcast(room, fn) {
@@ -461,7 +464,7 @@ function matchRoom(r) {
   // en el modo Online el rival ve un apodo automático (nada escrito por otros jugadores); con amigos, el nombre filtrado
   broadcast(r, (s) => {
     const o = r.players[other(s)];
-    return { t: "matched", code: r.code, token: r.tokens[s], ranked: !!r.ranked, opp: { name: r.ranked ? o.alias : o.player.name, tro: o.player.tro } };
+    return { t: "matched", code: r.code, token: r.tokens[s], ranked: !!r.ranked, opp: { name: r.ranked ? o.alias : o.player.name, tro: o.player.tro, skin: o.player.skin || {} } };
   });
   setTimeout(() => rooms.get(r.code) === r && startPick(r), 1500);
 }
