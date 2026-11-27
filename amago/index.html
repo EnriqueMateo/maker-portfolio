@@ -2580,7 +2580,10 @@ const PORTAL=(()=>{if(window.AMAGO_APP)return "";if(window.AMAGO_PORTAL)return w
 if(PORTAL==="crazygames")window.AMAGO_PORTAL_LINKS=false;
 /* SDK de CrazyGames (solo en su portal): avisa de cuándo termina la carga y cuándo hay partida en juego, que es lo que ellos miden */
 const CG={on:PORTAL==="crazygames",sdk:null,playing:false,
-  init(){if(!this.on)return;const sc=document.createElement("script");sc.src="https://sdk.crazygames.com/crazygames-sdk-v3.js";
+  init(){if(!this.on)return;
+    /* dentro del envoltorio cg.html (mismo origen): el SDK ya está cargado allí */
+    try{const P=window.parent;if(P!==window&&P.CG_READY){P.CG_READY.then(sdk=>{if(!sdk)return;this.sdk=sdk;try{sdk.game.loadingStop();if(this.playing)sdk.game.gameplayStart();}catch(e){}this.restore();});return;}}catch(e){}
+    const sc=document.createElement("script");sc.src="https://sdk.crazygames.com/crazygames-sdk-v3.js";
     sc.onload=async()=>{try{await window.CrazyGames.SDK.init();this.sdk=window.CrazyGames.SDK;this.sdk.game.loadingStop();if(this.playing)this.sdk.game.gameplayStart();this.restore();}catch(e){console.warn("CrazyGames SDK",e);}};document.head.appendChild(sc);},
   /* progreso guardado también con el Data Module de CrazyGames (dentro de su marco el navegador puede borrar el almacenamiento local) */
   store(){if(!this.sdk||!this.sdk.data)return;try{this.sdk.data.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}},

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AMAGO</title>
+<!-- Envoltorio para CrazyGames: su marco es apaisado y AMAGO está hecho para móvil en vertical.
+     El juego va dentro de un marco de tamaño de móvil (430×860) escalado para caber; dentro, el juego ve un móvil normal
+     (toques, tablero y textos funcionan igual). El SDK de CrazyGames vive aquí y el juego lo usa desde dentro (mismo origen). -->
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0d1a5c}
+  body{background:radial-gradient(ellipse at 50% 35%,#2f62e0 0%,#1a3aa8 45%,#0d1a5c 100%)}
+  #f{position:absolute;left:50%;top:50%;border:0;display:block;transform-origin:center center;background:#1a3aa8;box-shadow:0 10px 60px rgba(0,0,0,.45)}
+</style>
+<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+</head>
+<body>
+<iframe id="f" title="AMAGO" allow="autoplay; fullscreen; clipboard-write; gamepad" src="/?portal=crazygames&cg=1"></iframe>
+<script>
+  const f = document.getElementById("f"), W = 430, H = 860;
+  function fit() {
+    const w = innerWidth, h = innerHeight;
+    if (w <= h * 0.75) { /* móvil en vertical: el juego ocupa toda la pantalla */
+      f.style.width = w + "px"; f.style.height = h + "px"; f.style.transform = "translate(-50%,-50%)"; f.style.boxShadow = "none";
+    } else {             /* ordenador o tableta apaisada: columna de móvil escalada */
+      const s = Math.min(h / H, w / W);
+      f.style.width = W + "px"; f.style.height = H + "px"; f.style.transform = "translate(-50%,-50%) scale(" + s + ")"; f.style.boxShadow = "";
+    }
+  }
+  addEventListener("resize", fit); fit();
+  /* el juego (dentro del marco) espera esta promesa para usar el SDK */
+  window.CG_READY = (async () => { try { await window.CrazyGames.SDK.init(); return window.CrazyGames.SDK; } catch (e) { console.warn("CrazyGames SDK", e); return null; } })();
+  f.addEventListener("load", () => { try { f.contentWindow.focus(); } catch (e) {} });
+</script>
+</body>
+</html>

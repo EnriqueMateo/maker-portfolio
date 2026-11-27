@@ -100,6 +100,7 @@ const server = http.createServer((req, res) => {
   if (snd) return serve(req, res, path.join(root, snd[1], snd[2] + ".m4a"), "audio/mp4", 604800);
   const font = url.match(/^\/fonts\/([a-z0-9_-]+)\.woff2$/);
   if (font) return serve(req, res, path.join(root, "fonts", font[1] + ".woff2"), "font/woff2", 604800);
+  if (url === "/cg") return serve(req, res, path.join(root, "cg.html"), "text/html; charset=utf-8", 0);
   if (url === "/privacidad") return serve(req, res, path.join(root, "privacidad.html"), "text/html; charset=utf-8", 3600);
   if (url === "/privacy") return serve(req, res, path.join(root, "privacy.html"), "text/html; charset=utf-8", 3600);
   if (url === "/soporte" || url === "/support") return serve(req, res, path.join(root, "soporte.html"), "text/html; charset=utf-8", 3600);
