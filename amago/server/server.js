@@ -163,7 +163,9 @@ function cleanPlayer(m) {
   const lv = {};
   const hasLv = m.lv && typeof m.lv === "object";
   for (const h of unl) lv[h] = hasLv ? Math.max(1, Math.min(E.LV_MAX || 10, Math.floor(Number(m.lv[h]) || 1))) : (E.ULTI_LV || 5);
-  return { name, tro, unl, skin, lv };
+  // jugador nuevo (aún sin partidas): sirve para el premio por invitar en las salas de amigos
+  const nw = m.nw === 1;
+  return { name, tro, unl, skin, lv, nw };
 }
 
 function broadcast(room, fn) {
@@ -472,7 +474,7 @@ function matchRoom(r) {
   // en el modo Online el rival ve un apodo automático (nada escrito por otros jugadores); con amigos, el nombre filtrado
   broadcast(r, (s) => {
     const o = r.players[other(s)];
-    return { t: "matched", code: r.code, token: r.tokens[s], ranked: !!r.ranked, opp: { name: r.ranked ? o.alias : o.player.name, tro: o.player.tro, skin: o.player.skin || {} } };
+    return { t: "matched", code: r.code, token: r.tokens[s], ranked: !!r.ranked, opp: { name: r.ranked ? o.alias : o.player.name, tro: o.player.tro, skin: o.player.skin || {}, nw: !r.ranked && !!o.player.nw } };
   });
   setTimeout(() => rooms.get(r.code) === r && startPick(r), 1500);
 }

@@ -2416,6 +2416,8 @@ const TR=(()=>{
   Object.assign(I18N_EN,{"Mi isla":"My island","De la arena":"Arena default","Hielo":"Ice","Dunas":"Dunes","Menta":"Mint","Noche":"Night","Cerezo":"Cherry","Lima":"Lime","Oro":"Gold","Azul":"Blue","Verde":"Green","Morado":"Purple","Carbón":"Charcoal","Chicle":"Bubblegum","Casillas":"Tiles","Marco":"Frame","Así se ve tu tablero en cada partida. Los estilos nuevos se ganan jugando.":"This is how your board looks in every match. New styles are earned by playing.","Juega # partidas":"Play # matches","Gana # partidas":"Win # matches","Llega a # trofeos":"Reach # trophies","Llega al nivel #":"Reach level #","Te faltan #":"# to go"});
   Object.assign(I18N_EN,{"Sonido y avisos":"Sound & alerts","Ayuda":"Help","Nombre":"Name","Invitado · tu progreso solo está en este móvil":"Guest · your progress is only on this phone","Datos anónimos de juego":"Anonymous gameplay data","¿Seguro? Se borra todo tu progreso.":"Sure? All your progress will be deleted.","SÍ, BORRAR":"YES, DELETE","Inicio":"Home"});
   Object.assign(I18N_EN,{"Aspecto exclusivo":"Exclusive skin","Tus ataques lucen su propio efecto, y tu rival lo ve en cada disparo. Solo es estética: no da ventaja.":"Your attacks show their own effect, and your rival sees it on every shot. Cosmetic only: no advantage.","Gana gemas jugando o consíguelas en la tienda.":"Earn gems by playing or get them in the shop.","VER GEMAS":"SEE GEMS","EXCLUSIVO":"EXCLUSIVE","exclusivo":"exclusive","Aliento de hielo":"Ice breath","Golpe de lava":"Lava slam","Filo carmesí":"Crimson edge","Cartas de escarcha":"Frost cards","Ventisca":"Blizzard"});
+  Object.assign(I18N_EN,{"Si es nuevo en AMAGO, los dos ganáis un cofre grande.":"If they are new to AMAGO, you both get a big chest."});
+  Object.assign(I18N_EN,{"¡Has traído a un amigo!":"You brought a friend!","¡Regalo por aceptar el reto!":"A gift for accepting the challenge!","Tu amigo era nuevo en AMAGO: los dos ganáis un cofre grande. Puedes conseguirlo con hasta 5 amigos.":"Your friend was new to AMAGO: you both get a big chest. You can earn it with up to 5 friends.","Has entrado por el reto de un amigo: los dos ganáis un cofre grande.":"You joined through a friend's challenge: you both get a big chest."});
   Object.assign(I18N_EN,{"¡Desbloqueada!":"Unlocked!"});
   Object.assign(I18N_EN,{"Se desbloquea en el nivel #.":"Unlocks at level #.","Cada nivel: +1,5 % de energía. Nivel 4 y 8: +1 de vida. Nivel 5: ULTI.":"Each level: +1.5% energy. Levels 4 and 8: +1 life. Level 5: ULTI."});
   Object.assign(I18N_EN,{"La ULTI se desbloquea en el nivel #":"ULTI unlocks at level #"});
@@ -5476,7 +5478,7 @@ function renderModal(){
       m.innerHTML=`<div class="sheet"><h2 class="out">Con amigos</h2><div class="howc"><div class="big hwimg">${ico("swords","l")}</div><p>El modo online necesita el servidor de AMAGO. Esta vista previa no puede conectarse a internet.</p><p>Abre el juego desde la dirección del servidor y aquí podrás crear o unirte a una sala.</p></div><button class="gbtn" data-a="close">ENTENDIDO</button></div>`;
     }else if(M.st==="wait"){
       m.innerHTML=`<div class="sheet"><h2 class="out">Sala creada</h2><p>Pásale este código a tu amigo:</p><div class="codebig out">${M.code}</div>
-        ${PUBLIC_BASE?`<button class="gbtn" data-a="sharelink">ENVIAR RETO</button><p class="sub" style="margin:6px 0 2px">Tu amigo entra con el enlace y juega en el navegador, sin instalar nada.</p>`:""}<button class="pillbtn" data-a="copycode">Copiar código</button><p class="waitdots">Esperando a tu amigo<span>.</span><span>.</span><span>.</span></p>
+        ${PUBLIC_BASE?`<button class="gbtn" data-a="sharelink">ENVIAR RETO</button><p class="sub" style="margin:6px 0 2px">Tu amigo entra con el enlace y juega en el navegador, sin instalar nada.</p>${(S.refN||0)<5?`<p class="sub" style="margin:0 0 2px;color:var(--tx-hl)">${ico("gift","s")} ${TT("Si es nuevo en AMAGO, los dos ganáis un cofre grande.")}</p>`:""}`:""}<button class="pillbtn" data-a="copycode">Copiar código</button><p class="waitdots">Esperando a tu amigo<span>.</span><span>.</span><span>.</span></p>
         <button class="pillbtn" data-a="netcancel">Cancelar</button></div>`;
     }else if(M.st==="busy"){
       m.innerHTML=`<div class="sheet"><h2 class="out">Conectando…</h2><div style="display:flex;justify-content:center"><div class="av spin">${heroArt(S.fav)}</div></div></div>`;
@@ -6291,6 +6293,14 @@ async function endMatch(){
   /* llaves → cofre */
   let gotChest=0;const keysBefore=S.keys;
   for(let i=0;i<keysGot;i++){if(S.box.length>=BOX_MAX)break;S.keys++;if(S.keys>=KEYS_PER_CHEST){S.keys=0;S.box.push(1);gotChest++;}}
+  /* premio por invitar: si juegas con un amigo nuevo que entró por tu reto, los dos os lleváis un cofre grande
+     (quien invita, hasta 5 amigos; quien llega, una vez). Sin dinero ni presión: solo un regalo por jugar juntos */
+  let refMsg="";
+  if(G.online&&!G.ranked&&!G.left){
+    if(G.opp&&G.opp.nw&&(S.refN||0)<5&&S.games>0){S.refN=(S.refN||0)+1;if(S.box.length<BOX_MAX){S.box.push(2);gotChest++;}refMsg="inv";EV.add("ref_reward",{n:S.refN});}
+    else if(G.viaInvite&&!S.refGift){S.refGift=1;if(S.box.length<BOX_MAX){S.box.push(2);gotChest++;}refMsg="new";EV.add("ref_gift",{});}
+  }
+  if(refMsg)setTimeout(()=>{if(UI.modal)return;UI.modal={k:"info2",title:TT(refMsg==="inv"?"¡Has traído a un amigo!":"¡Regalo por aceptar el reto!"),html:`<div style="display:flex;justify-content:center"><span class="im" style="width:110px;height:110px;display:block"><img src="${UIA}chest2.webp" alt="" style="width:100%;height:100%;object-fit:contain"></span></div><p>${TT(refMsg==="inv"?"Tu amigo era nuevo en AMAGO: los dos ganáis un cofre grande. Puedes conseguirlo con hasta 5 amigos.":"Has entrado por el reto de un amigo: los dos ganáis un cofre grande.")}</p>`};renderModal();sfx("buy");},2200);
   /* fichas del pase: ×2 si vas con retraso o vuelves tras una ausencia; Plus +20 % */
   let tk=win?25:draw?15:10;const tkMult=(catchUp()||S.back>0?2:1)*(S.pass.plus?1.2:1);if(S.back>0)S.back--;
   tk=Math.round(tk*tkMult);S.pass.tk+=tk;
@@ -6389,7 +6399,7 @@ function netOpen(){
     if(NET.ws&&NET.ws.readyState===1)return res();
     let ws;try{ws=new WebSocket(SERVER?SERVER.replace(/^http/,"ws"):(location.protocol==="https:"?"wss://":"ws://")+location.host);}catch(e){return rej(e);}
     NET.closing=false;
-    ws.onopen=()=>{NET.ws=ws;netSend({t:"hello",ulti:1,name:S.name,tro:S.tro,unl:S.unl,lv:Object.fromEntries(S.unl.map(h=>[h,effLv(h)])),skin:Object.fromEntries(Object.entries((S.equip&&S.equip.skin)||{}).filter(([h,k])=>SKINS[k]&&SKINS[k].fx&&S.own.skin.includes(k))),...(ACC||{})});res();};
+    ws.onopen=()=>{NET.ws=ws;netSend({t:"hello",ulti:1,nw:S.games<1?1:0,name:S.name,tro:S.tro,unl:S.unl,lv:Object.fromEntries(S.unl.map(h=>[h,effLv(h)])),skin:Object.fromEntries(Object.entries((S.equip&&S.equip.skin)||{}).filter(([h,k])=>SKINS[k]&&SKINS[k].fx&&S.own.skin.includes(k))),...(ACC||{})});res();};
     ws.onerror=()=>rej(new Error("conexión"));
     ws.onclose=()=>{const was=NET.ws===ws;NET.ws=null;if(was&&!NET.closing)netLost();};
     ws.onmessage=e=>{let m;try{m=JSON.parse(e.data);}catch(err){return;}netMsg(m);};
@@ -6447,7 +6457,7 @@ function netMsg(m){
     case "oppBack":if(G)G.oppAway=false;toast("oppback","🔌 Tu rival ha vuelto. ¡Seguid!");break;
     case "matched":
       clearInterval(qTimer);
-      actx();G={online:true,code:m.code,token:m.token,ranked:!!m.ranked,diff:m.ranked?"normal":null,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false};G.oppSkin=(m.opp&&m.opp.skin)||null;
+      actx();G={online:true,code:m.code,token:m.token,ranked:!!m.ranked,diff:m.ranked?"normal":null,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false,viaInvite:!m.ranked&&!!NET.viaInvite};NET.viaInvite=false;G.oppSkin=(m.opp&&m.opp.skin)||null;
       UI.modal={k:"search",found:true};renderModal();sfx("banner");break;
     case "pickPhase":
       G.round=m.round;G.score={p:m.score.you,b:m.score.opp};G.used.p=m.used.slice();G.picked=false;G.oppReady=false;R=null;
@@ -6864,7 +6874,7 @@ function bootGame(){
   EV.add("app_open",{ms:Math.round(performance.now()),games:S.games,app:!!window.AMAGO_APP});CLOUD.init();
   if(!B3){app.innerHTML=`<div class="sheet" style="margin:auto"><h2 class="out">AMAGO</h2><p>Tu navegador no puede mostrar gráficos 3D (WebGL). Prueba con Chrome, Safari o Edge actualizados.</p></div>`;}
   else if(INVITE&&ONLINE_OK){/* entra por un enlace de reto: directo a la sala del amigo (el entrenamiento queda para después) */
-    try{history.replaceState(null,"",location.pathname+(PORTAL?"?portal="+PORTAL:""));}catch(e){}EV.add("invite_open",{new:!S.games});showHome();setTimeout(()=>netStart("join",INVITE),350);}
+    try{history.replaceState(null,"",location.pathname+(PORTAL?"?portal="+PORTAL:""));}catch(e){}EV.add("invite_open",{new:!S.games});NET.viaInvite=!S.games;showHome();setTimeout(()=>netStart("join",INVITE),350);}
   else if(!S.tutDone&&!S.games)TUT.welcome();
   else showHome();
 }
