@@ -2591,6 +2591,8 @@ const CG={on:PORTAL==="crazygames",sdk:null,playing:false,
 const PUBLIC_BASE=SERVER||(/^https?:$/.test(location.protocol)?location.origin:""),INVITE=(()=>{if(window.AMAGO_APP)return "";try{const c=(new URLSearchParams(location.search).get("sala")||"").toUpperCase();return /^[A-Z]{4}$/.test(c)?c:"";}catch(e){return "";}})();
 const _PORTAL0=0,PORTAL_CTA=!!PORTAL&&window.AMAGO_PORTAL_LINKS!==false,APPSTORE_URL="https://apps.apple.com/app/id6821653359";
 const ONLINE_OK=!!SERVER||(/^https?:$/.test(location.protocol)&&!/claude\.ai|claudeusercontent|anthropic/.test(location.hostname));
+/* cuentas propias (Apple / correo): no en CrazyGames, que no permite inicios de sesión externos (allí guarda su Data Module) */
+const ACC_OK=ONLINE_OK&&PORTAL!=="crazygames";
 
 /* ================= utilidades ================= */
 const REDUCED=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2673,7 +2675,7 @@ const CLOUD={ready:false,tried:false,timer:0,
 };
 /* cuenta: invitado (solo este móvil) o registrada con correo y contraseña (cualquier móvil) */
 const isGuest=()=>!(ACC&&ACC.email);
-function accOpen(m,err){UI.modal={k:"acc",m:m||(isGuest()?"reg":"me"),err};renderModal();
+function accOpen(m,err){if(!ACC_OK)return;UI.modal={k:"acc",m:m||(isGuest()?"reg":"me"),err};renderModal();
   /* el mismo toque que abre la ventana no debe enfocar el campo de correo (en iPhone sacaría el teclado) */
   document.querySelectorAll("#accmail,#accpass").forEach(i=>{i.readOnly=true;setTimeout(()=>{i.readOnly=false;},450);});}
 async function accSubmit(kind){
@@ -4980,7 +4982,7 @@ function homeEvents(){
   if(S.seen>=0&&d-S.seen>=3&&S.games>0){const gap=d-S.seen;S.seen=d;save();UI.modal={k:"comeback",gap};renderModal();return;}
   S.seen=d;save();
   if(CLOUD.expired){const e=CLOUD.expired;CLOUD.expired=null;UI.modal={k:"acc",m:"login",err:"Tu sesión ha caducado. Vuelve a entrar con "+e+"."};renderModal();return;}
-  if(ONLINE_OK&&isGuest()&&S.tutDone){S.nag=S.nag||{};const due=[3,10,25,60].filter(n=>S.games>=n&&!S.nag[n]);if(due.length){due.forEach(n=>S.nag[n]=1);save();EV.add("acc_nag",{games:S.games});UI.modal={k:"guestnag"};renderModal();return;}}
+  if(ACC_OK&&isGuest()&&S.tutDone){S.nag=S.nag||{};const due=[3,10,25,60].filter(n=>S.games>=n&&!S.nag[n]);if(due.length){due.forEach(n=>S.nag[n]=1);save();EV.add("acc_nag",{games:S.games});UI.modal={k:"guestnag"};renderModal();return;}}
   if(calReady()&&S.games>=2&&S.cal.shown!==d){S.cal.shown=d;save();UI.modal={k:"calendar"};renderModal();return;}
   maybeOffer();
 }
@@ -5436,7 +5438,7 @@ function renderModal(){
     /* ordenado por secciones: perfil, sonido y avisos, ayuda; lo destructivo, discreto al final */
     m.innerHTML=`<div class="sheet setsheet"><button class="x" data-a="close" aria-label="Cerrar">✕</button><h2 class="out">Ajustes</h2>
       <div class="setprof pnl"><span class="tav">${heroArt(S.fav)}</span><span class="spn"><b>${esc(S.name)}</b><small>${ONLINE_OK?(isGuest()?"Invitado · tu progreso solo está en este móvil":ACC.via==="apple"?"Cuenta de Apple":esc(ACC.email)):""}</small></span>
-        <span class="spb"><button class="gbtn blue sm" data-a="name">Nombre</button>${ONLINE_OK?`<button class="gbtn ${isGuest()?"green":"blue"} sm" data-a="acc">${isGuest()?"Crear cuenta":"Cuenta"}</button>`:""}</span></div>
+        <span class="spb"><button class="gbtn blue sm" data-a="name">Nombre</button>${ACC_OK?`<button class="gbtn ${isGuest()?"green":"blue"} sm" data-a="acc">${isGuest()?"Crear cuenta":"Cuenta"}</button>`:""}</span></div>
       <p class="setsec">Sonido y avisos</p>
       <div class="tgroup">
       <button class="toggle" data-a="tsnd" aria-pressed="${S.snd?"true":"false"}"><span>Sonido</span><i class="sw ${S.snd?"on":""}" aria-hidden="true"></i></button>
@@ -5971,7 +5973,7 @@ const TUT={
       <span class="tutbig bob">${heroArt("ojo")}</span>
       <h2 class="out">¡Bienvenido a AMAGO!</h2><p class="sub">Soy Ojo, tu entrenador. En un minuto te enseño a jugar.</p>
       <button class="gbtn xl shine pulse" data-a="tutgo">¡VAMOS!</button>
-      <button class="linkbtn" data-a="tutskip">Ya sé jugar</button>${ONLINE_OK?`<button class="linkbtn" data-a="acc" data-m="login">Ya tengo cuenta: iniciar sesión</button>`:""}</div>`;
+      <button class="linkbtn" data-a="tutskip">Ya sé jugar</button>${ACC_OK?`<button class="linkbtn" data-a="acc" data-m="login">Ya tengo cuenta: iniciar sesión</button>`:""}</div>`;
     EV.add("tut",{s:"welcome"});
   },
   match(){
