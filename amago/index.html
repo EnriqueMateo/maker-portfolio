@@ -2578,6 +2578,11 @@ const SERVER=window.AMAGO_SERVER||"";
 /* versión web en portales (itch.io…): botón para llevarse el juego al móvil; en portales que no admiten enlaces a tiendas va apagado */
 const PORTAL=(()=>{if(window.AMAGO_APP)return "";if(window.AMAGO_PORTAL)return window.AMAGO_PORTAL;try{const q=new URLSearchParams(location.search).get("portal");return /^(itch|crazygames|web)$/.test(q||"")?q:"";}catch(e){return "";}})();
 if(PORTAL==="crazygames")window.AMAGO_PORTAL_LINKS=false;
+/* SDK de CrazyGames (solo en su portal): avisa de cuándo termina la carga y cuándo hay partida en juego, que es lo que ellos miden */
+const CG={on:PORTAL==="crazygames",sdk:null,playing:false,
+  init(){if(!this.on)return;const sc=document.createElement("script");sc.src="https://sdk.crazygames.com/crazygames-sdk-v3.js";
+    sc.onload=async()=>{try{await window.CrazyGames.SDK.init();this.sdk=window.CrazyGames.SDK;this.sdk.game.loadingStop();if(this.playing)this.sdk.game.gameplayStart();}catch(e){console.warn("CrazyGames SDK",e);}};document.head.appendChild(sc);},
+  play(on){if(!this.on||this.playing===on)return;this.playing=on;try{this.sdk&&this.sdk.game[on?"gameplayStart":"gameplayStop"]();}catch(e){}}};
 /* dirección pública del juego web (para los enlaces de reto) y código de sala si se entra por un enlace /s/ABCD */
 const PUBLIC_BASE=SERVER||(/^https?:$/.test(location.protocol)?location.origin:""),INVITE=(()=>{if(window.AMAGO_APP)return "";try{const c=(new URLSearchParams(location.search).get("sala")||"").toUpperCase();return /^[A-Z]{4}$/.test(c)?c:"";}catch(e){return "";}})();
 const _PORTAL0=0,PORTAL_CTA=!!PORTAL&&window.AMAGO_PORTAL_LINKS!==false,APPSTORE_URL="https://apps.apple.com/app/id6821653359";
@@ -4922,6 +4927,7 @@ function placeHand(el,x,y){el.style.left=Math.max(6,Math.min(innerWidth-64,x))+"
   const c=document.querySelector(".tcoach");if(c){const r=c.getBoundingClientRect(),up=c.classList.contains("up");const hit=!up&&y>r.top-40&&y<r.bottom+20;if(hit)c.classList.add("up");else if(up&&y<innerHeight*.45)c.classList.remove("up");}}
 /* ---- inicio ---- */
 function showHome(){
+  CG.play(false);
   gameFxOff();UI.screen="home";stopLoop();app.className="home";setBg();ensureDay();MUS.play("menu");
   if(GFX)GFX.loadArena(arenaOf(S.tro).a.k);/* al subir de arena, que el escenario nuevo ya esté listo para la siguiente partida */
   S.news=S.news||{};
@@ -5916,6 +5922,7 @@ function showPick(){if(GFX)GFX.loadArena(curArena());
   if(G.round===1)toast("pick","🦸 Cada héroe es distinto: mira su <b>vida</b>, su <b>velocidad</b> y si su ataque <b>avisa</b>.");
 }
 async function startRound(){
+  CG.play(true);
   const tp=G.pickSel;
   const tb=G.oppPool.find(i=>!G.used.b.includes(i))||pick(IDS);
   /* tu nivel en partida está limitado por la arena; el bot sube con los trofeos (nunca más de 1 por encima de ti) */
@@ -6255,6 +6262,7 @@ async function endRound(w){
   G.round++;showPick();
 }
 async function endMatch(){
+  CG.play(false);
   R=null;ensureDay();EV.add("match_end",{win:G.score.p>G.score.b,draw:G.score.p===G.score.b,score:G.score.p+"-"+G.score.b,mode:G.online?(G.ranked?"online":"amigos"):"bot",bd:G.botD||null,sk:S.sk,diff:G.online?null:S.diff,n:S.games+1,left:!!G.left});
   const win=G.score.p>G.score.b,draw=G.score.p===G.score.b,d=today(),diff=(d0=>TRO_MULT[d0]!=null?d0:"normal")(G.diff||S.diff||"facil");/* "auto" (Batalla) cobra como Normal */
   if(!G.online&&!G.tutorial&&!G.camp&&(S.diff==="auto"||!S.diff)&&!draw)skillUpdate(win);
@@ -6475,6 +6483,7 @@ function netMsg(m){
   }
 }
 async function onlineRoundStart(m){
+  CG.play(true);
   R=m.view;R.paused=true;recReset();EV.add("round_start",{n:m.round,hero:m.you,opp:m.opp,mode:G.ranked?"online":"amigos"});
   await vsAndCountdown(m.you,m.opp);
   toast("controls","👇 Toca <b>tu tablero</b> para moverte · 👆 toca el <b>ROJO</b> para disparar. Todo cuesta 💧 energía.");
@@ -6869,6 +6878,7 @@ document.addEventListener("visibilitychange",()=>{lastT=performance.now();
 
 fxInit();
 function bootGame(){
+  CG.init();
   if(PAY.native)PAY.init();/* productos y precios de Apple; sin productos creados, la tienda sigue sin compras */
   if(GFX){try{GFX.bakePortraits();}catch(e){console.warn("Sin retratos 3D",e);}}
   EV.add("app_open",{ms:Math.round(performance.now()),games:S.games,app:!!window.AMAGO_APP});CLOUD.init();
