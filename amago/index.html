@@ -2581,7 +2581,11 @@ if(PORTAL==="crazygames")window.AMAGO_PORTAL_LINKS=false;
 /* SDK de CrazyGames (solo en su portal): avisa de cuándo termina la carga y cuándo hay partida en juego, que es lo que ellos miden */
 const CG={on:PORTAL==="crazygames",sdk:null,playing:false,
   init(){if(!this.on)return;const sc=document.createElement("script");sc.src="https://sdk.crazygames.com/crazygames-sdk-v3.js";
-    sc.onload=async()=>{try{await window.CrazyGames.SDK.init();this.sdk=window.CrazyGames.SDK;this.sdk.game.loadingStop();if(this.playing)this.sdk.game.gameplayStart();}catch(e){console.warn("CrazyGames SDK",e);}};document.head.appendChild(sc);},
+    sc.onload=async()=>{try{await window.CrazyGames.SDK.init();this.sdk=window.CrazyGames.SDK;this.sdk.game.loadingStop();if(this.playing)this.sdk.game.gameplayStart();this.restore();}catch(e){console.warn("CrazyGames SDK",e);}};document.head.appendChild(sc);},
+  /* progreso guardado también con el Data Module de CrazyGames (dentro de su marco el navegador puede borrar el almacenamiento local) */
+  store(){if(!this.sdk||!this.sdk.data)return;try{this.sdk.data.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}},
+  restore(){if(!this.sdk||!this.sdk.data)return;try{const d=this.sdk.data.getItem(SAVE_KEY);if(!d){this.store();return;}const r=JSON.parse(d);
+    if((r.games||0)>(S.games||0)){try{localStorage.setItem(SAVE_KEY,d);}catch(e){}S=loadSave();if(UI.screen&&!R)refreshScreen();}else this.store();}catch(e){}},
   play(on){if(!this.on||this.playing===on)return;this.playing=on;try{this.sdk&&this.sdk.game[on?"gameplayStart":"gameplayStop"]();}catch(e){}}};
 /* dirección pública del juego web (para los enlaces de reto) y código de sala si se entra por un enlace /s/ABCD */
 const PUBLIC_BASE=SERVER||(/^https?:$/.test(location.protocol)?location.origin:""),INVITE=(()=>{if(window.AMAGO_APP)return "";try{const c=(new URLSearchParams(location.search).get("sala")||"").toUpperCase();return /^[A-Z]{4}$/.test(c)?c:"";}catch(e){return "";}})();
@@ -2619,7 +2623,7 @@ function loadSave(){
   if(!s.skMig){s.skMig=1;if(s.sk==null)s.sk={facil:.15,normal:.5,dificil:.85}[s.diff]??.12;if(s.mode==="bot"&&s.diff!=="dificil")s.diff="auto";}
   return s;
 }
-function save(){S.at=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}CLOUD.push();}
+function save(){S.at=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}CLOUD.push();CG.store();}
 let S=loadSave();
 
 /* ================= cuenta anónima en la nube y estadísticas de uso =================
