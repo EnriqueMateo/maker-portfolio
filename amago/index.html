@@ -2592,9 +2592,13 @@ const CG={on:PORTAL==="crazygames",sdk:null,playing:false,
   /* multijugador de CrazyGames: su enlace de invitación lleva el código de sala; al abrirlo, el amigo entra directo.
      «Instant Multiplayer»: si el jugador llega desde una fiesta de CrazyGames, se crea la sala al momento */
   invite(code){if(!this.sdk)return "";try{return this.sdk.game.inviteLink({roomId:code});}catch(e){return "";}},
-  showInvite(code){if(!this.sdk)return;try{this.sdk.game.showInviteButton({roomId:code});}catch(e){}},
-  hideInvite(){if(!this.sdk)return;try{this.sdk.game.hideInviteButton();}catch(e){}},
-  entry(){if(!this.sdk||this._entry)return;this._entry=1;try{const r=String(this.sdk.game.getInviteParam("roomId")||"").toUpperCase();
+  showInvite(code){if(!this.sdk)return;const g=this.sdk.game;try{g.updateRoom({roomId:code,isJoinable:true,inviteParams:{roomId:code}});}catch(e){}try{this.invite(code);g.showInviteButton({roomId:code});}catch(e){}},
+  roomFull(){if(!this.sdk)return;try{this.sdk.game.updateRoom({isJoinable:false});}catch(e){}try{this.sdk.game.hideInviteButton();}catch(e){}},
+  hideInvite(){if(!this.sdk)return;try{this.sdk.game.hideInviteButton();}catch(e){}try{this.sdk.game.leftRoom();}catch(e){}},
+  entry(){if(!this.sdk||this._entry)return;this._entry=1;
+    /* invitación aceptada con el juego ya abierto (desde el botón de amigos de CrazyGames) */
+    try{this.sdk.game.addJoinRoomListener(p=>{const r=String((p&&p.roomId)||"").toUpperCase();if(/^[A-Z]{4}$/.test(r)&&!R){netClose();setTimeout(()=>netStart("join",r),300);}});}catch(e){}
+    try{const r=String(this.sdk.game.getInviteParam("roomId")||"").toUpperCase();
     if(/^[A-Z]{4}$/.test(r)){setTimeout(()=>netStart("join",r),400);return;}if(this.sdk.game.isInstantMultiplayer)setTimeout(()=>netStart("create"),400);}catch(e){}},
   play(on){if(!this.on||this.playing===on)return;this.playing=on;try{this.sdk&&this.sdk.game[on?"gameplayStart":"gameplayStop"]();}catch(e){}}};
 /* dirección pública del juego web (para los enlaces de reto) y código de sala si se entra por un enlace /s/ABCD */
@@ -6480,7 +6484,7 @@ function netMsg(m){
     case "oppAway":if(G)G.oppAway=true;if(R)R.paused=true;renderStatus();break;
     case "oppBack":if(G)G.oppAway=false;toast("oppback","🔌 Tu rival ha vuelto. ¡Seguid!");break;
     case "matched":
-      clearInterval(qTimer);CG.hideInvite();
+      clearInterval(qTimer);CG.roomFull();
       actx();G={online:true,code:m.code,token:m.token,ranked:!!m.ranked,diff:m.ranked?"normal":null,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false,viaInvite:!m.ranked&&!!NET.viaInvite};NET.viaInvite=false;G.oppSkin=(m.opp&&m.opp.skin)||null;
       UI.modal={k:"search",found:true};renderModal();sfx("banner");break;
     case "pickPhase":
