@@ -2599,7 +2599,8 @@ const CG={on:PORTAL==="crazygames",sdk:null,playing:false,
     /* invitación aceptada con el juego ya abierto (desde el botón de amigos de CrazyGames) */
     try{this.sdk.game.addJoinRoomListener(p=>{const r=String((p&&p.roomId)||"").toUpperCase();if(/^[A-Z]{4}$/.test(r)&&!R){netClose();setTimeout(()=>netStart("join",r),300);}});}catch(e){}
     try{const r=String(this.sdk.game.getInviteParam("roomId")||"").toUpperCase();
-    if(/^[A-Z]{4}$/.test(r)){setTimeout(()=>netStart("join",r),400);return;}if(this.sdk.game.isInstantMultiplayer)setTimeout(()=>netStart("create"),400);}catch(e){}},
+    const go=k=>setTimeout(()=>{if(R&&G&&G.tutorial){R=null;G=null;showHome();}netStart(k,r);},400);
+    if(/^[A-Z]{4}$/.test(r)){go("join");return;}if(this.sdk.game.isInstantMultiplayer)go("create");}catch(e){}},
   play(on){if(!this.on||this.playing===on)return;this.playing=on;try{this.sdk&&this.sdk.game[on?"gameplayStart":"gameplayStop"]();}catch(e){}}};
 /* dirección pública del juego web (para los enlaces de reto) y código de sala si se entra por un enlace /s/ABCD */
 const PUBLIC_BASE=SERVER||(/^https?:$/.test(location.protocol)?location.origin:""),INVITE=(()=>{if(window.AMAGO_APP)return "";try{const c=(new URLSearchParams(location.search).get("sala")||"").toUpperCase();return /^[A-Z]{4}$/.test(c)?c:"";}catch(e){return "";}})();
