@@ -2582,13 +2582,20 @@ if(PORTAL==="crazygames")window.AMAGO_PORTAL_LINKS=false;
 const CG={on:PORTAL==="crazygames",sdk:null,playing:false,
   init(){if(!this.on)return;
     /* dentro del envoltorio cg.html (mismo origen): el SDK ya está cargado allí */
-    try{const P=window.parent;if(P!==window&&P.CG_READY){P.CG_READY.then(sdk=>{if(!sdk)return;this.sdk=sdk;try{sdk.game.loadingStop();if(this.playing)sdk.game.gameplayStart();}catch(e){}this.restore();});return;}}catch(e){}
+    try{const P=window.parent;if(P!==window&&P.CG_READY){P.CG_READY.then(sdk=>{if(!sdk)return;this.sdk=sdk;try{sdk.game.loadingStop();if(this.playing)sdk.game.gameplayStart();}catch(e){}this.restore();this.entry();});return;}}catch(e){}
     const sc=document.createElement("script");sc.src="https://sdk.crazygames.com/crazygames-sdk-v3.js";
-    sc.onload=async()=>{try{await window.CrazyGames.SDK.init();this.sdk=window.CrazyGames.SDK;this.sdk.game.loadingStop();if(this.playing)this.sdk.game.gameplayStart();this.restore();}catch(e){console.warn("CrazyGames SDK",e);}};document.head.appendChild(sc);},
+    sc.onload=async()=>{try{await window.CrazyGames.SDK.init();this.sdk=window.CrazyGames.SDK;this.sdk.game.loadingStop();if(this.playing)this.sdk.game.gameplayStart();this.restore();this.entry();}catch(e){console.warn("CrazyGames SDK",e);}};document.head.appendChild(sc);},
   /* progreso guardado también con el Data Module de CrazyGames (dentro de su marco el navegador puede borrar el almacenamiento local) */
   store(){if(!this.sdk||!this.sdk.data)return;try{this.sdk.data.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}},
   restore(){if(!this.sdk||!this.sdk.data)return;try{const d=this.sdk.data.getItem(SAVE_KEY);if(!d){this.store();return;}const r=JSON.parse(d);
     if((r.games||0)>(S.games||0)){try{localStorage.setItem(SAVE_KEY,d);}catch(e){}S=loadSave();if(UI.screen&&!R)refreshScreen();}else this.store();}catch(e){}},
+  /* multijugador de CrazyGames: su enlace de invitación lleva el código de sala; al abrirlo, el amigo entra directo.
+     «Instant Multiplayer»: si el jugador llega desde una fiesta de CrazyGames, se crea la sala al momento */
+  invite(code){if(!this.sdk)return "";try{return this.sdk.game.inviteLink({roomId:code});}catch(e){return "";}},
+  showInvite(code){if(!this.sdk)return;try{this.sdk.game.showInviteButton({roomId:code});}catch(e){}},
+  hideInvite(){if(!this.sdk)return;try{this.sdk.game.hideInviteButton();}catch(e){}},
+  entry(){if(!this.sdk||this._entry)return;this._entry=1;try{const r=String(this.sdk.game.getInviteParam("roomId")||"").toUpperCase();
+    if(/^[A-Z]{4}$/.test(r)){setTimeout(()=>netStart("join",r),400);return;}if(this.sdk.game.isInstantMultiplayer)setTimeout(()=>netStart("create"),400);}catch(e){}},
   play(on){if(!this.on||this.playing===on)return;this.playing=on;try{this.sdk&&this.sdk.game[on?"gameplayStart":"gameplayStop"]();}catch(e){}}};
 /* dirección pública del juego web (para los enlaces de reto) y código de sala si se entra por un enlace /s/ABCD */
 const PUBLIC_BASE=SERVER||(/^https?:$/.test(location.protocol)?location.origin:""),INVITE=(()=>{if(window.AMAGO_APP)return "";try{const c=(new URLSearchParams(location.search).get("sala")||"").toUpperCase();return /^[A-Z]{4}$/.test(c)?c:"";}catch(e){return "";}})();
@@ -6423,7 +6430,7 @@ function netOpen(){
   });
 }
 function netSend(o){if(NET.ws&&NET.ws.readyState===1)NET.ws.send(JSON.stringify(o));}
-function netClose(){NET.closing=true;if(NET.ws){netSend({t:"leave"});NET.ws.close();}NET.ws=null;}
+function netClose(){CG.hideInvite();NET.closing=true;if(NET.ws){netSend({t:"leave"});NET.ws.close();}NET.ws=null;}
 /* si se corta la conexión en mitad de una partida online, se intenta volver durante ~14 s */
 function reconnectUI(on){let el=$("#reconn");if(on&&!el){el=document.createElement("div");el.id="reconn";el.className="reconn";el.innerHTML=`<div class="sheet"><h2 class="out">Reconectando…</h2><p>Se ha cortado la conexión. Volviendo a tu partida.</p></div>`;document.body.appendChild(el);}if(!on&&el)el.remove();}
 async function netResume(){
@@ -6460,7 +6467,7 @@ async function netStart(kind,code){
 function netMsg(m){
   switch(m.t){
     case "emo":if(EMOS.includes(m.e))emoShow("b",m.e);break;
-    case "room":UI.modal={k:"friends",st:"wait",code:m.code};renderModal();break;
+    case "room":UI.modal={k:"friends",st:"wait",code:m.code};renderModal();CG.showInvite(m.code);break;
     case "error":if(UI.modal&&UI.modal.k==="queue"){clearInterval(qTimer);netClose();UI.modal={k:"queue",err:m.msg};renderModal();break;}UI.modal={k:"friends",st:"menu",err:m.msg};renderModal();break;
     case "queued":break;
     case "resumed":
@@ -6473,7 +6480,7 @@ function netMsg(m){
     case "oppAway":if(G)G.oppAway=true;if(R)R.paused=true;renderStatus();break;
     case "oppBack":if(G)G.oppAway=false;toast("oppback","🔌 Tu rival ha vuelto. ¡Seguid!");break;
     case "matched":
-      clearInterval(qTimer);
+      clearInterval(qTimer);CG.hideInvite();
       actx();G={online:true,code:m.code,token:m.token,ranked:!!m.ranked,diff:m.ranked?"normal":null,score:{p:0,b:0},round:1,used:{p:[],b:[]},opp:m.opp,picked:false,oppReady:false,viaInvite:!m.ranked&&!!NET.viaInvite};NET.viaInvite=false;G.oppSkin=(m.opp&&m.opp.skin)||null;
       UI.modal={k:"search",found:true};renderModal();sfx("banner");break;
     case "pickPhase":
@@ -6835,7 +6842,7 @@ document.addEventListener("click",e=>{
     case "netcreate":sfx("tap");netStart("create");break;
     case "netjoin":{const c=($("#codeinp").value||"").toUpperCase().replace(/[^A-Z]/g,"");if(c.length!==4){UI.modal.err="El código tiene 4 letras.";renderModal();break;}sfx("tap");netStart("join",c);break;}
     case "netcancel":netClose();UI.modal={k:"friends",st:"menu"};renderModal();break;
-    case "sharelink":{const c=UI.modal&&UI.modal.code;if(!c||!PUBLIC_BASE)break;sfx("tap");const url=PUBLIC_BASE+"/s/"+c,txt=TT("¡Te reto a un duelo a ciegas en AMAGO! Entra aquí:")+" "+url;EV.add("invite_share",{});
+    case "sharelink":{const c=UI.modal&&UI.modal.code;if(!c||!PUBLIC_BASE)break;sfx("tap");const url=CG.invite(c)||PUBLIC_BASE+"/s/"+c,txt=TT("¡Te reto a un duelo a ciegas en AMAGO! Entra aquí:")+" "+url;EV.add("invite_share",{});
       (async()=>{try{const Cap=window.Capacitor&&window.Capacitor.Plugins;if(Cap&&Cap.Share){await Cap.Share.share({title:"AMAGO",text:txt});return;}if(navigator.share){await navigator.share({title:"AMAGO",text:txt});return;}}catch(e){if(e&&e.name==="AbortError")return;}
         try{await navigator.clipboard.writeText(txt);floatText(innerWidth/2,innerHeight/2,TT("¡Enlace copiado!"),"good");}catch(e){}})();break;}
     case "copycode":{const c=UI.modal.code;try{navigator.clipboard.writeText(c).then(()=>floatText(innerWidth/2,innerHeight/2,"¡Copiado!","good"),()=>{});}catch(err){}break;}
