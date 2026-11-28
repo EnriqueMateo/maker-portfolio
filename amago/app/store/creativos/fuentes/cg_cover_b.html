@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+/* portada B para CrazyGames: un héroe enorme apuntando a la isla roja con huellas y una diana. "u" = 1% del lado corto */
+:root{--u:1vmin;--ls:calc(var(--u)*13)}
+body{width:100vw;height:100vh;background:radial-gradient(70% 80% at 55% 40%,#4aa0ff 0%,#1d55d6 40%,#0b1a6a 78%,#060c34 100%)}
+.rays{background:repeating-conic-gradient(from 0deg at 62% 50%,rgba(255,255,255,.09) 0deg 7deg,transparent 7deg 18deg)}
+.stage{position:absolute;perspective:calc(var(--u)*140)}
+.grid{position:absolute;inset:0;transform:rotateX(52deg) rotateZ(-8deg);display:grid;grid-template-columns:repeat(5,1fr);gap:calc(var(--u)*1.2);padding:calc(var(--u)*2);background:#a3182c;border-radius:calc(var(--u)*3);box-shadow:0 calc(var(--u)*4) 0 #5e0a1c,0 calc(var(--u)*8) calc(var(--u)*10) rgba(0,0,0,.5)}
+.grid i{background:linear-gradient(#ff9a80,#f0624e);border-radius:calc(var(--u)*1.2);box-shadow:inset 0 calc(var(--u)*-.8) 0 rgba(120,20,30,.35);position:relative}
+.grid i.p::after{content:"";position:absolute;left:28%;top:22%;width:44%;height:56%;background:
+ radial-gradient(ellipse 22% 30% at 30% 65%,#3a0c18 98%,transparent 100%),radial-gradient(ellipse 22% 30% at 70% 35%,#3a0c18 98%,transparent 100%);opacity:.85}
+.grid i.t{background:linear-gradient(#fff6b0,#ffc23a);box-shadow:0 0 calc(var(--u)*5) #fff3a0}
+.aim{position:absolute;border-radius:50%;border:calc(var(--u)*1.4) solid #fff;box-shadow:0 0 0 calc(var(--u)*.7) #13163a,inset 0 0 0 calc(var(--u)*.7) #13163a,0 0 calc(var(--u)*6) rgba(255,255,255,.8)}
+.aim::before,.aim::after{content:"";position:absolute;background:#fff;box-shadow:0 0 0 calc(var(--u)*.5) #13163a}
+.aim::before{left:50%;top:-30%;width:calc(var(--u)*1.4);height:160%;transform:translateX(-50%)}
+.aim::after{top:50%;left:-30%;height:calc(var(--u)*1.4);width:160%;transform:translateY(-50%)}
+.big{position:absolute;font-family:Lilita;color:#fff;-webkit-text-stroke:calc(var(--u)*.9) #13163a;text-shadow:0 calc(var(--u)*1.2) 0 #13163a;line-height:.9;text-align:center;transform:rotate(-5deg)}
+.big b{color:#ffd23a}
+.hero{filter:drop-shadow(0 calc(var(--u)*2) 0 rgba(20,6,30,.55)) drop-shadow(0 0 calc(var(--u)*4) rgba(255,220,120,.35))}
+.logo{position:absolute;transform:translate(-50%,0)}
+</style></head><body><div class="rays"></div>
+<div class="stage" id="st"><div class="grid" id="g"></div></div>
+<div class="aim" id="aim"></div>
+<img class="hero" id="h" src="../../../../sprites/brasa.webp">
+<div class="big" id="t">WHERE IS<br><b>HE?</b></div>
+<div class="logo" id="lg">AMAGO</div>
+<script>
+const W=innerWidth,H=innerHeight,ar=W/H,s=(id,css)=>Object.assign(document.getElementById(id).style,css);
+const g=document.getElementById("g");for(let k=0;k<25;k++){const i=document.createElement("i");if([7,12,13,18].includes(k))i.className="p";g.appendChild(i);}
+if(ar>1.4){ /* 16:9 */
+  s("st",{left:"44%",top:"34%",width:"50%",height:"78%"});s("aim",{left:"66%",top:"58%",width:"13vmin",height:"13vmin"});
+  s("h",{left:"-3%",bottom:"-6%",height:"100%",position:"absolute"});s("t",{right:"4%",top:"5%",fontSize:"19vmin"});s("lg",{left:"16%",top:"3%",fontSize:"11vmin"});
+}else if(ar<0.8){ /* 2:3 */
+  s("st",{left:"8%",top:"30%",width:"90%",height:"42%"});s("aim",{left:"56%",top:"47%",width:"20vmin",height:"20vmin"});
+  s("h",{left:"-12%",bottom:"-3%",height:"50%",position:"absolute"});s("t",{right:"6%",top:"4%",fontSize:"22vmin"});s("lg",{left:"72%",top:"90%",fontSize:"11vmin"});
+}else{ /* 1:1 */
+  s("st",{left:"36%",top:"30%",width:"62%",height:"62%"});s("aim",{left:"62%",top:"54%",width:"16vmin",height:"16vmin"});
+  s("h",{left:"-10%",bottom:"-6%",height:"82%",position:"absolute"});s("t",{right:"4%",top:"4%",fontSize:"15vmin"});s("lg",{left:"78%",top:"88%",fontSize:"9vmin"});
+}
+</script></body></html>
