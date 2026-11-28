@@ -310,6 +310,19 @@ function makeHooks(room) {
       // las ULTIs de engaño (sin aviso "w") no se le cuentan al rival
       if (E.ULTIS[type] && E.ULTIS[type].w) ev(other(s), { e: "ulti", s: "b", type });
     },
+    // Nieve, Pinza y Raíz: cada uno ve lo suyo; al rival solo se le dan coordenadas si ya quedó a la vista (arrastrado o atrapado)
+    frozen(s, x, y) {
+      ev(s, { e: "frozen", s: "p", x, y });
+      ev(other(s), { e: "frozen", s: "b", x: -9, y: -9 });
+    },
+    pinched(s, x, y) {
+      ev(s, { e: "pinched", s: "p", x, y });
+      ev(other(s), { e: "pinched", s: "b", x, y });
+    },
+    stuck(s, x, y) {
+      ev(s, { e: "stuck", s: "p", x, y });
+      ev(other(s), { e: "stuck", s: "b", x, y });
+    },
     burn(s) {
       ev(s, { e: "burn", s: "p" });
       ev(other(s), { e: "burn", s: "b" });

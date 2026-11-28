@@ -1848,6 +1848,8 @@ html.ui3 .stile.num .ts{color:#c3ccf5!important}
 <script src="vendor/three.min.js"></script>
 <script>
 "use strict";
+/* pruebas en local: http://localhost:PUERTO/?dev=1 enseña los héroes aún sin lanzar */
+if(typeof location!=="undefined"&&location.hostname==="localhost"&&/[?&]dev=1/.test(location.search))window.AMAGO_DEV_HEROES=1;
 /* ENGINE-START */
 /* Motor del juego: reglas puras, sin DOM. Lo usan el navegador (contra el bot) y el servidor online. */
 const AMAGO=(function(){
@@ -1872,6 +1874,11 @@ Object.assign(HEROES,{
   savia:{n:"Savia",r:"Hada",rar:2,hp:3,step:.3,mc:1,pat:"one",cost:3,dmg:1,travel:.45,warn:true,regen:14,live:false,a:"Espina",d:"Si pasa 14 s sin recibir golpes, recupera 1 vida.",c:"#e05ab0",l:"#ffb3e2",dk:"#8a1e66",proj:"star"},
   mira:{n:"Mira",r:"Lince",rar:2,hp:3,step:.3,mc:1,pat:"one",cost:5,dmg:2,travel:1.1,warn:false,loud:true,a:"Tiro certero",d:"Disparo de 2 en 1 casilla, sin aviso. Su huella se queda 4 s.",c:"#f0c030",l:"#ffe58a",dk:"#9a6a0a",proj:"arrow"},
   eco:{n:"Eco",r:"Murciélago",rar:3,hp:3,step:.28,mc:1,pat:"row3",cost:6,dmg:1,travel:.6,warn:true,echo:true,live:false,a:"Chillido",d:"Cada disparo deja dos huellas: una de verdad y otra falsa.",c:"#5a4ad8",l:"#b8acff",dk:"#2a1a8a",proj:"bolt"},
+  pinza:{n:"Pinza",r:"Cangrejo",rar:1,hp:4,step:.38,mc:1,pat:"one",cost:4,dmg:1,travel:.55,warn:true,pinch:true,live:false,a:"Pinzazo",d:"Golpe en 1 casilla. Si se queda cerca, la pinza arrastra al rival a esa casilla y lo deja a la vista un momento.",c:"#e8423a",l:"#ffb0a8",dk:"#9a1a14",proj:"rock"},
+  nieve:{n:"Nieve",r:"Pingüino",rar:2,hp:3,step:.3,mc:1,pat:"row3",cost:4,dmg:1,travel:.65,warn:true,freeze:2,live:false,a:"Rayo helado",d:"Hielo en línea de 3. A quien golpea lo deja congelado 2 s, sin poder moverse.",c:"#5ab8f0",l:"#d4f0ff",dk:"#1f6aa0",proj:"bolt"},
+  tinta:{n:"Tinta",r:"Pulpo",rar:2,hp:3,step:.26,mc:1,pat:"one",cost:3,dmg:1,travel:.45,warn:true,ink:4,live:false,a:"Chorro de tinta",d:"Golpe en 1 casilla. Su huella dura la mitad y, tras disparar, no deja pasos durante 4 s.",c:"#8a4ad8",l:"#d4b8ff",dk:"#4a1a8a",proj:"star"},
+  chispa:{n:"Chispa",r:"Hámster",rar:3,hp:3,step:.3,mc:1,pat:"one",cost:3,dmg:1,travel:.5,warn:true,turret:9,live:false,a:"Llave chispeante",d:"Golpe en 1 casilla. Su torreta dispara sola cada 9 s a una casilla al azar de la isla rival.",c:"#f0b020",l:"#ffe08a",dk:"#9a6a00",proj:"bolt"},
+  raiz:{n:"Raíz",r:"Tocón",rar:1,hp:4,step:.45,mc:1,pat:"one",cost:3,dmg:1,travel:.6,warn:true,roots:true,live:false,a:"Raíces",d:"Golpe en 1 casilla. Si falla, deja raíces ocultas 10 s: quien las pise queda atrapado 2 s y a la vista.",c:"#7a9a3a",l:"#cfe8a0",dk:"#3f5a14",proj:"rock"},
 });
 /* jefes de la campaña: no se pueden elegir ni desbloquear. burrow = segundos que asoma tras atacar (el resto del tiempo es inmune) */
 Object.assign(HEROES,{
@@ -1907,6 +1914,11 @@ const ULTIS={
   savia:{n:"Florecer",i:"🌸",d:"Recuperas 1 vida.",w:"Ha recuperado 1 vida"},
   mira:{n:"Mira láser",i:"🎯",d:"Tu siguiente disparo llega al instante.",w:""},
   eco:{n:"Coro",i:"🦇",d:"5 huellas falsas en tu isla durante 3 s.",w:""},
+  pinza:{n:"Tenaza",i:"🦀",d:"Tu siguiente pinzazo golpea en cruz (5 casillas).",w:"Su siguiente golpe caerá en cruz"},
+  nieve:{n:"Ventisca",i:"❄️",d:"Congela la isla rival 1,5 s: el rival no puede moverse.",w:"¡Ventisca! No puedes moverte 1,5 s"},
+  tinta:{n:"Nube de tinta",i:"🐙",d:"5 s sin dejar huellas ni pasos.",w:""},
+  chispa:{n:"Sobrecarga",i:"⚡",d:"La torreta dispara 3 veces seguidas.",w:"¡La torreta va a disparar 3 veces!"},
+  raiz:{n:"Bosque",i:"🌳",d:"4 raíces ocultas en la isla rival.",w:"¡Hay raíces ocultas en tu isla!"},
 };
 const rnd=n=>Math.floor(Math.random()*n);
 const pick=a=>a[rnd(a.length)];
@@ -1957,7 +1969,7 @@ function newRound(tp,tb,opts){
   const spawn=()=>pick(allCells().filter(([x,y])=>Math.abs(x-2)+Math.abs(y-2)>=2));
   const sp=spawn(),sb=spawn();
   const R={now:0,heroes:{p:newHero(tp,sp[0],sp[1],lv.p),b:newHero(tb,sb[0],sb[1],lv.b)},elx:{p:ELX_START,b:ELX_START},
-    boosts:[],projs:[],mines:[],marks:{p:[],b:[]},nextBoost:3,sudden:false,nextPing:SUDDEN_T,over:false,dmg:{p:0,b:0},paused:true};
+    boosts:[],projs:[],mines:[],roots:[],marks:{p:[],b:[]},nextBoost:3,sudden:false,nextPing:SUDDEN_T,over:false,dmg:{p:0,b:0},paused:true};
   /* reglas propias de las arenas avanzadas (mismas casillas en las dos islas: es justo para los dos) */
   /* reglas de nivel de la campaña: elx (recarga ×), hpB (vida del rival ×), huB (duración de las huellas del rival ×), noAmago */
   R.mod=opts.mod||{};if(R.mod.hpB){const b=R.heroes.b;b.hp=b.max=Math.round(b.max*R.mod.hpB);}
@@ -1965,6 +1977,7 @@ function newRound(tp,tb,opts){
   if(R.arena==="volcan")R.lava={next:15,warnAt:12,tiles:shuffle(allCells()).slice(0,2)};
   if(R.arena==="trono"){const c=pick(allCells().filter(([x,y])=>Math.abs(x-2)+Math.abs(y-2)<=2));R.cover={x:c[0],y:c[1],used:{p:false,b:false}};}
   if(R.arena==="olimpo")R.wind={next:20,until:0,dir:0};
+  R.turret={};for(const s of SIDES)if(HEROES[R.heroes[s].type].turret)R.turret[s]={x:rnd(N),y:rnd(N),next:HIDE_T+4};
   if(opts.bot)R.bot={belief:normalize(grid(1)),next:0,relocateAt:0,seen:new Set(),react:opts.bot.react,perc:opts.bot.perc??.35,pend:[],dr:{},lastPrint:null,eps:opts.bot.eps,passiveUntil:opts.bot.passive,think:opts.bot.think??.2,dodge:opts.bot.dodge??1,gap:opts.bot.gap??0,thr:opts.bot.thr??1,lastShot:-99,moveP:opts.bot.moveP??1,blind:!!opts.bot.blind,decoy:opts.bot.decoy??.25,wild:opts.bot.wild??.15};
   return R;
 }
@@ -2014,11 +2027,13 @@ function stepHero(R,s,hk,dt){
   if(R.elx[s]<H.mc){h.path=[];call(hk,"noElx",s);return;}
   const [x,y]=h.path.shift();
   R.elx[s]-=H.mc;h.x=x;h.y=y;h.nextStep=due+H.step;
-  if(!H.jump&&!H.burrow&&!(h.smokeUntil>R.now)&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
+  if(!H.jump&&!H.burrow&&!(h.smokeUntil>R.now)&&!(h.inkUntil>R.now)&&Math.random()<.55){const j=Math.random()<.5,ex=j?clampN(x+rnd(3)-1):x,ey=j?clampN(y+rnd(3)-1):y;mark(R,s,{t:"step",x:ex,y:ey,until:R.now+.8});}
   {const gz=R.gz&&R.gz[s];if(gz&&R.now>=gz.from&&R.now<gz.until&&!(h.airUntil>R.now)){h.stuckUntil=R.now+1.6;h.path=[];mark(R,s,{t:"ping",x,y,type:h.type,until:R.now+1.6});call(hk,"petrify",s,x,y);}}
   if(H.heavy){mark(R,s,{t:"huella",x,y,until:R.now+1.4,st:true});call(hk,"stomp",s,x,y);}/* Coloso: sus pasos retumban */
   if(R.webs){const wi=R.webs.findIndex(w=>w.d===s&&w.x===x&&w.y===y);
     if(wi>=0&&!H.web&&!(h.airUntil>R.now)){R.webs.splice(wi,1);h.stuckUntil=R.now+2;h.path=[];mark(R,s,{t:"ping",x,y,type:h.type,until:R.now+2});call(hk,"stuck",s,x,y);}}
+  {const ri=R.roots?R.roots.findIndex(m=>m.d===s&&m.x===x&&m.y===y):-1;
+    if(ri>=0&&!(h.airUntil>R.now)){R.roots.splice(ri,1);h.stuckUntil=R.now+2;h.path=[];mark(R,s,{t:"ping",x,y,type:h.type,until:R.now+2});call(hk,"stuck",s,x,y);}}
   const mi=R.mines.findIndex(m=>m.d===s&&m.x===x&&m.y===y);
   if(mi>=0){const m=R.mines.splice(mi,1)[0];
     if(h.shieldUntil>R.now||h.invulUntil>R.now){if(h.invulUntil<=R.now)h.shieldUntil=0;mark(R,s,{t:"bloq",x,y,until:R.now+MARK_T});}
@@ -2043,6 +2058,12 @@ function spawnBoost(R,hk){
   const b={x,y,k,born:R.now,until:R.now+BOOST_LIFE,id:++MID};
   R.boosts.push(b);call(hk,"boost",b);
 }
+/* Chispa: la torreta (en una casilla fija de su isla) dispara a una casilla al azar de la isla rival, con aviso y sin huella */
+function turretShot(R,s,delay,hk){
+  const t=R.turret&&R.turret[s];if(!t)return;const c=[rnd(N),rnd(N)];
+  const p={o:s,d:other(s),cells:[c],hitAt:R.now+delay+.9*(R.sudden?.6:1),launched:R.now+delay,dmg:1,warn:true,type:R.heroes[s].type,id:++MID,hx:t.x,hy:t.y,turret:true};
+  R.projs.push(p);call(hk,"fired",p);
+}
 function fakeSpot(h){return pick(allCells().filter(([x,y])=>x!==h.x||y!==h.y));}
 /* huella borrosa: cae en su casilla o en una de alrededor (3×3) */
 function blurSpot(h){return pick(allCells().filter(([x,y])=>Math.abs(x-h.x)<=1&&Math.abs(y-h.y)<=1));}
@@ -2062,9 +2083,11 @@ function fire(R,s,tx,ty,hk){
     if(h.type==="brasa")p.burn=true;
     if(h.type==="rayo")p.cells=[[tx,ty],[tx-1,ty-1],[tx+1,ty+1],[tx-1,ty+1],[tx+1,ty-1]].filter(([x,y])=>inB(x,y));
     if(h.type==="bum"){p.warn=false;p.hitAt=R.now+H.travel*.5*(R.sudden?.6:1);}
-    if(h.type==="mira")p.hitAt=R.now+.08;}
+    if(h.type==="mira")p.hitAt=R.now+.08;
+    if(h.type==="pinza")p.cells=areaOf("cross5",tx,ty);}
   const c=H.stealth?blurSpot(h):H.fake?fakeSpot(h):[h.x,h.y];
-  p.hx=c[0];p.hy=c[1];if(!(h.smokeUntil>R.now))mark(R,s,{t:"huella",x:c[0],y:c[1],until:R.now+HUELLA_T*(H.loud?2:1)*(s==="b"&&R.mod.huB||1),fake:!!H.fake,blur:!!H.stealth});
+  p.hx=c[0];p.hy=c[1];if(!(h.smokeUntil>R.now))mark(R,s,{t:"huella",x:c[0],y:c[1],until:R.now+HUELLA_T*(H.loud?2:H.ink?.5:1)*(s==="b"&&R.mod.huB||1),fake:!!H.fake,blur:!!H.stealth});
+  if(H.ink)h.inkUntil=R.now+H.ink;
   if(H.echo&&!(h.smokeUntil>R.now)){const e=fakeSpot(h);mark(R,s,{t:"huella",x:e[0],y:e[1],until:R.now+HUELLA_T,fake:false,blur:false});}
   R.projs.push(p);call(hk,"fired",p);
   if(H.burrow){/* jefe bajo tierra: al atacar asoma, se queda quieto y a la vista; furioso lanza un segundo golpe y asoma menos */
@@ -2094,6 +2117,11 @@ function ulti(R,s,hk){
     case "salto":h.airUntil=R.now+2.5;h.invulUntil=Math.max(h.invulUntil,R.now+2.5);break;
     case "savia":h.hp=Math.min(h.max,h.hp+1);break;
     case "eco":{for(const [x,y] of shuffle(allCells().filter(([x,y])=>x!==h.x||y!==h.y)).slice(0,5))mark(R,s,{t:"huella",x,y,until:R.now+3,fake:false,blur:false});break;}
+    case "pinza":h.ultiNext=true;break;
+    case "nieve":if(!(v.fortUntil>R.now)&&!(v.airUntil>R.now)){v.stuckUntil=Math.max(v.stuckUntil||0,R.now+1.5);v.path=[];call(hk,"frozen",o,v.x,v.y);}break;
+    case "tinta":h.smokeUntil=R.now+5;break;
+    case "chispa":for(let i=0;i<3;i++)turretShot(R,s,i*.5,hk);break;
+    case "raiz":{for(const [x,y] of shuffle(allCells().filter(([x,y])=>(x!==v.x||y!==v.y)&&!R.roots.some(m=>m.d===o&&m.x===x&&m.y===y))).slice(0,4))R.roots.push({o:s,d:o,x,y,until:R.now+15});break;}
   }
   call(hk,"ulti",s,h.type);return "ok";
 }
@@ -2113,7 +2141,7 @@ function amago(R,s,x,y,hk){
   /* "show": casillas al azar que ve quien lo lanza (las de verdad evitan al rival y le darían pistas) */
   const p={o:s,d:other(s),cells,show:areaOf(H.pat,rnd(N),rnd(N)),hitAt:R.now+H.travel*(R.sudden?.6:1),launched:R.now,dmg:0,dud:true,warn:H.warn,type:h.type,id:++MID,hx:x,hy:y};
   /* misma duración y número de huellas que un disparo real (antes Mira y Eco delataban el amago) */
-  mark(R,s,{t:"huella",x,y,until:R.now+HUELLA_T*(H.loud?2:1),fake:true,blur:!!H.stealth,decoy:true});
+  mark(R,s,{t:"huella",x,y,until:R.now+HUELLA_T*(H.loud?2:H.ink?.5:1)*(s==="b"&&R.mod.huB||1),fake:true,blur:!!H.stealth,decoy:true});
   if(H.echo){const e=fakeSpot(h);mark(R,s,{t:"huella",x:e[0],y:e[1],until:R.now+HUELLA_T,fake:true,blur:false,decoy:true});}
   R.projs.push(p);call(hk,"fired",p);
   return "ok";
@@ -2131,12 +2159,17 @@ function impact(R,p,hk){
     if(cov&&v.invulUntil<=R.now&&v.shieldUntil<=R.now){R.cover.used[p.d]=true;p.res="block";mark(R,p.d,{t:"bloq",x:v.x,y:v.y,until:R.now+MARK_T});call(hk,"cover",p.d);}/* Trono: la estatua para un golpe y se rompe */
     else if(v.shieldUntil>R.now||v.invulUntil>R.now){if(v.invulUntil<=R.now)v.shieldUntil=0;p.res="block";if(HEROES[v.type].burrow&&!(v.outUntil>R.now))p.under=true;mark(R,p.d,{t:"bloq",x:v.x,y:v.y,until:R.now+MARK_T});}
     else{v.hp=Math.max(0,v.hp-p.dmg);R.dmg[p.o]+=p.dmg;p.res="hit";v.lastHit=R.now;mark(R,p.d,{t:"hit",x:v.x,y:v.y,type:v.type,until:R.now+MARK_T});
-      v.invulUntil=R.now+INVUL_T;R.elx[p.d]=Math.min(ELX_MAX,R.elx[p.d]+2);}
+      v.invulUntil=R.now+INVUL_T;R.elx[p.d]=Math.min(ELX_MAX,R.elx[p.d]+2);
+      {const fz=HEROES[p.type].freeze;if(fz&&!p.turret&&v.hp>0&&!(v.fortUntil>R.now)){v.stuckUntil=Math.max(v.stuckUntil||0,R.now+fz);v.path=[];call(hk,"frozen",p.d,v.x,v.y);}}}
     p.vx=v.x;p.vy=v.y;
   }else{
     const near=p.cells.some(([x,y])=>Math.abs(v.x-x)+Math.abs(v.y-y)===1);
     p.res=near?"near":"miss";
     if(p.meteor)p.res="miss";else for(const [x,y] of p.cells)mark(R,p.d,{t:near?"cerca":"agua",x,y,until:R.now+MARK_T});
+    if(near&&HEROES[p.type].pinch&&!p.turret&&!(v.fortUntil>R.now)&&!(v.airUntil>R.now)){/* Pinza: arrastra al rival a la casilla del golpe que tiene al lado y lo deja a la vista */
+      const c=p.cells.find(([x,y])=>Math.abs(v.x-x)+Math.abs(v.y-y)===1);
+      if(c){v.x=c[0];v.y=c[1];v.path=[];mark(R,p.d,{t:"ping",x:v.x,y:v.y,type:v.type,until:R.now+1.2});call(hk,"pinched",p.d,v.x,v.y);}}
+    if(HEROES[p.type].roots&&!p.turret){const [x,y]=p.cells[0];R.roots=(R.roots||[]).filter(m=>!(m.o===p.o&&m.x===x&&m.y===y));R.roots.push({o:p.o,d:p.d,x,y,until:R.now+10});}
     if(HEROES[p.type].mine){const [x,y]=p.cells[0];R.mines=R.mines.filter(m=>!(m.o===p.o&&m.x===x&&m.y===y));R.mines.push({o:p.o,d:p.d,x,y,until:R.now+12});}
   }
   if(p.burn){(R.fires=R.fires||[]).push({o:p.o,d:p.d,cells:p.cells,from:R.now+.9,until:R.now+5,hit:false});}/* Suelo ardiente */
@@ -2175,6 +2208,8 @@ function tick(R,dt,hk){
   for(const s of SIDES)stepHero(R,s,hk,dt);
   R.boosts=R.boosts.filter(b=>b.until>R.now);
   R.mines=R.mines.filter(m=>m.until>R.now);
+  if(R.roots)R.roots=R.roots.filter(m=>m.until>R.now);
+  for(const s of SIDES){const t=R.turret&&R.turret[s],hh=R.heroes[s];if(t&&hh.hp>0&&R.now>=t.next){t.next=R.now+HEROES[hh.type].turret;turretShot(R,s,0,hk);}}
   if(R.fires&&R.fires.length){R.fires=R.fires.filter(f=>f.until>R.now);
     for(const f of R.fires){const v=R.heroes[f.d];if(f.hit||R.now<f.from||v.hp<=0||!inArea(f.cells,v.x,v.y))continue;
       if(v.invulUntil>R.now)continue;
@@ -2300,7 +2335,7 @@ function viewFor(R,s){
   const o=other(s),me=R.heroes[s],foe=R.heroes[o],sw=x=>x===s?"p":"b";
   const vis=me.visionUntil>R.now;
   return {now:R.now,sudden:R.sudden,paused:R.paused,over:R.over,elx:{p:R.elx[s]},
-    heroes:{p:{type:me.type,x:me.x,y:me.y,hp:me.hp,max:me.max,path:me.path,cdUntil:me.cdUntil,decoyUntil:me.decoyUntil,shieldUntil:me.shieldUntil,turboUntil:me.turboUntil,visionUntil:me.visionUntil,lv:me.lv||1,ultiUsed:!!me.ultiUsed,ultiNext:!!me.ultiNext,smokeUntil:me.smokeUntil||0,fortUntil:me.fortUntil||0,airUntil:me.airUntil||0},
+    heroes:{p:{type:me.type,x:me.x,y:me.y,hp:me.hp,max:me.max,path:me.path,cdUntil:me.cdUntil,decoyUntil:me.decoyUntil,shieldUntil:me.shieldUntil,turboUntil:me.turboUntil,visionUntil:me.visionUntil,lv:me.lv||1,ultiUsed:!!me.ultiUsed,ultiNext:!!me.ultiNext,smokeUntil:me.smokeUntil||0,fortUntil:me.fortUntil||0,airUntil:me.airUntil||0,stuckUntil:me.stuckUntil||0},
             b:{type:foe.type,hp:foe.hp,max:foe.max,x:vis?foe.x:-9,y:vis?foe.y:-9,path:[],cdUntil:0,shieldUntil:0,turboUntil:0,visionUntil:0}},
     boosts:R.boosts,
     projs:R.projs.filter(p=>p.o===s||p.warn).map(p=>persp(p,s)),
@@ -2309,6 +2344,7 @@ function viewFor(R,s){
       p:R.marks[s].filter(m=>m.t!=="step"||HEROES[foe.type].ears).map(m=>{if(!m.dud)return m;const c=Object.assign({},m);delete c.dud;return c;})},
     ultiOn:!!R.ultiOn,ultiLv:R.ultiLv||0,fires:(R.fires||[]).map(f=>({d:sw(f.d),cells:f.cells,until:f.until})),
     mines:(R.mines||[]).filter(m=>m.o===s).map(m=>({x:m.x,y:m.y,until:m.until})),
+    roots:(R.roots||[]).filter(m=>m.o===s).map(m=>({x:m.x,y:m.y,until:m.until})),
     lava:R.lava||null,cover:R.cover?{x:R.cover.x,y:R.cover.y,used:{p:R.cover.used[s],b:R.cover.used[o]}}:null,wind:R.wind||null,
     dmg:{p:R.dmg[s],b:R.dmg[o]}};
 }
@@ -2421,6 +2457,7 @@ const TR=(()=>{
   Object.assign(I18N_EN,{"¡Desbloqueada!":"Unlocked!"});
   Object.assign(I18N_EN,{"Se desbloquea en el nivel #.":"Unlocks at level #.","Cada nivel: +1,5 % de energía. Nivel 4 y 8: +1 de vida. Nivel 5: ULTI.":"Each level: +1.5% energy. Levels 4 and 8: +1 life. Level 5: ULTI."});
   Object.assign(I18N_EN,{"La ULTI se desbloquea en el nivel #":"ULTI unlocks at level #"});
+  Object.assign(I18N_EN,{"Pinza": "Pinch", "Cangrejo": "Crab", "Pinzazo": "Claw snap", "Golpe en 1 casilla. Si se queda cerca, la pinza arrastra al rival a esa casilla y lo deja a la vista un momento.": "Hits 1 tile. If it lands next to the rival, the claw drags them onto that tile and reveals them for a moment.", "Nieve": "Frost", "Pingüino": "Penguin", "Rayo helado": "Ice beam", "Hielo en línea de 3. A quien golpea lo deja congelado 2 s, sin poder moverse.": "Ice in a line of 3. Whoever it hits is frozen for 2 s and can't move.", "Tinta": "Ink", "Pulpo": "Octopus", "Chorro de tinta": "Ink jet", "Golpe en 1 casilla. Su huella dura la mitad y, tras disparar, no deja pasos durante 4 s.": "Hits 1 tile. Its footprint lasts half as long and it leaves no steps for 4 s after shooting.", "Chispa": "Spark", "Hámster": "Hamster", "Llave chispeante": "Sparky wrench", "Golpe en 1 casilla. Su torreta dispara sola cada 9 s a una casilla al azar de la isla rival.": "Hits 1 tile. Its turret fires on its own every 9 s at a random tile of the rival island.", "Raíz": "Root", "Tocón": "Stump", "Raíces": "Roots", "Golpe en 1 casilla. Si falla, deja raíces ocultas 10 s: quien las pise queda atrapado 2 s y a la vista.": "Hits 1 tile. On a miss it leaves hidden roots for 10 s: whoever steps on them is stuck for 2 s and revealed.", "Tenaza": "Pincer", "Tu siguiente pinzazo golpea en cruz (5 casillas).": "Your next snap hits in a cross (5 tiles).", "Su siguiente golpe caerá en cruz": "Its next hit will land in a cross", "Ventisca": "Blizzard", "Congela la isla rival 1,5 s: el rival no puede moverse.": "Freezes the rival island for 1.5 s: the rival can't move.", "¡Ventisca! No puedes moverte 1,5 s": "Blizzard! You can't move for 1.5 s", "Nube de tinta": "Ink cloud", "5 s sin dejar huellas ni pasos.": "5 s without footprints or steps.", "Sobrecarga": "Overload", "La torreta dispara 3 veces seguidas.": "The turret fires 3 times in a row.", "¡La torreta va a disparar 3 veces!": "The turret is about to fire 3 times!", "Bosque": "Forest", "4 raíces ocultas en la isla rival.": "4 hidden roots on the rival island.", "¡Hay raíces ocultas en tu isla!": "There are hidden roots on your island!", "¡Congelado!": "Frozen!", "¡Arrastrado!": "Dragged!", "❄️ <b>¡Rival congelado!</b> No puede moverse 2 s: si sabes dónde está, ¡dispara!": "❄️ <b>Rival frozen!</b> They can't move for 2 s: if you know where they are, shoot!"});
   Object.assign(I18N_EN,{"Escalón # de #":"Tier # of #","Temporada #":"Season #"," · ¡fichas dobles para ponerte al día!":" · double tokens to catch up!","Quedan # días · ¡fichas dobles para ponerte al día!":"# days left · double tokens to catch up!","Nivel #":"Level #","de #":"of #","Nivel":"Level","Quita # vida":"Deals # damage","Quita # vidas":"Deals # damage"});
   Object.assign(I18N_EN,{"Batalla":"Battle","Al instante, contra rivales de tu nivel · trofeos, monedas, llaves y fichas":"Instant, against rivals of your level · trophies, coins, keys and tokens","Entrenamiento: elige tú la dificultad":"Training: pick the difficulty yourself","Entreno #":"Training #"});
   Object.assign(I18N_EN,{"¿Nos ayudas a mejorar?":"Help us improve?","Enviar estadísticas anónimas de cómo juegas (partidas, héroes, dónde te atascas) nos ayuda a hacer AMAGO más divertido. Sin anuncios, sin datos personales.":"Sending anonymous stats about how you play (matches, heroes, where you get stuck) helps us make AMAGO more fun. No ads, no personal data.","Puedes cambiarlo cuando quieras en Ajustes.":"You can change it anytime in Settings.","SÍ, CLARO":"SURE","No, gracias":"No, thanks"});
@@ -3358,7 +3395,7 @@ function glbHero(id){
   return root;
 }
 /* ---- héroes 2D: la ilustración como una figura de cartón que siempre mira a la cámara ---- */
-const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","topo","arana","coloso","rey","reina"],SPRITES={},SPRITE_H={reina:1.25,rey:1.35,topo:1.3,arana:1.25,coloso:1.5,flecha:1.12,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05};
+const SPRITE_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","pinza","nieve","tinta","chispa","raiz","topo","arana","coloso","rey","reina"],SPRITES={},SPRITE_H={reina:1.25,rey:1.35,topo:1.3,arana:1.25,coloso:1.5,flecha:1.12,brasa:1.05,sombra:1,ojo:1,truco:1.02,muro:1.22,rayo:1.1,bum:.95,mina:1.02,salto:.95,savia:1.05,eco:1.05,mira:1.05,pinza:1,nieve:1,tinta:1,chispa:1,raiz:1.12};
 const SKIN_LIST=["brasa_glacial","muro_magma","sombra_carmesi","truco_artico","ojo_nevado"];
 function loadSprites(){
   const L=new T.TextureLoader();
@@ -3782,7 +3819,7 @@ function animateKK(u,t,st,act,at_){
 const H3DTONE=(()=>{const q=/[?&]tone=([\d.,]+)/.exec(location.search);return q?q[1].split(",").map(Number):[1.04,.9,.6];})();
 const H3DROT={};/* el giro de los modelos que no miran al frente ya se aplica al convertirlos (art/t2/conv3.py) *//* giro de los modelos generados que no salen mirando al frente */
 const H3D_SKINS=["sk_brasa_glacial","sk_sombra_carmesi","sk_muro_magma","sk_ojo_nevado","sk_truco_artico"];/* aspectos con modelo 3D propio */
-const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","coloso","rey","reina","topo","arana"],H3D={},H3DYAW={};let h3dP=null;
+const H3D_LIST=["flecha","brasa","sombra","ojo","truco","muro","rayo","bum","mina","salto","savia","eco","mira","pinza","nieve","tinta","chispa","raiz","coloso","rey","reina","topo","arana"],H3D={},H3DYAW={};let h3dP=null;
 const H3DON=(()=>{try{const q=new URLSearchParams(location.search).get("h3d");if(q!=null)localStorage.setItem("amago-h3d",q);return localStorage.getItem("amago-h3d")!=="0";}catch(e){return true;}})();
 function loadH3D(ids){
   if(!H3DON||!T.GLTFLoader)return Promise.resolve();
@@ -6521,6 +6558,9 @@ function onlineEv(m){
     case "ping":ui.ping();break;
     case "ulti":ui.ulti(m.s,m.type);break;
     case "burn":ui.burn(m.s);break;
+    case "frozen":ui.frozen(m.s,m.x,m.y);break;
+    case "pinched":ui.pinched(m.s,m.x,m.y);break;
+    case "stuck":ui.stuck(m.s,m.x,m.y);break;
   }
 }
 async function onlineRoundEnd(m){
@@ -6701,6 +6741,8 @@ const ui={
     else if(U.w){banner("⚠️ "+TT("ULTI RIVAL")+": "+TT(U.n),TT(U.w),"red",1500);sfx("radar");buzz(40);}},
   ping(){sfx("radar");},
   web(d){if(UI.screen!=="game")return;sfx("web");if(d==="p")toast("webs","🕸️ <b>¡Telarañas!</b> Si pisas una, quedas atrapado 2 s y el rival te ve. Rodéalas.");},
+  frozen(s,x,y){if(UI.screen!=="game")return;if(s==="p"){const c=B3.heroScreen();floatText(c.x,c.y,"❄️ "+TT("¡Congelado!"),"bad");sfx("hurt");buzz([30,20,30]);vignette();}else if(x>=0){const c=B3.screenPos("b",x,y,1);floatText(c.x,c.y,"❄️ "+TT("¡Congelado!"),"big");sfx("near");}else{toast("frz","❄️ <b>¡Rival congelado!</b> No puede moverse 2 s: si sabes dónde está, ¡dispara!");sfx("near");}},
+  pinched(s,x,y){if(UI.screen!=="game")return;if(s==="p"){const c=B3.heroScreen();floatText(c.x,c.y,"🦀 "+TT("¡Arrastrado!"),"bad");sfx("hurt");buzz(30);}else{const c=B3.screenPos("b",x,y,1);floatText(c.x,c.y,"🦀 "+TT("¡A la vista!"),"big");sfx("near");}},
   stuck(s,x,y){if(UI.screen!=="game")return;if(s==="p"){const c=B3.heroScreen();floatText(c.x,c.y,"🕸️ "+TT("¡Atrapado!"),"bad");sfx("hurt");buzz([30,20,30]);vignette();}
     else{const c=B3.screenPos("b",x,y,1);floatText(c.x,c.y,"🕸️ "+TT("¡Atrapado! ¡Dale!"),"near");sfx("radar");}},
   burrow(s,x,y){if(UI.screen!=="game"||s!=="b")return;sfx("dig");B3.burst(B3.tileWorld("b",x,y).setY(.15),[0x7a5230,0x5a3a1c,0xa87a4a],22,1.8,2,.11);},
